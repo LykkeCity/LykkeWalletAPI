@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Lykke.Service.Assets.Client.Custom;
 using LykkeApi2.Models;
-//using Lykke.Service.Assets.Client.Models;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace LykkeApi2.Controllers
 {
