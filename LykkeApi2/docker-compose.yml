@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  lykkeapi2:
+    image: lykkeapi2
+    build:
+      context: ./LykkeApi2
+      dockerfile: Dockerfile

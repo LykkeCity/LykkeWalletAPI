@@ -1,0 +1,76 @@
+# Global wildcards
+*.aps
+*.bak
+*.dll
+*.log
+*.ncb
+*.obj
+*.old
+*.opensdf
+*.orig
+*.pdb
+*.Publish.xml
+*.sdf
+*.sln.cache
+*.suo
+*.tmp
+*.user
+*.lock.json
+
+# Well-known infrastructure folders
+/packages/
+/target/
+**/aspnet_client/
+
+# IDEs
+*[Rr]e[Ss]harper*
+**/.idea/
+**/.metadata/
+**/.settings/
+/[Tt]est[Rr]esults/
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+ipch/
+
+# Visual Studio project upgrade
+[Bb]ackup/
+UpgradeLog*
+_UpgradeReport_Files/
+
+# Operating Systems generated
+.DS_Store
+[Dd]esktop.ini
+[Tt]humbs.db
+
+#ncrunch
+*.*crunch*
+
+#publish profiles
+*publish.ps1
+*.pubxml
+*.psm1
+
+#some test
+.vs
+/deploy
+/settings
+TestResult.xml
+#include compiled contracts
+!/src/EthereumContractBuilder/contracts/bin/
+node_modules
+**/launchsettings.json
+**/appsettings.dev.json
+**/docker-compose.dev.yml
+
+/src/BackOffice/Scripts/*.js
+/src/BackOffice/Scripts/.js
+/src/BackOffice/wwwroot/fonts
+/src/BackOffice/wwwroot/output
+/src/BackOffice/wwwroot/js
+/src/BackOffice/Scripts/*.js.map
+app/
+**/UseDevelopmentStorage=true
+/src/BackOffice/appsettings.Development.json
+/LykkeApi2/appsettings.Development.json
