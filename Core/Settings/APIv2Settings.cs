@@ -13,17 +13,15 @@ namespace Core.Settings
     {
         public DbSettings Db { get; set; }
 
-        public ServiceSettings Service { get; set; }
-
         public ServiceSettings Services { get; set; }
 
-        public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
+        //public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
 
-        public string ExchangeOperationsServiceUrl { get; set; }
+        //public string ExchangeOperationsServiceUrl { get; set; }
 
-        public double DefaultWithdrawalLimit { get; set; }
+       // public double DefaultWithdrawalLimit { get; set; }
 
-        public DeploymentSettings DeploymentSettings { get; set; }
+        //public DeploymentSettings DeploymentSettings { get; set; }
     }
 
     public class DbSettings
