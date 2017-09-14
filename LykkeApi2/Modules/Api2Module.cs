@@ -11,7 +11,9 @@ using Core.Settings;
 using FluentValidation.AspNetCore;
 using Lykke.Service.Assets.Client.Custom;
 using Lykke.Service.ClientAccount.Client.Custom;
+using Lykke.Service.Registration;
 using LykkeApi2.App_Start;
+using LykkeApi2.Credentials;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -40,15 +42,18 @@ namespace LykkeApi2.Modules
               new AzureTableStorage<VerifiedEmailEntity>(_settings.WalletApiv2.Db.ClientPersonalInfoConnString, "VerifiedEmails", _log)));
 
             builder.RegisterInstance<DeploymentSettings>(new DeploymentSettings());
+            builder.RegisterInstance(_settings.WalletApiv2.DeploymentSettings);
+
 
             _services.UseAssetsClient(AssetServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
             _services.UseClientAccountService(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
             _services.UseClientAccountClient(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD), _log);
-            
+
             //_services.AddSingleton<IVerifiedEmailsRepository>(new VerifiedEmailsRepository(
             //    new AzureTableStorage<VerifiedEmailEntity>(dbSettings.ClientPersonalInfoConnString, "VerifiedEmails", log)));
 
-            //_services.AddSingleton<I>(x => new ClientAccountClient(_settings.WalletApiv2.Services.ClientAccountServiceUrl, _log));
+            _services.AddSingleton<ILykkeRegistrationClient>(x => new LykkeRegistrationClient(_settings.WalletApiv2.Services.RegistrationUrl, _log));
+            _services.AddSingleton<ClientAccountLogic>();
 
             builder.Populate(_services);
         }

@@ -22,7 +22,7 @@ namespace LykkeApi2.Strings {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Phrases {
+    public class Phrases {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace LykkeApi2.Strings {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LykkeApi2.Strings.Phrases", typeof(Phrases).Assembly);
@@ -51,7 +51,7 @@ namespace LykkeApi2.Strings {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Client with the same email is already registered.
         /// </summary>
-        internal static string ClientWithEmailIsRegistered {
+        public static string ClientWithEmailIsRegistered {
             get {
                 return ResourceManager.GetString("ClientWithEmailIsRegistered", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Email not verified.
         /// </summary>
-        internal static string EmailNotVerified {
+        public static string EmailNotVerified {
             get {
                 return ResourceManager.GetString("EmailNotVerified", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Field should not be empty.
         /// </summary>
-        internal static string FieldShouldNotBeEmpty {
+        public static string FieldShouldNotBeEmpty {
             get {
                 return ResourceManager.GetString("FieldShouldNotBeEmpty", resourceCulture);
             }
@@ -90,16 +90,25 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Invalid address.
         /// </summary>
-        internal static string InvalidAddress {
+        public static string InvalidAddress {
             get {
                 return ResourceManager.GetString("InvalidAddress", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid email format.
+        /// </summary>
+        public static string InvalidEmailFormat {
+            get {
+                return ResourceManager.GetString("InvalidEmailFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {PropertyName} is not valid.
         /// </summary>
-        internal static string InvalidPropertyValue {
+        public static string InvalidPropertyValue {
             get {
                 return ResourceManager.GetString("InvalidPropertyValue", resourceCulture);
             }
@@ -108,18 +117,36 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Invalid value.
         /// </summary>
-        internal static string InvalidValue {
+        public static string InvalidValue {
             get {
                 return ResourceManager.GetString("InvalidValue", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Maximum length is {0}.
+        /// </summary>
+        public static string MaxLength {
+            get {
+                return ResourceManager.GetString("MaxLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Minimum length is {0}.
         /// </summary>
-        internal static string MinLength {
+        public static string MinLength {
             get {
                 return ResourceManager.GetString("MinLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to We are experiencing technical problems. Please try again..
+        /// </summary>
+        public static string TechnicalProblems {
+            get {
+                return ResourceManager.GetString("TechnicalProblems", resourceCulture);
             }
         }
     }

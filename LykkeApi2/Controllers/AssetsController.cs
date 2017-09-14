@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Lykke.Service.Assets.Client.Custom;
+using LykkeApi2.Models;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Lykke.Service.Assets.Client.Custom;
-using LykkeApi2.Models;
 
 namespace LykkeApi2.Controllers
 {

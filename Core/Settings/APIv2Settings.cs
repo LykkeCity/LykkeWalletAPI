@@ -38,4 +38,9 @@ namespace Core.Settings
         public string ClientAccountServiceUrl { get; set; }
         public string RegistrationUrl { get; set; }
     }
+
+    public class DeploymentSettings
+    {
+        public bool IsProduction { get; set; }
+    }
 }
