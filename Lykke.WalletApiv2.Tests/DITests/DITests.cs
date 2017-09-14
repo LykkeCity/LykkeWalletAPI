@@ -30,6 +30,8 @@ namespace Lykke.WalletApiv2.Tests.DITests
             containerBuilder.RegisterModule(new Api2Module(settings, _mockLog.Object));
             containerBuilder.RegisterType<AssetsController>();
             containerBuilder.RegisterType<AccountExistController>();
+            containerBuilder.RegisterType<RegistrationController>();
+
             //register your controller class here to test
 
             this.container = containerBuilder.Build();
