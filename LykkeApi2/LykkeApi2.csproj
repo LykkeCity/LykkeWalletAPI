@@ -13,7 +13,7 @@
     <PackageReference Include="Lykke.Common" Version="1.1.95" />
     <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.0.11" />
     <PackageReference Include="Lykke.Logs" Version="1.0.33" />
-    <PackageReference Include="Lykke.Service.Assets.Client" Version="1.0.1-beta" />
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="1.0.2-beta" />
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.10" />
     <PackageReference Include="Lykke.Service.Registration" Version="1.0.30" />
     <PackageReference Include="Lykke.SettingsReader" Version="1.0.38" />

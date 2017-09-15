@@ -49,6 +49,7 @@ namespace LykkeApi2.Models
             NoEncodedMainKey = 32,
             PreviousTransactionsWereNotCompleted = 33,
             LimitationCheckFailed = 34,
+            AssetAttributeNotFound = 35,
 
             BadRequest = 999,
             RquiredFileds = 40
@@ -140,6 +141,18 @@ namespace LykkeApi2.Models
         }
 
         public new static ResponseModel<T> CreateFail(ErrorCodeType errorCodeType, string message)
+        {
+            return new ResponseModel<T>
+            {
+                Error = new ErrorModel
+                {
+                    Code = errorCodeType,
+                    Message = message
+                }
+            };
+        }
+
+        public static ResponseModel<T> CreateNotFound(ErrorCodeType errorCodeType, string message)
         {
             return new ResponseModel<T>
             {
