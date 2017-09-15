@@ -15,11 +15,11 @@ namespace Core.Settings
 
         public ServiceSettings Services { get; set; }
 
-        public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
+        //public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
 
-        public string ExchangeOperationsServiceUrl { get; set; }
+        //public string ExchangeOperationsServiceUrl { get; set; }
 
-        public double DefaultWithdrawalLimit { get; set; }
+        // public double DefaultWithdrawalLimit { get; set; }
 
         public DeploymentSettings DeploymentSettings { get; set; }
     }
