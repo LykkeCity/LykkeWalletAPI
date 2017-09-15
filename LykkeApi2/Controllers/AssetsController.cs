@@ -1,6 +1,7 @@
 ﻿using Lykke.Service.Assets.Client.Custom;
 using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -49,13 +50,45 @@ namespace LykkeApi2.Controllers
             return ResponseModel<IAssetAttributesKeyValue>.CreateOk(keyValues.ConvertToApiModel().Pairs.FirstOrDefault() ?? new KeyValue());
         }
 
-        [HttpPost("description/list")]
-        public async Task<ResponseModel<AssetDescriptionsResponseModel>> GetAssetDescriptionsList([FromBody]GetAssetDescriptionsRequestModel request)
+        [HttpPost("description")]
+        public async Task<ResponseModel<AssetDescriptionsResponseModel>> GetAssetDescriptions([FromBody]GetAssetDescriptionsRequestModel request)
         {
             var res = await _assetsService.GetAssetDescriptionsAsync(new Lykke.Service.Assets.Client.Models.GetAssetDescriptionsRequestModel { Ids = request.Ids });
 
             return
                 ResponseModel<AssetDescriptionsResponseModel>.CreateOk(res.ConvertToApiModel());
         }
+
+        [HttpGet("{assetId}/description")]
+        public async Task<ResponseModel<AssetDescriptionsResponseModel>> GetAssetDescription(string assetId)
+        {
+            var res = await _assetsService.GetAssetDescriptionsAsync(new Lykke.Service.Assets.Client.Models.GetAssetDescriptionsRequestModel { Ids = new List<string> { assetId } });
+
+            return ResponseModel<AssetDescriptionsResponseModel>.CreateOk(res.ConvertToApiModel());
+        }
+
+        [HttpGet("categories")]
+        public async Task<ResponseModel<GetAssetCategoriesResponseModel>> GetAssetCategories()
+        {
+            var res = await _assetsService.GetAssetCategoriesAsync();
+
+            return ResponseModel<GetAssetCategoriesResponseModel>.CreateOk(
+               GetAssetCategoriesResponseModel.Create(res.Select(itm => itm.ConvertToApiModel()).ToArray()));
+        }
+
+        [HttpGet("{assetId}/categories")]
+        public async Task<ResponseModel<GetAssetCategoriesResponseModel>> GetAssetCategory(string assetId)
+        {
+            var res = await _assetsService.TryGetAssetCategoryAsync(assetId);
+
+            if (res.errorResponse != null)
+            {
+                return ResponseModel<GetAssetCategoriesResponseModel>.CreateNotFound(ResponseModel.ErrorCodeType.AssetAttributeNotFound, ResponseModel.ErrorCodeType.AssetAttributeNotFound.ToString());
+            }
+
+            return ResponseModel<GetAssetCategoriesResponseModel>.CreateOk(
+               GetAssetCategoriesResponseModel.Create(new ApiAssetCategoryModel[] { res.ConvertToApiModel() }));
+        }
+
     }
 }

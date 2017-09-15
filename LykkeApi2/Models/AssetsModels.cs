@@ -5,6 +5,20 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Models
 {
+    public class GetAssetCategoriesResponseModel
+    {
+        public ApiAssetCategoryModel[] AssetCategories { get; set; }
+
+        public static GetAssetCategoriesResponseModel Create(ApiAssetCategoryModel[] assetCategories)
+        {
+            return new GetAssetCategoriesResponseModel
+            {
+                AssetCategories = assetCategories
+            };
+        }
+    }
+
+
     public class GetBaseAssetsRespModel
     {
         public ApiAssetModel[] Assets { get; set; }
