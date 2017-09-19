@@ -45,9 +45,42 @@ namespace LykkeApi2.Models
         }
     }
 
+    public class AssetExtendedResponseModel
+    {
+        public IEnumerable<AssetExtended> Assets { get; set; }
+
+        public static AssetExtendedResponseModel Create(IEnumerable<AssetExtended> assets)
+        {
+            return new AssetExtendedResponseModel
+            {
+                Assets = assets
+            };
+        }
+    }
+
+    public class AssetExtended
+    {
+        public ApiAssetModel Asset { get; set; }
+        public AssetDescriptionModel Description { get; set; }
+        public ApiAssetCategoryModel Category { get; set; }
+        public IEnumerable<IAssetAttributesKeyValue> Attributes { get; set; }
+
+        public static AssetExtended Create(ApiAssetModel asset, AssetDescriptionModel description, ApiAssetCategoryModel category, IEnumerable<IAssetAttributesKeyValue> attributes)
+        {
+            return new AssetExtended
+            {
+                Asset = asset,
+                Description = description,
+                Category = category,
+                Attributes = attributes
+            };
+        }
+    }
+
+
     public class AssetAttributesModel
     {
-        public IAssetAttributesKeyValue[] Pairs { get; set; }
+        public IAssetAttributesKeyValue[] Attrbuttes { get; set; }
     }
 
     public interface IAssetAttributesKeyValue
@@ -65,6 +98,13 @@ namespace LykkeApi2.Models
     public class AssetDescriptionsResponseModel
     {
         public IEnumerable<AssetDescriptionModel> Descriptions { get; set; }
+        public static AssetDescriptionsResponseModel Create(IEnumerable<AssetDescriptionModel> descriptions)
+        {
+            return new AssetDescriptionsResponseModel
+            {
+                Descriptions = descriptions
+            };
+        }
     }
 
     public class GetAssetDescriptionsRequestModel

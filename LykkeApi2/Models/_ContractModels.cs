@@ -24,7 +24,7 @@ namespace LykkeApi2.Models
 
     public static class DomainToContractConverter
     {
-        public static ApiAssetModel ConvertToApiModel(this IAsset src)
+        public static ApiAssetModel ConvertToApiModel(this Lykke.Service.Assets.Client.Custom.IAsset src)
         {
             return new ApiAssetModel
             {
@@ -42,7 +42,7 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static ApiAssetCategoryModel ConvertToApiModel(this IAssetCategory src)
+        public static ApiAssetCategoryModel ConvertToApiModel(this Lykke.Service.Assets.Client.Custom.IAssetCategory src)
         {
             return new ApiAssetCategoryModel
             {
@@ -58,19 +58,45 @@ namespace LykkeApi2.Models
         {
             return new AssetAttributesModel
             {
-                Pairs = src.Attributes.Select(aa => new KeyValue { Key = aa.Key, Value = aa.Value }).ToArray()
+                Attrbuttes = src.Attributes.Select(aa => new KeyValue { Key = aa.Key, Value = aa.Value }).ToArray()
             };
 
         }
 
-        public static AssetDescriptionsResponseModel ConvertToApiModel(this IAssetExtendedInfo src)
+        public static AssetDescriptionModel ConvertToApiModel(this Lykke.Service.Assets.Client.Custom.IAssetDescription src)
         {
-            return new AssetDescriptionsResponseModel
+            return new AssetDescriptionModel
             {
-                Descriptions = src.Descriptions.Select(d=> AssetDescriptionModel.Create(d)).ToList()
+                Id = src.Id,
+                AssetClass = src.AssetClass,
+                Description = src.Description,
+                IssuerName = src.IssuerName,
+                MarketCapitalization = src.MarketCapitalization,
+                NumberOfCoins = src.NumberOfCoins,
+                PopIndex = src.PopIndex,
+                AssetDescriptionUrl = src.AssetDescriptionUrl,
+                FullName = src.FullName
             };
 
         }
+
+        public static AssetExtended ConvertTpApiModel(this Lykke.Service.Assets.Client.Models.AssetExtended src)
+        {
+            var asset = src.Asset.ConvertToApiModel();
+            var description = src.Description.ConvertToApiModel();
+            var attributes = src.Attributes.ConvertToApiModel();
+            var category = src.Category.ConvertToApiModel();
+
+
+            return new AssetExtended
+            {
+                Asset = asset,
+                Description = description,
+                 Category = category,
+                  Attributes = attributes.Attrbuttes
+            };
+        }
+        
     }
 
     public class AssetDescriptionModel
@@ -84,24 +110,6 @@ namespace LykkeApi2.Models
         public string MarketCapitalization { get; set; }
         public string AssetDescriptionUrl { get; set; }
         public string FullName { get; set; }
-
-
-        public static AssetDescriptionModel Create(AssetExtendedInfo src)
-        {
-            return new AssetDescriptionModel
-            {
-                Id = src.Id,
-                AssetClass = src.AssetClass,
-                Description = src.Description,
-                IssuerName = src.IssuerName,
-                MarketCapitalization = src.MarketCapitalization,
-                NumberOfCoins = src.NumberOfCoins,
-                PopIndex = src.PopIndex ?? 0,
-                AssetDescriptionUrl = src.AssetDescriptionUrl,
-                FullName = src.FullName
-            };
-        }
-
     }
 
     public class ApiAssetCategoryModel

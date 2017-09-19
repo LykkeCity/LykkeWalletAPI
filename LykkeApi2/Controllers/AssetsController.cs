@@ -47,16 +47,17 @@ namespace LykkeApi2.Controllers
         {
             var keyValues = await _assetsService.GetAssetAttributeByKeyAsync(assetId, key);
 
-            return ResponseModel<IAssetAttributesKeyValue>.CreateOk(keyValues.ConvertToApiModel().Pairs.FirstOrDefault() ?? new KeyValue());
+            return ResponseModel<IAssetAttributesKeyValue>.CreateOk(keyValues.ConvertToApiModel().Attrbuttes.FirstOrDefault() ?? new KeyValue());
         }
 
         [HttpPost("description")]
         public async Task<ResponseModel<AssetDescriptionsResponseModel>> GetAssetDescriptions([FromBody]GetAssetDescriptionsRequestModel request)
         {
             var res = await _assetsService.GetAssetDescriptionsAsync(new Lykke.Service.Assets.Client.Models.GetAssetDescriptionsRequestModel { Ids = request.Ids });
+            var descriptions = res.Select(s => s.ConvertToApiModel()).ToList();
 
             return
-                ResponseModel<AssetDescriptionsResponseModel>.CreateOk(res.ConvertToApiModel());
+                ResponseModel<AssetDescriptionsResponseModel>.CreateOk(AssetDescriptionsResponseModel.Create(descriptions));
         }
 
         [HttpGet("{assetId}/description")]
@@ -64,7 +65,7 @@ namespace LykkeApi2.Controllers
         {
             var res = await _assetsService.GetAssetDescriptionsAsync(new Lykke.Service.Assets.Client.Models.GetAssetDescriptionsRequestModel { Ids = new List<string> { assetId } });
 
-            return ResponseModel<AssetDescriptionsResponseModel>.CreateOk(res.ConvertToApiModel());
+            return ResponseModel<AssetDescriptionsResponseModel>.CreateOk(AssetDescriptionsResponseModel.Create(res.Select(s => s.ConvertToApiModel()).ToList()));
         }
 
         [HttpGet("categories")]
@@ -88,6 +89,28 @@ namespace LykkeApi2.Controllers
 
             return ResponseModel<GetAssetCategoriesResponseModel>.CreateOk(
                GetAssetCategoriesResponseModel.Create(new ApiAssetCategoryModel[] { res.ConvertToApiModel() }));
+        }
+
+        [HttpGet("extended")]
+        public async Task<ResponseModel<AssetExtendedResponseModel>> GetAssetsExtended()
+        {
+            var res = await _assetsService.GetAssetsExtendedAsync();
+
+            var assetsExtended = res.Assets.Select(s => s.ConvertTpApiModel()).ToList();
+
+            return ResponseModel<AssetExtendedResponseModel>.CreateOk(
+               AssetExtendedResponseModel.Create(assetsExtended));
+        }
+
+        [HttpGet("{assetId}/extended")]
+        public async Task<ResponseModel<AssetExtendedResponseModel>> GetAssetsExtended(string assetId)
+        {
+            var res = await _assetsService.GetAssetExtendedByIdAsync(assetId);
+
+            var assetsExtended = res.Assets.Select(s => s.ConvertTpApiModel()).ToList();
+
+            return ResponseModel<AssetExtendedResponseModel>.CreateOk(
+               AssetExtendedResponseModel.Create(assetsExtended));
         }
 
     }
