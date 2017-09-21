@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 
 namespace LykkeApi2.Models
 {
@@ -139,6 +140,7 @@ namespace LykkeApi2.Models
                 }
             };
         }
+
 
         public new static ResponseModel<T> CreateFail(ErrorCodeType errorCodeType, string message)
         {

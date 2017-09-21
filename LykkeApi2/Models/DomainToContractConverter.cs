@@ -1,4 +1,5 @@
 ﻿using Lykke.Service.Assets.Client.Custom;
+using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
 using System;
 using System.Collections.Generic;
@@ -95,6 +96,18 @@ namespace LykkeApi2.Models
                 QuotingAssetId = src.QuotingAssetId,
                 Source = src.Source,
                 Source2 = src.Source2,                
+            };
+        }
+
+        public static AssetPairRateModel ConvertToApiModel(this Lykke.MarketProfileService.Client.Models.AssetPairModel src)
+        {
+            return new AssetPairRateModel
+            {
+                 AskPrice = src.AskPrice,
+                  AskPriceTimestamp = src.AskPriceTimestamp, 
+                   AssetPair = src.AssetPair,
+                    BidPrice = src.BidPrice,
+                     BidPriceTimestamp = src.BidPriceTimestamp                      
             };
         }
 

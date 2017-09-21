@@ -10,6 +10,7 @@ using Common.Log;
 using Core.Messages;
 using Core.Settings;
 using FluentValidation.AspNetCore;
+using Lykke.MarketProfileService.Client;
 using Lykke.Service.Assets.Client.Custom;
 using Lykke.Service.ClientAccount.Client.Custom;
 using Lykke.Service.Registration;
@@ -56,6 +57,9 @@ namespace LykkeApi2.Modules
 
             _services.AddSingleton<ILykkeRegistrationClient>(x => new LykkeRegistrationClient(_settings.WalletApiv2.Services.RegistrationUrl, _log));
             _services.AddSingleton<ClientAccountLogic>();
+
+
+            _services.AddSingleton<ILykkeMarketProfileServiceAPI>(x => new LykkeMarketProfileServiceAPI(new Uri(_settings.WalletApiv2.Services.MarketProfileUrl)));
 
             RegisterDictionaryEntities(builder);
 

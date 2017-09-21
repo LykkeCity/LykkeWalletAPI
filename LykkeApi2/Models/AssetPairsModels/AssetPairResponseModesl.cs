@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Models.AssetPairsModels
 {
-    public class AssetPairResponseModesl
+    public class AssetPairResponseModel
     {
         public IEnumerable<AssetPairModel> AssetPairs { get; set; }
 
-        public static AssetPairResponseModesl Create(IEnumerable<AssetPairModel> assetsPairs)
+        public static AssetPairResponseModel Create(IEnumerable<AssetPairModel> assetsPairs)
         {
-            return new AssetPairResponseModesl
+            return new AssetPairResponseModel
             {
                 AssetPairs = assetsPairs
             };
