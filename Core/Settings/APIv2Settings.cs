@@ -35,6 +35,7 @@ namespace Core.Settings
         public string AssetsServiceUrl { get; set; }
         public string ClientAccountServiceUrl { get; set; }
         public string RegistrationUrl { get; set; }
+        public string WalletsServiceUrl { get; set; }
     }
 
     public class DeploymentSettings

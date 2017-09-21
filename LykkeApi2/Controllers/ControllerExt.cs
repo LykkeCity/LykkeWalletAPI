@@ -1,4 +1,5 @@
 ﻿using Common;
+using LykkeApi2.App_Start;
 using LykkeApi2.Extensions;
 using LykkeApi2.Infrastructure;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +13,16 @@ namespace LykkeApi2.Controllers
 {
     public static class ControllerExt
     {
+        public static string GetClientId(this Controller ctx)
+        {
+            return Dependencies.GetIdentity(ctx);
+        }
+
+        public static string GetPartnerId(this Controller ctx)
+        {
+            return Dependencies.GetPartnerId(ctx);
+        }
+
         public static string GetUserAgent(this Controller ctx)
         {
             return ctx.Request.GetUserAgent();
@@ -37,7 +48,6 @@ namespace LykkeApi2.Controllers
         {
             string ip = string.Empty;
 
-            // http://stackoverflow.com/a/43554000/538763
             var xForwardedForVal = GetHeaderValueAs<string>(ctx.HttpContext, "X-Forwarded-For").SplitCsv().FirstOrDefault();
 
             if (!string.IsNullOrEmpty(xForwardedForVal))

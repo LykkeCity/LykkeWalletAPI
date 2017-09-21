@@ -117,8 +117,20 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlreadyExists" xml:space="preserve">
+    <value>Record already existsRecord already exists</value>
+  </data>
+  <data name="AndroidUpdateNeededMsg" xml:space="preserve">
+    <value>Sorry, your app version is not supported anymore. Please update your app from Google Play and continue enjoying the service.</value>
+  </data>
+  <data name="ClientBalanceNotFound" xml:space="preserve">
+    <value>Client Balance Not Found</value>
+  </data>
   <data name="ClientWithEmailIsRegistered" xml:space="preserve">
     <value>Client with the same email is already registered</value>
+  </data>
+  <data name="DefaultUpdateNeededMsg" xml:space="preserve">
+    <value>App version not supported. Please, update.</value>
   </data>
   <data name="EmailNotVerified" xml:space="preserve">
     <value>Email not verified</value>
@@ -143,6 +155,9 @@
   </data>
   <data name="MinLength" xml:space="preserve">
     <value>Minimum length is {0}</value>
+  </data>
+  <data name="NotEmptyField" xml:space="preserve">
+    <value>{0} should not be empty</value>
   </data>
   <data name="TechnicalProblems" xml:space="preserve">
     <value>We are experiencing technical problems. Please try again.</value>

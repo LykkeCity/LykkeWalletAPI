@@ -15,9 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.WalletApiv2.Tests", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Repositories", "3. Repositories", "{6CE87381-2B88-4759-BDCD-FCC141673160}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureRepositories", "AzureRepositories\AzureRepositories.csproj", "{578B1BB6-3895-4F02-8EA1-94B269976080}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureRepositories", "AzureRepositories\AzureRepositories.csproj", "{578B1BB6-3895-4F02-8EA1-94B269976080}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LkeServices", "LkeServices\LkeServices.csproj", "{F013FA52-4048-463C-A931-20C386ECCFA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LkeServices", "LkeServices\LkeServices.csproj", "{F013FA52-4048-463C-A931-20C386ECCFA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

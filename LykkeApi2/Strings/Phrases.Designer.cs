@@ -61,11 +61,47 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Record already existsRecord already exists.
+        /// </summary>
+        public static string AlreadyExists {
+            get {
+                return ResourceManager.GetString("AlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sorry, your app version is not supported anymore. Please update your app from Google Play and continue enjoying the service..
+        /// </summary>
+        public static string AndroidUpdateNeededMsg {
+            get {
+                return ResourceManager.GetString("AndroidUpdateNeededMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Balance Not Found.
+        /// </summary>
+        public static string ClientBalanceNotFound {
+            get {
+                return ResourceManager.GetString("ClientBalanceNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Client with the same email is already registered.
         /// </summary>
         public static string ClientWithEmailIsRegistered {
             get {
                 return ResourceManager.GetString("ClientWithEmailIsRegistered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to App version not supported. Please, update..
+        /// </summary>
+        public static string DefaultUpdateNeededMsg {
+            get {
+                return ResourceManager.GetString("DefaultUpdateNeededMsg", resourceCulture);
             }
         }
         
@@ -138,6 +174,15 @@ namespace LykkeApi2.Strings {
         public static string MinLength {
             get {
                 return ResourceManager.GetString("MinLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} should not be empty.
+        /// </summary>
+        public static string NotEmptyField {
+            get {
+                return ResourceManager.GetString("NotEmptyField", resourceCulture);
             }
         }
         
