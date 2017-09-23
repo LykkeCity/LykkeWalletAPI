@@ -14,6 +14,7 @@ using Lykke.Service.ClientAccount.Client.Custom;
 using LykkeApi2.App_Start;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Lykke.Service.Registration;
 
 namespace LykkeApi2.Modules
 {
@@ -44,7 +45,9 @@ namespace LykkeApi2.Modules
             _services.UseAssetsClient(AssetServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
             _services.UseClientAccountService(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
             _services.UseClientAccountClient(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD), _log);
-            
+
+            builder.RegisterRegistrationClient(_settings.WalletApiv2.Services.RegistrationUrl, _log);
+
             //_services.AddSingleton<IVerifiedEmailsRepository>(new VerifiedEmailsRepository(
             //    new AzureTableStorage<VerifiedEmailEntity>(dbSettings.ClientPersonalInfoConnString, "VerifiedEmails", log)));
 
