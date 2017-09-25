@@ -35,13 +35,6 @@
     <ProjectReference Include="..\LkeServices\LkeServices.csproj" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <Reference Include="Lykke.Service.Wallets.Client">
-      <HintPath>..\..\WalletsService\Lykke.Service.Wallets\client\Lykke.Service.Wallets.Client\bin\Debug\netstandard2.0\Lykke.Service.Wallets.Client.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Strings\Phrases.Designer.cs">
       <DesignTime>True</DesignTime>
