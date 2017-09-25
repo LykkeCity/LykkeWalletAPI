@@ -5,12 +5,14 @@ using AzureRepositories.Email;
 using AzureRepositories.Repositories;
 using AzureStorage;
 using AzureStorage.Tables;
+using Common;
 using Common.IocContainer;
 using Common.Log;
 using Core.Accounts;
 using Core.Messages;
 using Core.Settings;
 using FluentValidation.AspNetCore;
+using Lykke.MarketProfileService.Client;
 using Lykke.Service.Assets.Client.Custom;
 using Lykke.Service.ClientAccount.Client.Custom;
 using Lykke.Service.Registration;
@@ -19,6 +21,7 @@ using LykkeApi2.App_Start;
 using LykkeApi2.Credentials;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 
 namespace LykkeApi2.Modules
 {
@@ -60,7 +63,22 @@ namespace LykkeApi2.Modules
 
             _services.AddSingleton<ClientAccountLogic>();
 
+
+            _services.AddSingleton<ILykkeMarketProfileServiceAPI>(x => new LykkeMarketProfileServiceAPI(new Uri(_settings.WalletApiv2.Services.MarketProfileUrl)));
+
+            RegisterDictionaryEntities(builder);
+
             builder.Populate(_services);
+        }
+
+        private void RegisterDictionaryEntities(ContainerBuilder builder)
+        {
+            builder.Register(c=>
+            {
+                var ctx = c.Resolve<IComponentContext>();
+                return new CachedDataDictionary<string, IAssetPair>(
+                   async () => (await ctx.Resolve<ICachedAssetsService>().GetAllAssetPairsAsync()).ToDictionary(itm => itm.Id));
+            }).SingleInstance();
         }
     }
 }
