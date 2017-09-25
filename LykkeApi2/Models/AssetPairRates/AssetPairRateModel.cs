@@ -16,6 +16,6 @@ namespace LykkeApi2.Models.AssetPairRates
 
         public double PChng { get; set; }
         public double[] ChngGrph { get; set; }
-        public bool Inverted { get; set; }        
+ 
     }
 }

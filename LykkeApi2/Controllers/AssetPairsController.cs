@@ -71,6 +71,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("rates")]
         public async Task<ResponseModel<AssetPairRatesResponseModel>> GetAssetPairRates()
         {
+            //TODO: get client id and partnerId from session/authorization: e.g. this.GetClientId();
             var clientId = "";
             var isIosDevice = this.IsIosDevice();
             var partnerId = "";
@@ -95,35 +96,41 @@ namespace LykkeApi2.Controllers
             return ResponseModel<AssetPairRatesResponseModel>.CreateOk(AssetPairRatesResponseModel.Create(list.ToArray()));
         }
 
-        //[HttpGet("rates/{id}")]
-        //public async Task<ResponseModel<AssetPairResponseModel>> GetAssetPairRatesById(string id)
-        //{
-        //    if (string.IsNullOrEmpty(id))
-        //        return ResponseModel<GetAssetPairRateModel>.CreateInvalidFieldError("id", Phrases.FieldShouldNotBeEmpty);
+        [HttpGet("rates/{assetPairId}")]
+        public async Task<ResponseModel<AssetPairRatesResponseModel>> GetAssetPairRatesById(string assetPairId)
+        {
+            //TODO: param validation - return bad request
+            //if (string.IsNullOrEmpty(id))
+            //    return ResponseModel<AssetPairRatesResponseModel>.CreateInvalidFieldError("id", Phrases.FieldShouldNotBeEmpty);
 
-        //    var asset = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == id);
-        //    if (asset == null)
-        //        return ResponseModel<GetAssetPairRateModel>.CreateInvalidFieldError("id", Phrases.InvalidValue);
+            var asset = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == assetPairId);
 
-        //    var clientId = this.GetClientId();
-        //    var marketProfile = await _marketProfileRepository.GetAsync();
+            //TODO VALIDATION: return bad request
+            //if (asset == null)
+            //    return ResponseModel<GetAssetPairRateModel>.CreateInvalidFieldError("id", Phrases.InvalidValue);
 
-        //    var nowFeedData = marketProfile.Profile.FirstOrDefault(itm => itm.Asset == id);
-        //    if (nowFeedData == null)
-        //        return
-        //            ResponseModel<GetAssetPairRateModel>.CreateFail(ResponseModel.ErrorCodeType.NoData, Phrases.NoData);
+            //TODO:
+            var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
 
-        //    var feedHoursHistory = await _feedHoursHistoryRepository.GetAsync(nowFeedData.Asset);
+            var feedData = marketProfile.FirstOrDefault(itm => itm.AssetPair == assetPairId);
 
-        //    var invertedPairsSettings =
-        //        await _clientSettingsRepository.GetSettings<AssetPairsInvertedSettings>(clientId);
-        //    var rate = nowFeedData.ConvertToApiModel(marketProfile, feedHoursHistory);
-        //    rate.Inverted = invertedPairsSettings.InvertedAssetIds.Contains(rate.Id);
+            //TODO VALIDATION: 
+            //if (nowFeedData == null)
+            //return ResponseModel<GetAssetPairRateModel>.CreateFail(ResponseModel.ErrorCodeType.NoData, Phrases.NoData);
 
-        //    return
-        //        ResponseModel<GetAssetPairRateModel>.CreateOk(
-        //            GetAssetPairRateModel.Create(rate));
-        //}
+            //TODO: Read from candles service
+            //var feedHoursHistory = await _feedHoursHistoryRepository.GetAsync(feedData.AssetPair);
+
+            //var invertedPairsSettings = await _clientSettingsRepository.GetSettings<AssetPairsInvertedSettings>(clientId);
+
+            //TODO: ConvertToApiModel with candles history
+            //var rate = feedData.ConvertToApiModel(feedHoursHistory);
+            var rate = feedData.ConvertToApiModel();
+            //Lykke.MarketProfileService.Client.Models.AssetPairModel src
+                        
+
+            return ResponseModel<AssetPairRatesResponseModel>.CreateOk(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel>  { rate }));
+        }
 
 
 
