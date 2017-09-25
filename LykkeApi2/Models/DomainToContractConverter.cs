@@ -1,4 +1,5 @@
-﻿using Lykke.Service.Assets.Client.Custom;
+﻿using Common;
+using Lykke.Service.Assets.Client.Custom;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
 using System;
@@ -111,5 +112,21 @@ namespace LykkeApi2.Models
             };
         }
 
+        public static AssetPairRateModel ConvertToApiModel(this Lykke.MarketProfileService.Client.Models.AssetPairModel src, Lykke.Service.CandlesHistory.Client.Models.CandlesHistoryResponseModel candleHistory)
+        {
+            var changesGraph = candleHistory?.History.Count == 2 ? new[] { 0.5, 0.5 } : candleHistory?.History.Select(h=>h.Close).Map().ToArray();
+
+            return new AssetPairRateModel
+            {
+                AskPrice = src.AskPrice,
+                AskPriceTimestamp = src.AskPriceTimestamp,
+                AssetPair = src.AssetPair,
+                BidPrice = src.BidPrice,
+                BidPriceTimestamp = src.BidPriceTimestamp,
+                ChngGrph = changesGraph ?? new double[] { },
+                PChng = Common.Utils.GetChangesInPercents(candleHistory?.History.First()?.Close ?? 0, candleHistory?.History.Last()?.Close ?? 0).GetValueOrDefault(),
+
+            };
+        }
     }
 }

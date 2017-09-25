@@ -37,6 +37,7 @@ namespace Core.Settings
         public string RegistrationUrl { get; set; }
         public string WalletsServiceUrl { get; set; }
         public string MarketProfileUrl { get; set; }
+        public string CandleHistoryUrl { get; set; }
     }
 
     public class DeploymentSettings
