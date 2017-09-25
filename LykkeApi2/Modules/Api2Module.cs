@@ -12,6 +12,7 @@ using Core.Settings;
 using FluentValidation.AspNetCore;
 using Lykke.MarketProfileService.Client;
 using Lykke.Service.Assets.Client.Custom;
+using Lykke.Service.CandlesHistory.Client;
 using Lykke.Service.ClientAccount.Client.Custom;
 using Lykke.Service.Registration;
 using LykkeApi2.App_Start;
@@ -60,6 +61,7 @@ namespace LykkeApi2.Modules
 
 
             _services.AddSingleton<ILykkeMarketProfileServiceAPI>(x => new LykkeMarketProfileServiceAPI(new Uri(_settings.WalletApiv2.Services.MarketProfileUrl)));
+            _services.AddSingleton<ICandleshistoryservice>(x => new Candleshistoryservice(new Uri(_settings.WalletApiv2.Services.CandleHistoryUrl)));
 
             RegisterDictionaryEntities(builder);
 
