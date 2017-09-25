@@ -76,7 +76,10 @@ namespace LykkeApi2.Controllers
             var isIosDevice = this.IsIosDevice();
             var partnerId = "";
 
-            var assetPairs = await _assetsService.GetAssetsPairsForClient( new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel { ClientId = clientId, IsIosDevice = isIosDevice, PartnerId = partnerId } );
+            //TODO - uncomment when new beta version of assets service is created
+            var assetPairs = new List<AssetPairModel>(); //await _assetsService.GetAssetsPairsForClient( new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel { ClientId = clientId, IsIosDevice = isIosDevice, PartnerId = partnerId } );
+
+            //var assetPairs = await _assetsService.GetAssetsPairsForClient( new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel { ClientId = clientId, IsIosDevice = isIosDevice, PartnerId = partnerId } );
 
             var assetPairsDict = assetPairs.ToDictionary(itm => itm.Id);
             var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
