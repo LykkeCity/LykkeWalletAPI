@@ -1,11 +1,13 @@
-﻿namespace LykkeApi2.Models.ResponceModels
+﻿using System.Net;
+
+namespace LykkeApi2.Models.ResponceModels
 {
     public class ApiOkResponse : ApiResponse
     {
         public object Result { get; }
 
         public ApiOkResponse(object result)
-            : base(ResponseStatusCode.OK)
+            : base(HttpStatusCode.OK)
         {
             Result = result;
         }

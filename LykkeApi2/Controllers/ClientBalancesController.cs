@@ -6,6 +6,7 @@ using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers
@@ -36,7 +37,7 @@ namespace LykkeApi2.Controllers
 
             if (clientBalances == null)
             {
-                return NotFound(new ApiResponse(ResponseStatusCode.NotFound, Phrases.ClientBalanceNotFound));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.ClientBalanceNotFound));
             }
 
             return Ok(clientBalances);
@@ -61,7 +62,7 @@ namespace LykkeApi2.Controllers
             }
             else
             {
-                return NotFound(new ApiResponse(ResponseStatusCode.InternalServerError, clientBalanceResult.ErrorMessage ?? Phrases.ClientBalanceNotFound));
+                return NotFound(new ApiResponse(HttpStatusCode.InternalServerError, clientBalanceResult.ErrorMessage ?? Phrases.ClientBalanceNotFound));
             }
         }
     }
