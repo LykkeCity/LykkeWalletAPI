@@ -10,6 +10,7 @@ using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Models.ValidationModels;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers
@@ -66,7 +67,7 @@ namespace LykkeApi2.Controllers
             RegistrationResponse result = await _lykkeRegistrationClient.RegisterAsync(registrationModel);
 
             if (result == null)
-                return NotFound(new ApiResponse(ResponseStatusCode.InternalServerError, Phrases.TechnicalProblems));
+                return NotFound(new ApiResponse(HttpStatusCode.InternalServerError, Phrases.TechnicalProblems));
 
             var resultPhone = await _clientAccountClient.InsertIndexedByPhoneAsync(
                                                         new IndexByPhoneRequestModel()
