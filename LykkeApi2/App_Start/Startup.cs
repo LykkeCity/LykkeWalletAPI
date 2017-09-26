@@ -7,7 +7,6 @@ using FluentValidation.AspNetCore;
 using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Logs;
-using Lykke.Service.Assets.Client.Custom;
 using Lykke.SettingsReader;
 using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Builder;
@@ -15,7 +14,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-
 
 namespace LykkeApi2.App_Start
 {

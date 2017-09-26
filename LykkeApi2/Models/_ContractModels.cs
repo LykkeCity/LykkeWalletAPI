@@ -1,11 +1,4 @@
-﻿using Lykke.Service.Assets.Client.Custom;
-using Lykke.Service.Assets.Client.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace LykkeApi2.Models
+﻿namespace LykkeApi2.Models
 {
     public class ApiAssetModel
     {
@@ -21,8 +14,6 @@ namespace LykkeApi2.Models
         public bool BlockchainDepositEnabled { get; set; }
         public string CategoryId { get; set; }
     }
-
-
 
     public class AssetDescriptionModel
     {
@@ -45,5 +36,4 @@ namespace LykkeApi2.Models
         public string AndroidIconUrl { get; set; }
         public int? SortOrder { get; set; }
     }
-
 }

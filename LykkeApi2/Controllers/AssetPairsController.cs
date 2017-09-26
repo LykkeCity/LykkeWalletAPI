@@ -22,7 +22,8 @@ namespace LykkeApi2.Controllers
         private readonly ILykkeMarketProfileServiceAPI _marketProfileService;
         private readonly ILog _log;
 
-        public AssetPairsController(CachedDataDictionary<string, IAssetPair> assetPairs, ICachedAssetsService assetsService, ILykkeMarketProfileServiceAPI marketProfile,  ILog log)
+        public AssetPairsController(CachedDataDictionary<string, IAssetPair> assetPairs,
+            ICachedAssetsService assetsService, ILykkeMarketProfileServiceAPI marketProfile,  ILog log)
         {
             _assetPairs = assetPairs;
             _assetsService = assetsService;

@@ -8,6 +8,20 @@ namespace Core.Constants
     {
         public const string DefaultAssetSetting = "Default";
 
+        public const string BitcoinAssetId = "BTC";
+        public const string LykkeAssetId = "LKK";
+
+        public const string UsdAssetId = "USD";
+        public const string EurAssetId = "EUR";
+        public const string ChfAssetId = "CHF";
+        public const string GbpAssetId = "GBP";
+        public const string EthAssetId = "ETH";
+        public const string SolarAssetId = "SLR";
+        public const string ChronoBankAssetId = "TIME";
+        public const string QuantaAssetId = "QNT";
+
+        public const string LKKUSDPairId = "LKKUSD";
+
         public const int TotalLykkeAmount = 1250000000;
 
         public const int MinPwdLength = 6;
