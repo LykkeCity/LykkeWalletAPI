@@ -78,8 +78,7 @@ namespace LykkeApi2.Modules
             _services.AddSingleton<ICandleshistoryservice>(x => new Candleshistoryservice(new Uri(_settings.WalletApiv2.Services.CandleHistoryUrl)));
 
             RegisterDictionaryEntities(builder);
-            BindHistoryMappers(builder);
-            BindServices(builder, _settings, _log);
+
             builder.Populate(_services);
         }
 
