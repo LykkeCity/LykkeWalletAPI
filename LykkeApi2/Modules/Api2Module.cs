@@ -1,24 +1,21 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AzureRepositories.Account;
+using AzureRepositories.CashOperations;
 using AzureRepositories.Email;
+using AzureRepositories.Exchange;
 using AzureRepositories.Repositories;
-using AzureStorage;
 using AzureStorage.Tables;
 using Common;
-using Common.IocContainer;
 using Common.Log;
-using Core.Accounts;
 using Core.Messages;
 using Core.Settings;
-using FluentValidation.AspNetCore;
 using Lykke.MarketProfileService.Client;
 using Lykke.Service.Assets.Client.Custom;
 using Lykke.Service.CandlesHistory.Client;
 using Lykke.Service.ClientAccount.Client.Custom;
+using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.Registration;
 using Lykke.Service.Wallets.Client;
-using LykkeApi2.App_Start;
 using LykkeApi2.Credentials;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -49,6 +46,17 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance<IVerifiedEmailsRepository>(new VerifiedEmailsRepository(
               new AzureTableStorage<VerifiedEmailEntity>(_settings.WalletApiv2.Db.ClientPersonalInfoConnString, "VerifiedEmails", _log)));
 
+            //--------------------------------------------
+            builder.RegisterInstance<ILimitTradeEventsRepository>(new LimitTradeEventsRepository(
+             new AzureTableStorage<LimitTradeEventEntity>(_settings.WalletApiv2.Db.ClientPersonalInfoConnString, "LimitTradeEvents", _log)));
+
+            builder.RegisterInstance<IMarketOrdersRepository>(new MarketOrdersRepository(
+            new AzureTableStorage<MarketOrderEntity>(_settings.WalletApiv2.Db.HMarketOrdersConnString, "MarketOrders", _log)));
+
+            //-------------------------------------------------------
+            builder.RegisterOperationsRepositoryClients(_settings.WalletApiv2.Services.OperationsRepositoryClient.ServiceUrl, _log,
+                                                        _settings.WalletApiv2.Services.OperationsRepositoryClient.RequestTimeout);
+
             builder.RegisterInstance<DeploymentSettings>(new DeploymentSettings());
             builder.RegisterInstance(_settings.WalletApiv2.DeploymentSettings);
 
@@ -56,27 +64,29 @@ namespace LykkeApi2.Modules
             _services.UseClientAccountService(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
             _services.UseClientAccountClient(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD), _log);
 
-            //_services.AddSingleton<IVerifiedEmailsRepository>(new VerifiedEmailsRepository(
-            //    new AzureTableStorage<VerifiedEmailEntity>(dbSettings.ClientPersonalInfoConnString, "VerifiedEmails", log)));
-
             _services.AddSingleton<ILykkeRegistrationClient>(x => new LykkeRegistrationClient(_settings.WalletApiv2.Services.RegistrationUrl, _log));
 
             _services.AddSingleton<IWalletsClient>(x => new WalletsClient(_settings.WalletApiv2.Services.WalletsServiceUrl, _log));
 
             _services.AddSingleton<ClientAccountLogic>();
 
-
             _services.AddSingleton<ILykkeMarketProfileServiceAPI>(x => new LykkeMarketProfileServiceAPI(new Uri(_settings.WalletApiv2.Services.MarketProfileUrl)));
             _services.AddSingleton<ICandleshistoryservice>(x => new Candleshistoryservice(new Uri(_settings.WalletApiv2.Services.CandleHistoryUrl)));
 
             RegisterDictionaryEntities(builder);
-
             builder.Populate(_services);
         }
 
         private void RegisterDictionaryEntities(ContainerBuilder builder)
         {
-            builder.Register(c=>
+            builder.Register(c =>
+            {
+                var ctx = c.Resolve<IComponentContext>();
+                return new CachedDataDictionary<string, IAsset>(
+                   async () => (await ctx.Resolve<ICachedAssetsService>().GetAllAssetsAsync()).ToDictionary(itm => itm.Id));
+            }).SingleInstance();
+
+            builder.Register(c =>
             {
                 var ctx = c.Resolve<IComponentContext>();
                 return new CachedDataDictionary<string, IAssetPair>(
