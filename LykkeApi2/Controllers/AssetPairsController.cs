@@ -67,16 +67,8 @@ namespace LykkeApi2.Controllers
             var assetPairsDict = assetPairs.ToDictionary(itm => itm.Id);
             var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
 
-            marketProfile = marketProfile.Where(itm => assetPairsDict.ContainsKey(itm.AssetPair)).ToList();
-
-            var list = new List<AssetPairRateModel>();
-            foreach (var feedData in marketProfile)
-            {
-                var feedHoursHistory = await _candleHistoryService.TryGetCandlesHistoryAsync(feedData.AssetPair, Lykke.Service.CandlesHistory.Client.Models.PriceType.Mid, Lykke.Service.CandlesHistory.Client.Models.TimeInterval.Hour, DateTime.UtcNow.AddHours(-24), DateTime.UtcNow);
-                list.Add(feedData.ConvertToApiModel(feedHoursHistory));
-            }            
-
-            return Ok(AssetPairRatesResponseModel.Create(list.ToArray())); 
+            marketProfile = marketProfile.Where(itm => assetPairsDict.ContainsKey(itm.AssetPair)).ToList();             
+            return Ok(AssetPairRatesResponseModel.Create(marketProfile.Select(m=>m.ConvertToApiModel()).ToArray())); 
         }
 
         [HttpGet("rates/{assetPairId}")]
@@ -102,13 +94,9 @@ namespace LykkeApi2.Controllers
             {
                 ModelState.AddModelError("marketProfile", $"No data exist for {assetPairId}");
                 return NotFound(new ApiResponse(HttpStatusCode.NotFound, $"No data exist for {assetPairId}"));
-            }
+            }           
 
-            var feedHoursHistory = await _candleHistoryService.TryGetCandlesHistoryAsync(assetPairId, Lykke.Service.CandlesHistory.Client.Models.PriceType.Mid, Lykke.Service.CandlesHistory.Client.Models.TimeInterval.Hour, DateTime.UtcNow.AddHours(-24), DateTime.UtcNow); //_feedHoursHistoryRepository.GetAsync(feedData.AssetPair);
-
-            var assetPairRate = feedData.ConvertToApiModel(feedHoursHistory);                       
-
-            return Ok(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel> { assetPairRate }));
+            return Ok(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel> { feedData.ConvertToApiModel() }));
         }
     }
 }

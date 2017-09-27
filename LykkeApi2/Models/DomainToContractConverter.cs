@@ -105,28 +105,11 @@ namespace LykkeApi2.Models
             return new AssetPairRateModel
             {
                  AskPrice = src.AskPrice,
-                  AskPriceTimestamp = src.AskPriceTimestamp, 
-                   AssetPair = src.AssetPair,
-                    BidPrice = src.BidPrice,
-                     BidPriceTimestamp = src.BidPriceTimestamp                      
+                 AskPriceTimestamp = src.AskPriceTimestamp, 
+                 AssetPair = src.AssetPair,
+                 BidPrice = src.BidPrice,
+                 BidPriceTimestamp = src.BidPriceTimestamp                      
             };
-        }
-
-        public static AssetPairRateModel ConvertToApiModel(this Lykke.MarketProfileService.Client.Models.AssetPairModel src, Lykke.Service.CandlesHistory.Client.Models.CandlesHistoryResponseModel candleHistory)
-        {
-            var changesGraph = candleHistory?.History.Count == 2 ? new[] { 0.5, 0.5 } : candleHistory?.History.Select(h=>h.Close).Map().ToArray();
-
-            return new AssetPairRateModel
-            {
-                AskPrice = src.AskPrice,
-                AskPriceTimestamp = src.AskPriceTimestamp,
-                AssetPair = src.AssetPair,
-                BidPrice = src.BidPrice,
-                BidPriceTimestamp = src.BidPriceTimestamp,
-                ChngGrph = changesGraph ?? new double[] { },
-                PChng = Common.Utils.GetChangesInPercents(candleHistory?.History.First()?.Close ?? 0, candleHistory?.History.Last()?.Close ?? 0).GetValueOrDefault(),
-
-            };
-        }
+        }        
     }
 }

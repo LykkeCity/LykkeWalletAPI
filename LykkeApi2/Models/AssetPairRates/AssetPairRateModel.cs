@@ -12,10 +12,6 @@ namespace LykkeApi2.Models.AssetPairRates
         public double AskPrice { get; set; }
 
         public DateTime BidPriceTimestamp { get; set; }
-        public DateTime AskPriceTimestamp { get; set; }
-
-        public double PChng { get; set; }
-        public double[] ChngGrph { get; set; }
- 
+        public DateTime AskPriceTimestamp { get; set; } 
     }
 }
