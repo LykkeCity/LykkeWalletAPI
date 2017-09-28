@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Models.AssetPairsModels
 {
-    public class AssetPairRequest
+    public class AssetPairRequestModel
     {
         [FromRoute(Name = "assetPairId")]
         public string AssetPairId { get; set; }

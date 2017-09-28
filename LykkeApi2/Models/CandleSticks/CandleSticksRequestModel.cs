@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Models
 {
-    public class CandleSticksRequest
+    public class CandleSticksRequestModel
     {
         [FromRoute]
         public string AssetPairId { get; set; }

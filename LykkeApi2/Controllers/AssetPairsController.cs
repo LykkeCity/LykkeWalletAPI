@@ -75,7 +75,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("rates/{assetPairId}")]
-        public async Task<IActionResult> GetAssetPairRatesById([FromRoute]AssetPairRequest request)
+        public async Task<IActionResult> GetAssetPairRatesById([FromRoute]AssetPairRequestModel request)
         {
             var asset = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == request.AssetPairId);
 

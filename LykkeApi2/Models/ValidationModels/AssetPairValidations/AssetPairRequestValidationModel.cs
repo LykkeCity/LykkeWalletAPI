@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Models.ValidationModels.AssetPairValidations
 {
-    public class AssetPairRequestValidationModel : AbstractValidator<AssetPairRequest>
+    public class AssetPairRequestValidationModel : AbstractValidator<AssetPairRequestModel>
     {
         public AssetPairRequestValidationModel()
         {

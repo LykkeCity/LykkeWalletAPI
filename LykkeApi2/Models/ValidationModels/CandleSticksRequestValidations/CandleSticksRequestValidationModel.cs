@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Models.ValidationModels.CandleSticksRequestValidations
 {
-    public class CandleSticksRequestValidationModel : AbstractValidator<CandleSticksRequest>
+    public class CandleSticksRequestValidationModel : AbstractValidator<CandleSticksRequestModel>
     {
         public CandleSticksRequestValidationModel()
         {
