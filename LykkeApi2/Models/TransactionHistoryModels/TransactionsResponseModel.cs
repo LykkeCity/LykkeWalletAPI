@@ -1,6 +1,6 @@
 ﻿using LykkeApi2.Models.ApiContractModels;
 
-namespace LykkeApi2.Models.TransactionsModels
+namespace LykkeApi2.Models.TransactionHistoryModels
 {
     public class TransactionsResponseModel
     {

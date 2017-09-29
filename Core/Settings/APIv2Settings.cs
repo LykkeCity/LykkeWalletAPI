@@ -40,6 +40,7 @@ namespace Core.Settings
         public string WalletsServiceUrl { get; set; }
         public OperationsRepositoryClient OperationsRepositoryClient { get; set; }
         public string MarketProfileUrl { get; set; }
+        public string OperationsHistoryUrl { get; set; }
     }
 
     public class OperationsRepositoryClient

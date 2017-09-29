@@ -1,10 +1,9 @@
-﻿using Core.CashOperations;
-using Core.Enumerators;
+﻿using Core.Enumerators;
 using System;
 
-namespace AzureRepositories.CashOperations
+namespace Core.CashOperations
 {
-    public class LimitTradeEventEntity : BaseEntity, ILimitTradeEvent
+    public class LimitTradeEvent : ILimitTradeEvent
     {
         public DateTime CreatedDt { get; set; }
         public OrderType OrderType { get; set; }
@@ -17,10 +16,5 @@ namespace AzureRepositories.CashOperations
         public string ClientId { get; set; }
         public string Id { get; set; }
         public string OrderId { get; set; }
-
-        public static string GeneratePartitionKey(string clientId)
-        {
-            return clientId;
-        }
     }
 }

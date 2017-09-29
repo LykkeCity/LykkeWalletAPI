@@ -81,7 +81,7 @@ namespace LykkeApi2.App_Start
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseLykkeMiddleware(appName, ex => new { Message = "Technical problem" });
+            //app.UseLykkeMiddleware(appName, ex => new { Message = "Technical problem" });
 
             app.UseMvc(routes =>
             {
