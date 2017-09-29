@@ -22,7 +22,7 @@ namespace LykkeApi2.Strings {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Phrases {
+    internal class Phrases {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace LykkeApi2.Strings {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Resources.ResourceManager ResourceManager {
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("LykkeApi2.Strings.Phrases", typeof(Phrases).Assembly);
@@ -51,7 +51,7 @@ namespace LykkeApi2.Strings {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        public static global::System.Globalization.CultureInfo Culture {
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Record already existsRecord already exists.
         /// </summary>
-        public static string AlreadyExists {
+        internal static string AlreadyExists {
             get {
                 return ResourceManager.GetString("AlreadyExists", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Sorry, your app version is not supported anymore. Please update your app from Google Play and continue enjoying the service..
         /// </summary>
-        public static string AndroidUpdateNeededMsg {
+        internal static string AndroidUpdateNeededMsg {
             get {
                 return ResourceManager.GetString("AndroidUpdateNeededMsg", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Client Balance Not Found.
         /// </summary>
-        public static string ClientBalanceNotFound {
+        internal static string ClientBalanceNotFound {
             get {
                 return ResourceManager.GetString("ClientBalanceNotFound", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Client with the same email is already registered.
         /// </summary>
-        public static string ClientWithEmailIsRegistered {
+        internal static string ClientWithEmailIsRegistered {
             get {
                 return ResourceManager.GetString("ClientWithEmailIsRegistered", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to App version not supported. Please, update..
         /// </summary>
-        public static string DefaultUpdateNeededMsg {
+        internal static string DefaultUpdateNeededMsg {
             get {
                 return ResourceManager.GetString("DefaultUpdateNeededMsg", resourceCulture);
             }
@@ -108,7 +108,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Email not verified.
         /// </summary>
-        public static string EmailNotVerified {
+        internal static string EmailNotVerified {
             get {
                 return ResourceManager.GetString("EmailNotVerified", resourceCulture);
             }
@@ -117,7 +117,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Field should not be empty.
         /// </summary>
-        public static string FieldShouldNotBeEmpty {
+        internal static string FieldShouldNotBeEmpty {
             get {
                 return ResourceManager.GetString("FieldShouldNotBeEmpty", resourceCulture);
             }
@@ -126,7 +126,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Invalid address.
         /// </summary>
-        public static string InvalidAddress {
+        internal static string InvalidAddress {
             get {
                 return ResourceManager.GetString("InvalidAddress", resourceCulture);
             }
@@ -135,7 +135,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Invalid email format.
         /// </summary>
-        public static string InvalidEmailFormat {
+        internal static string InvalidEmailFormat {
             get {
                 return ResourceManager.GetString("InvalidEmailFormat", resourceCulture);
             }
@@ -144,7 +144,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to {PropertyName} is not valid.
         /// </summary>
-        public static string InvalidPropertyValue {
+        internal static string InvalidPropertyValue {
             get {
                 return ResourceManager.GetString("InvalidPropertyValue", resourceCulture);
             }
@@ -153,7 +153,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Invalid value.
         /// </summary>
-        public static string InvalidValue {
+        internal static string InvalidValue {
             get {
                 return ResourceManager.GetString("InvalidValue", resourceCulture);
             }
@@ -162,7 +162,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Maximum length is {0}.
         /// </summary>
-        public static string MaxLength {
+        internal static string MaxLength {
             get {
                 return ResourceManager.GetString("MaxLength", resourceCulture);
             }
@@ -171,16 +171,43 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Minimum length is {0}.
         /// </summary>
-        public static string MinLength {
+        internal static string MinLength {
             get {
                 return ResourceManager.GetString("MinLength", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Limit Order Not Found.
+        /// </summary>
+        internal static string NoLimitOrder {
+            get {
+                return ResourceManager.GetString("NoLimitOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Limit History Not Found.
+        /// </summary>
+        internal static string NoLimitsHistory {
+            get {
+                return ResourceManager.GetString("NoLimitsHistory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Limit Trade History Not Found.
+        /// </summary>
+        internal static string NoLimitTradesHistory {
+            get {
+                return ResourceManager.GetString("NoLimitTradesHistory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} should not be empty.
         /// </summary>
-        public static string NotEmptyField {
+        internal static string NotEmptyField {
             get {
                 return ResourceManager.GetString("NotEmptyField", resourceCulture);
             }
@@ -189,7 +216,7 @@ namespace LykkeApi2.Strings {
         /// <summary>
         ///   Looks up a localized string similar to We are experiencing technical problems. Please try again..
         /// </summary>
-        public static string TechnicalProblems {
+        internal static string TechnicalProblems {
             get {
                 return ResourceManager.GetString("TechnicalProblems", resourceCulture);
             }
