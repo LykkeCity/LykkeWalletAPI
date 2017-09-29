@@ -43,7 +43,7 @@ namespace LykkeApi2.Controllers
             return Ok(clientBalances);
         }
 
-        [HttpGet("getClientBalanceByAssetId/{assetId}")]
+        [HttpGet("{assetId}")]
         [SwaggerOperation("GetClientBalanceByAssetId")]
         public async Task<IActionResult> GetClientBalnceByAssetId(string assetId)
         {
