@@ -6,7 +6,6 @@ namespace AzureRepositories.Exchange
 {
     public class MarketOrderEntity : TableEntity, IMarketOrder
     {
-
         public static class ByOrderId
         {
             public static string GeneratePartitionKey()

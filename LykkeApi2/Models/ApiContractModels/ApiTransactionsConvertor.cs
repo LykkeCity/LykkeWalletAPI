@@ -242,6 +242,7 @@ using Core.Exchange;
 using Lykke.Service.Assets.Client.Custom;
 using System;
 using System.Collections.Generic;
+using OrderAction = Core.Enumerators.OrderAction;
 
 namespace LykkeApi2.Models.ApiContractModels
 {
@@ -304,7 +305,7 @@ namespace LykkeApi2.Models.ApiContractModels
 
         public static ApiLimitTradeEvent ConvertToApiModel(this ILimitTradeEvent limitTradeEvent, IAssetPair assetPair, int accuracy)
         {
-            var isBuy = limitTradeEvent.OrderType == OrderType.Buy;
+            var isBuy = limitTradeEvent.OrderType == Core.Enumerators.OrderType.Buy;
 
             var rate = limitTradeEvent.Price.TruncateDecimalPlaces(assetPair.Accuracy, isBuy);
 
@@ -346,7 +347,34 @@ namespace LykkeApi2.Models.ApiContractModels
             };
         }
 
-        public static ApiMarketOrder ConvertToApiModel(this IMarketOrder marketOrder, IAssetPair assetPair, int accuracy)
+        public static ApiLimitOrder ConvertToApiModel(this Core.Exchange.LimitOrder limitOrder, IAssetPair assetPair, int accuracy)
+        {
+            var isBuy = limitOrder.OrderAction() == Core.Enumerators.OrderAction.Buy;
+
+            var rate = limitOrder.Price.TruncateDecimalPlaces(assetPair.Accuracy, isBuy);
+
+            var converted = (rate * limitOrder.Volume).TruncateDecimalPlaces(accuracy, isBuy);
+
+            var totalCost = limitOrder.OrderAction() == Core.Enumerators.OrderAction.Sell ? limitOrder.Volume : converted;
+            var volume = limitOrder.OrderAction() == Core.Enumerators.OrderAction.Sell ? converted : limitOrder.Volume;
+
+            return new ApiLimitOrder
+            {
+                Id = limitOrder.Id,
+                OrderType = limitOrder.OrderAction().ToString(),
+                AssetPair = assetPair.Id,
+                BaseAsset = limitOrder.Straight ? assetPair.BaseAssetId : assetPair.QuotingAssetId,
+                Volume = Math.Abs(volume),
+                RemainingVolume = Math.Abs(limitOrder.RemainingVolume),
+                TotalCost = Math.Abs(totalCost),
+                DateTime = limitOrder.CreatedAt.ToIsoDateTime(),
+                Accuracy = assetPair.Accuracy,
+                Price = rate,
+                OrderStatus = limitOrder.Status
+            };
+        }
+
+        private static ApiMarketOrder ConvertToApiModel(this IMarketOrder marketOrder, IAssetPair assetPair, int accuracy)
         {
             var rate =
                 (!marketOrder.Straight ? 1 / marketOrder.Price : marketOrder.Price).TruncateDecimalPlaces(
@@ -373,8 +401,28 @@ namespace LykkeApi2.Models.ApiContractModels
             };
         }
 
+        private static ApiTradeOperation ConvertToApiModel(this IClientTrade clientTrade, IAsset asset)
+        {
+            var isSettled = !string.IsNullOrEmpty(clientTrade.BlockChainHash); //ToDo: clientTrade.IsSettled
+            return new ApiTradeOperation
+            {
+                DateTime = clientTrade.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                Id = clientTrade.Id,
+                Asset = clientTrade.AssetId,
+                Volume = clientTrade.Amount.TruncateDecimalPlaces(asset.Accuracy),
+                IconId = asset.GetIcon(),
+                BlockChainHash = clientTrade.BlockChainHash ?? string.Empty,
+                AddressFrom = clientTrade.AddressFrom,
+                AddressTo = clientTrade.AddressTo,
+                IsSettled = isSettled,
+                State = clientTrade.State,
+                IsLimitTrade = clientTrade.IsLimitOrderResult,
+                OrderId = clientTrade.LimitOrderId
+            };
+        }
+
         public static ApiTradeOperation[] GetClientTrades(IClientTrade[] clientTrades, IDictionary<string, IAsset> assetsDict, IDictionary<string, IAssetPair> assetPairsDict,
-            IDictionary<string, IMarketOrder> marketOrdersDict)
+            IDictionary<string, MarketOrder> marketOrdersDict)
         {
             var apiClientTrades = new List<ApiTradeOperation>();
 
@@ -399,6 +447,26 @@ namespace LykkeApi2.Models.ApiContractModels
                         apiClientTrades.Add(itm.ConvertToApiModel(asset, marketOrder, assetPair));
                     }
                 }
+            }
+
+            return apiClientTrades.ToArray();
+        }
+
+        public static ApiTradeOperation[] GetLimitClientTrades(IClientTrade[] clientTrades, IDictionary<string, IAsset> assetsDict)
+        {
+            var apiClientTrades = new List<ApiTradeOperation>();
+
+            foreach (var itm in clientTrades)
+            {
+                if (!itm.IsLimitOrderResult)
+                    continue;
+
+                var asset = assetsDict[itm.AssetId];
+
+                if (asset == null)
+                    continue;
+
+                apiClientTrades.Add(itm.ConvertToApiModel(asset));
             }
 
             return apiClientTrades.ToArray();
