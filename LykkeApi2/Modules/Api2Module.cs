@@ -23,6 +23,7 @@ using LykkeApi2.Credentials;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using Lykke.Service.Registration;
 
 namespace LykkeApi2.Modules
 {

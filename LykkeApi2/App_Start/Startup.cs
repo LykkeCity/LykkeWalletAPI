@@ -70,6 +70,7 @@ namespace LykkeApi2.App_Start
             var log = CreateLogWithSlack(services, apiSettings);
 
             builder.RegisterModule(new Api2Module(apiSettings, log));
+            builder.RegisterModule(new AspNetCoreModule());
             builder.Populate(services);
             ApplicationContainer = builder.Build();
 
