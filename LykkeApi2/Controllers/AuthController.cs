@@ -1,15 +1,9 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using Common;
-using Core.Constants;
-using Lykke.Service.Registration;
+﻿using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Infrastructure;
-using LykkeApi2.Models;
 using LykkeApi2.Models.Auth;
-using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Rest.TransientFaultHandling;
+using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers
 {

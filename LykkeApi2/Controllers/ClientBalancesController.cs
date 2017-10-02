@@ -4,6 +4,7 @@ using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ClientBalancesModels;
 using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Strings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
 using System.Net;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [LowerVersion(Devices = "IPhone,IPad", LowerVersion = 181)]
     [LowerVersion(Devices = "android", LowerVersion = 659)]
     [Route("api/[controller]")]
@@ -33,7 +34,7 @@ namespace LykkeApi2.Controllers
         {
             var clientId = this.GetClientId();
 
-            var clientBalances = await _walletsClient.GetClientBalances("35302a53-cacb-4052-b5c0-57f9c819495b");
+            var clientBalances = await _walletsClient.GetClientBalances(clientId);
 
             if (clientBalances == null)
             {
@@ -52,7 +53,7 @@ namespace LykkeApi2.Controllers
             var clientBalanceResult = await _walletsClient.GetClientBalanceByAssetId(
                         new Lykke.Service.Wallets.Client.AutorestClient.Models.ClientBalanceByAssetIdModel()
                         {
-                            ClientId = "35302a53-cacb-4052-b5c0-57f9c819495b",
+                            ClientId = clientId,
                             AssetId = assetId
                         });
 
