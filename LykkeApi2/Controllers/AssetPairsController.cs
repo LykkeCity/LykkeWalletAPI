@@ -1,6 +1,5 @@
 ﻿using Common;
 using Common.Log;
-using Core.Enums;
 using Lykke.MarketProfileService.Client;
 using Lykke.Service.Assets.Client.Custom;
 using Lykke.Service.CandlesHistory.Client;
@@ -9,10 +8,7 @@ using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
 using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Models.ValidationModels;
-using LykkeApi2.Strings;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -30,9 +26,7 @@ namespace LykkeApi2.Controllers
         private readonly ICandleshistoryservice _candleHistoryService;
         private readonly ILog _log;
 
-        public AssetPairsController(CachedDataDictionary<string, IAssetPair> assetPairs, ICachedAssetsService assetsService, ILykkeMarketProfileServiceAPI marketProfile, ICandleshistoryservice candleHistoryService,  ILog log)
-        public AssetPairsController(CachedDataDictionary<string, IAssetPair> assetPairs,
-            ICachedAssetsService assetsService, ILykkeMarketProfileServiceAPI marketProfile,  ILog log)
+        public AssetPairsController(CachedDataDictionary<string, IAssetPair> assetPairs, ICachedAssetsService assetsService, ILykkeMarketProfileServiceAPI marketProfile, ICandleshistoryservice candleHistoryService, ILog log)
         {
             _assetPairs = assetPairs;
             _assetsService = assetsService;
@@ -52,7 +46,7 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> GetAssetPairById(string id)
         {
             var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == id);
-            if(assetPair == null)
+            if (assetPair == null)
             {
                 return NotFound(new ApiResponse(HttpStatusCode.NotFound, $"AssetPair {id} does not exist"));
             }
@@ -67,13 +61,13 @@ namespace LykkeApi2.Controllers
             string partnerId = null;
             var isIosDevice = this.IsIosDevice();
 
-            var assetPairs = await _assetsService.GetAssetsPairsForClient( new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel { ClientId = clientId, IsIosDevice = isIosDevice, PartnerId = partnerId } );
+            var assetPairs = await _assetsService.GetAssetsPairsForClient(new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel { ClientId = clientId, IsIosDevice = isIosDevice, PartnerId = partnerId });
 
             var assetPairsDict = assetPairs.ToDictionary(itm => itm.Id);
             var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
 
             marketProfile = marketProfile.Where(itm => assetPairsDict.ContainsKey(itm.AssetPair)).ToList();
-            return Ok(AssetPairRatesResponseModel.Create(marketProfile.Select(m=>m.ConvertToApiModel()).ToArray()));
+            return Ok(AssetPairRatesResponseModel.Create(marketProfile.Select(m => m.ConvertToApiModel()).ToArray()));
         }
 
         [HttpGet("rates/{assetPairId}")]
@@ -97,6 +91,6 @@ namespace LykkeApi2.Controllers
             return Ok(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel> { feedData.ConvertToApiModel() }));
         }
 
-        
+
     }
 }
