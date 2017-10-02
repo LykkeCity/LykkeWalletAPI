@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using LykkeApi2.Models.ValidationModels;
 
 namespace LykkeApi2.App_Start
 {
@@ -45,9 +46,11 @@ namespace LykkeApi2.App_Start
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc()
-                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
-                .AddFluentValidation()
+            services.AddMvc(options =>
+                {
+                    options.Filters.Add<ValidateModelAttribute>();
+                })                
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())                
                 .AddJsonOptions(options =>
                 {
                     options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
@@ -61,13 +64,12 @@ namespace LykkeApi2.App_Start
 
 
             var builder = new ContainerBuilder();
-            var apiSettings = settingsLocal ?? (Environment.IsDevelopment()
-                ? Configuration.Get<APIv2Settings>()
-                : HttpSettingsLoader.Load<APIv2Settings>(Configuration.GetValue<string>("apiv2SettingsUrl")));
+            var apiSettings = Configuration.LoadSettings<APIv2Settings>();
 
-            var log = CreateLogWithSlack(services, apiSettings);
+            var log = CreateLogWithSlack(services, apiSettings.CurrentValue.WalletApiv2, apiSettings.ConnectionString(x => x.WalletApiv2.Db.LogsConnString));
 
-            builder.RegisterModule(new Api2Module(apiSettings, log));
+            builder.RegisterModule(new Api2Module(apiSettings.Nested(x => x.WalletApiv2), log));
+            builder.RegisterModule(new ClientsModule(apiSettings.Nested(x => x.WalletApiv2.Services)));
             builder.RegisterModule(new AspNetCoreModule());
             builder.Populate(services);
             ApplicationContainer = builder.Build();
@@ -106,9 +108,8 @@ namespace LykkeApi2.App_Start
             ApplicationContainer.Dispose();
         }
 
-        private static ILog CreateLogWithSlack(IServiceCollection services, APIv2Settings settings)
-        {
-            var apiSettings = settings.WalletApiv2;
+        private static ILog CreateLogWithSlack(IServiceCollection services, BaseSettings apiSettings, IReloadingManager<string> dbLogConnectionStringManager)
+        {            
             var consoleLogger = new LogToConsole();
             var aggregateLogger = new AggregateLogger();
 
@@ -121,14 +122,13 @@ namespace LykkeApi2.App_Start
             //    QueueName = settings.SlackNotifications.AzureQueue.QueueName
             //}, aggregateLogger);
 
-            var dbLogConnectionString = apiSettings.Db.LogsConnString;
+            var dbLogConnectionString = dbLogConnectionStringManager.CurrentValue;
 
             // Creating azure storage logger, which logs own messages to concole log
             if (!string.IsNullOrEmpty(dbLogConnectionString) && !(dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}")))
             {
-                var persistenceManager = new LykkeLogToAzureStoragePersistenceManager(
-                    appName,
-                    AzureTableStorage<LogEntity>.Create(() => dbLogConnectionString, "LogApiv2", consoleLogger),
+                var persistenceManager = new LykkeLogToAzureStoragePersistenceManager(                    
+                    AzureTableStorage<LogEntity>.Create(dbLogConnectionStringManager, "LogApiv2", consoleLogger),
                     consoleLogger);
 
                 //var slackNotificationsManager = new LykkeLogToAzureSlackNotificationsManager(appName, slackService, consoleLogger);

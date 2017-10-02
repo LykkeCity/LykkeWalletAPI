@@ -6,6 +6,7 @@ using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
+using Lykke.SettingsReader;
 using Xunit;
 
 namespace Lykke.WalletApiv2.Tests.DITests
@@ -27,7 +28,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
             //settings.WalletApiv2.DeploymentSettings.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.DeploymentSettings, mockUrl));
 
             var containerBuilder = new ContainerBuilder();
-            containerBuilder.RegisterModule(new Api2Module(settings, _mockLog.Object));
+            containerBuilder.RegisterModule(new Api2Module(new SettingsServiceReloadingManager<BaseSettings>("http://52.232.122.203/rr5999apiv2999dvgsert25uwheifn_WalletApiv2"), _mockLog.Object));
             containerBuilder.RegisterType<AssetsController>();
             containerBuilder.RegisterType<AccountExistController>();
             containerBuilder.RegisterType<RegistrationController>();

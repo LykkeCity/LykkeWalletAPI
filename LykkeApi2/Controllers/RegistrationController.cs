@@ -1,9 +1,11 @@
-﻿using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
+using LykkeApi2.Models;
+﻿using Core.Settings;
 using LykkeApi2.Models.ClientAccountModels;
 using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Models.ValidationModels;

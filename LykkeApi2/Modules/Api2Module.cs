@@ -18,17 +18,18 @@ using LykkeApi2.Models.ApiContractModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
+using Lykke.SettingsReader;
 
 namespace LykkeApi2.Modules
 {
     public class Api2Module : Module
     {
-        private readonly APIv2Settings _settings;
+        private readonly IReloadingManager<BaseSettings> _settings;
         private readonly ILog _log;
         private readonly IServiceCollection _services;
         private TimeSpan DEFAULT_CACHE_EXPIRATION_PERIOD = TimeSpan.FromHours(1);
 
-        public Api2Module(APIv2Settings settings, ILog log)
+        public Api2Module(IReloadingManager<BaseSettings> settings, ILog log)
         {
             _settings = settings;
             _log = log;
@@ -40,27 +41,25 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_settings).SingleInstance();
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 
-            builder.RegisterOperationsRepositoryClients(_settings.WalletApiv2.Services.OperationsRepositoryClient.ServiceUrl, _log,
-                                                        _settings.WalletApiv2.Services.OperationsRepositoryClient.RequestTimeout);
+            builder.RegisterOperationsRepositoryClients(_settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, _log,
+                                                        _settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
 
-            builder.RegisterOperationsRepositoryClients(_settings.WalletApiv2.Services.OperationsRepositoryClient.ServiceUrl, _log,
-                                                        _settings.WalletApiv2.Services.OperationsRepositoryClient.RequestTimeout);
+            builder.RegisterOperationsRepositoryClients(_settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, _log,
+                                                        _settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
 
             builder.RegisterInstance<DeploymentSettings>(new DeploymentSettings());
-            builder.RegisterInstance(_settings.WalletApiv2.DeploymentSettings);
+            builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
 
-            _services.UseAssetsClient(AssetServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
-            _services.UseClientAccountService(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
-            _services.UseClientAccountClient(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD), _log);
+            _services.UseAssetsClient(AssetServiceSettings.Create(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
 
-            _services.AddSingleton<ILykkeRegistrationClient>(x => new LykkeRegistrationClient(_settings.WalletApiv2.Services.RegistrationUrl, _log));
+            _services.AddSingleton<ILykkeRegistrationClient>(x => new LykkeRegistrationClient(_settings.CurrentValue.Services.RegistrationUrl, _log));
 
-            _services.AddSingleton<IWalletsClient>(x => new WalletsClient(_settings.WalletApiv2.Services.WalletsServiceUrl, _log));
+            _services.AddSingleton<IWalletsClient>(x => new WalletsClient(_settings.CurrentValue.Services.WalletsServiceUrl, _log));
 
             _services.AddSingleton<ClientAccountLogic>();
 
-            _services.AddSingleton<ILykkeMarketProfileServiceAPI>(x => new LykkeMarketProfileServiceAPI(new Uri(_settings.WalletApiv2.Services.MarketProfileUrl)));
-            _services.AddSingleton<ICandleshistoryservice>(x => new Candleshistoryservice(new Uri(_settings.WalletApiv2.Services.CandleHistoryUrl)));
+            _services.AddSingleton<ILykkeMarketProfileServiceAPI>(x => new LykkeMarketProfileServiceAPI(new Uri(_settings.CurrentValue.Services.MarketProfileUrl)));
+            _services.AddSingleton<ICandleshistoryservice>(x => new Candleshistoryservice(new Uri(_settings.CurrentValue.Services.CandleHistoryUrl)));
 
             RegisterDictionaryEntities(builder);
             BindHistoryMappers(builder);
@@ -85,12 +84,12 @@ namespace LykkeApi2.Modules
             }).SingleInstance();
         }
 
-        private static void BindServices(ContainerBuilder builder, APIv2Settings settings, ILog log)
+        private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings, ILog log)
         {
-            builder.RegisterOperationsRepositoryClients(settings.WalletApiv2.Services.OperationsRepositoryClient.ServiceUrl, log,
-                                                        settings.WalletApiv2.Services.OperationsRepositoryClient.RequestTimeout);
+            builder.RegisterOperationsRepositoryClients(settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, log,
+                                                        settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
 
-            builder.RegisterOperationsHistoryClient(settings.WalletApiv2.Services.OperationsHistoryUrl, log);
+            builder.RegisterOperationsHistoryClient(settings.CurrentValue.Services.OperationsHistoryUrl, log);
         }
 
         private static void BindHistoryMappers(ContainerBuilder builder)
