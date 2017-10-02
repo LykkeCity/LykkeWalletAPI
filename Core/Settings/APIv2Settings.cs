@@ -41,6 +41,7 @@ namespace Core.Settings
         public OperationsRepositoryClient OperationsRepositoryClient { get; set; }
         public string MarketProfileUrl { get; set; }
         public string CandleHistoryUrl { get; set; }
+        public string OperationsHistoryUrl { get; set; }
     }
 
     public class OperationsRepositoryClient

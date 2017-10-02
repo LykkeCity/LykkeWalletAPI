@@ -1,8 +1,6 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AzureRepositories.CashOperations;
 using AzureRepositories.Email;
-using AzureRepositories.Exchange;
 using AzureRepositories.Repositories;
 using AzureStorage.Tables;
 using Common;
@@ -24,7 +22,6 @@ using LykkeApi2.Models.ApiContractModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
-using Lykke.Service.Registration;
 
 namespace LykkeApi2.Modules
 {
@@ -50,14 +47,6 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance<IVerifiedEmailsRepository>(new VerifiedEmailsRepository(
               new AzureTableStorage<VerifiedEmailEntity>(_settings.WalletApiv2.Db.ClientPersonalInfoConnString, "VerifiedEmails", _log)));
 
-            //--------------------------------------------
-            builder.RegisterInstance<ILimitTradeEventsRepository>(new LimitTradeEventsRepository(
-             new AzureTableStorage<LimitTradeEventEntity>(_settings.WalletApiv2.Db.ClientPersonalInfoConnString, "LimitTradeEvents", _log)));
-
-            builder.RegisterInstance<IMarketOrdersRepository>(new MarketOrdersRepository(
-            new AzureTableStorage<MarketOrderEntity>(_settings.WalletApiv2.Db.HMarketOrdersConnString, "MarketOrders", _log)));
-
-            //-------------------------------------------------------
             builder.RegisterOperationsRepositoryClients(_settings.WalletApiv2.Services.OperationsRepositoryClient.ServiceUrl, _log,
                                                         _settings.WalletApiv2.Services.OperationsRepositoryClient.RequestTimeout);
 

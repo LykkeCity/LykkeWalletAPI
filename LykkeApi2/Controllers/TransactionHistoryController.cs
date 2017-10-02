@@ -20,6 +20,7 @@ using Swashbuckle.SwaggerGen.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using CashInOutOperation = Core.CashOperations.CashInOutOperation;
 using ClientTrade = Core.CashOperations.ClientTrade;
@@ -312,7 +313,7 @@ namespace LykkeApi2.Controllers
             if (ordered.Count() > 0)
                 return Ok(ordered);
             else
-                return NotFound(new ApiResponse(ResponseStatusCode.NotFound, Phrases.NoLimitTradesHistory));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitTradesHistory));
         }
 
         [HttpGet("limit/history")]
@@ -380,7 +381,7 @@ namespace LykkeApi2.Controllers
             if (ordered.Count() > 0)
                 return Ok(ordered);
             else
-                return NotFound(new ApiResponse(ResponseStatusCode.NotFound, Phrases.NoLimitsHistory));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitsHistory));
         }
 
         [HttpGet("limit/order")]
@@ -397,12 +398,12 @@ namespace LykkeApi2.Controllers
 
             if (order == null)
             {
-                return NotFound(new ApiResponse(ResponseStatusCode.NotFound, Phrases.NoLimitOrder));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitOrder));
             }
 
             //var order = await _limitOrdersRepositoryClient.GetOrderAsync(orderId);
             if (order.ClientId != clientId)
-                return BadRequest(new ApiResponse(ResponseStatusCode.BadRequest, Phrases.InvalidValue));
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, Phrases.InvalidValue));
 
             var assetPair = await _assetPairs.GetItemAsync(order.AssetPairId);
 
@@ -423,7 +424,7 @@ namespace LykkeApi2.Controllers
             {
                 var firstMessage = response.Error.Messages.First();
                 var messageText = string.Concat(firstMessage.Value);
-                return NotFound(new ApiResponse(ResponseStatusCode.NotFound, messageText));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, messageText));
             }
 
             var mappedResult = response.Records
@@ -438,7 +439,7 @@ namespace LykkeApi2.Controllers
             if (orderedResult.Count() > 0)
                 return Ok(orderedResult);
             else
-                return NotFound(new ApiResponse(ResponseStatusCode.NotFound, Phrases.NoLimitsHistory));
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitsHistory));
         }
 
         #region HelperMethods
