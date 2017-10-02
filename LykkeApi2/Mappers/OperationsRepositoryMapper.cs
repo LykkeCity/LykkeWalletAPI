@@ -34,9 +34,6 @@ namespace LykkeApi2.Mappers
                         .ForMember(dest => dest.VolumeText, opt => opt.Ignore());
                     cfg.CreateMap<ClientTrade, Core.CashOperations.ClientTrade>();
                     cfg.CreateMap<TransferEvent, Core.CashOperations.TransferEvent>();
-                    cfg.CreateMap<LimitTradeEvent, Core.CashOperations.LimitTradeEvent>();
-                    cfg.CreateMap<LimitOrder, Core.Exchange.LimitOrder>();
-                    cfg.CreateMap<MarketOrder, Core.Exchange.MarketOrder>();
                 });
 
                 config.AssertConfigurationIsValid();
