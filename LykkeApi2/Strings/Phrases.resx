@@ -171,4 +171,7 @@
   <data name="NoLimitOrder" xml:space="preserve">
     <value>Limit Order Not Found</value>
   </data>
+  <data name="AssetNotFound" xml:space="preserve">
+    <value>Asset Not Found</value>
+  </data>
 </root>

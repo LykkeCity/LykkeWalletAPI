@@ -79,6 +79,15 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Asset Not Found.
+        /// </summary>
+        internal static string AssetNotFound {
+            get {
+                return ResourceManager.GetString("AssetNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Client Balance Not Found.
         /// </summary>
         internal static string ClientBalanceNotFound {

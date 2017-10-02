@@ -281,6 +281,48 @@ namespace LykkeApi2.Controllers
                 ));
         }
 
+        [HttpGet("limit/ordersAndTrades")]
+        [SwaggerOperation("GetLimitOrderAndTrades")]
+        public async Task<IActionResult> LimitOrderAndTrades([FromQuery] string orderId)
+        {
+            //var clientId = this.GetClientId();
+            var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
+
+            var order = OperationsRepositoryMapper.Instance.Map<LimitOrder>(
+                                    _limitOrdersRepositoryClient.GetOrderAsync(orderId).Result);
+
+            if (order == null)
+            {
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitOrder));
+            }
+
+           if (order.ClientId != clientId)
+                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, Phrases.InvalidValue));
+
+            var assetPair = await _assetPairs.GetItemAsync(order.AssetPairId);
+            var assets = await _assets.GetDictionaryAsync();
+            var asset = await _assets.GetItemAsync(assetPair.QuotingAssetId);
+
+            if (asset == null)
+            {
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.AssetNotFound));
+            }
+
+            var availableAssetIds = assets.Keys.ToArray();
+
+            var responseClientTrades = (await _clientTradesRepositoryClient.GetByOrderAsync(orderId))
+              .Where(itm => itm.ClientId == clientId && availableAssetIds.Contains(itm.AssetId) && itm.IsHidden.HasValue && !itm.IsHidden.Value)
+              .ToArray();
+
+            var clientTrades = OperationsRepositoryMapper.Instance.Map<IEnumerable<ClientTrade>>(responseClientTrades)
+                .Cast<IClientTrade>().ToArray();
+
+            var apiLimitClientTrades =
+                ApiTransactionsConvertor.GetLimitClientTrades(clientTrades, assets);
+
+            return Ok(order.ConvertToApiModel(assetPair, apiLimitClientTrades, asset.Accuracy));
+        }
+
         [HttpGet("limit/trades")]
         [SwaggerOperation("GetLimitTradesHistories")]
         public async Task<IActionResult> LimitTrades([FromQuery] string orderId)
@@ -290,7 +332,7 @@ namespace LykkeApi2.Controllers
             //var clientId = "35302a53-cacb-4052-b5c0-57f9c819495b"; //has wallets client id
 
             // gstanev 
-            var clientId = " 0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
+            var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
             var assets = await _assets.GetDictionaryAsync();
 
             var availableAssetIds = assets.Keys.ToArray();
@@ -392,7 +434,6 @@ namespace LykkeApi2.Controllers
 
             var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
 
-
             var order = OperationsRepositoryMapper.Instance.Map<LimitOrder>(
                                     _limitOrdersRepositoryClient.GetOrderAsync(orderId).Result);
 
@@ -401,7 +442,6 @@ namespace LykkeApi2.Controllers
                 return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitOrder));
             }
 
-            //var order = await _limitOrdersRepositoryClient.GetOrderAsync(orderId);
             if (order.ClientId != clientId)
                 return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, Phrases.InvalidValue));
 
@@ -414,10 +454,10 @@ namespace LykkeApi2.Controllers
 
         [HttpGet("client/get")]
         public async Task<IActionResult> Get(
-           [FromQuery] int top = 1000,
-           [FromQuery] int skip = 0,
-           [FromQuery] string operationType = null,
-           [FromQuery] string assetId = null)
+    [FromQuery] int top = 1000,
+    [FromQuery] int skip = 0,
+    [FromQuery] string operationType = null,
+    [FromQuery] string assetId = null)
         {
             var response = await RouteToServiceMethod(top, skip, operationType, assetId);
             if (response.Error != null)
