@@ -43,6 +43,9 @@ namespace LykkeApi2.Modules
             builder.RegisterOperationsRepositoryClients(_settings.WalletApiv2.Services.OperationsRepositoryClient.ServiceUrl, _log,
                                                         _settings.WalletApiv2.Services.OperationsRepositoryClient.RequestTimeout);
 
+            builder.RegisterOperationsRepositoryClients(_settings.WalletApiv2.Services.OperationsRepositoryClient.ServiceUrl, _log,
+                                                        _settings.WalletApiv2.Services.OperationsRepositoryClient.RequestTimeout);
+
             builder.RegisterInstance<DeploymentSettings>(new DeploymentSettings());
             builder.RegisterInstance(_settings.WalletApiv2.DeploymentSettings);
 
