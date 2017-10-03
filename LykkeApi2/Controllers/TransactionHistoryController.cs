@@ -95,7 +95,6 @@ namespace LykkeApi2.Controllers
             //Until we don't have Authorization functionality we could not use the logic for getting automatically client Id for authorized user
 
             var clientId = " 0701bdd3-c2d4-4d34-8750-a29e8e42df6c"; //this.GetClientId(); //no wallets client id
-
             //var clientId = "e9b10277-aa24-4fa2-90d6-9c6756d88f81"; //has wallets client id
 
             var clientTrades = new IClientTrade[0];
