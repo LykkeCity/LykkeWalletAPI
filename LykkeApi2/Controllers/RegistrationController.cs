@@ -1,5 +1,4 @@
-﻿using Core.Messages;
-using Lykke.Service.ClientAccount.Client;
+﻿using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
@@ -19,19 +18,15 @@ namespace LykkeApi2.Controllers
     [ValidateModel]
     public class RegistrationController : Controller
     {
-        private readonly IVerifiedEmailsRepository _verifiedEmailsRepository;
         private readonly IClientAccountClient _clientAccountClient;
         private readonly ILykkeRegistrationClient _lykkeRegistrationClient;
         private readonly ClientAccountLogic _clientAccountLogic;
 
         public RegistrationController(
-            IVerifiedEmailsRepository verifiedEmailsRepository,
             ClientAccountLogic clientAccountLogic,
             IClientAccountClient clientAccountClient,
-            ILykkeRegistrationClient lykkeRegistrationClient
-                        )
+            ILykkeRegistrationClient lykkeRegistrationClient)
         {
-            _verifiedEmailsRepository = verifiedEmailsRepository;
             _lykkeRegistrationClient = lykkeRegistrationClient;
             _clientAccountClient = clientAccountClient;
             _clientAccountLogic = clientAccountLogic;

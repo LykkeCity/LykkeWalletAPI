@@ -1,5 +1,4 @@
 ﻿using Core.Constants;
-using Core.Messages;
 using Core.Settings;
 using FluentValidation;
 using Lykke.Service.ClientAccount.Client;
@@ -12,18 +11,15 @@ namespace LykkeApi2.Models.ValidationModels.RegistrationValidations
 {
     public class RegistrationValidationModel : AbstractValidator<AccountRegistrationModel>
     {
-        private readonly IVerifiedEmailsRepository _verifiedEmailsRepository;
         private readonly IClientAccountClient _clientAccountClient;
         private readonly DeploymentSettings _deploymentSettings;
         private readonly ClientAccountLogic _clientAccountLogic;
 
         public RegistrationValidationModel(
-            IVerifiedEmailsRepository verifiedEmailsRepository,
             IClientAccountClient clientAccountClient,
             DeploymentSettings deploymentSettings,
             ClientAccountLogic clientAccountLogic)
         {
-            _verifiedEmailsRepository = verifiedEmailsRepository;
             _clientAccountClient = clientAccountClient;
             _deploymentSettings = deploymentSettings;
             _clientAccountLogic = clientAccountLogic;
