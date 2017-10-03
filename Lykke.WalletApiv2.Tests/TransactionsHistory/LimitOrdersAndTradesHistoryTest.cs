@@ -52,5 +52,39 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
             Assert.NotNull(result);
             Assert.IsType<OkObjectResult>(result);
         }
+
+        [Fact]
+        public async Task GetLimitTradesHistory_ReturnsOk()
+        {
+            var logs = new Mock<ILog>();
+
+            var tradeOperationsRepositoryClient = new Mock<ITradeOperationsRepositoryClient>();
+            var transferOperationsRepositoryClient = new Mock<ITransferOperationsRepositoryClient>();
+            var cashOperationsRepositoryClient = new Mock<ICashOperationsRepositoryClient>();
+            var cashOutAttemptOperationsRepositoryClient = new Mock<ICashOutAttemptOperationsRepositoryClient>();
+            var limitTradeEventsRepositoryClient = new Mock<ILimitTradeEventsRepositoryClient>();
+            var limitOrdersRepositoryClient = new Mock<ILimitOrdersRepositoryClient>();
+            var marketOrdersRepositoryClient = new Mock<IMarketOrdersRepositoryClient>();
+
+            var walletsClient = new Mock<IWalletsClient>();
+            var operationsHistoryClient = new Mock<IOperationsHistoryClient>();
+            var historyOperationMapper = new Mock<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
+
+            tradeOperationsRepositoryClient.Setup(x => x.GetByOrderAsync(It.IsAny<string>()))
+                .Returns(CreateMockedResponseForTransactionsHistory.GetClientTrades());
+
+            _controller = new TransactionHistoryController(logs.Object, tradeOperationsRepositoryClient.Object,
+               transferOperationsRepositoryClient.Object, cashOperationsRepositoryClient.Object, cashOutAttemptOperationsRepositoryClient.Object,
+               limitTradeEventsRepositoryClient.Object, limitOrdersRepositoryClient.Object, marketOrdersRepositoryClient.Object,
+               walletsClient.Object, operationsHistoryClient.Object, historyOperationMapper.Object, new CachedDataDictionary<string, IAssetPair>(
+                  async () => (await CreateMockedResponseForTransactionsHistory.GetAssetPairs()).ToDictionary(itm => itm.Id)),
+              new CachedDataDictionary<string, IAsset>(
+                  async () => (await CreateMockedResponseForTransactionsHistory.GetAssets()).ToDictionary(itm => itm.Id)));
+
+            var result = await _controller.LimitTrades("29a16081-2f1c-44d6-8dd3-72fa871f4bc7");
+
+            Assert.NotNull(result);
+            Assert.IsType<OkObjectResult>(result);
+        }
     }
 }

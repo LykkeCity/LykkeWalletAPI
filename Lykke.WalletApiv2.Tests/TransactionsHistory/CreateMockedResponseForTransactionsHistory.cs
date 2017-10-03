@@ -59,6 +59,19 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
             return Task.FromResult(trades.AsEnumerable());
         }
 
+        public static Task<IEnumerable<ClientTrade>> GetClientTrades()
+        {
+            List<ClientTrade> trades = new List<ClientTrade>();
+            trades.Add(new ClientTrade()
+            {
+                LimitOrderId = "29a16081-2f1c-44d6-8dd3-72fa871f4bc7",
+                IsLimitOrderResult = true,
+                AssetId = "USD",
+                IsHidden = false,
+                ClientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c"
+            });
+            return Task.FromResult(trades.AsEnumerable());
+        }
 
         public static Task<IEnumerable<Service.Assets.Client.Custom.IAsset>> GetAssets()
         {
