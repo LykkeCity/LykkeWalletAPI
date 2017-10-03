@@ -108,9 +108,6 @@ namespace LykkeApi2.Controllers
             var assets = await _assets.GetDictionaryAsync();
             var assetPairs = await _assetPairs.GetDictionaryAsync();
 
-
-            /*_walletCredentialsRepository.GetAllClientMultisigs(_walletCredentialsHistoryRepository, clientId);*/
-
             var walletsCredentials = (await _walletsClient.GetWalletCredential(clientId));
             var walletsCredentialsHistory = (await _walletsClient.GetWalletCredentialHistory(clientId));
 
@@ -181,9 +178,6 @@ namespace LykkeApi2.Controllers
                                     .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
                                     .ToArray();
                             })
-                    //_limitTradeEventsRepository.GetEventsAsync(clientId)
-                    //   .ContinueWith(
-                    //       task => limitTradeEvents = task.Result.Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden).ToArray())
                     );
             }
             else
@@ -246,10 +240,6 @@ namespace LykkeApi2.Controllers
                             })
 
                          );
-                //_limitTradeEventsRepository.GetEventsAsync(clientId)
-                //    .ContinueWith(
-                //        task => limitTradeEvents = task.Result.Where(itm => itm.AssetId == assetId && !itm.IsHidden).ToArray())
-                //);
             }
 
             if (clientTrades.Count() > 0)
@@ -259,13 +249,11 @@ namespace LykkeApi2.Controllers
                                                                                                  .Select(x => x.MarketOrderId)
                                                                                                  .Distinct()
                                                                                                  .ToArray()).Result);
-
-                marketOrders = marketOrdersResult.GroupBy(x => x.Id).Select(x => x.First()).ToDictionary(x => x.Id);
+                if (marketOrdersResult != null && marketOrdersResult.Count() > 0)
+                {
+                    marketOrders = marketOrdersResult.GroupBy(x => x.Id).Select(x => x.First()).ToDictionary(x => x.Id);
+                }
             }
-
-            //var marketOrders = (await _marketOrdersRepository.GetOrdersAsync(clientTrades.Where(x => x.IsLim.ToDictionary(x => x.Id);itOrderResult)
-            //                            .Select(x => x.MarketOrderId).Distinct()))
-            //                            .GroupBy(x => x.Id).Select(x => x.First()).ToDictionary(x => x.Id);
 
             var apiClientTrades = ApiTransactionsConvertor.GetClientTrades(clientTrades, assets, assetPairs, marketOrders);
 
@@ -300,6 +288,12 @@ namespace LykkeApi2.Controllers
                 return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, Phrases.InvalidValue));
 
             var assetPair = await _assetPairs.GetItemAsync(order.AssetPairId);
+
+            if (assetPair == null)
+            {
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.AssetPairNotFound));
+            }
+
             var assets = await _assets.GetDictionaryAsync();
             var asset = await _assets.GetItemAsync(assetPair.QuotingAssetId);
 
@@ -331,7 +325,6 @@ namespace LykkeApi2.Controllers
 
             //var clientId = "35302a53-cacb-4052-b5c0-57f9c819495b"; //has wallets client id
 
-            // gstanev 
             var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
             var assets = await _assets.GetDictionaryAsync();
 
@@ -364,7 +357,7 @@ namespace LykkeApi2.Controllers
         {
             //var clientId = this.GetClientId();
 
-            var clientId = " 0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
+            var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
             //var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c"; //has orederId = 83f763fc-c269-42dd-8861-3bdb5591e450
 
             var assets = await _assets.GetDictionaryAsync();
@@ -397,12 +390,7 @@ namespace LykkeApi2.Controllers
                                     .Where(itm => itm.ClientId == clientId && availableAssetIds.Contains(itm.AssetId) && !itm.IsHidden)
                                     .ToArray();
                             })
-
-            //_limitTradeEventsRepository.GetEventsAsync(clientId, orderId)
-            //    .ContinueWith(
-            //        task => limitEvents = task.Result
-            //            .Where(itm => itm.ClientId == clientId && availableAssetIds.Contains(itm.AssetId) && !itm.IsHidden).ToArray())
-            );
+                      );
 
             var result = new List<TransactionHistoryResponseModel>();
 
@@ -447,17 +435,24 @@ namespace LykkeApi2.Controllers
 
             var assetPair = await _assetPairs.GetItemAsync(order.AssetPairId);
 
+            if (assetPair == null)
+            {
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.AssetPairNotFound));
+            }
+
             var asset = await _assets.GetItemAsync(assetPair.QuotingAssetId);
+
+            if (asset == null)
+            {
+                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.AssetNotFound));
+            }
 
             return Ok(order.ConvertToApiModel(assetPair, asset.Accuracy));
         }
 
         [HttpGet("client/get")]
-        public async Task<IActionResult> Get(
-    [FromQuery] int top = 1000,
-    [FromQuery] int skip = 0,
-    [FromQuery] string operationType = null,
-    [FromQuery] string assetId = null)
+        public async Task<IActionResult> Get([FromQuery] int top = 1000, [FromQuery] int skip = 0,
+                                             [FromQuery] string operationType = null, [FromQuery] string assetId = null)
         {
             var response = await RouteToServiceMethod(top, skip, operationType, assetId);
             if (response.Error != null)

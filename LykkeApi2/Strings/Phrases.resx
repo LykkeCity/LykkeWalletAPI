@@ -174,4 +174,7 @@
   <data name="AssetNotFound" xml:space="preserve">
     <value>Asset Not Found</value>
   </data>
+  <data name="AssetPairNotFound" xml:space="preserve">
+    <value>Asset Pair Not Found</value>
+  </data>
 </root>

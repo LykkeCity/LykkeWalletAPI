@@ -43,14 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Strings\Phrases.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Phrases.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Dockerfile">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -58,8 +50,7 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Strings\Phrases.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Phrases.Designer.cs</LastGenOutput>
+      <Generator></Generator>
     </EmbeddedResource>
   </ItemGroup>
 
