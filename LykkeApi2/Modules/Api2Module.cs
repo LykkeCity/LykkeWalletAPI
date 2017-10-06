@@ -17,6 +17,7 @@ using LykkeApi2.Mappers;
 using LykkeApi2.Models.ApiContractModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Lykke.Service.RateCalculator.Client;
 using System.Linq;
 using Lykke.SettingsReader;
 
@@ -46,6 +47,8 @@ namespace LykkeApi2.Modules
 
             builder.RegisterOperationsRepositoryClients(_settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, _log,
                                                         _settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
+
+            builder.RegisterRateCalculatorClient(_settings.CurrentValue.Services.RateCalculatorServiceApiUrl, _log);
 
             builder.RegisterInstance<DeploymentSettings>(new DeploymentSettings());
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);

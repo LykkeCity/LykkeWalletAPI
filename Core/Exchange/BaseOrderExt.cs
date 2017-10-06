@@ -21,12 +21,5 @@ namespace Core.Exchange
 
             return null;
         }
-
-        public static OrderAction ViceVersa(this OrderAction orderAction)
-        {
-            if (orderAction == Enumerators.OrderAction.Buy)
-                return Enumerators.OrderAction.Sell;
-            return Enumerators.OrderAction.Buy;
-        }
     }
 }
