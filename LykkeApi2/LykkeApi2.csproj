@@ -15,6 +15,7 @@
     <PackageReference Include="Lykke.Logs" Version="1.0.33" />
     <PackageReference Include="Lykke.Service.Assets.Client" Version="1.0.1-beta" />
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.10" />
+    <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.11" />
     <PackageReference Include="Lykke.Service.Registration" Version="1.0.30" />
     <PackageReference Include="Lykke.SettingsReader" Version="1.0.38" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="1.0.4" />
