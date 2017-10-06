@@ -4,7 +4,6 @@ using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ClientBalancesModels;
 using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Strings;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
 using System.Net;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [LowerVersion(Devices = "IPhone,IPad", LowerVersion = 181)]
     [LowerVersion(Devices = "android", LowerVersion = 659)]
     [Route("api/[controller]")]
@@ -32,7 +31,8 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetClientBalances")]
         public async Task<IActionResult> Get()
         {
-            var clientId = this.GetClientId();
+            //var clientId = this.GetClientId();
+            var clientId = "e9b10277-aa24-4fa2-90d6-9c6756d88f81"; //has wallets client id
 
             var clientBalances = await _walletsClient.GetClientBalances(clientId);
 

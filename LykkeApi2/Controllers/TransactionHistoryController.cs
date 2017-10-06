@@ -94,8 +94,10 @@ namespace LykkeApi2.Controllers
         {
             //Until we don't have Authorization functionality we could not use the logic for getting automatically client Id for authorized user
 
-            var clientId = " 0701bdd3-c2d4-4d34-8750-a29e8e42df6c"; //this.GetClientId(); //no wallets client id
+            //var clientId = " 0701bdd3-c2d4-4d34-8750-a29e8e42df6c"; //this.GetClientId(); //no wallets client id
             //var clientId = "e9b10277-aa24-4fa2-90d6-9c6756d88f81"; //has wallets client id
+
+            var clientId = "0044f62c-7e0c-472e-ba26-06204e54d7f9"; //dafiTest@mail.com account
 
             var clientTrades = new IClientTrade[0];
             var cashOperations = new ICashInOutOperation[0];
@@ -241,13 +243,13 @@ namespace LykkeApi2.Controllers
                          );
             }
 
-            if (clientTrades.Count() > 0)
+            if (clientTrades.Count() > 0 && !clientTrades.Any(x => string.IsNullOrEmpty(x.MarketOrderId)))
             {
                 var marketOrdersResult = OperationsRepositoryMapper.Instance.Map<IEnumerable<MarketOrder>>(
-                                                    _marketOrdersRepositoryClient.GetOrdersAsync(clientTrades.Where(x => !x.IsLimitOrderResult)
-                                                                                                 .Select(x => x.MarketOrderId)
-                                                                                                 .Distinct()
-                                                                                                 .ToArray()).Result);
+                                      _marketOrdersRepositoryClient.GetOrdersAsync(clientTrades.Where(x => !x.IsLimitOrderResult)
+                                                                                               .Select(x => x.MarketOrderId)
+                                                                                               .Distinct()
+                                                                                               .ToArray()).Result);
                 if (marketOrdersResult != null && marketOrdersResult.Count() > 0)
                 {
                     marketOrders = marketOrdersResult.GroupBy(x => x.Id).Select(x => x.First()).ToDictionary(x => x.Id);
@@ -273,7 +275,7 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> LimitOrderAndTrades([FromQuery] string orderId)
         {
             //var clientId = this.GetClientId();
-            var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
+            var clientId = "0044f62c-7e0c-472e-ba26-06204e54d7f9";
 
             var order = OperationsRepositoryMapper.Instance.Map<LimitOrder>(
                                     _limitOrdersRepositoryClient.GetOrderAsync(orderId).Result);
@@ -324,7 +326,7 @@ namespace LykkeApi2.Controllers
 
             //var clientId = "35302a53-cacb-4052-b5c0-57f9c819495b"; //has wallets client id
 
-            var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
+            var clientId = "0044f62c-7e0c-472e-ba26-06204e54d7f9";
             var assets = await _assets.GetDictionaryAsync();
 
             var availableAssetIds = assets.Keys.ToArray();
@@ -356,7 +358,7 @@ namespace LykkeApi2.Controllers
         {
             //var clientId = this.GetClientId();
 
-            var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
+            var clientId = "0044f62c-7e0c-472e-ba26-06204e54d7f9";
             //var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c"; //has orederId = 83f763fc-c269-42dd-8861-3bdb5591e450
 
             var assets = await _assets.GetDictionaryAsync();
@@ -419,7 +421,9 @@ namespace LykkeApi2.Controllers
         {
             //var clientId = this.GetClientId();
 
-            var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
+            //var clientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c";
+
+            var clientId = "0044f62c-7e0c-472e-ba26-06204e54d7f9";
 
             var order = OperationsRepositoryMapper.Instance.Map<LimitOrder>(
                                     _limitOrdersRepositoryClient.GetOrderAsync(orderId).Result);
