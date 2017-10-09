@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.8
+VisualStudioVersion = 15.0.26730.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LykkeApi2", "LykkeApi2\LykkeApi2.csproj", "{FBB79E85-5D98-4294-8704-957CF738E738}"
 EndProject
@@ -13,11 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Tests", "2. Tests", "{F9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.WalletApiv2.Tests", "Lykke.WalletApiv2.Tests\Lykke.WalletApiv2.Tests.csproj", "{EEC9EE2E-28A2-434F-8D37-A87F241367D8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Repositories", "3. Repositories", "{6CE87381-2B88-4759-BDCD-FCC141673160}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureRepositories", "AzureRepositories\AzureRepositories.csproj", "{578B1BB6-3895-4F02-8EA1-94B269976080}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LkeServices", "LkeServices\LkeServices.csproj", "{F013FA52-4048-463C-A931-20C386ECCFA5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LkeServices", "LkeServices\LkeServices.csproj", "{F013FA52-4048-463C-A931-20C386ECCFA5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +33,6 @@ Global
 		{EEC9EE2E-28A2-434F-8D37-A87F241367D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEC9EE2E-28A2-434F-8D37-A87F241367D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEC9EE2E-28A2-434F-8D37-A87F241367D8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{578B1BB6-3895-4F02-8EA1-94B269976080}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{578B1BB6-3895-4F02-8EA1-94B269976080}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{578B1BB6-3895-4F02-8EA1-94B269976080}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{578B1BB6-3895-4F02-8EA1-94B269976080}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -52,7 +44,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{B6ADDBDB-541F-49C5-B96E-3C0968E9D4B4} = {7E25EA3D-F2C3-466A-8300-49CA73CB4432}
 		{EEC9EE2E-28A2-434F-8D37-A87F241367D8} = {F92247DB-2265-43BB-9F04-BD94A4C8EF06}
-		{578B1BB6-3895-4F02-8EA1-94B269976080} = {6CE87381-2B88-4759-BDCD-FCC141673160}
 		{F013FA52-4048-463C-A931-20C386ECCFA5} = {7E25EA3D-F2C3-466A-8300-49CA73CB4432}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

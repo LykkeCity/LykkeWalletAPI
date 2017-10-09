@@ -1,12 +1,9 @@
 ﻿using Common;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.Models;
 using LykkeApi2.Models;
-using LykkeApi2.Models.ClientAccountModels;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers

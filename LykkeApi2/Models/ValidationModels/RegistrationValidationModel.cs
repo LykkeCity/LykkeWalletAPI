@@ -1,6 +1,6 @@
-﻿using Core.Messages;
-using FluentValidation;
-using Lykke.Service.ClientAccount.Client;
+﻿using FluentValidation;
+using Lykke.Service.ClientAccount.Client.AutorestClient;
+using Lykke.Service.ClientAccount.Client.AutorestClient.Models;
 using LykkeApi2.Models.ClientAccountModels;
 using LykkeApi2.Models.ValidationModels.RegistrationValidations;
 using LykkeApi2.Strings;
@@ -8,17 +8,13 @@ using LykkeApi2.Strings;
 namespace LykkeApi2.Models.ValidationModels
 {
     public class RegistrationValidationModel : AbstractValidator<AccountRegistrationModel>
-    {
-        private readonly IVerifiedEmailsRepository _verifiedEmailsRepository;
-        private readonly IClientAccountClient _clientAccountClient;
-
-        public RegistrationValidationModel(
-            IVerifiedEmailsRepository verifiedEmailsRepository,
-            IClientAccountClient clientAccountClient)
-        {
-            _verifiedEmailsRepository = verifiedEmailsRepository;
-            _clientAccountClient = clientAccountClient;
-
+    {        
+        private readonly IClientAccountService _clientAccountService;
+        
+        public RegistrationValidationModel(IClientAccountService clientAccountService)
+        {            
+            _clientAccountService = clientAccountService;
+            
             RuleFor(reg => reg.Email).NotNull();
             RuleFor(reg => reg.Hint).ValidHintVlue();
             RuleFor(reg => reg.Email).Must(IsEmaiVerified).WithMessage(Phrases.EmailNotVerified);
@@ -27,8 +23,8 @@ namespace LykkeApi2.Models.ValidationModels
         }
 
         private bool IsEmaiVerified(AccountRegistrationModel instance, string value)
-        {
-            return _verifiedEmailsRepository.IsEmailVerified(instance.Email, instance.PartnerId).Result;
+        {            
+            return _clientAccountService.ApiIsEmailVerifiedPost(new IsVerifiedEmailModel(instance.Email, instance.PartnerId)) ?? false;
         }
 
         //private bool IsTraderWithEmailExistsForPartner(AccountRegistrationModel instance, string foo)

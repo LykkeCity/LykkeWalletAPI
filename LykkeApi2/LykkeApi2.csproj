@@ -9,18 +9,25 @@
     <PackageReference Include="Autofac" Version="4.6.1" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="7.1.1" />
-    <PackageReference Include="Lykke.AzureStorage" Version="1.2.36" />
-    <PackageReference Include="Lykke.Common" Version="1.1.95" />
-    <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.0.11" />
-    <PackageReference Include="Lykke.Logs" Version="1.0.33" />
-    <PackageReference Include="Lykke.Service.Assets.Client" Version="1.0.1-beta" />
-    <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.10" />
+    <PackageReference Include="Lykke.AzureStorage" Version="2.0.1" />
+    <PackageReference Include="Lykke.Common" Version="1.1.100" />
+    <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.0.13" />
+    <PackageReference Include="Lykke.Logs" Version="3.1.1" />
+    <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.15" />
+    <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="1.0.12" />
+    <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.14-beta" />
+    <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="1.0.7" />
+    <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.7-beta" />
+    <PackageReference Include="Lykke.Service.HftInternalService.Client" Version="1.0.2-beta" />
+    <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.11" />
     <PackageReference Include="Lykke.Service.Registration" Version="1.0.30" />
-    <PackageReference Include="Lykke.SettingsReader" Version="1.0.38" />
+    <PackageReference Include="Lykke.Service.Wallets.Client" Version="1.0.4-beta" />
+    <PackageReference Include="Lykke.SettingsReader" Version="1.0.41" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="1.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.SwaggerGen" Version="6.0.0-beta902" />
     <PackageReference Include="Swashbuckle.SwaggerUi" Version="6.0.0-beta902" />
+	<PackageReference Include="Lykke.Service.Assets.Client" Version="1.0.6-beta" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,17 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\AzureRepositories\AzureRepositories.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\LkeServices\LkeServices.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Strings\Phrases.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Phrases.resx</DependentUpon>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
@@ -49,8 +47,7 @@
 
   <ItemGroup>
     <EmbeddedResource Update="Strings\Phrases.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Phrases.Designer.cs</LastGenOutput>
+      <Generator></Generator>
     </EmbeddedResource>
   </ItemGroup>
 

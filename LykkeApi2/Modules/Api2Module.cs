@@ -1,30 +1,36 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AzureRepositories.Email;
-using AzureRepositories.Repositories;
-using AzureStorage;
-using AzureStorage.Tables;
-using Common.IocContainer;
+using Common;
 using Common.Log;
-using Core.Messages;
+using Core.Mappers;
 using Core.Settings;
-using FluentValidation.AspNetCore;
+using Lykke.MarketProfileService.Client;
 using Lykke.Service.Assets.Client.Custom;
+using Lykke.Service.CandlesHistory.Client;
 using Lykke.Service.ClientAccount.Client.Custom;
-using LykkeApi2.App_Start;
+using Lykke.Service.OperationsHistory.Client;
+using Lykke.Service.OperationsRepository.Client;
+using Lykke.Service.Registration;
+using Lykke.Service.Wallets.Client;
+using LykkeApi2.Credentials;
+using LykkeApi2.Mappers;
+using LykkeApi2.Models.ApiContractModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Lykke.Service.RateCalculator.Client;
+using System.Linq;
+using Lykke.SettingsReader;
 
 namespace LykkeApi2.Modules
 {
     public class Api2Module : Module
     {
-        private readonly APIv2Settings _settings;
+        private readonly IReloadingManager<BaseSettings> _settings;
         private readonly ILog _log;
         private readonly IServiceCollection _services;
         private TimeSpan DEFAULT_CACHE_EXPIRATION_PERIOD = TimeSpan.FromHours(1);
 
-        public Api2Module(APIv2Settings settings, ILog log)
+        public Api2Module(IReloadingManager<BaseSettings> settings, ILog log)
         {
             _settings = settings;
             _log = log;
@@ -36,21 +42,65 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_settings).SingleInstance();
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 
-            builder.RegisterInstance<IVerifiedEmailsRepository>(new VerifiedEmailsRepository(
-              new AzureTableStorage<VerifiedEmailEntity>(_settings.WalletApiv2.Db.ClientPersonalInfoConnString, "VerifiedEmails", _log)));
+            builder.RegisterOperationsRepositoryClients(_settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, _log,
+                                                        _settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
+
+            builder.RegisterOperationsRepositoryClients(_settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, _log,
+                                                        _settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
+
+            builder.RegisterRateCalculatorClient(_settings.CurrentValue.Services.RateCalculatorServiceApiUrl, _log);
 
             builder.RegisterInstance<DeploymentSettings>(new DeploymentSettings());
+            builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
 
-            _services.UseAssetsClient(AssetServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
-            _services.UseClientAccountService(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
-            _services.UseClientAccountClient(ClientAccountServiceSettings.Create(new Uri(_settings.WalletApiv2.Services.ClientAccountServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD), _log);
-            
-            //_services.AddSingleton<IVerifiedEmailsRepository>(new VerifiedEmailsRepository(
-            //    new AzureTableStorage<VerifiedEmailEntity>(dbSettings.ClientPersonalInfoConnString, "VerifiedEmails", log)));
+            _services.UseAssetsClient(AssetServiceSettings.Create(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
 
-            //_services.AddSingleton<I>(x => new ClientAccountClient(_settings.WalletApiv2.Services.ClientAccountServiceUrl, _log));
+            _services.AddSingleton<ILykkeRegistrationClient>(x => new LykkeRegistrationClient(_settings.CurrentValue.Services.RegistrationUrl, _log));
 
+            _services.AddSingleton<IWalletsClient>(x => new WalletsClient(_settings.CurrentValue.Services.WalletsServiceUrl, _log));
+
+            _services.AddSingleton<ClientAccountLogic>();
+
+            _services.AddSingleton<ILykkeMarketProfileServiceAPI>(x => new LykkeMarketProfileServiceAPI(new Uri(_settings.CurrentValue.Services.MarketProfileUrl)));
+            _services.AddSingleton<ICandleshistoryservice>(x => new Candleshistoryservice(new Uri(_settings.CurrentValue.Services.CandleHistoryUrl)));
+
+            RegisterDictionaryEntities(builder);
+            BindHistoryMappers(builder);
+            BindServices(builder, _settings, _log);
             builder.Populate(_services);
+        }
+
+        private void RegisterDictionaryEntities(ContainerBuilder builder)
+        {
+            builder.Register(c =>
+            {
+                var ctx = c.Resolve<IComponentContext>();
+                return new CachedDataDictionary<string, IAsset>(
+                   async () => (await ctx.Resolve<ICachedAssetsService>().GetAllAssetsAsync()).ToDictionary(itm => itm.Id));
+            }).SingleInstance();
+
+            builder.Register(c =>
+            {
+                var ctx = c.Resolve<IComponentContext>();
+                return new CachedDataDictionary<string, IAssetPair>(
+                   async () => (await ctx.Resolve<ICachedAssetsService>().GetAllAssetPairsAsync()).ToDictionary(itm => itm.Id));
+            }).SingleInstance();
+        }
+
+        private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings, ILog log)
+        {
+            builder.RegisterOperationsRepositoryClients(settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, log,
+                                                        settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
+
+            builder.RegisterOperationsHistoryClient(settings.CurrentValue.Services.OperationsHistoryUrl, log);
+        }
+
+        private static void BindHistoryMappers(ContainerBuilder builder)
+        {
+            var historyMapProvider = new HistoryOperationMapProvider();
+            var historyMapper = new HistoryOperationMapper<object, ApiBalanceChangeModel, ApiCashOutAttempt, ApiTradeOperation, ApiTransfer>(historyMapProvider);
+
+            builder.RegisterInstance(historyMapper).As<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
         }
     }
 }
