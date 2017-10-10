@@ -79,6 +79,7 @@ namespace LykkeApi2.Controllers
 
         [HttpGet]
         [SwaggerOperation("GetTransactionHistories")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> Get([FromQuery] string assetId)
         {
             //Until we don't have Authorization functionality we could not use the logic for getting automatically client Id for authorized user
@@ -258,6 +259,7 @@ namespace LykkeApi2.Controllers
 
         [HttpGet("limit/ordersAndTrades")]
         [SwaggerOperation("GetLimitOrderAndTrades")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> LimitOrderAndTrades([FromQuery] string orderId)
         {
             //var clientId = this.GetClientId();
@@ -308,6 +310,7 @@ namespace LykkeApi2.Controllers
 
         [HttpGet("limit/trades")]
         [SwaggerOperation("GetLimitTradesHistories")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> LimitTrades([FromQuery] string orderId)
         {
             //var clientId = this.GetClientId(); //not used untill authorization functionality
@@ -344,6 +347,7 @@ namespace LykkeApi2.Controllers
 
         [HttpGet("limit/history")]
         [SwaggerOperation("GetLimitHistory")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> LimitHistory([FromQuery] string orderId)
         {
             //var clientId = this.GetClientId();
@@ -409,6 +413,7 @@ namespace LykkeApi2.Controllers
 
         [HttpGet("limit/order")]
         [SwaggerOperation("GetLimitOrderHistories")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> LimitOrder([FromQuery] string orderId)
         {
             //var clientId = this.GetClientId();
@@ -446,6 +451,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("client/get")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> Get([FromQuery] int top = 1000, [FromQuery] int skip = 0,
             [FromQuery] string operationType = null, [FromQuery] string assetId = null)
         {

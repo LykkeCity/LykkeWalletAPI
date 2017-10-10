@@ -37,6 +37,7 @@ namespace LykkeApi2.Controllers
         /// <param name="fromMoment">From moment in ISO 8601 (inclusive)</param>
         /// <param name="toMoment">To moment in ISO 8601 (exclusive)</param>
         [HttpGet("{AssetPairId}/{PriceType}/{TimeInterval}/{FromMoment:datetime}/{ToMoment:datetime}")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> Get([FromRoute]CandleSticksRequestModel request) 
         {
             try

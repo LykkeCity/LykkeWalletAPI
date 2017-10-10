@@ -20,6 +20,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> Get()
         {
             var assets = (await _assetsService.GetAllAssetsAsync()).Where(x => !x.IsDisabled);
@@ -27,6 +28,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("{id}")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> Get(string id)
         {
             var asset = await _assetsService.TryGetAssetAsync(id);
@@ -39,6 +41,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("{assetId}/attributes")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetAttributes(string assetId)
         {
             var keyValues = await _assetsService.GetAssetAttributesAsync(assetId);
@@ -46,6 +49,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("{assetId}/attributes/{key}")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetAttributeByKey(string assetId, string key)
         {
             var keyValues = await _assetsService.GetAssetAttributeByKeyAsync(assetId, key);
@@ -53,6 +57,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpPost("description")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetDescriptions([FromBody]GetAssetDescriptionsRequestModel request)
         {
             var res = await _assetsService.GetAssetDescriptionsAsync(new Lykke.Service.Assets.Client.Models.GetAssetDescriptionsRequestModel { Ids = request.Ids });
@@ -60,6 +65,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("{assetId}/description")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetDescription(string assetId)
         {
             var res = await _assetsService.GetAssetDescriptionsAsync(new Lykke.Service.Assets.Client.Models.GetAssetDescriptionsRequestModel { Ids = new List<string> { assetId } });
@@ -67,6 +73,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("categories")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetCategories()
         {
             var res = await _assetsService.GetAssetCategoriesAsync();
@@ -74,6 +81,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("{assetId}/categories")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetCategory(string assetId)
         {
             var res = await _assetsService.TryGetAssetCategoryAsync(assetId);
@@ -87,6 +95,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("extended")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetsExtended()
         {
             var res = await _assetsService.GetAssetsExtendedAsync();
@@ -95,6 +104,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("{assetId}/extended")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetsExtended(string assetId)
         {
             var res = await _assetsService.GetAssetExtendedByIdAsync(assetId);

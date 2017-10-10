@@ -5,11 +5,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <Compile Remove="Setthings\**" />
+    <EmbeddedResource Remove="Setthings\**" />
+    <None Remove="Setthings\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Setthings\" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
 </Project>

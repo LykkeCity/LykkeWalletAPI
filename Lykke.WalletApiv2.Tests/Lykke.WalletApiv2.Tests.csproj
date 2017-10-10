@@ -22,4 +22,8 @@
     <ProjectReference Include="..\LykkeApi2\LykkeApi2.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Registration\" />
+  </ItemGroup>
+
 </Project>

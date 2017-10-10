@@ -20,6 +20,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpPost("converter")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<ResponseModel<ConvertionResponse>> Convert([FromBody] ConvertionRequest request)
         {
             var orderAction = BaseOrderExt.GetOrderAction(request.OrderAction);

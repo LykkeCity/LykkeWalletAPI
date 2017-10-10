@@ -8,17 +8,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LykkeApi2.Controllers
 {
-    [Route("api/[controller]")]
-    public class ApiKeyController : Controller
+    [Route("api/hft")]
+    public class HftController : Controller
     {
         private readonly IHftInternalServiceAPI _hftInternalService;
 
-        public ApiKeyController(IHftInternalServiceAPI hftInternalService)
+        public HftController(IHftInternalServiceAPI hftInternalService)
         {
             _hftInternalService = hftInternalService;
         }
 
-        [HttpPost]
+        [HttpPost("createkey")]
         [ProducesResponseType(typeof(CreateApiKeyResponse), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> CreateKey([FromBody]CreateApiKeyRequest request)
         {
@@ -30,7 +30,7 @@ namespace LykkeApi2.Controllers
             return Ok(new CreateApiKeyResponse { Key = apiKey.Key, Wallet = apiKey.Wallet });
         }
 
-        [HttpDelete("{key}")]
+        [HttpDelete("deletekey/{key}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> DeleteKey(string key)
         {

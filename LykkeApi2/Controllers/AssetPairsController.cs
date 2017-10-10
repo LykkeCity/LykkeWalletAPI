@@ -18,7 +18,7 @@ using LykkeApi2.Infrastructure;
 namespace LykkeApi2.Controllers
 {
     [Route("api/[controller]")]
-    [ValidateModel]
+    [ValidateModel]   
     public class AssetPairsController : Controller
     {
         private readonly CachedDataDictionary<string, IAssetPair> _assetPairs;
@@ -45,6 +45,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> Get()
         {
             var assetPairs = (await _assetPairs.Values()).Where(s => !s.IsDisabled);
@@ -52,6 +53,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("{id}")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetPairById(string id)
         {
             var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == id);
@@ -63,6 +65,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("rates")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetPairRates()
         {            
             var assetPairs = await _assetsService.GetAssetsPairsForClient(new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel
@@ -80,6 +83,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet("rates/{assetPairId}")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetPairRatesById([FromRoute]AssetPairRequestModel request)
         {
             var asset = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == request.AssetPairId);
@@ -99,7 +103,5 @@ namespace LykkeApi2.Controllers
 
             return Ok(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel> { feedData.ConvertToApiModel() }));
         }
-
-
     }
 }
