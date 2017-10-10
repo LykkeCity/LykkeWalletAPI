@@ -22,14 +22,17 @@ namespace LykkeApi2.Controllers
     {
         private readonly IClientAccountClient _clientAccountClient;
         private readonly ILykkeRegistrationClient _lykkeRegistrationClient;
+        private readonly IRequestContext _requestContext;
         private readonly ClientAccountLogic _clientAccountLogic;
 
         public RegistrationController(
             ClientAccountLogic clientAccountLogic,
             IClientAccountClient clientAccountClient,
-            ILykkeRegistrationClient lykkeRegistrationClient)
+            ILykkeRegistrationClient lykkeRegistrationClient,
+            IRequestContext requestContext)
         {
             _lykkeRegistrationClient = lykkeRegistrationClient;
+            _requestContext = requestContext;
             _clientAccountClient = clientAccountClient;
             _clientAccountLogic = clientAccountLogic;
         }
@@ -42,22 +45,20 @@ namespace LykkeApi2.Controllers
                 ModelState.AddModelError("email", Phrases.ClientWithEmailIsRegistered);
                 return BadRequest(new ApiBadRequestResponse(ModelState));
             }
-
-            bool isIosDevice = this.IsIosDevice();
-
+            
             var registrationModel = new RegistrationModel
             {
                 ClientInfo = model.ClientInfo,
-                UserAgent = this.GetUserAgent(),
+                UserAgent = _requestContext.UserAgent,
                 ContactPhone = model.ContactPhone,
                 Email = model.Email,
                 FullName = model.FullName,
                 Hint = model.Hint,
                 PartnerId = model.PartnerId,
                 Password = model.Password,
-                Ip = this.GetIp(),
+                Ip = _requestContext.GetIp(),
                 Changer = RecordChanger.Client,
-                IosVersion = isIosDevice ? this.GetVersion() : null,
+                IosVersion = _requestContext.IsIosDevice() ? _requestContext.GetVersion() : null,
                 Referer = HttpContext.Request.Host.Host
             };
 

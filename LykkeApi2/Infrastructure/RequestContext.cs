@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using System.Security.Claims;
+using Common;
 using LykkeApi2.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
 
@@ -7,7 +9,11 @@ namespace LykkeApi2.Infrastructure
     public interface IRequestContext
     {
         string GetIp();
-        string GetUserAgent();
+        string UserAgent { get; }
+        string ClientId { get; }
+        string PartnerId { get; }
+        bool IsIosDevice();
+        double? GetVersion();
     }
 
     public class RequestContext : IRequestContext
@@ -41,9 +47,46 @@ namespace LykkeApi2.Infrastructure
             return ip;
         }
 
-        public string GetUserAgent()
+        public string UserAgent => _httpContext.Request.GetUserAgent();
+
+        public string ClientId => _httpContext.User?.Identity?.Name;
+
+        public string PartnerId
         {
-            return _httpContext.Request.GetUserAgent();
+            get
+            {
+                var identity = (ClaimsIdentity) _httpContext?.User.Identity;
+                return identity?.Claims.FirstOrDefault(x => x.Type == "PartnerId")?.Value;
+            }
+        }
+
+        public bool IsIosDevice()
+        {
+            var userAgentVariables =
+                UserAgentHelper.ParseUserAgent(_httpContext.Request.GetUserAgent().ToLower());
+            if (userAgentVariables.ContainsKey(UserAgentVariablesLowercase.DeviceType))
+            {
+                if (userAgentVariables[UserAgentVariablesLowercase.DeviceType] == DeviceTypesLowercase.IPad ||
+                    userAgentVariables[UserAgentVariablesLowercase.DeviceType] == DeviceTypesLowercase.IPhone)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public double? GetVersion()
+        {
+            var userAgentVariables =
+                UserAgentHelper.ParseUserAgent(_httpContext.Request.GetUserAgent().ToLower());
+
+            if (userAgentVariables.ContainsKey(UserAgentVariablesLowercase.AppVersion))
+            {
+                return userAgentVariables[UserAgentVariablesLowercase.AppVersion].ParseAnyDouble();
+            }
+
+            return null;
         }
     }
 }

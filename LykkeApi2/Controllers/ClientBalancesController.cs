@@ -22,12 +22,14 @@ namespace LykkeApi2.Controllers
     {
         private readonly ILog _log;
         private readonly IBalancesClient _balancesClient;
+        private readonly IRequestContext _requestContext;
 
         public ClientBalancesController(ILog log,
-            IBalancesClient balancesClient)
+            IBalancesClient balancesClient, IRequestContext requestContext)
         {
             _log = log;
             _balancesClient = balancesClient;
+            _requestContext = requestContext;
         }
 
         [HttpGet]
@@ -36,7 +38,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(ApiResponse), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get()
         {
-            var clientBalances = await _balancesClient.GetClientBalances(this.GetClientId());
+            var clientBalances = await _balancesClient.GetClientBalances(_requestContext.ClientId);
 
             if (clientBalances == null)
             {
@@ -55,7 +57,7 @@ namespace LykkeApi2.Controllers
             var clientBalanceResult = await _balancesClient.GetClientBalanceByAssetId(
                 new ClientBalanceByAssetIdModel
                 {
-                    ClientId = this.GetClientId(),
+                    ClientId = _requestContext.ClientId,
                     AssetId = assetId
                 });
 

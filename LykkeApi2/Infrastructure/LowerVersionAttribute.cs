@@ -1,13 +1,10 @@
 ﻿using Common;
-using LykkeApi2.Extensions;
 using LykkeApi2.Models;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using LykkeApi2.Infrastructure.Extensions;
 
 namespace LykkeApi2.Infrastructure
 {

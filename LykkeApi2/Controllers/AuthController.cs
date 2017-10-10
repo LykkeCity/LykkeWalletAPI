@@ -28,7 +28,7 @@ namespace LykkeApi2.Controllers
                 Email = model.Email,
                 Password = model.Password,
                 Ip = _requestContext.GetIp(),
-                UserAgent = _requestContext.GetUserAgent(),
+                UserAgent = _requestContext.UserAgent,
                 PartnerId = model.PartnerId
             });
 

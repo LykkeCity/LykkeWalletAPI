@@ -5,6 +5,7 @@ using LykkeApi2.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Threading.Tasks;
+using LykkeApi2.Infrastructure;
 using Xunit;
 
 namespace Lykke.WalletApiv2.Tests.ClientBalances
@@ -17,11 +18,12 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
         public async Task GetClientBalancesByClientId_ReturnsOk()
         {
             var logs = new Mock<ILog>();
+            var context = new Mock<IRequestContext>();
             var walletsClient = new Mock<IBalancesClient>();
             walletsClient.Setup(x => x.GetClientBalances(It.IsAny<string>()))
                 .Returns(CreateMockedResponseForClientBalances.GetAllBalancesForClient);
 
-            _controller = new ClientBalancesController(logs.Object, walletsClient.Object);
+            _controller = new ClientBalancesController(logs.Object, walletsClient.Object, context.Object);
 
             var result = await _controller.Get();
 
@@ -33,11 +35,12 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
         public async Task GetClientBalancesByClientIdAndAssetId_ReturnsOk()
         {
             var logs = new Mock<ILog>();
+            var context = new Mock<IRequestContext>();
             var walletsClient = new Mock<IBalancesClient>();
             walletsClient.Setup(x => x.GetClientBalanceByAssetId(It.IsAny<ClientBalanceByAssetIdModel>()))
                 .Returns(CreateMockedResponseForClientBalances.GetAllBalancesForClientByAssetId);
 
-            _controller = new ClientBalancesController(logs.Object, walletsClient.Object);
+            _controller = new ClientBalancesController(logs.Object, walletsClient.Object, context.Object);
 
             var result = await _controller.GetClientBalanceByAssetId("USD");
 

@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using LykkeApi2.Infrastructure;
 
 namespace LykkeApi2.Controllers
 {
@@ -25,14 +26,22 @@ namespace LykkeApi2.Controllers
         private readonly ILykkeMarketProfileServiceAPI _marketProfileService;
         private readonly ICandleshistoryservice _candleHistoryService;
         private readonly ILog _log;
+        private readonly IRequestContext _requestContext;
 
-        public AssetPairsController(CachedDataDictionary<string, IAssetPair> assetPairs, ICachedAssetsService assetsService, ILykkeMarketProfileServiceAPI marketProfile, ICandleshistoryservice candleHistoryService, ILog log)
+        public AssetPairsController(
+            CachedDataDictionary<string, IAssetPair> assetPairs, 
+            ICachedAssetsService assetsService, 
+            ILykkeMarketProfileServiceAPI marketProfile, 
+            ICandleshistoryservice candleHistoryService, 
+            ILog log,
+            IRequestContext requestContext)
         {
             _assetPairs = assetPairs;
             _assetsService = assetsService;
             _marketProfileService = marketProfile;
             _candleHistoryService = candleHistoryService;
             _log = log;
+            _requestContext = requestContext;
         }
 
         [HttpGet]
@@ -55,13 +64,13 @@ namespace LykkeApi2.Controllers
 
         [HttpGet("rates")]
         public async Task<IActionResult> GetAssetPairRates()
-        {
-            //TODO: IMPORTANT get client id and partnerId from session/authorization: e.g. this.GetClientId(); //
-            var clientId = "e9d8fef5-0943-4ba8-96af-e1cbfc2c044c";
-            string partnerId = null;
-            var isIosDevice = this.IsIosDevice();
-
-            var assetPairs = await _assetsService.GetAssetsPairsForClient(new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel { ClientId = clientId, IsIosDevice = isIosDevice, PartnerId = partnerId });
+        {            
+            var assetPairs = await _assetsService.GetAssetsPairsForClient(new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel
+            {
+                ClientId = _requestContext.ClientId,
+                IsIosDevice = _requestContext.IsIosDevice(),
+                PartnerId = _requestContext.PartnerId
+            });
 
             var assetPairsDict = assetPairs.ToDictionary(itm => itm.Id);
             var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
