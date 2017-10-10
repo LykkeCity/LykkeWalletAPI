@@ -16,7 +16,7 @@ using CreateWalletRequest = LykkeApi2.Models.Wallets.CreateWalletRequest;
 namespace LykkeApi2.Controllers
 {
     [Authorize]
-    [Route("api/wallet")]
+    [Route("api/client")]
     public class WalletController : Controller
     {
         private readonly IClientAccountService _clientAccountService;
@@ -30,20 +30,22 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext;
         }
                 
-        [HttpPost("create")]
+        [HttpPost("wallet")]
         [SwaggerOperation("CreateWallet")]
+        [ApiExplorerSettings(GroupName = "Client")]
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
             var wallet = await _clientAccountService.CreateWalletAsync(
-                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(request.ClientId, request.Type, request.Name));
+                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(_requestContext.ClientId, request.Type, request.Name));
 
             return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type };
         }
 
+        [HttpGet("wallets")]
         [ProducesResponseType(typeof(IEnumerable<WalletDto>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpGet]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]        
         [SwaggerOperation("GetClientWallets")]
+        [ApiExplorerSettings(GroupName = "Client")]
         public async Task<IActionResult> GetClientWallets()
         {
             var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
@@ -54,9 +56,10 @@ namespace LykkeApi2.Controllers
             return Ok(wallets.Select(wallet => new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type }));
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("wallet/{id}")]
         [SwaggerOperation("GetWallet")]
         [ProducesResponseType(typeof(WalletModel), (int)HttpStatusCode.OK)]
+        [ApiExplorerSettings(GroupName = "Client")]
         public async Task<IActionResult> GetWallet(string id)
         {
             var wallet = await _clientAccountService.GetWalletAsync(id);
@@ -67,11 +70,10 @@ namespace LykkeApi2.Controllers
             return Ok(new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type }); 
         }
 
-
+        [HttpGet("wallet/{id}/balances")]
         [ProducesResponseType(typeof(IEnumerable<BalanceModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpGet("{id}/balances")]
-        [SwaggerOperation("GetBalances")]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]                
+        [ApiExplorerSettings(GroupName = "Client")]
         public async Task<IActionResult> GetBalances(string id)
         {
             var balances = await _balanceService.GetClientBalances(id);

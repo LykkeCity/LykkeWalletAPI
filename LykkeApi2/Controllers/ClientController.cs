@@ -52,32 +52,7 @@ namespace LykkeApi2.Controllers
             _clientAccountLogic = clientAccountLogic;
             _requestContext = requestContext;
         }
-
-        [HttpGet("exist")]
-        public async Task<ResponseModel<Models.ClientAccountModels.AccountExistResultModel>> Get([FromQuery]string email)
-        {
-            if (string.IsNullOrEmpty(email))
-                return ResponseModel<Models.ClientAccountModels.AccountExistResultModel>.CreateInvalidFieldError("email", Phrases.FieldShouldNotBeEmpty);
-
-            email = email.ToLower();
-
-            if (!email.IsValidEmail())
-                return ResponseModel<Models.ClientAccountModels.AccountExistResultModel>.CreateInvalidFieldError("email", Phrases.InvalidAddress);
-
-            var result = false;
-            try
-            {
-                result = await _clientAccountClient.CheckIfAccountExists(email);
-
-                return ResponseModel<Models.ClientAccountModels.AccountExistResultModel>.CreateOk(
-                    new Models.ClientAccountModels.AccountExistResultModel { IsEmailRegistered = result });
-            }
-            catch (Exception ex)
-            {
-                return ResponseModel<Models.ClientAccountModels.AccountExistResultModel>.CreateInvalidFieldError("email", ex.Message);
-            }
-        }
-
+        
         [HttpPost("register")]
         public async Task<IActionResult> Post([FromBody]AccountRegistrationModel model)
         {

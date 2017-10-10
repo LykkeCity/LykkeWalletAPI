@@ -18,7 +18,7 @@ namespace LykkeApi2.Controllers
             _hftInternalService = hftInternalService;
         }
 
-        [HttpPost("createkey")]
+        [HttpPost("key")]
         [ProducesResponseType(typeof(CreateApiKeyResponse), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> CreateKey([FromBody]CreateApiKeyRequest request)
         {
@@ -30,7 +30,7 @@ namespace LykkeApi2.Controllers
             return Ok(new CreateApiKeyResponse { Key = apiKey.Key, Wallet = apiKey.Wallet });
         }
 
-        [HttpDelete("deletekey/{key}")]
+        [HttpDelete("{key}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> DeleteKey(string key)
         {

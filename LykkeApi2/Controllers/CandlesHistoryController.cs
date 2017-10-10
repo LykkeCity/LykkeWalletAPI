@@ -17,12 +17,12 @@ namespace LykkeApi2.Controllers
 {
     [Route("api/[controller]")]
     [ValidateModel]
-    public class CandleSticksController : Controller
+    public class CandlesHistoryController : Controller
     {
         private readonly ICandleshistoryservice _candleHistoryService;
         private readonly ILog _log;
 
-        public CandleSticksController(ICandleshistoryservice candleHistoryService, ILog log)
+        public CandlesHistoryController(ICandleshistoryservice candleHistoryService, ILog log)
         {
             _candleHistoryService = candleHistoryService;
             _log = log;
