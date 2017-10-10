@@ -2,12 +2,8 @@
 using Autofac;
 using Core.Settings;
 using Lykke.Service.ClientAccount.Client.AutorestClient;
-using Lykke.Service.ClientAccount.Client.Custom;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
-using Lykke.Service.Registration;
-using Lykke.Service.Wallets.Client.AutorestClient;
 using Lykke.SettingsReader;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules
 {
@@ -29,10 +25,6 @@ namespace LykkeApi2.Modules
             builder.RegisterType<HftInternalServiceAPI>()
                 .As<IHftInternalServiceAPI>()
                 .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.HftInternalServiceUrl));
-
-            builder.RegisterType<WalletsService>()
-                .As<IWalletsService>()
-                .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.WalletsServiceUrl));
         }
     }
 }

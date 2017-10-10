@@ -38,7 +38,7 @@ namespace Core.Settings
         public string ClientAccountServiceUrl { get; set; }
         public string RegistrationUrl { get; set; }
         public string RateCalculatorServiceApiUrl { get; set; }
-        public string WalletsServiceUrl { get; set; }
+        public string BalancesServiceUrl { get; set; }
         public OperationsRepositoryClient OperationsRepositoryClient { get; set; }
         public string MarketProfileUrl { get; set; }
         public string CandleHistoryUrl { get; set; }

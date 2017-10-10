@@ -1,5 +1,4 @@
-﻿
-using Lykke.Service.Wallets.Client.ResponseModels;
+﻿using Lykke.Service.Balances.Client.ResponseModels;
 
 namespace LykkeApi2.Models.ClientBalancesModels
 {
@@ -10,7 +9,7 @@ namespace LykkeApi2.Models.ClientBalancesModels
 
         public static ClientBalanceResponseModel Create(ClientBalanceModel src)
         {
-            return new ClientBalanceResponseModel()
+            return new ClientBalanceResponseModel
             {
                 AssetId = src.AssetId,
                 Balance = src.Balance,

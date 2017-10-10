@@ -5,12 +5,12 @@ using Lykke.Service.Assets.Client.Custom;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using Lykke.Service.OperationsRepository.Client.Abstractions.Exchange;
-using Lykke.Service.Wallets.Client;
 using LykkeApi2.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
 using System.Threading.Tasks;
+using Lykke.Service.Balances.Client;
 using Xunit;
 
 namespace Lykke.WalletApiv2.Tests.TransactionsHistory
@@ -32,7 +32,7 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
             var limitOrdersRepositoryClient = new Mock<ILimitOrdersRepositoryClient>();
             var marketOrdersRepositoryClient = new Mock<IMarketOrdersRepositoryClient>();
 
-            var walletsClient = new Mock<IWalletsClient>();
+            var walletsClient = new Mock<IBalancesClient>();
             var operationsHistoryClient = new Mock<IOperationsHistoryClient>();
             var historyOperationMapper = new Mock<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
 
@@ -66,7 +66,7 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
             var limitOrdersRepositoryClient = new Mock<ILimitOrdersRepositoryClient>();
             var marketOrdersRepositoryClient = new Mock<IMarketOrdersRepositoryClient>();
 
-            var walletsClient = new Mock<IWalletsClient>();
+            var walletsClient = new Mock<IBalancesClient>();
             var operationsHistoryClient = new Mock<IOperationsHistoryClient>();
             var historyOperationMapper = new Mock<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
 

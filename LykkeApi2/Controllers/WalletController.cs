@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Lykke.Service.Balances.Client;
 using Lykke.Service.ClientAccount.Client.AutorestClient;
 using Lykke.Service.ClientAccount.Client.AutorestClient.Models;
-using Lykke.Service.Wallets.Client.AutorestClient;
 using LykkeApi2.Models.Wallets;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
@@ -17,12 +17,12 @@ namespace LykkeApi2.Controllers
     public class WalletController : Controller
     {
         private readonly IClientAccountService _clientAccountService;
-        private readonly IWalletsService _walletsService;
+        private readonly IBalancesClient _balanceService;
 
-        public WalletController(IClientAccountService clientAccountService, IWalletsService walletsService)
+        public WalletController(IClientAccountService clientAccountService, IBalancesClient balanceService)
         {
             _clientAccountService = clientAccountService;
-            _walletsService = walletsService;
+            _balanceService = balanceService;
         }
                 
         [HttpPost]
@@ -69,7 +69,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetBalances")]
         public async Task<IActionResult> GetBalances(string id)
         {
-            var balances = await _walletsService.GetClientBalancesAsync(id);
+            var balances = await _balanceService.GetClientBalances(id);
             
             return Ok(balances);
         }
