@@ -2,6 +2,7 @@
 using Core.Settings;
 using FluentValidation;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccount.Client.AutorestClient.Models;
 using Lykke.Service.ClientAccount.Client.Models;
 using LykkeApi2.Credentials;
 using LykkeApi2.Models.ClientAccountModels;

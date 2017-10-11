@@ -24,7 +24,7 @@ namespace LykkeApi2.Models.ValidationModels
 
         private bool IsEmaiVerified(AccountRegistrationModel instance, string value)
         {            
-            return _clientAccountService.ApiIsEmailVerifiedPost(new IsVerifiedEmailModel(instance.Email, instance.PartnerId)) ?? false;
+            return _clientAccountService.IsEmailVerified(new VerifiedEmailModel(instance.Email, instance.PartnerId)) ?? false;
         }
 
         //private bool IsTraderWithEmailExistsForPartner(AccountRegistrationModel instance, string foo)
