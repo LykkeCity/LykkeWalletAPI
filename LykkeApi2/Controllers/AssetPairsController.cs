@@ -71,7 +71,7 @@ namespace LykkeApi2.Controllers
             var assetPairs = await _assetsService.GetAssetsPairsForClient(new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel
             {
                 ClientId = _requestContext.ClientId,
-                IsIosDevice = _requestContext.IsIosDevice(),
+                IsIosDevice = _requestContext.IsIosDevice,
                 PartnerId = _requestContext.PartnerId
             });
 

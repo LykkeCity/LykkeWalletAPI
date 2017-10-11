@@ -21,6 +21,7 @@ using LykkeApi2.Models;
 using LykkeApi2.Models.Auth;
 using LykkeApi2.Models.ClientAccountModels;
 using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
 using ClientBalanceResponseModel = LykkeApi2.Models.ClientBalancesModels.ClientBalanceResponseModel;
 
 namespace LykkeApi2.Controllers
@@ -71,7 +72,7 @@ namespace LykkeApi2.Controllers
                 Password = model.Password,
                 Ip = _requestContext.GetIp(),
                 Changer = RecordChanger.Client,
-                IosVersion = _requestContext.IsIosDevice() ? _requestContext.GetVersion() : null,
+                IosVersion = _requestContext.IsIosDevice ? _requestContext.Version : null,
                 Referer = HttpContext.Request.Host.Host
             };
 
@@ -124,6 +125,8 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(ApiResponse), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get()
         {
+            await _log.WriteInfoAsync("api v2", JsonConvert.SerializeObject(_requestContext), null);
+
             var clientBalances = await _balancesClient.GetClientBalances(_requestContext.ClientId);
 
             if (clientBalances == null)
