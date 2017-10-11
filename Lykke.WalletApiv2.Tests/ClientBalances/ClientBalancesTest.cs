@@ -23,7 +23,7 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
             walletsClient.Setup(x => x.GetClientBalances(It.IsAny<string>()))
                 .Returns(CreateMockedResponseForClientBalances.GetAllBalancesForClient);
 
-            _controller = new ClientController(logs.Object, walletsClient.Object, null, null, null, context.Object);
+            _controller = new ClientController(logs.Object, walletsClient.Object, null, null, context.Object);
 
             var result = await _controller.Get();
 
@@ -40,7 +40,7 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
             walletsClient.Setup(x => x.GetClientBalanceByAssetId(It.IsAny<ClientBalanceByAssetIdModel>()))
                 .Returns(CreateMockedResponseForClientBalances.GetAllBalancesForClientByAssetId);
 
-            _controller = new ClientController(logs.Object, walletsClient.Object, null, null, null, context.Object);
+            _controller = new ClientController(logs.Object, walletsClient.Object, null, null, context.Object);
 
             var result = await _controller.GetClientBalanceByAssetId("USD");
 

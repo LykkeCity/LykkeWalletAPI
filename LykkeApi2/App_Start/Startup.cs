@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AzureStorage.Tables;
 using Common.Log;
@@ -8,15 +9,19 @@ using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Logs;
 using Lykke.SettingsReader;
+using LykkeApi2.Infrastructure;
+using LykkeApi2.Infrastructure.Authentication;
+using LykkeApi2.Models.ValidationModels;
 using LykkeApi2.Modules;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Internal;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using LykkeApi2.Models.ValidationModels;
 
-namespace LykkeApi2.App_Start
+namespace LykkeApi2
 {
     public class Startup
     {
@@ -55,13 +60,20 @@ namespace LykkeApi2.App_Start
                 {
                     options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
                 });
-
-
+            
             services.AddSwaggerGen(options =>
             {
                 options.DefaultLykkeConfiguration(apiVersion, appName);
+
+                options.OperationFilter<ApiKeyHeaderOperationFilter>();
             });
 
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddScheme<LykkeAuthOptions, LykkeAuthHandler>("Bearer", options => { });
 
             var builder = new ContainerBuilder();
             var apiSettings = Configuration.LoadSettings<APIv2Settings>();
@@ -79,20 +91,33 @@ namespace LykkeApi2.App_Start
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
         {
+            app.UseCors("Lykke");
+            app.Use(next => context =>
+            {
+                context.Request.EnableRewind();
+
+                return next(context);
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            //app.UseLykkeMiddleware(appName, ex => new { Message = "Technical problem" });
-
+            app.UseAuthentication();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                 name: "default-to-swagger",
                 template: "{controller=Swagger}");
             });
-
+            
+            CreateErrorResponse responseFactory = exception => exception;
+            app.UseMiddleware<GlobalErrorHandlerMiddleware>("WalletApiV2", responseFactory);
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+            
             app.UseSwagger();
             app.UseSwaggerUi(swaggerUrl: $"/swagger/{apiVersion}/swagger.json");
             app.UseStaticFiles();

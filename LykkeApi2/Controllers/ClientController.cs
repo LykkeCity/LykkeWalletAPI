@@ -12,6 +12,7 @@ using Common;
 using Lykke.Service.Balances.AutorestClient.Models;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccount.Client.AutorestClient;
 using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
@@ -23,8 +24,7 @@ using Microsoft.AspNetCore.Authorization;
 using ClientBalanceResponseModel = LykkeApi2.Models.ClientBalancesModels.ClientBalanceResponseModel;
 
 namespace LykkeApi2.Controllers
-{
-    [Authorize]
+{    
     [LowerVersion(Devices = "IPhone,IPad", LowerVersion = 181)]
     [LowerVersion(Devices = "android", LowerVersion = 659)]
     [Route("api/client")]
@@ -32,23 +32,20 @@ namespace LykkeApi2.Controllers
     {
         private readonly ILog _log;
         private readonly IBalancesClient _balancesClient;
-        private readonly ILykkeRegistrationClient _lykkeRegistrationClient;
-        private readonly IClientAccountClient _clientAccountClient;
+        private readonly ILykkeRegistrationClient _lykkeRegistrationClient;        
         private readonly ClientAccountLogic _clientAccountLogic;
         private readonly IRequestContext _requestContext;
 
         public ClientController(
             ILog log,
             IBalancesClient balancesClient, 
-            ILykkeRegistrationClient lykkeRegistrationClient,
-            IClientAccountClient clientAccountClient,
+            ILykkeRegistrationClient lykkeRegistrationClient,                        
             ClientAccountLogic clientAccountLogic,
             IRequestContext requestContext)
         {
             _log = log;
             _balancesClient = balancesClient;
-            _lykkeRegistrationClient = lykkeRegistrationClient;
-            _clientAccountClient = clientAccountClient;
+            _lykkeRegistrationClient = lykkeRegistrationClient;            
             _clientAccountLogic = clientAccountLogic;
             _requestContext = requestContext;
         }
@@ -82,15 +79,7 @@ namespace LykkeApi2.Controllers
 
             if (result == null)
                 return NotFound(new ApiResponse(HttpStatusCode.InternalServerError, Phrases.TechnicalProblems));
-
-            var resultPhone = await _clientAccountClient.InsertIndexedByPhoneAsync(
-                new IndexByPhoneRequestModel()
-                {
-                    ClientId = result.Account.Id,
-                    PhoneNumber = result.PersonalData.Phone,
-                    PreviousPhoneNumber = null
-                });
-
+            
             return Ok(new AccountsRegistrationResponseModel
             {
                 Token = result.Token,
@@ -109,7 +98,7 @@ namespace LykkeApi2.Controllers
         [HttpPost("auth")]
         public async Task<IActionResult> Auth([FromBody]AuthRequestModel model)
         {
-            AuthResponse authResult = await _lykkeRegistrationClient.AuthorizeAsync(new AuthModel
+            var authResult = await _lykkeRegistrationClient.AuthorizeAsync(new AuthModel
             {
                 ClientInfo = model.ClientInfo,
                 Email = model.Email,
@@ -119,15 +108,16 @@ namespace LykkeApi2.Controllers
                 PartnerId = model.PartnerId
             });
 
-            if (authResult.Status == AuthenticationStatus.Error)
+            if (authResult?.Status == AuthenticationStatus.Error)
                 return BadRequest(new { message = authResult.ErrorMessage });
 
             return Ok(new AuthResponseModel
             {
-                AccessToken = authResult.Token,
+                AccessToken = authResult?.Token,
             });
         }        
 
+        [Authorize]
         [HttpGet("balances")]        
         [SwaggerOperation("GetBalances")]
         [ProducesResponseType(typeof(IEnumerable<ClientBalanceResponseModel>), (int) HttpStatusCode.OK)]
@@ -144,6 +134,7 @@ namespace LykkeApi2.Controllers
             return Ok(clientBalances);
         }
 
+        [Authorize]
         [HttpGet("balances/{assetId}")]
         [SwaggerOperation("GetBalanceByAssetId")]
         [ProducesResponseType(typeof(ClientBalanceResponseModel), (int)HttpStatusCode.OK)]

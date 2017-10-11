@@ -29,7 +29,7 @@ namespace LykkeApi2.Controllers
             _balanceService = balanceService;
             _requestContext = requestContext;
         }
-                
+                        
         [HttpPost("wallet")]
         [SwaggerOperation("CreateWallet")]
         [ApiExplorerSettings(GroupName = "Client")]
@@ -40,7 +40,7 @@ namespace LykkeApi2.Controllers
 
             return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type };
         }
-
+        
         [HttpGet("wallets")]
         [ProducesResponseType(typeof(IEnumerable<WalletDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]        

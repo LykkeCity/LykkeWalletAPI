@@ -1,5 +1,4 @@
-﻿using LykkeApi2.App_Start;
-using Microsoft.AspNetCore;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 

@@ -18,7 +18,10 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using Lykke.Service.RateCalculator.Client;
 using System.Linq;
+using Core.Identity;
+using LkeServices.Identity;
 using Lykke.SettingsReader;
+using LykkeApi2.Infrastructure;
 
 namespace LykkeApi2.Modules
 {
@@ -59,18 +62,12 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
 
             _services.UseAssetsClient(AssetServiceSettings.Create(
-                new Uri(_settings.CurrentValue.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
+                new Uri(_settings.CurrentValue.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));                       
 
-            _services.AddSingleton<ILykkeRegistrationClient>(x =>
-                new LykkeRegistrationClient(_settings.CurrentValue.Services.RegistrationUrl, _log));
+            _services.AddSingleton<ClientAccountLogic>();                        
 
-            _services.AddSingleton<ClientAccountLogic>();
-
-            _services.AddSingleton<ILykkeMarketProfileServiceAPI>(x =>
-                new LykkeMarketProfileServiceAPI(new Uri(_settings.CurrentValue.Services.MarketProfileUrl)));
-
-            _services.AddSingleton<ICandleshistoryservice>(x =>
-                new Candleshistoryservice(new Uri(_settings.CurrentValue.Services.CandleHistoryUrl)));
+            builder.RegisterType<RequestContext>().As<IRequestContext>().SingleInstance();
+            builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().SingleInstance();
 
             RegisterDictionaryEntities(builder);
             BindHistoryMappers(builder);

@@ -43,7 +43,8 @@ namespace Core.Settings
         public string MarketProfileUrl { get; set; }
         public string CandleHistoryUrl { get; set; }
         public string OperationsHistoryUrl { get; set; }
-        public string HftInternalServiceUrl { get; set; }      
+        public string HftInternalServiceUrl { get; set; }
+        public string SessionUrl { get; set; }
     }
 
     public class OperationsRepositoryClient
