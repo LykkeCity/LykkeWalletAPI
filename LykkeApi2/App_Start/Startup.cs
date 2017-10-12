@@ -91,7 +91,7 @@ namespace LykkeApi2
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
         {
-            app.UseCors("Lykke");
+            app.UseCors(builder => { builder.AllowAnyOrigin(); });
             app.Use(next => context =>
             {
                 context.Request.EnableRewind();
