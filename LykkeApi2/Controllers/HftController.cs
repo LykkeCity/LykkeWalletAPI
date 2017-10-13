@@ -5,11 +5,13 @@ using System.Threading.Tasks;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ApiKey;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LykkeApi2.Controllers
 {
     [Route("api/hft")]
+    [Authorize]
     public class HftController : Controller
     {
         private readonly IHftInternalServiceAPI _hftInternalService;
