@@ -138,11 +138,11 @@ namespace LykkeApi2
             
             CreateErrorResponse responseFactory = exception => exception;
             app.UseMiddleware<GlobalErrorHandlerMiddleware>("WalletApiV2", responseFactory);
-            //app.UseForwardedHeaders(new ForwardedHeadersOptions
-            //{
-            //    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            //});
-            
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
             app.UseSwagger();
             app.UseSwaggerUi(swaggerUrl: $"/swagger/{apiVersion}/swagger.json");
             app.UseStaticFiles();
