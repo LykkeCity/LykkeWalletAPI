@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace LykkeApi2.Models.ApiKey
+﻿namespace LykkeApi2.Models.ApiKey
 {
     public class CreateApiKeyResponse
     {
-        public string Key { get; set; }
-        public string Wallet { get; set; }
+        public string ApiKey { get; set; }
+        public string WalletId { get; set; }
     }
 }
