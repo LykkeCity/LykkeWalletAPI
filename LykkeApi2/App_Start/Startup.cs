@@ -13,13 +13,19 @@ using LykkeApi2.Infrastructure;
 using LykkeApi2.Infrastructure.Authentication;
 using LykkeApi2.Models.ValidationModels;
 using LykkeApi2.Modules;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Internal;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using SQLitePCL;
 
 namespace LykkeApi2
 {
@@ -66,19 +72,33 @@ namespace LykkeApi2
                 options.DefaultLykkeConfiguration(apiVersion, appName);
 
                 options.OperationFilter<ApiKeyHeaderOperationFilter>();
-            });
-
-            services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddScheme<LykkeAuthOptions, LykkeAuthHandler>("Bearer", options => { });
+            });            
 
             var builder = new ContainerBuilder();
             var apiSettings = Configuration.LoadSettings<APIv2Settings>();
 
             var log = CreateLogWithSlack(services, apiSettings.CurrentValue.WalletApiv2, apiSettings.ConnectionString(x => x.WalletApiv2.Db.LogsConnString));
+
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                })
+                .AddCookie(options =>
+                {
+                    options.ExpireTimeSpan = TimeSpan.FromHours(24);
+                    options.LoginPath = new PathString("/login");
+                })
+                .AddOpenIdConnect(options =>
+                {
+                    options.Authority = apiSettings.CurrentValue.WalletApiv2.Authentication.Authority;
+                    options.ClientId = apiSettings.CurrentValue.WalletApiv2.Authentication.ClientId;
+                    options.ClientSecret = apiSettings.CurrentValue.WalletApiv2.Authentication.ClientSecret;
+                    options.RequireHttpsMetadata = true;
+                    options.SaveTokens = true;
+                    options.CallbackPath = "/auth";
+                    options.ResponseType = OpenIdConnectResponseType.Code;                    
+                });
 
             builder.RegisterModule(new Api2Module(apiSettings.Nested(x => x.WalletApiv2), log));
             builder.RegisterModule(new ClientsModule(apiSettings.Nested(x => x.WalletApiv2.Services)));
@@ -118,10 +138,10 @@ namespace LykkeApi2
             
             CreateErrorResponse responseFactory = exception => exception;
             app.UseMiddleware<GlobalErrorHandlerMiddleware>("WalletApiV2", responseFactory);
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            });
+            //app.UseForwardedHeaders(new ForwardedHeadersOptions
+            //{
+            //    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            //});
             
             app.UseSwagger();
             app.UseSwaggerUi(swaggerUrl: $"/swagger/{apiVersion}/swagger.json");
