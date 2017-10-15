@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Threading.Tasks;
 using Lykke.Service.ClientAccount.Client.AutorestClient;
+using Lykke.Service.HftInternalService.Client.AutorestClient;
 using LykkeApi2.Infrastructure;
 using Xunit;
 
@@ -19,11 +20,12 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
         {
             var context = new Mock<IRequestContext>();
             var clientAccountService = new Mock<IClientAccountService>();
+            var hftInternalService = new Mock<IHftInternalServiceAPI>();
             var balancesClient = new Mock<IBalancesClient>();
             balancesClient.Setup(x => x.GetClientBalances(It.IsAny<string>()))
                 .Returns(CreateMockedResponseForClientBalances.GetAllBalancesForClient);
 
-            _controller = new WalletsController(context.Object, clientAccountService.Object, balancesClient.Object);
+            _controller = new WalletsController(context.Object, clientAccountService.Object, balancesClient.Object, hftInternalService.Object);
 
             var result = await _controller.GetTradingWalletBalances();
 
@@ -36,11 +38,12 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
         {
             var context = new Mock<IRequestContext>();
             var clientAccountService = new Mock<IClientAccountService>();
+            var hftInternalService = new Mock<IHftInternalServiceAPI>();
             var balancesClient = new Mock<IBalancesClient>();
             balancesClient.Setup(x => x.GetClientBalanceByAssetId(It.IsAny<ClientBalanceByAssetIdModel>()))
                 .Returns(CreateMockedResponseForClientBalances.GetAllBalancesForClientByAssetId);
 
-            _controller = new WalletsController(context.Object, clientAccountService.Object, balancesClient.Object);
+            _controller = new WalletsController(context.Object, clientAccountService.Object, balancesClient.Object, hftInternalService.Object);
 
             var result = await _controller.GetTradindWalletBalanceByAssetId("USD");
 
