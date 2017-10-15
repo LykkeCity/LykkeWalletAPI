@@ -3,10 +3,13 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
+using Lykke.Service.HftInternalService.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ApiKey;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.SwaggerGen.Annotations;
+using CreateApiKeyRequest = LykkeApi2.Models.ApiKey.CreateApiKeyRequest;
 
 namespace LykkeApi2.Controllers
 {
@@ -39,6 +42,27 @@ namespace LykkeApi2.Controllers
                 return BadRequest();
 
             return Ok(new CreateApiKeyResponse { ApiKey = apiKey.Key, WalletId = apiKey.Wallet });
+        }
+
+        /// <summary>
+        /// Create new api-key for existing wallet.
+        /// </summary>
+        /// <param name="walletId"></param>
+        /// <returns></returns>
+        [HttpPut("{walletId}/regenerateKey")]
+        [ProducesResponseType(typeof(CreateApiKeyResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [SwaggerOperation("RegenerateKey")]
+        public async Task<IActionResult> RegenerateKey(string walletId)
+        {
+            var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
+            var apiKey = clientKeys.FirstOrDefault(x => x.Wallet == walletId);
+            if (apiKey != null)
+            {
+                await _hftInternalService.RegenerateKeyAsync(new RegenerateKeyRequest { ClientId = _requestContext.ClientId, WalletId = apiKey.Wallet });
+                return Ok();
+            }
+            return NotFound();
         }
 
         /// <summary>
