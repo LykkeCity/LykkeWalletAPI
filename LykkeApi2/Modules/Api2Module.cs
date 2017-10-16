@@ -4,12 +4,9 @@ using Common;
 using Common.Log;
 using Core.Mappers;
 using Core.Settings;
-using Lykke.MarketProfileService.Client;
 using Lykke.Service.Assets.Client.Custom;
-using Lykke.Service.CandlesHistory.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
-using Lykke.Service.Registration;
 using Lykke.Service.Balances.Client;
 using LykkeApi2.Credentials;
 using LykkeApi2.Mappers;
@@ -62,12 +59,12 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
 
             _services.UseAssetsClient(AssetServiceSettings.Create(
-                new Uri(_settings.CurrentValue.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));                       
+                new Uri(_settings.CurrentValue.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
 
-            _services.AddSingleton<ClientAccountLogic>();                        
+            _services.AddSingleton<ClientAccountLogic>();
 
-            builder.RegisterType<RequestContext>().As<IRequestContext>().SingleInstance();
-            builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().SingleInstance();
+            builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
+            builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
 
             RegisterDictionaryEntities(builder);
             BindHistoryMappers(builder);
