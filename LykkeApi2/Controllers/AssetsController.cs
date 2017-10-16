@@ -1,10 +1,8 @@
 ﻿using Lykke.Service.Assets.Client.Custom;
 using LykkeApi2.Models;
-using LykkeApi2.Models.ResponceModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers
@@ -35,7 +33,7 @@ namespace LykkeApi2.Controllers
             if (asset == null)
             {
                 ModelState.AddModelError("id", $"Asset {id} does not exist");
-                return NotFound(new ApiBadRequestResponse(ModelState));
+                return NotFound(ModelState);
             }
             return Ok(GetClientBaseAssetRespModel.Create(asset.ConvertToApiModel()));
         }
@@ -88,10 +86,10 @@ namespace LykkeApi2.Controllers
 
             if (res.errorResponse != null)
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, $"Error while retrieving asset category for asset {assetId}. {res.errorResponse.ErrorMessages}"));
+                return NotFound($"Error while retrieving asset category for asset {assetId}. {res.errorResponse.ErrorMessages}");
             }
 
-            return Ok(GetAssetCategoriesResponseModel.Create(new ApiAssetCategoryModel[] { res.ConvertToApiModel() }));
+            return Ok(GetAssetCategoriesResponseModel.Create(new[] { res.ConvertToApiModel() }));
         }
 
         [HttpGet("extended")]

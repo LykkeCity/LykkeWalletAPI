@@ -10,7 +10,6 @@ using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using Lykke.Service.OperationsRepository.Client.Abstractions.Exchange;
 using LykkeApi2.Mappers;
 using LykkeApi2.Models.ApiContractModels;
-using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Models.TransactionHistoryModels;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +17,6 @@ using Swashbuckle.SwaggerGen.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Lykke.Service.Balances.Client;
 using LykkeApi2.Infrastructure;
@@ -85,7 +83,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetTransactionHistories")]
         [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> Get([FromQuery] string assetId)
-        {            
+        {
             var clientTrades = new IClientTrade[0];
             var cashOperations = new ICashInOutOperation[0];
             var transfers = new ITransferEvent[0];
@@ -264,17 +262,17 @@ namespace LykkeApi2.Controllers
 
             if (order == null)
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitOrder));
+                return NotFound(Phrases.NoLimitOrder);
             }
 
             if (order.ClientId != _requestContext.ClientId)
-                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, Phrases.InvalidValue));
+                return BadRequest(Phrases.InvalidValue);
 
             var assetPair = await _assetPairs.GetItemAsync(order.AssetPairId);
 
             if (assetPair == null)
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.AssetPairNotFound));
+                return NotFound(Phrases.AssetPairNotFound);
             }
 
             var assets = await _assets.GetDictionaryAsync();
@@ -282,7 +280,7 @@ namespace LykkeApi2.Controllers
 
             if (asset == null)
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.AssetNotFound));
+                return NotFound(Phrases.AssetNotFound);
             }
 
             var availableAssetIds = assets.Keys.ToArray();
@@ -306,7 +304,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetLimitTradesHistories")]
         [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> LimitTrades([FromQuery] string orderId)
-        {            
+        {
             var assets = await _assets.GetDictionaryAsync();
 
             var availableAssetIds = assets.Keys.ToArray();
@@ -328,10 +326,10 @@ namespace LykkeApi2.Controllers
 
             var ordered = result.OrderByDescending(x => x.DateTime);
 
-            if (ordered.Count() > 0)
-                return Ok(ordered);
-            else
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitTradesHistory));
+            if (!ordered.Any())
+                return NotFound(Phrases.NoLimitTradesHistory);
+
+            return Ok(ordered);
         }
 
         [HttpGet("limit/history")]
@@ -389,10 +387,10 @@ namespace LykkeApi2.Controllers
 
             var ordered = result.OrderByDescending(x => x.DateTime);
 
-            if (ordered.Count() > 0)
-                return Ok(ordered);
-            else
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitsHistory));
+            if (!ordered.Any())
+                return NotFound(Phrases.NoLimitsHistory);
+
+            return Ok(ordered);
         }
 
         [HttpGet("limit/order")]
@@ -405,24 +403,24 @@ namespace LykkeApi2.Controllers
 
             if (order == null)
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitOrder));
+                return NotFound(Phrases.NoLimitOrder);
             }
 
             if (order.ClientId != _requestContext.ClientId)
-                return BadRequest(new ApiResponse(HttpStatusCode.BadRequest, Phrases.InvalidValue));
+                return BadRequest(Phrases.InvalidValue);
 
             var assetPair = await _assetPairs.GetItemAsync(order.AssetPairId);
 
             if (assetPair == null)
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.AssetPairNotFound));
+                return NotFound(Phrases.AssetPairNotFound);
             }
 
             var asset = await _assets.GetItemAsync(assetPair.QuotingAssetId);
 
             if (asset == null)
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.AssetNotFound));
+                return NotFound(Phrases.AssetNotFound);
             }
 
             return Ok(order.ConvertToApiModel(assetPair, asset.Accuracy));
@@ -438,22 +436,22 @@ namespace LykkeApi2.Controllers
             {
                 var firstMessage = response.Error.Messages.First();
                 var messageText = string.Concat(firstMessage.Value);
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, messageText));
+                return NotFound(messageText);
             }
 
             var mappedResult = response.Records
                 .Select(r =>
                 {
-                    var source = new HistoryOperationSourceData {OperationType = r.OpType, JsonData = r.CustomData};
+                    var source = new HistoryOperationSourceData { OperationType = r.OpType, JsonData = r.CustomData };
                     var mapped = _historyOperationMapper.Map(source);
                     return ConvertServiceObjectToHistoryRecord(mapped);
                 });
             var orderedResult = mappedResult.OrderByDescending(i => i.DateTime);
 
-            if (orderedResult.Count() > 0)
-                return Ok(orderedResult);
-            else
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.NoLimitsHistory));
+            if (!orderedResult.Any())
+                return NotFound(Phrases.NoLimitsHistory);
+
+            return Ok(orderedResult);
         }
 
         #region HelperMethods

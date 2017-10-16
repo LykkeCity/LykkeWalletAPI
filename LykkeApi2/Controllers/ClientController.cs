@@ -1,7 +1,6 @@
 ﻿using System;
 using Common.Log;
 using LykkeApi2.Infrastructure;
-using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
@@ -43,14 +42,13 @@ namespace LykkeApi2.Controllers
         [HttpPost("register")]
         [SwaggerOperation("RegisterClient")]
         [ProducesResponseType(typeof(AccountsRegistrationResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiBadRequestResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Post([FromBody]AccountRegistrationModel model)
         {
             if (await _clientAccountLogic.IsTraderWithEmailExistsForPartnerAsync(model.Email, model.PartnerId))
             {
                 ModelState.AddModelError("email", Phrases.ClientWithEmailIsRegistered);
-                return BadRequest(new ApiBadRequestResponse(ModelState));
+                return BadRequest(ModelState);
             }
 
             var registrationModel = new RegistrationModel
@@ -69,10 +67,10 @@ namespace LykkeApi2.Controllers
                 Referer = HttpContext.Request.Host.Host
             };
 
-            RegistrationResponse result = await _lykkeRegistrationClient.RegisterAsync(registrationModel);
+            var result = await _lykkeRegistrationClient.RegisterAsync(registrationModel);
 
             if (result == null)
-                return NotFound(new ApiResponse(HttpStatusCode.InternalServerError, Phrases.TechnicalProblems));
+                return BadRequest(Phrases.TechnicalProblems);
 
             return Ok(new AccountsRegistrationResponseModel
             {

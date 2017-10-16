@@ -11,9 +11,7 @@ using Lykke.Service.HftInternalService.Client.AutorestClient;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ApiKey;
 using LykkeApi2.Models.ClientBalancesModels;
-using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Models.Wallets;
-using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
@@ -59,6 +57,7 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpPost("hft")]
         [ProducesResponseType(typeof(CreateApiKeyResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         [SwaggerOperation("CreateApiWallet")]
         public async Task<IActionResult> CreateApiWallet([FromBody] CreateApiKeyRequest request)
         {
@@ -104,7 +103,7 @@ namespace LykkeApi2.Controllers
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<WalletDto>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [SwaggerOperation("GetWallets")]
         public async Task<IActionResult> GetWallets()
         {
@@ -122,6 +121,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("{id}")]
         [SwaggerOperation("GetWallet")]
         [ProducesResponseType(typeof(WalletModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetWallet(string id)
         {
             var wallet = await _clientAccountService.GetWalletAsync(id);
@@ -140,7 +140,6 @@ namespace LykkeApi2.Controllers
         [HttpGet("balances")]
         [SwaggerOperation("GetBalances")]
         [ProducesResponseType(typeof(IEnumerable<WalletBalancesModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetBalances()
         {
             var result = new List<WalletBalancesModel>();
@@ -178,7 +177,6 @@ namespace LykkeApi2.Controllers
         [HttpGet("trading/balances")]
         [SwaggerOperation("GetTradingWalletBalances")]
         [ProducesResponseType(typeof(IEnumerable<ClientBalanceResponseModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetTradingWalletBalances()
         {
             var clientBalances = await _balancesClient.GetClientBalances(_requestContext.ClientId);
@@ -193,7 +191,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("{walletId}/balances")]
         [SwaggerOperation("GetWalletBalances")]
         [ProducesResponseType(typeof(IEnumerable<ClientBalanceResponseModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetWalletBalances(string walletId)
         {
             var clientBalances = await _balancesClient.GetClientBalances(walletId);
@@ -201,7 +199,7 @@ namespace LykkeApi2.Controllers
             {
                 var wallet = await _clientAccountService.GetWalletAsync(walletId);
                 if (wallet == null)
-                    return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.ClientBalanceNotFound));
+                    return NotFound();
             }
 
             return Ok(clientBalances?.Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]);
@@ -214,7 +212,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("balances/{assetId}")]
         [SwaggerOperation("GetBalancesByAssetId")]
         [ProducesResponseType(typeof(IEnumerable<WalletAssetBalanceModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetBalancesByAssetId(string assetId)
         {
             var result = new List<WalletAssetBalanceModel>();
@@ -227,7 +225,7 @@ namespace LykkeApi2.Controllers
 
             if (!string.IsNullOrEmpty(clientBalance?.ErrorMessage))
             {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, clientBalance.ErrorMessage ?? Phrases.ClientBalanceNotFound));
+                return NotFound();
             }
 
             result.Add(new WalletAssetBalanceModel
@@ -268,7 +266,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("trading/balances/{assetId}")]
         [SwaggerOperation("GetTradindWalletBalanceByAssetId")]
         [ProducesResponseType(typeof(ClientBalanceResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetTradindWalletBalanceByAssetId(string assetId)
         {
             var clientBalanceResult = await _balancesClient.GetClientBalanceByAssetId(
@@ -283,8 +281,7 @@ namespace LykkeApi2.Controllers
                 return Ok(ClientBalanceResponseModel.Create(clientBalanceResult));
             }
 
-            return NotFound(new ApiResponse(HttpStatusCode.NotFound,
-                clientBalanceResult?.ErrorMessage ?? Phrases.ClientBalanceNotFound));
+            return NotFound();
         }
 
         /// <summary>
@@ -294,7 +291,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("{walletId}/balances/{assetId}")]
         [SwaggerOperation("GetWalletBalanceByAssetId")]
         [ProducesResponseType(typeof(ClientBalanceResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetWalletBalanceByAssetId(string walletId, string assetId)
         {
             var clientBalanceResult = await _balancesClient.GetClientBalanceByAssetId(
@@ -309,8 +306,7 @@ namespace LykkeApi2.Controllers
                 return Ok(ClientBalanceResponseModel.Create(clientBalanceResult));
             }
 
-            return NotFound(new ApiResponse(HttpStatusCode.NotFound,
-                clientBalanceResult?.ErrorMessage ?? Phrases.ClientBalanceNotFound));
+            return NotFound();
         }
     }
 }

@@ -1,16 +1,12 @@
 ﻿using Common.Log;
-using Core.Enums;
 using Lykke.Service.CandlesHistory.Client;
 using Lykke.Service.CandlesHistory.Client.Custom;
 using Lykke.Service.CandlesHistory.Client.Models;
 using LykkeApi2.Models;
-using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers
@@ -38,7 +34,7 @@ namespace LykkeApi2.Controllers
         /// <param name="toMoment">To moment in ISO 8601 (exclusive)</param>
         [HttpGet("{AssetPairId}/{PriceType}/{TimeInterval}/{FromMoment:datetime}/{ToMoment:datetime}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        public async Task<IActionResult> Get([FromRoute]CandleSticksRequestModel request) 
+        public async Task<IActionResult> Get([FromRoute]CandleSticksRequestModel request)
         {
             try
             {
@@ -48,7 +44,7 @@ namespace LykkeApi2.Controllers
             catch (ErrorResponseException ex)
             {
                 var errors = ex.Error.ErrorMessages.Values.SelectMany(s => s.Select(ss => ss));
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, $"{String.Join(',', errors)}"));
+                return NotFound($"{string.Join(',', errors)}");
             }
         }
     }
