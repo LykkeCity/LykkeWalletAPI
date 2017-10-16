@@ -15,7 +15,11 @@ namespace Core.Settings
 
         public ServiceSettings Services { get; set; }
 
-        public AuthenticationSettings Authentication { get; set; }
+        //public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
+
+        //public string ExchangeOperationsServiceUrl { get; set; }
+
+        // public double DefaultWithdrawalLimit { get; set; }
 
         public DeploymentSettings DeploymentSettings { get; set; }
     }
@@ -41,14 +45,6 @@ namespace Core.Settings
         public string OperationsHistoryUrl { get; set; }
         public string HftInternalServiceUrl { get; set; }
         public string SessionUrl { get; set; }
-    }
-
-    public class AuthenticationSettings
-    {
-        public string ClientId { get; set; }
-        public string ClientSecret { get; set; }
-        public string PostLogoutRedirectUri { get; set; }
-        public string Authority { get; set; }
     }
 
     public class OperationsRepositoryClient
