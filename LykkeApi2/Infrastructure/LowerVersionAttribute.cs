@@ -1,9 +1,9 @@
 ﻿using Common;
-using LykkeApi2.Models;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Linq;
+using System.Net;
 using LykkeApi2.Infrastructure.Extensions;
 
 namespace LykkeApi2.Infrastructure
@@ -62,15 +62,15 @@ namespace LykkeApi2.Infrastructure
         }
 
         private bool IsValidUserAgent(string userAgent)
-        {
+        {   
             return userAgent.Contains(UserAgentVariablesLowercase.DeviceType) && userAgent.Contains(UserAgentVariablesLowercase.AppVersion);
         }
 
         private void ReturnNotSupported(ActionExecutingContext actionContext, string device)
         {
             string msg = device == DeviceTypesLowercase.Android ? Phrases.AndroidUpdateNeededMsg : Phrases.DefaultUpdateNeededMsg;
-            var response = ResponseModel.CreateFail(ResponseModel.ErrorCodeType.VersionNotSupported, msg);
-            actionContext.Result = new JsonResult(response);
+            var response = new { Message = msg };
+            actionContext.Result = new JsonResult(response){StatusCode = (int)HttpStatusCode.ExpectationFailed };
         }
     }
 }
