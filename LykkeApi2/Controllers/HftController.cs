@@ -37,11 +37,11 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> RegenerateKey(string walletId)
         {
             var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
-            var apiKey = clientKeys.FirstOrDefault(x => x.Wallet == walletId);
-            if (apiKey != null)
+            var existingApiKey = clientKeys.FirstOrDefault(x => x.Wallet == walletId);
+            if (existingApiKey != null)
             {
-                await _hftInternalService.RegenerateKeyAsync(new RegenerateKeyRequest { ClientId = _requestContext.ClientId, WalletId = apiKey.Wallet });
-                return Ok();
+                var apiKey = await _hftInternalService.RegenerateKeyAsync(new RegenerateKeyRequest { ClientId = _requestContext.ClientId, WalletId = existingApiKey.Wallet });
+                return Ok(new CreateApiKeyResponse { ApiKey = apiKey.Key, WalletId = apiKey.Wallet });
             }
             return NotFound();
         }
