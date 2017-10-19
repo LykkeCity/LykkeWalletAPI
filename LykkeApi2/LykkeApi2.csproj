@@ -28,12 +28,14 @@
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="1.0.7" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.7-beta" />
     <PackageReference Include="Lykke.Service.HftInternalService.Client" Version="1.0.7-beta" />
+    <PackageReference Include="Lykke.Service.Pledges.Client" Version="1.0.3-beta" />
     <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.11" />
     <PackageReference Include="Lykke.Service.Registration" Version="1.0.31" />
     <PackageReference Include="Lykke.SettingsReader" Version="1.0.42" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="1.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.SwaggerGen" Version="6.0.0-beta902" />
     <PackageReference Include="Swashbuckle.SwaggerUi" Version="6.0.0-beta902" />
 	<PackageReference Include="Lykke.Service.Assets.Client" Version="1.0.6-beta" />
