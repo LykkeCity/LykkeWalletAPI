@@ -13,7 +13,7 @@ using Swashbuckle.SwaggerGen.Annotations;
 namespace LykkeApi2.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/hft")]
     public class HftController : Controller
     {
         private readonly IHftInternalServiceAPI _hftInternalService;

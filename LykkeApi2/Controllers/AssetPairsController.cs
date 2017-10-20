@@ -14,7 +14,7 @@ using LykkeApi2.Infrastructure;
 
 namespace LykkeApi2.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/assetPairs")]
     [ValidateModel]
     public class AssetPairsController : Controller
     {

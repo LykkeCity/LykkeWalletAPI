@@ -27,7 +27,7 @@ using TransferEvent = Core.CashOperations.TransferEvent;
 namespace LykkeApi2.Controllers
 {
     //[Authorize]
-    [Route("api/[controller]")]
+    [Route("api/transactionHistory")]
     public class TransactionHistoryController : Controller
     {
         private readonly ILog _log;

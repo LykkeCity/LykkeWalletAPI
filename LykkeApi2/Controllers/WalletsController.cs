@@ -21,7 +21,7 @@ using CreateWalletRequest = LykkeApi2.Models.Wallets.CreateWalletRequest;
 namespace LykkeApi2.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/wallets")]
     public class WalletsController : Controller
     {
         private readonly IRequestContext _requestContext;

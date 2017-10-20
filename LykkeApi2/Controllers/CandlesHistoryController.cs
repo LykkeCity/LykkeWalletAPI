@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/candlesHistory")]
     [ValidateModel]
     public class CandlesHistoryController : Controller
     {
@@ -32,7 +32,7 @@ namespace LykkeApi2.Controllers
         /// <param name="timeInterval">Time interval</param>
         /// <param name="fromMoment">From moment in ISO 8601 (inclusive)</param>
         /// <param name="toMoment">To moment in ISO 8601 (exclusive)</param>
-        [HttpGet("{AssetPairId}/{PriceType}/{TimeInterval}/{FromMoment:datetime}/{ToMoment:datetime}")]
+        [HttpGet("{assetPairId}/{priceType}/{timeInterval}/{fromMoment:datetime}/{toMoment:datetime}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> Get([FromRoute]CandleSticksRequestModel request)
         {

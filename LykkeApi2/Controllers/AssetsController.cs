@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LykkeApi2.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/assets")]
     public class AssetsController : Controller
     {
         private readonly ICachedAssetsService _assetsService;
