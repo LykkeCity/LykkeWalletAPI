@@ -11,19 +11,24 @@ using System.Net;
 using ApiModels = LykkeApi2.Models.Pledges;
 using LykkeApi2.Mappers;
 using ClientModels = Lykke.Service.Pledges.Client.AutorestClient.Models;
+using Microsoft.AspNetCore.Authorization;
+using LykkeApi2.Infrastructure;
 
 namespace LykkeApi2.Controllers
 {
-    [Route("api/[controller]")]
+    [Authorize]
+    [Route("api/pledges")]
     public class PledgesController : Controller
     {
+        private readonly IRequestContext _requestContext;
         private readonly IPledgesClient _pledgesClient;
         private readonly ILog _log;
 
-        public PledgesController(ILog log, IPledgesClient pledgesClient)
+        public PledgesController(ILog log, IPledgesClient pledgesClient, IRequestContext requestContext)
         {
             _log = log ?? throw new ArgumentException(nameof(log));
             _pledgesClient = pledgesClient ?? throw new ArgumentException(nameof(pledgesClient));
+            _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
         }
 
         /// <summary>
@@ -36,13 +41,18 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiModels.CreatePledgeResponse), (int)HttpStatusCode.OK)]
-        public async Task<ApiModels.CreatePledgeResponse> Create([FromBody] ApiModels.CreatePledgeRequest request)
+        public async Task<IActionResult> Create([FromBody] ApiModels.CreatePledgeRequest request)
         {
+            if (request == null)
+                return BadRequest();
+
             var clientRequest = PledgesMapper.Instance.Map<ClientModels.CreatePledgeRequest>(request);
+            clientRequest.ClientId = _requestContext.ClientId;
+
             var pledge = await _pledgesClient.Create(clientRequest);
             var response = PledgesMapper.Instance.Map<ApiModels.CreatePledgeResponse>(pledge);
 
-            return response;
+            return Ok(response);
         }
 
         /// <summary>
@@ -55,12 +65,19 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiModels.GetPledgeResponse), (int)HttpStatusCode.OK)]
-        public async Task<ApiModels.GetPledgeResponse> Get(string id)
+        public async Task<IActionResult> Get(string id)
         {
+            if (String.IsNullOrEmpty(id))
+                return BadRequest();
+
             var pledge = await _pledgesClient.Get(id);
+
+            if (pledge == null)
+                return NotFound();
+
             var response = PledgesMapper.Instance.Map<ApiModels.GetPledgeResponse>(pledge);
 
-            return response;
+            return Ok(response);
         }
 
         /// <summary>
@@ -74,13 +91,18 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiModels.UpdatePledgeResponse), (int)HttpStatusCode.OK)]
-        public async Task<ApiModels.UpdatePledgeResponse> Update(string id, [FromBody] ApiModels.UpdatePledgeRequest request)
+        public async Task<IActionResult> Update(string id, [FromBody] ApiModels.UpdatePledgeRequest request)
         {
+            if (String.IsNullOrEmpty(id) || request == null)
+                return BadRequest();
+
             var clientRequest = PledgesMapper.Instance.Map<ClientModels.UpdatePledgeRequest>(request);
+            clientRequest.ClientId = _requestContext.ClientId;
+
             var pledge = await _pledgesClient.Update(id, clientRequest);
             var response = PledgesMapper.Instance.Map<ApiModels.UpdatePledgeResponse>(pledge);
 
-            return response;
+            return Ok(response);
         }
 
         /// <summary>
@@ -92,27 +114,30 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        public async Task Delete(string id)
+        public async Task<IActionResult> Delete(string id)
         {
+            if (String.IsNullOrEmpty(id))
+                return BadRequest();
+
             await _pledgesClient.Delete(id);
+
+            return Ok();
         }
 
         /// <summary>
-        /// Get pledges for provided client. 
+        /// Get all client pledges. 
         /// </summary>
-        /// <param name="id">Id of the client we wanna get pledges for.</param>
-        /// <returns></returns>
-        [HttpGet("client/{id}")]
-        [SwaggerOperation("GetPledgesByClientId")]
+        [HttpGet]
+        [SwaggerOperation("GetPledges")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(IEnumerable<ApiModels.GetPledgeResponse>), (int)HttpStatusCode.OK)]
-        public async Task<IEnumerable<ApiModels.GetPledgeResponse>> GetPledgesByClientId(string id)
+        public async Task<IActionResult> GetPledges()
         {
-            var pledges = await _pledgesClient.GetPledgesByClientId(id);
+            var pledges = await _pledgesClient.GetPledgesByClientId(_requestContext.ClientId);
             var response = PledgesMapper.Instance.Map<IEnumerable<ApiModels.GetPledgeResponse>>(pledges);
 
-            return response;
+            return Ok(response);
         }
     }
 }
