@@ -79,6 +79,11 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext;
         }
 
+        /// <summary>
+        /// Get transaction history.
+        /// </summary>
+        /// <param name="assetId"></param>
+        /// <returns></returns>
         [HttpGet]
         [SwaggerOperation("GetTransactionHistories")]
         [ApiExplorerSettings(GroupName = "Exchange")]
@@ -252,6 +257,11 @@ namespace LykkeApi2.Controllers
                 ));
         }
 
+        /// <summary>
+        /// Limit order and trades.
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         [HttpGet("limit/ordersAndTrades")]
         [SwaggerOperation("GetLimitOrderAndTrades")]
         [ApiExplorerSettings(GroupName = "Exchange")]
@@ -300,6 +310,11 @@ namespace LykkeApi2.Controllers
             return Ok(order.ConvertToApiModel(assetPair, apiLimitClientTrades, asset.Accuracy));
         }
 
+        /// <summary>
+        /// Limit trades.
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         [HttpGet("limit/trades")]
         [SwaggerOperation("GetLimitTradesHistories")]
         [ApiExplorerSettings(GroupName = "Exchange")]
@@ -332,6 +347,11 @@ namespace LykkeApi2.Controllers
             return Ok(ordered);
         }
 
+        /// <summary>
+        /// Limit history.
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         [HttpGet("limit/history")]
         [SwaggerOperation("GetLimitHistory")]
         [ApiExplorerSettings(GroupName = "Exchange")]
@@ -393,6 +413,11 @@ namespace LykkeApi2.Controllers
             return Ok(ordered);
         }
 
+        /// <summary>
+        /// Limit order.
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
         [HttpGet("limit/order")]
         [SwaggerOperation("GetLimitOrderHistories")]
         [ApiExplorerSettings(GroupName = "Exchange")]
@@ -426,6 +451,14 @@ namespace LykkeApi2.Controllers
             return Ok(order.ConvertToApiModel(assetPair, asset.Accuracy));
         }
 
+        /// <summary>
+        /// Get client transaction history.
+        /// </summary>
+        /// <param name="top"></param>
+        /// <param name="skip"></param>
+        /// <param name="operationType"></param>
+        /// <param name="assetId"></param>
+        /// <returns></returns>
         [HttpGet("client")]
         [ApiExplorerSettings(GroupName = "Client")]
         public async Task<IActionResult> Get([FromQuery] int top = 1000, [FromQuery] int skip = 0,

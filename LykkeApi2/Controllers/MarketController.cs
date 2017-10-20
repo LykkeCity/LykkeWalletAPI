@@ -19,6 +19,11 @@ namespace LykkeApi2.Controllers
             _rateCalculator = rateCalculator;
         }
 
+        /// <summary>
+        /// Convert one asset to another.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("converter")]
         [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(ConvertionResponse), (int)HttpStatusCode.OK)]

@@ -38,6 +38,10 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext;
         }
 
+        /// <summary>
+        /// Get asset pairs.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> Get()
@@ -46,6 +50,11 @@ namespace LykkeApi2.Controllers
             return Ok(AssetPairResponseModel.Create(assetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
         }
 
+        /// <summary>
+        /// Get asset pair by id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetPairById(string id)
@@ -58,6 +67,10 @@ namespace LykkeApi2.Controllers
             return Ok(AssetPairResponseModel.Create(new List<AssetPairModel> { assetPair.ConvertToApiModel() }));
         }
 
+        /// <summary>
+        /// Get asset pair rates.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("rates")]
         [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetPairRates()
@@ -76,6 +89,11 @@ namespace LykkeApi2.Controllers
             return Ok(AssetPairRatesResponseModel.Create(marketProfile.Select(m => m.ConvertToApiModel()).ToArray()));
         }
 
+        /// <summary>
+        /// Get asset pair rates by id.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpGet("rates/{assetPairId}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
         public async Task<IActionResult> GetAssetPairRatesById([FromRoute]AssetPairRequestModel request)
