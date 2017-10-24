@@ -40,7 +40,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("CreatePledge")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(ApiModels.CreatePledgeResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiModels.CreatePledgeResponse), (int)HttpStatusCode.Created)]
         public async Task<IActionResult> Create([FromBody] ApiModels.CreatePledgeRequest request)
         {
             if (request == null)
@@ -52,7 +52,7 @@ namespace LykkeApi2.Controllers
             var pledge = await _pledgesClient.Create(clientRequest);
             var response = PledgesMapper.Instance.Map<ApiModels.CreatePledgeResponse>(pledge);
 
-            return Ok(response);
+            return Created(uri: $"api/pledges/{pledge.Id}", value: response);
         }
 
         /// <summary>
@@ -86,20 +86,20 @@ namespace LykkeApi2.Controllers
         /// <param name="id">Id of the pledge we wanna update.</param>
         /// <param name="request">Pledge values we wanna change.</param>
         /// <returns>Updated pledge.</returns>
-        [HttpPut("{id}")]
+        [HttpPut]
         [SwaggerOperation("UpdatePledge")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ApiModels.UpdatePledgeResponse), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> Update(string id, [FromBody] ApiModels.UpdatePledgeRequest request)
+        public async Task<IActionResult> Update([FromBody] ApiModels.UpdatePledgeRequest request)
         {
-            if (String.IsNullOrEmpty(id) || request == null)
+            if (request == null)
                 return BadRequest();
 
             var clientRequest = PledgesMapper.Instance.Map<ClientModels.UpdatePledgeRequest>(request);
             clientRequest.ClientId = _requestContext.ClientId;
 
-            var pledge = await _pledgesClient.Update(id, clientRequest);
+            var pledge = await _pledgesClient.Update(clientRequest);
             var response = PledgesMapper.Instance.Map<ApiModels.UpdatePledgeResponse>(pledge);
 
             return Ok(response);
@@ -113,7 +113,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("DeletePledge")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         public async Task<IActionResult> Delete(string id)
         {
             if (String.IsNullOrEmpty(id))
@@ -121,7 +121,7 @@ namespace LykkeApi2.Controllers
 
             await _pledgesClient.Delete(id);
 
-            return Ok();
+            return NoContent();
         }
 
         /// <summary>
