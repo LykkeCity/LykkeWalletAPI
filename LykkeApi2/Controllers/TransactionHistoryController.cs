@@ -575,13 +575,13 @@ namespace LykkeApi2.Controllers
         [HttpGet("operationsDetail/history")]
         [SwaggerOperation("GeOperationsDetailHistory")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        public async Task<IActionResult> OperationsDetailHistory([FromBody] OperationsDetailHistoryRequestModel model)
+        public async Task<IActionResult> OperationsDetailHistory([FromQuery] string clientId, [FromQuery] string transactionId)
         {
-            var operationDetailsForClient = _operationDetailsInformationClient.GetAsync(model.ClientId).Result;
+            var operationDetailsForClient = _operationDetailsInformationClient.GetAsync(clientId).Result;
 
             if (operationDetailsForClient != null && operationDetailsForClient.Count() > 0)
             {
-                var result = operationDetailsForClient.FirstOrDefault(o => o.TransactionId == model.TransactionId);
+                var result = operationDetailsForClient.FirstOrDefault(o => o.TransactionId == transactionId);
                 if (result != null)
                     return Ok(result);
 
