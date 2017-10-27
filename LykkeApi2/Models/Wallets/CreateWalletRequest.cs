@@ -6,5 +6,6 @@ namespace LykkeApi2.Models.Wallets
     {
         public WalletType Type { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
     }
 }

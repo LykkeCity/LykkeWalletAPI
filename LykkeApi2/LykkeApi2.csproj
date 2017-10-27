@@ -27,7 +27,7 @@
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.32-beta" />
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="1.0.7" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.7-beta" />
-    <PackageReference Include="Lykke.Service.HftInternalService.Client" Version="1.0.7-beta" />
+    <PackageReference Include="Lykke.Service.HftInternalService.Client" Version="1.0.9-beta" />
     <PackageReference Include="Lykke.Service.Pledges.Client" Version="1.0.5-beta" />
     <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.11" />
     <PackageReference Include="Lykke.Service.Registration" Version="1.0.31" />
