@@ -17,6 +17,8 @@ namespace LykkeApi2.Models.ApiContractModels
         public string AddressTo { get; set; }
         public bool IsSettled { get; set; }
         public string Type { get; set; }
+        public string TransactionId { get; set; }
+        public string ClientId { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         public TransactionStates State { get; set; }

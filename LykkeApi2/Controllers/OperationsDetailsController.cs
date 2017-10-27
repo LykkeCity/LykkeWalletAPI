@@ -72,10 +72,11 @@ namespace LykkeApi2.Controllers
                 Id = Guid.NewGuid().ToString("N"),
                 TransactionId = model.TransactionId,
                 ClientId = _requestContext.ClientId,
+                CreatedAt = DateTime.Now,
                 Comment = model.Comment
             });
 
-            return Ok(operationDetailsInfoId);
+            return Ok(new OperationsDetailsRegisterResponseModel { Id = operationDetailsInfoId });
         }
     }
 }

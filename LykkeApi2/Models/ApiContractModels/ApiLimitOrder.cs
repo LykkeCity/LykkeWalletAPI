@@ -19,5 +19,7 @@
 
         public int Accuracy { get; set; }
         public string OrderStatus { get; set; }
+
+        public string ClientId { get; set; }
     }
 }
