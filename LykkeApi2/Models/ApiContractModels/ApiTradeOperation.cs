@@ -23,5 +23,8 @@ namespace LykkeApi2.Models.ApiContractModels
 
         public string OrderId { get; set; }
         public bool IsLimitTrade { get; set; }
+
+        public string ClientId { get; set; }
+        public string TransactionId { get; set; }
     }
 }

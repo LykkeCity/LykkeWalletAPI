@@ -19,5 +19,7 @@
         public double Position { get; set; }
 
         public int Accuracy { get; set; }
+
+        public string ClientId { get; set; }
     }
 }

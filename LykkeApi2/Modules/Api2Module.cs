@@ -19,6 +19,7 @@ using Core.Identity;
 using LkeServices.Identity;
 using Lykke.SettingsReader;
 using LykkeApi2.Infrastructure;
+using Lykke.Service.ClientAccount.Client.Custom;
 
 namespace LykkeApi2.Modules
 {
@@ -42,14 +43,6 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 
-            builder.RegisterOperationsRepositoryClients(
-                _settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, _log,
-                _settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
-
-            builder.RegisterOperationsRepositoryClients(
-                _settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, _log,
-                _settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
-
             builder.RegisterRateCalculatorClient(_settings.CurrentValue.Services.RateCalculatorServiceApiUrl, _log);
 
             builder.RegisterBalancesClient(_settings.CurrentValue.Services.BalancesServiceUrl, _log);
@@ -60,6 +53,9 @@ namespace LykkeApi2.Modules
 
             _services.UseAssetsClient(AssetServiceSettings.Create(
                 new Uri(_settings.CurrentValue.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
+
+            _services.UseClientAccountClient(ClientAccountServiceSettings.Create(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)), _log);
+
 
             _services.AddSingleton<ClientAccountLogic>();
 

@@ -14,5 +14,6 @@ namespace LykkeApi2.Models.ApiContractModels
         public string Status { get; set; }
         public string Type { get; set; }
         public double TotalCost { get; set; }
+        public string ClientId { get; set; }
     }
 }

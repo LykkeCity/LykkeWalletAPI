@@ -177,4 +177,13 @@
   <data name="AssetPairNotFound" xml:space="preserve">
     <value>Asset Pair Not Found</value>
   </data>
+  <data name="OperationDisabled" xml:space="preserve">
+    <value>Service temporarily unavailable. Sorry for the inconvenience.</value>
+  </data>
+  <data name="NotEnoughFunds" xml:space="preserve">
+    <value>Not enough funds</value>
+  </data>
+  <data name="OperationsDetailInfoNotFound" xml:space="preserve">
+    <value>Operataion Details Not Found</value>
+  </data>
 </root>

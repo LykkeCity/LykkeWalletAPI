@@ -26,7 +26,9 @@ namespace LykkeApi2.Models.ApiContractModels
                 AddressTo = cashInOutOperation.AddressTo,
                 IsSettled = isSettled,
                 Type = cashInOutOperation.Type.ToString(),
-                State = cashInOutOperation.State
+                State = cashInOutOperation.State,
+                TransactionId = cashInOutOperation.TransactionId,
+                ClientId = cashInOutOperation.ClientId,
             };
         }
 
@@ -49,7 +51,9 @@ namespace LykkeApi2.Models.ApiContractModels
                 AddressFrom = evnt.AddressFrom,
                 AddressTo = evnt.AddressTo,
                 IsSettled = isSettled,
-                State = evnt.State
+                State = evnt.State,
+                ClientId = evnt.ClientId,
+                TransactionId = evnt.TransactionId
             };
         }
 
@@ -61,7 +65,8 @@ namespace LykkeApi2.Models.ApiContractModels
                 Id = request.Id,
                 Volume = request.Amount.TruncateDecimalPlaces(asset.Accuracy),
                 Asset = request.AssetId,
-                IconId = asset.GetIcon()
+                IconId = asset.GetIcon(),
+                ClientId = request.ClientId,
             };
         }
 
@@ -84,7 +89,8 @@ namespace LykkeApi2.Models.ApiContractModels
                 AssetPair = limitTradeEvent.AssetPair,
                 Status = limitTradeEvent.Status.ToString(),
                 Type = limitTradeEvent.OrderType.ToString(),
-                TotalCost = Math.Abs(converted)
+                TotalCost = Math.Abs(converted),
+                ClientId = limitTradeEvent.ClientId,
             };
         }
 
@@ -105,7 +111,9 @@ namespace LykkeApi2.Models.ApiContractModels
                 MarketOrder = marketOrder?.ConvertToApiModel(assetPair, asset.Accuracy),
                 IsSettled = isSettled,
                 State = clientTrade.State,
-                IsLimitTrade = clientTrade.IsLimitOrderResult
+                IsLimitTrade = clientTrade.IsLimitOrderResult,
+                ClientId = clientTrade.ClientId,
+                TransactionId = clientTrade.TransactionId
             };
         }
 
@@ -132,7 +140,8 @@ namespace LykkeApi2.Models.ApiContractModels
                 DateTime = limitOrder.CreatedAt.ToIsoDateTime(),
                 Accuracy = assetPair.Accuracy,
                 Price = rate,
-                OrderStatus = limitOrder.Status
+                OrderStatus = limitOrder.Status,
+                ClientId = limitOrder.ClientId,
             };
         }
 
@@ -159,7 +168,8 @@ namespace LykkeApi2.Models.ApiContractModels
                     DateTime = limitOrder.CreatedAt.ToIsoDateTime(),
                     Accuracy = assetPair.Accuracy,
                     Price = rate,
-                    OrderStatus = limitOrder.Status
+                    OrderStatus = limitOrder.Status,
+                    ClientId = limitOrder.ClientId
                 },
                 Trades = trades
             };
@@ -188,7 +198,8 @@ namespace LykkeApi2.Models.ApiContractModels
                 DateTime = marketOrder.CreatedAt.ToIsoDateTime(),
                 Accuracy = assetPair.Accuracy,
                 Price = rate,
-                BaseAsset = marketOrder.Straight ? assetPair.BaseAssetId : assetPair.QuotingAssetId
+                BaseAsset = marketOrder.Straight ? assetPair.BaseAssetId : assetPair.QuotingAssetId,
+                ClientId = marketOrder.ClientId,
             };
         }
 
@@ -208,7 +219,9 @@ namespace LykkeApi2.Models.ApiContractModels
                 IsSettled = isSettled,
                 State = clientTrade.State,
                 IsLimitTrade = clientTrade.IsLimitOrderResult,
-                OrderId = clientTrade.LimitOrderId
+                OrderId = clientTrade.LimitOrderId,
+                ClientId = clientTrade.ClientId,
+                TransactionId = clientTrade.TransactionId
             };
         }
 

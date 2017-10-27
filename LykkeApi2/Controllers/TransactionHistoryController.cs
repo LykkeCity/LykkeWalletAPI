@@ -23,10 +23,12 @@ using LykkeApi2.Infrastructure;
 using CashInOutOperation = Core.CashOperations.CashInOutOperation;
 using ClientTrade = Core.CashOperations.ClientTrade;
 using TransferEvent = Core.CashOperations.TransferEvent;
+using Microsoft.AspNetCore.Authorization;
+using Lykke.Service.OperationsRepository.Client.Abstractions.OperationsDetails;
 
 namespace LykkeApi2.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/transactionHistory")]
     public class TransactionHistoryController : Controller
     {
@@ -46,6 +48,8 @@ namespace LykkeApi2.Controllers
         private readonly CachedDataDictionary<string, IAsset> _assets;
         private readonly IRequestContext _requestContext;
 
+        private readonly IOperationDetailsInformationClient _operationDetailsInformationClient;
+
         public TransactionHistoryController(
             ILog log,
             ITradeOperationsRepositoryClient clientTradesRepositoryClient,
@@ -60,8 +64,8 @@ namespace LykkeApi2.Controllers
             IHistoryOperationMapper<object, HistoryOperationSourceData> historyOperationMapper,
             CachedDataDictionary<string, IAssetPair> assetPairs,
             CachedDataDictionary<string, IAsset> assets,
-            IRequestContext requestContext
-        )
+            IRequestContext requestContext,
+            IOperationDetailsInformationClient operationDetailsInformationClient)
         {
             _log = log;
             _clientTradesRepositoryClient = clientTradesRepositoryClient;
@@ -77,6 +81,7 @@ namespace LykkeApi2.Controllers
             _assetPairs = assetPairs;
             _assets = assets;
             _requestContext = requestContext;
+            _operationDetailsInformationClient = operationDetailsInformationClient;
         }
 
         /// <summary>
@@ -258,6 +263,156 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
+        /// Get transaction history with every row containing information about trade, cash-in/cash-out, transfers and limit orders.
+        /// </summary>
+        /// <param name="assetId"></param>
+        /// <returns></returns>
+
+        [HttpGet("history")]
+        [SwaggerOperation("GetHistory")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
+        public async Task<IActionResult> GetHistory([FromQuery] string assetId = null)
+        {
+            var clientId = _requestContext.ClientId;
+
+            var assets = await _assets.GetDictionaryAsync();
+            var assetPairs = await _assetPairs.GetDictionaryAsync();
+            var marketOrders = new Dictionary<string, MarketOrder>();
+
+            string[] availableAssetIds = string.IsNullOrEmpty(assetId) || assetId.ToLower() == "null"
+                ? assets.Keys.ToArray()
+                : new string[] { assetId };
+
+            IClientTrade[] clientTrades = new IClientTrade[0];
+            ICashInOutOperation[] cashOperations = new ICashInOutOperation[0];
+            ITransferEvent[] transfers = new ITransferEvent[0];
+            ICashOutRequest[] cashOutAttempts = new ICashOutRequest[0];
+            ILimitTradeEvent[] limitEvents = new ILimitTradeEvent[0];
+
+            var walletsCredentials = (await _balancesClient.GetWalletCredential(_requestContext.ClientId));
+            var walletsCredentialsHistory = (await _balancesClient.GetWalletCredentialHistory(_requestContext.ClientId));
+
+            var clientMultisigs = new List<string>();
+
+            if (walletsCredentials != null && walletsCredentials.MultiSig != null)
+            {
+                clientMultisigs.Add(walletsCredentials.MultiSig);
+            }
+
+            if (walletsCredentialsHistory != null && walletsCredentialsHistory.WalletsCredentialHistory != null)
+            {
+                clientMultisigs.AddRange(walletsCredentialsHistory.WalletsCredentialHistory);
+            }
+
+            if (clientMultisigs.Count() > 0)
+            {
+                await Task.WhenAll(
+                        _clientTradesRepositoryClient.GetByMultisigsAsync(clientMultisigs.ToArray())
+                            .ContinueWith(
+                                task =>
+                                {
+                                    var operations =
+                                        OperationsRepositoryMapper.Instance.Map<IEnumerable<ClientTrade>>(task.Result);
+                                    clientTrades = operations
+                                        .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                        .ToArray();
+                                }),
+                        _cashOperationsRepositoryClient.GetByMultisigsAsync(clientMultisigs.ToArray())
+                            .ContinueWith(task =>
+                            {
+                                var operations = OperationsRepositoryMapper.Instance.Map<IEnumerable<CashInOutOperation>>(
+                                    task.Result);
+                                cashOperations = operations
+                                    .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                    .ToArray();
+                            }),
+                        _transferEventsRepositoryClient.GetByMultisigsAsync(clientMultisigs.ToArray())
+                            .ContinueWith(
+                                task =>
+                                {
+                                    var operations =
+                                        OperationsRepositoryMapper.Instance.Map<IEnumerable<TransferEvent>>(task.Result);
+                                    transfers = operations
+                                        .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                        .ToArray();
+                                }),
+                        _cashOutAttemptRepositoryClient.GetRequestsAsync(_requestContext.ClientId)
+                            .ContinueWith(
+                                task =>
+                                {
+                                    var operations = OperationsRepositoryMapper.Instance
+                                        .Map<IEnumerable<SwiftCashOutRequest>>(
+                                            task.Result);
+                                    cashOutAttempts = operations
+                                        .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                        .ToArray();
+                                }),
+                        _limitTradeEventsRepositoryClient.GetAsync(_requestContext.ClientId).ContinueWith(
+                            task =>
+                            {
+                                var limitTradeEventsResult =
+                                    OperationsRepositoryMapper.Instance.Map<IEnumerable<LimitTradeEvent>>(
+                                        task.Result);
+                                limitEvents = limitTradeEventsResult
+                                    .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                    .ToArray();
+                            })
+                    );
+            }
+
+            if (clientTrades.Count() > 0 && !clientTrades.Any(x => string.IsNullOrEmpty(x.MarketOrderId)))
+            {
+                var marketOrdersResult = OperationsRepositoryMapper.Instance.Map<IEnumerable<MarketOrder>>(
+                    _marketOrdersRepositoryClient.GetOrdersAsync(clientTrades.Where(x => !x.IsLimitOrderResult)
+                        .Select(x => x.MarketOrderId)
+                        .Distinct()
+                        .ToArray()).Result);
+                if (marketOrdersResult != null && marketOrdersResult.Count() > 0)
+                {
+                    marketOrders = marketOrdersResult.GroupBy(x => x.Id).Select(x => x.First()).ToDictionary(x => x.Id);
+                }
+            }
+
+            List<TransactionHistoryResponseModel> result = new List<TransactionHistoryResponseModel>();
+
+            // market trades
+            var apiClientTrades =
+              ApiTransactionsConvertor.GetClientTrades(clientTrades, assets, assetPairs, marketOrders);
+
+            result.AddRange(
+                apiClientTrades.Select(
+                    x => TransactionHistoryResponseModel.Create(Convert.ToDateTime(x.DateTime), x.Id, x)));
+
+            // limit trades
+            var apiLimitClientTrades =
+                ApiTransactionsConvertor.GetLimitClientTrades(clientTrades, assets);
+            result.AddRange(
+                apiLimitClientTrades.Select(
+                    x => TransactionHistoryResponseModel.Create(Convert.ToDateTime(x.DateTime), x.Id, x)));
+
+            result.AddRange(
+                limitEvents.Select(
+                    x => TransactionHistoryResponseModel.Create(x.CreatedDt, x.Id,
+                        limitTradeEvent: x.ConvertToApiModel(assetPairs[x.AssetPair], assets[assetPairs[x.AssetPair].QuotingAssetId].Accuracy))));
+            result.AddRange(
+                cashOperations.Select(
+                    x => TransactionHistoryResponseModel.Create(x.DateTime, x.Id,
+                        cashInOut: x.ConvertToApiModel(assets[x.AssetId]))));
+            result.AddRange(
+                transfers.Select(
+                    x => TransactionHistoryResponseModel.Create(x.DateTime, x.Id,
+                        transfer: x.ConvertToApiModel(assets[x.AssetId]))));
+            result.AddRange(
+                cashOutAttempts.Select(
+                    x => TransactionHistoryResponseModel.Create(x.DateTime, x.Id,
+                        cashOutAttempt: x.ConvertToApiModel(assets[x.AssetId]))));
+
+            var ordered = result.OrderByDescending(x => x.DateTime);
+
+            return Ok(ordered);
+        }
+
+        /// <summary>
         /// Limit order and trades.
         /// </summary>
         /// <param name="orderId"></param>
@@ -411,6 +566,31 @@ namespace LykkeApi2.Controllers
                 return NotFound(Phrases.NoLimitsHistory);
 
             return Ok(ordered);
+        }
+
+
+        /// <summary>
+        /// Get operation details information for the particular transaction id and for the client who has made the transaction.
+        /// </summary>
+        [HttpGet("operationsDetail/history")]
+        [SwaggerOperation("GeOperationsDetailHistory")]
+        [ApiExplorerSettings(GroupName = "Exchange")]
+        public async Task<IActionResult> OperationsDetailHistory([FromBody] OperationsDetailHistoryRequestModel model)
+        {
+            var operationDetailsForClient = _operationDetailsInformationClient.GetAsync(model.ClientId).Result;
+
+            if (operationDetailsForClient != null && operationDetailsForClient.Count() > 0)
+            {
+                var result = operationDetailsForClient.FirstOrDefault(o => o.TransactionId == model.TransactionId);
+                if (result != null)
+                    return Ok(result);
+
+                return NotFound(Phrases.OperationsDetailInfoNotFound);
+            }
+            else
+            {
+                return NotFound(Phrases.OperationsDetailInfoNotFound);
+            }
         }
 
         /// <summary>
