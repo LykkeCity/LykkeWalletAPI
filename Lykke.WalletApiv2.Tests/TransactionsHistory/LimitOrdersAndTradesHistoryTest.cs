@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using Lykke.Service.Balances.Client;
 using LykkeApi2.Infrastructure;
 using Xunit;
+using Lykke.Service.OperationsRepository.Client.Abstractions.OperationsDetails;
 
 namespace Lykke.WalletApiv2.Tests.TransactionsHistory
 {
@@ -34,6 +35,8 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
             var marketOrdersRepositoryClient = new Mock<IMarketOrdersRepositoryClient>();
             var requestContext = new Mock<IRequestContext>();
 
+            var operationDetailsInformationClient = new Mock<IOperationDetailsInformationClient>();
+
             var walletsClient = new Mock<IBalancesClient>();
             var operationsHistoryClient = new Mock<IOperationsHistoryClient>();
             var historyOperationMapper = new Mock<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
@@ -47,7 +50,7 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
                walletsClient.Object, operationsHistoryClient.Object, historyOperationMapper.Object, new CachedDataDictionary<string, IAssetPair>(
                   async () => (await CreateMockedResponseForTransactionsHistory.GetAssetPairs()).ToDictionary(itm => itm.Id)),
               new CachedDataDictionary<string, IAsset>(
-                  async () => (await CreateMockedResponseForTransactionsHistory.GetAssets()).ToDictionary(itm => itm.Id)), requestContext.Object);
+                  async () => (await CreateMockedResponseForTransactionsHistory.GetAssets()).ToDictionary(itm => itm.Id)), requestContext.Object, operationDetailsInformationClient.Object);
 
             var result = await _controller.LimitOrder("29a16081-2f1c-44d6-8dd3-72fa871f4bc7");
 
@@ -72,6 +75,8 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
             var operationsHistoryClient = new Mock<IOperationsHistoryClient>();
             var historyOperationMapper = new Mock<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
 
+            var operationDetailsInformationClient = new Mock<IOperationDetailsInformationClient>();
+
             tradeOperationsRepositoryClient.Setup(x => x.GetByOrderAsync(It.IsAny<string>()))
                 .Returns(CreateMockedResponseForTransactionsHistory.GetClientTrades());
 
@@ -81,9 +86,49 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
                walletsClient.Object, operationsHistoryClient.Object, historyOperationMapper.Object, new CachedDataDictionary<string, IAssetPair>(
                   async () => (await CreateMockedResponseForTransactionsHistory.GetAssetPairs()).ToDictionary(itm => itm.Id)),
               new CachedDataDictionary<string, IAsset>(
-                  async () => (await CreateMockedResponseForTransactionsHistory.GetAssets()).ToDictionary(itm => itm.Id)), requestContext.Object);
+                  async () => (await CreateMockedResponseForTransactionsHistory.GetAssets()).ToDictionary(itm => itm.Id)), requestContext.Object, operationDetailsInformationClient.Object);
 
             var result = await _controller.LimitTrades("29a16081-2f1c-44d6-8dd3-72fa871f4bc7");
+
+            Assert.NotNull(result);
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task GetOperationsDetailsHistory_ReturnsOk()
+        {
+            var logs = new Mock<ILog>();
+
+            var tradeOperationsRepositoryClient = new Mock<ITradeOperationsRepositoryClient>();
+            var transferOperationsRepositoryClient = new Mock<ITransferOperationsRepositoryClient>();
+            var cashOperationsRepositoryClient = new Mock<ICashOperationsRepositoryClient>();
+            var cashOutAttemptOperationsRepositoryClient = new Mock<ICashOutAttemptOperationsRepositoryClient>();
+            var limitTradeEventsRepositoryClient = new Mock<ILimitTradeEventsRepositoryClient>();
+            var limitOrdersRepositoryClient = new Mock<ILimitOrdersRepositoryClient>();
+            var marketOrdersRepositoryClient = new Mock<IMarketOrdersRepositoryClient>();
+            var requestContext = new Mock<IRequestContext>();
+            var walletsClient = new Mock<IBalancesClient>();
+            var operationsHistoryClient = new Mock<IOperationsHistoryClient>();
+            var historyOperationMapper = new Mock<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
+
+            var operationDetailsInformationClient = new Mock<IOperationDetailsInformationClient>();
+
+            operationDetailsInformationClient.Setup(x => x.GetAsync(It.IsAny<string>()))
+                .Returns(CreateMockedResponseForOperationsDetailsHistory.GetOperationsDetails());
+
+            _controller = new TransactionHistoryController(logs.Object, tradeOperationsRepositoryClient.Object,
+               transferOperationsRepositoryClient.Object, cashOperationsRepositoryClient.Object, cashOutAttemptOperationsRepositoryClient.Object,
+               limitTradeEventsRepositoryClient.Object, limitOrdersRepositoryClient.Object, marketOrdersRepositoryClient.Object,
+               walletsClient.Object, operationsHistoryClient.Object, historyOperationMapper.Object, new CachedDataDictionary<string, IAssetPair>(
+                  async () => (await CreateMockedResponseForTransactionsHistory.GetAssetPairs()).ToDictionary(itm => itm.Id)),
+              new CachedDataDictionary<string, IAsset>(
+                  async () => (await CreateMockedResponseForTransactionsHistory.GetAssets()).ToDictionary(itm => itm.Id)), requestContext.Object, operationDetailsInformationClient.Object);
+
+            var result = await _controller.OperationsDetailHistory(new LykkeApi2.Models.TransactionHistoryModels.OperationsDetailHistoryRequestModel()
+            {
+                TransactionId = "b64e64bb-eff6-43aa-aee8-d37e8dda7bed",
+                ClientId = "4e276be2-5fb8-438d-9d73-15687a84d5e9"
+            });
 
             Assert.NotNull(result);
             Assert.IsType<OkObjectResult>(result);
