@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.WalletApiv2.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LkeServices", "LkeServices\LkeServices.csproj", "{F013FA52-4048-463C-A931-20C386ECCFA5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.Service.ClientAccount.Client", "..\ClientAccount_Service\client\Lykke.Service.ClientAccount.Client\Lykke.Service.ClientAccount.Client.csproj", "{6C26805A-B515-46D6-ACB7-C057509FF49F}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,10 +37,6 @@ Global
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6C26805A-B515-46D6-ACB7-C057509FF49F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6C26805A-B515-46D6-ACB7-C057509FF49F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6C26805A-B515-46D6-ACB7-C057509FF49F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6C26805A-B515-46D6-ACB7-C057509FF49F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
