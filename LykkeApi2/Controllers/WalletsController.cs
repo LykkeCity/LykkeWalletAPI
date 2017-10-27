@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Lykke.Service.Balances.AutorestClient.Models;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.ClientAccount.Client.AutorestClient;
-using Lykke.Service.ClientAccount.Client.AutorestClient.Models;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ApiKey;
@@ -45,9 +44,9 @@ namespace LykkeApi2.Controllers
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
             var wallet = await _clientAccountService.CreateWalletAsync(
-                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(_requestContext.ClientId, request.Type, request.Name));
+                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(_requestContext.ClientId, request.Type, request.Name, request.Description));
 
-            return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type };
+            return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description };
         }
 
         /// <summary>
@@ -62,7 +61,7 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> CreateApiWallet([FromBody] CreateApiKeyRequest request)
         {
             var apiKey = await _hftInternalService.CreateKeyAsync(
-                new Lykke.Service.HftInternalService.Client.AutorestClient.Models.CreateApiKeyRequest(_requestContext.ClientId, request.Name));
+                new Lykke.Service.HftInternalService.Client.AutorestClient.Models.CreateApiKeyRequest(_requestContext.ClientId, request.Name, request.Description));
 
             if (apiKey == null)
                 return BadRequest();
@@ -102,7 +101,7 @@ namespace LykkeApi2.Controllers
         /// Get all client wallets.
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<WalletDto>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<WalletModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [SwaggerOperation("GetWallets")]
         public async Task<IActionResult> GetWallets()
@@ -112,7 +111,7 @@ namespace LykkeApi2.Controllers
             if (wallets == null)
                 return NotFound();
 
-            return Ok(wallets.Select(wallet => new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type }));
+            return Ok(wallets.Select(wallet => new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description }));
         }
 
         /// <summary>
@@ -129,7 +128,7 @@ namespace LykkeApi2.Controllers
             if (wallet == null)
                 return NotFound();
 
-            return Ok(new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type });
+            return Ok(new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description });
         }
 
 
@@ -162,6 +161,7 @@ namespace LykkeApi2.Controllers
                         Id = wallet.Id,
                         Type = wallet.Type,
                         Name = wallet.Name,
+                        Description = wallet.Description,
                         Balances = balances?.Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]
                     });
                 }
@@ -251,6 +251,7 @@ namespace LykkeApi2.Controllers
                         Id = wallet.Id,
                         Type = wallet.Type,
                         Name = wallet.Name,
+                        Description = wallet.Description,
                         Balances = balance != null ? ClientBalanceResponseModel.Create(balance) : null
                     });
                 }
