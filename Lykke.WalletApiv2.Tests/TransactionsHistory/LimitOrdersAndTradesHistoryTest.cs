@@ -124,11 +124,7 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
               new CachedDataDictionary<string, IAsset>(
                   async () => (await CreateMockedResponseForTransactionsHistory.GetAssets()).ToDictionary(itm => itm.Id)), requestContext.Object, operationDetailsInformationClient.Object);
 
-            var result = await _controller.OperationsDetailHistory(new LykkeApi2.Models.TransactionHistoryModels.OperationsDetailHistoryRequestModel()
-            {
-                TransactionId = "b64e64bb-eff6-43aa-aee8-d37e8dda7bed",
-                ClientId = "4e276be2-5fb8-438d-9d73-15687a84d5e9"
-            });
+            var result = await _controller.OperationsDetailHistory("4e276be2-5fb8-438d-9d73-15687a84d5e9", "b64e64bb-eff6-43aa-aee8-d37e8dda7bed");
 
             Assert.NotNull(result);
             Assert.IsType<OkObjectResult>(result);

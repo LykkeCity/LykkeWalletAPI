@@ -55,7 +55,7 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
-        /// Inserts new operation details information data in database
+        /// Inserts new operation details information data in database and returns the id of the new item
         /// </summary>
         /// <param name="model">
         /// model: necessary values for inserting an operation details information data in database
