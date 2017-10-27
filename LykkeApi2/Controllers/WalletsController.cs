@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Lykke.Service.Balances.AutorestClient.Models;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.ClientAccount.Client.AutorestClient;
-using Lykke.Service.ClientAccount.Client.AutorestClient.Models;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ApiKey;
@@ -45,9 +44,9 @@ namespace LykkeApi2.Controllers
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
             var wallet = await _clientAccountService.CreateWalletAsync(
-                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(_requestContext.ClientId, request.Type, request.Name));
+                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(_requestContext.ClientId, request.Type, request.Name, request.Description));
 
-            return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type };
+            return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description };
         }
 
         /// <summary>
