@@ -84,6 +84,7 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
 
             return Task.FromResult(assets.AsEnumerable());
         }
+
     }
 
     public class AssetPair : IAssetPair
