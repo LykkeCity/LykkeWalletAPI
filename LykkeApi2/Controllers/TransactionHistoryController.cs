@@ -3,7 +3,7 @@ using Common.Log;
 using Core.CashOperations;
 using Core.Exchange;
 using Core.Mappers;
-using Lykke.Service.Assets.Client.Custom;
+using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsHistory.Client.Models;
 using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
@@ -44,8 +44,8 @@ namespace LykkeApi2.Controllers
         private readonly IBalancesClient _balancesClient;
         private readonly IOperationsHistoryClient _historyClient;
         private readonly IHistoryOperationMapper<object, HistoryOperationSourceData> _historyOperationMapper;
-        private readonly CachedDataDictionary<string, IAssetPair> _assetPairs;
-        private readonly CachedDataDictionary<string, IAsset> _assets;
+        private readonly CachedDataDictionary<string, AssetPair> _assetPairs;
+        private readonly CachedDataDictionary<string, Asset> _assets;
         private readonly IRequestContext _requestContext;
 
         public TransactionHistoryController(
@@ -60,8 +60,8 @@ namespace LykkeApi2.Controllers
             IBalancesClient balancesClient,
             IOperationsHistoryClient historyClient,
             IHistoryOperationMapper<object, HistoryOperationSourceData> historyOperationMapper,
-            CachedDataDictionary<string, IAssetPair> assetPairs,
-            CachedDataDictionary<string, IAsset> assets,
+            CachedDataDictionary<string, AssetPair> assetPairs,
+            CachedDataDictionary<string, Asset> assets,
             IRequestContext requestContext
         )
         {
