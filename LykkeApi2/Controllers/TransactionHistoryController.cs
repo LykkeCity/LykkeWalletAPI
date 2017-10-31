@@ -17,6 +17,7 @@ using Swashbuckle.SwaggerGen.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Lykke.Service.Balances.Client;
 using LykkeApi2.Infrastructure;
@@ -92,6 +93,7 @@ namespace LykkeApi2.Controllers
         [HttpGet]
         [SwaggerOperation("GetTransactionHistories")]
         [ApiExplorerSettings(GroupName = "Exchange")]
+        [ProducesResponseType(typeof(TransactionsResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get([FromQuery] string assetId)
         {
             var clientTrades = new IClientTrade[0];
@@ -271,6 +273,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("history")]
         [SwaggerOperation("GetHistory")]
         [ApiExplorerSettings(GroupName = "Exchange")]
+        [ProducesResponseType(typeof(List<TransactionHistoryResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetHistory([FromQuery] string assetId = null)
         {
             var clientId = _requestContext.ClientId;
@@ -420,6 +423,9 @@ namespace LykkeApi2.Controllers
         [HttpGet("limit/ordersAndTrades")]
         [SwaggerOperation("GetLimitOrderAndTrades")]
         [ApiExplorerSettings(GroupName = "Exchange")]
+        [ProducesResponseType(typeof(ApiLimitOrdersAndTrades), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> LimitOrderAndTrades([FromQuery] string orderId)
         {
             var order = OperationsRepositoryMapper.Instance.Map<LimitOrder>(
@@ -473,6 +479,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("limit/trades")]
         [SwaggerOperation("GetLimitTradesHistories")]
         [ApiExplorerSettings(GroupName = "Exchange")]
+        [ProducesResponseType(typeof(IEnumerable<TransactionHistoryResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> LimitTrades([FromQuery] string orderId)
         {
             var assets = await _assets.GetDictionaryAsync();
@@ -510,6 +517,8 @@ namespace LykkeApi2.Controllers
         [HttpGet("limit/history")]
         [SwaggerOperation("GetLimitHistory")]
         [ApiExplorerSettings(GroupName = "Exchange")]
+        [ProducesResponseType(typeof(IEnumerable<TransactionHistoryResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> LimitHistory([FromQuery] string orderId)
         {
             var assets = await _assets.GetDictionaryAsync();
@@ -575,6 +584,8 @@ namespace LykkeApi2.Controllers
         [HttpGet("operationsDetail/history")]
         [SwaggerOperation("GeOperationsDetailHistory")]
         [ApiExplorerSettings(GroupName = "Exchange")]
+        [ProducesResponseType(typeof(Lykke.Service.OperationsRepository.AutorestClient.Models.OperationDetailsInformation), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> OperationsDetailHistory([FromQuery] string clientId, [FromQuery] string transactionId)
         {
             var operationDetailsForClient = _operationDetailsInformationClient.GetAsync(clientId).Result;
@@ -601,6 +612,9 @@ namespace LykkeApi2.Controllers
         [HttpGet("limit/order")]
         [SwaggerOperation("GetLimitOrderHistories")]
         [ApiExplorerSettings(GroupName = "Exchange")]
+        [ProducesResponseType(typeof(ApiLimitOrder), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> LimitOrder([FromQuery] string orderId)
         {
             var order = OperationsRepositoryMapper.Instance.Map<LimitOrder>(
@@ -641,6 +655,8 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("client")]
         [ApiExplorerSettings(GroupName = "Client")]
+        [ProducesResponseType(typeof(IEnumerable<TransactionHistoryResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get([FromQuery] int top = 1000, [FromQuery] int skip = 0,
             [FromQuery] string operationType = null, [FromQuery] string assetId = null)
         {

@@ -40,6 +40,7 @@ namespace LykkeApi2.Controllers
         /// Create wallet.
         /// </summary>
         [HttpPost]
+        [ProducesResponseType(typeof(WalletModel), (int)HttpStatusCode.OK)]
         [SwaggerOperation("CreateWallet")]
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
@@ -77,6 +78,7 @@ namespace LykkeApi2.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [SwaggerOperation("DeleteWallet")]
         public async Task<IActionResult> DeleteWallet(string id)
         {
             // checking if user owns the specified wallet
