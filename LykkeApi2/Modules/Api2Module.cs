@@ -1,34 +1,34 @@
-﻿using Autofac;
+﻿using System;
+using System.Linq;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common;
 using Common.Log;
+using Core.Identity;
 using Core.Mappers;
 using Core.Settings;
-using Lykke.Service.Assets.Client.Custom;
+using LkeServices.Identity;
+using Lykke.Service.Assets.Client;
+using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Balances.Client;
+using Lykke.Service.ClientAccount.Client.Custom;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
-using Lykke.Service.Balances.Client;
+using Lykke.Service.RateCalculator.Client;
+using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
+using LykkeApi2.Infrastructure;
 using LykkeApi2.Mappers;
 using LykkeApi2.Models.ApiContractModels;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using Lykke.Service.RateCalculator.Client;
-using System.Linq;
-using Core.Identity;
-using LkeServices.Identity;
-using Lykke.SettingsReader;
-using LykkeApi2.Infrastructure;
-using Lykke.Service.ClientAccount.Client.Custom;
 
 namespace LykkeApi2.Modules
 {
     public class Api2Module : Module
     {
-        private readonly IReloadingManager<BaseSettings> _settings;
         private readonly ILog _log;
         private readonly IServiceCollection _services;
-        private TimeSpan DEFAULT_CACHE_EXPIRATION_PERIOD = TimeSpan.FromHours(1);
+        private readonly IReloadingManager<BaseSettings> _settings;
 
         public Api2Module(IReloadingManager<BaseSettings> settings, ILog log)
         {
@@ -51,10 +51,11 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
 
-            _services.UseAssetsClient(AssetServiceSettings.Create(
-                new Uri(_settings.CurrentValue.Services.AssetsServiceUrl), DEFAULT_CACHE_EXPIRATION_PERIOD));
+            builder.RegisterInstance<IAssetsService>(
+                new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
 
-            _services.UseClientAccountClient(ClientAccountServiceSettings.Create(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)), _log);
+            _services.UseClientAccountClient(
+                ClientAccountServiceSettings.Create(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)), _log);
 
 
             _services.AddSingleton<ClientAccountLogic>();
@@ -73,17 +74,17 @@ namespace LykkeApi2.Modules
             builder.Register(c =>
             {
                 var ctx = c.Resolve<IComponentContext>();
-                return new CachedDataDictionary<string, IAsset>(
+                return new CachedDataDictionary<string, Asset>(
                     async () =>
-                        (await ctx.Resolve<ICachedAssetsService>().GetAllAssetsAsync()).ToDictionary(itm => itm.Id));
+                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync()).ToDictionary(itm => itm.Id));
             }).SingleInstance();
 
             builder.Register(c =>
             {
                 var ctx = c.Resolve<IComponentContext>();
-                return new CachedDataDictionary<string, IAssetPair>(
+                return new CachedDataDictionary<string, AssetPair>(
                     async () =>
-                        (await ctx.Resolve<ICachedAssetsService>().GetAllAssetPairsAsync())
+                        (await ctx.Resolve<IAssetsService>().AssetPairGetAllAsync())
                         .ToDictionary(itm => itm.Id));
             }).SingleInstance();
         }

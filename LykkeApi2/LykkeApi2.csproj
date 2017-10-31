@@ -38,7 +38,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.SwaggerGen" Version="6.0.0-beta902" />
     <PackageReference Include="Swashbuckle.SwaggerUi" Version="6.0.0-beta902" />
-	<PackageReference Include="Lykke.Service.Assets.Client" Version="1.0.6-beta" />
+	<PackageReference Include="Lykke.Service.Assets.Client" Version="2.0.6-beta" />
   </ItemGroup>
 
   <ItemGroup>
