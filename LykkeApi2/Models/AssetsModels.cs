@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LykkeApi2.Models
 {
@@ -107,5 +110,18 @@ namespace LykkeApi2.Models
     public class GetAssetDescriptionsRequestModel
     {
         public string[] Ids { get; set; }
+    }
+
+    public class BaseAssetModel
+    {
+        public string BaseAssetId { get; set; }
+    }
+
+    public class BaseAssetUpdateModel
+    {
+        [Required(AllowEmptyStrings = false)]
+        public string ClientId { get; set; }
+        [Required]
+        public string BaseAsssetId { get; set; }
     }
 }

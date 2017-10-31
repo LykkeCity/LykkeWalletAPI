@@ -1,21 +1,35 @@
+﻿using System;
 using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using Lykke.Service.Assets.Client;
-using Lykke.Service.Assets.Client.Models;
 using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using System.Threading.Tasks;
+using Common;
+using Common.Log;
+using Lykke.Service.ClientAccount.Client.AutorestClient;
+using Lykke.Service.Assets.Client;
+using Lykke.Service.Assets.Client.Models;
 
 namespace LykkeApi2.Controllers
 {
     [Route("api/assets")]
     public class AssetsController : Controller
     {
-        private readonly IAssetsService _assetsService;
+        #region settings consts
 
-        public AssetsController(IAssetsService assetsService)
+        private const string BaseAssetSetting = "BaseAsset";
+
+        #endregion
+
+        private readonly IAssetsService _assetsService;
+        private readonly IClientAccountService _clientAccountService;
+        private readonly ILog _log;
+
+        public AssetsController(IAssetsService assetsService, IClientAccountService clientAccountService, ILog log)
         {
             _assetsService = assetsService;
+            _clientAccountService = clientAccountService;
+            _log = log;
         }
 
         /// <summary>
@@ -194,6 +208,44 @@ namespace LykkeApi2.Controllers
             if (res == null)
                 return NotFound();
             return Ok(AssetExtendedResponseModel.Create(new[] {res.ConvertTpApiModel()}));
+        }
+        [HttpGet("baseAsset")]
+        [ApiExplorerSettings(GroupName = "Settings")]
+        public async Task<IActionResult> GetBaseAsset([FromQuery] string clientId)
+        {
+            object response;
+            try
+            {
+                response = await _clientAccountService.ClientSettings.GetSettingsAsync(clientId, BaseAssetSetting);
+    }
+            catch (Exception e)
+            {
+                await _log.WriteFatalErrorAsync(nameof(AssetsController), nameof(GetBaseAsset), e);
+                return BadRequest(new {message = e.Message});
+            }
+
+            if (response is BaseAssetModel baseAssetResponse)
+            {
+                return Ok(baseAssetResponse);
+            }
+
+            return BadRequest(new {message = "Unknown type of response from internal service"});
+        }
+
+        [HttpPost("baseAsset")]
+        [ApiExplorerSettings(GroupName = "Settings")]
+        public async Task SetBaseAsset([FromBody] BaseAssetUpdateModel model)
+        {
+            var request = new BaseAssetModel {BaseAssetId = model.BaseAsssetId};
+
+            try
+            {
+                await _clientAccountService.ClientSettings.SetSettingsAsync(model.ClientId, BaseAssetSetting, request.ToJson());
+            }
+            catch (Exception e)
+            {
+                await _log.WriteFatalErrorAsync(nameof(AssetsController), nameof(SetBaseAsset), e);
+            }
         }
     }
 }
