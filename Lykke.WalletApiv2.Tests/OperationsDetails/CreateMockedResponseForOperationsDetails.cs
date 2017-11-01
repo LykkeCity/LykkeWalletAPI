@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Lykke.WalletApiv2.Tests.OperationsDetails
 {
-    class CreateMockedResponseForOperationsDetails
+    public class CreateMockedResponseForOperationsDetails
     {
         public static Task<string> RegisterOerationDetail()
         {

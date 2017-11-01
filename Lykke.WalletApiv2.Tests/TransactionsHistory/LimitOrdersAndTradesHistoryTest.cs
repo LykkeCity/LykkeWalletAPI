@@ -44,6 +44,9 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
             limitOrdersRepositoryClient.Setup(x => x.GetOrderAsync(It.IsAny<string>()))
                 .Returns(CreateMockedResponseForTransactionsHistory.GetLimitOrder());
 
+            requestContext.SetupGet(x => x.ClientId).Returns("0701bdd3-c2d4-4d34-8750-a29e8e42df6c");
+
+
             _controller = new TransactionHistoryController(logs.Object, tradeOperationsRepositoryClient.Object,
                transferOperationsRepositoryClient.Object, cashOperationsRepositoryClient.Object, cashOutAttemptOperationsRepositoryClient.Object,
                limitTradeEventsRepositoryClient.Object, limitOrdersRepositoryClient.Object, marketOrdersRepositoryClient.Object,
@@ -76,6 +79,8 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
             var historyOperationMapper = new Mock<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
 
             var operationDetailsInformationClient = new Mock<IOperationDetailsInformationClient>();
+
+            requestContext.SetupGet(x => x.ClientId).Returns("0701bdd3-c2d4-4d34-8750-a29e8e42df6c");
 
             tradeOperationsRepositoryClient.Setup(x => x.GetByOrderAsync(It.IsAny<string>()))
                 .Returns(CreateMockedResponseForTransactionsHistory.GetClientTrades());
@@ -112,6 +117,8 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
             var historyOperationMapper = new Mock<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
 
             var operationDetailsInformationClient = new Mock<IOperationDetailsInformationClient>();
+
+            requestContext.SetupGet(x => x.ClientId).Returns("0701bdd3-c2d4-4d34-8750-a29e8e42df6c");
 
             operationDetailsInformationClient.Setup(x => x.GetAsync(It.IsAny<string>()))
                 .Returns(CreateMockedResponseForOperationsDetailsHistory.GetOperationsDetails());

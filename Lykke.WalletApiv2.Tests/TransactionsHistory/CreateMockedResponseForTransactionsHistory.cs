@@ -20,7 +20,7 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
                 Status = "Matched",
                 Straight = true,
                 Id = "29a16081-2f1c-44d6-8dd3-72fa871f4bc7",
-                ClientId = null,
+                ClientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c",
                 RemainingVolume = 0,
                 MatchingId = "36f75086-fd4c-4af8-928a-562c0ded7d81"
             };
@@ -67,7 +67,7 @@ namespace Lykke.WalletApiv2.Tests.TransactionsHistory
                 IsLimitOrderResult = true,
                 AssetId = "USD",
                 IsHidden = false,
-                ClientId = null
+                ClientId = "0701bdd3-c2d4-4d34-8750-a29e8e42df6c",
             });
             return Task.FromResult(trades.AsEnumerable());
         }

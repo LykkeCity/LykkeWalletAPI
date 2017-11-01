@@ -25,6 +25,8 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
             balancesClient.Setup(x => x.GetClientBalances(It.IsAny<string>()))
                 .Returns(CreateMockedResponseForClientBalances.GetAllBalancesForClient);
 
+            context.SetupGet(x => x.ClientId).Returns("0701bdd3-c2d4-4d34-8750-a29e8e42df6c");
+
             _controller = new WalletsController(context.Object, clientAccountService.Object, balancesClient.Object, hftInternalService.Object);
 
             var result = await _controller.GetTradingWalletBalances();
@@ -42,6 +44,8 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
             var balancesClient = new Mock<IBalancesClient>();
             balancesClient.Setup(x => x.GetClientBalanceByAssetId(It.IsAny<ClientBalanceByAssetIdModel>()))
                 .Returns(CreateMockedResponseForClientBalances.GetAllBalancesForClientByAssetId);
+
+            context.SetupGet(x => x.ClientId).Returns("0701bdd3-c2d4-4d34-8750-a29e8e42df6c");
 
             _controller = new WalletsController(context.Object, clientAccountService.Object, balancesClient.Object, hftInternalService.Object);
 

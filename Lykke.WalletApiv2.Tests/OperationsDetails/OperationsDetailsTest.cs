@@ -15,6 +15,7 @@ namespace Lykke.WalletApiv2.Tests.OperationsDetails
     {
         private OperationsDetailsController _controller;
 
+
         [Fact]
         public async Task CreateOperationDetails_ReturnsOk()
         {
@@ -26,12 +27,14 @@ namespace Lykke.WalletApiv2.Tests.OperationsDetails
             operationDetailsInformationClient.Setup(x => x.CreateAsync(It.IsAny<OperationDetailsInformation>()))
              .Returns(CreateMockedResponseForOperationsDetails.CreateOperation());
 
+            context.SetupGet(x => x.ClientId).Returns("4e276be2-5fb8-438d-9d73-15687a84d5e9");
+
             _controller = new OperationsDetailsController(logs.Object, context.Object,
                             operationDetailsInformationClient.Object);
 
             var result = await _controller.CreateOperationsDetail(new OperationsDetailsModel()
             {
-                TransactionId = " de8fd8c3-5115-488d-be0a-564389ea5365",
+                TransactionId = "de8fd8c3-5115-488d-be0a-564389ea5365",
                 Comment = "Test new comment"
             });
 
@@ -46,6 +49,7 @@ namespace Lykke.WalletApiv2.Tests.OperationsDetails
             var operationDetailsInformationClient = new Mock<IOperationDetailsInformationClient>();
             var logs = new Mock<ILog>();
 
+            context.SetupGet(x => x.ClientId).Returns("4e276be2-5fb8-438d-9d73-15687a84d5e9");
 
             _controller = new OperationsDetailsController(logs.Object, context.Object,
                             operationDetailsInformationClient.Object);
@@ -55,7 +59,7 @@ namespace Lykke.WalletApiv2.Tests.OperationsDetails
 
             var result = await _controller.RegisterOperationsDetail(new OperationsDetailsModel()
             {
-                TransactionId = " de8fd8c3-5115-488d-be0a-564389ea5365",
+                TransactionId = "de8fd8c3-5115-488d-be0a-564389ea5365",
                 Comment = "Test new comment"
             });
 
