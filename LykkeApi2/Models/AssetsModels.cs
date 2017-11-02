@@ -119,8 +119,6 @@ namespace LykkeApi2.Models
 
     public class BaseAssetUpdateModel
     {
-        [Required(AllowEmptyStrings = false)]
-        public string ClientId { get; set; }
         [Required]
         public string BaseAsssetId { get; set; }
     }

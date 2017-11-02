@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using LykkeApi2.Models.Operations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LykkeApi2.Controllers
 {
+    [Authorize]
     [Route("api/operations")]
     public class OperationsController : Controller
     {

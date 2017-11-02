@@ -11,6 +11,8 @@ using Lykke.Service.ClientAccount.Client.AutorestClient;
 using Lykke.Service.ClientSettings.Domain;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
+using LykkeApi2.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LykkeApi2.Controllers
 {
@@ -25,12 +27,14 @@ namespace LykkeApi2.Controllers
 
         private readonly IAssetsService _assetsService;
         private readonly IClientSettingsClient _clientSettingsService;
+        private readonly IRequestContext _requestContext;
         private readonly ILog _log;
 
-        public AssetsController(IAssetsService assetsService, IClientSettingsClient clientSettingsService, ILog log)
+        public AssetsController(IAssetsService assetsService, IClientSettingsClient clientSettingsService, IRequestContext requestContext, ILog log)
         {
             _assetsService = assetsService;
             _clientSettingsService = clientSettingsService;
+            _requestContext = requestContext;
             _log = log;
         }
 
@@ -211,15 +215,17 @@ namespace LykkeApi2.Controllers
                 return NotFound();
             return Ok(AssetExtendedResponseModel.Create(new[] {res.ConvertTpApiModel()}));
         }
+
+        [Authorize]
         [HttpGet("baseAsset")]
         [ApiExplorerSettings(GroupName = "Settings")]
-        public async Task<IActionResult> GetBaseAsset([FromQuery] string clientId)
+        public async Task<IActionResult> GetBaseAsset()
         {
             BaseAsset response;
             try
             {
-                response = await _clientSettingsService.GetSettings<BaseAsset>(clientId);
-    }
+                response = await _clientSettingsService.GetSettings<BaseAsset>(_requestContext.ClientId);
+            }
             catch (Exception e)
             {
                 await _log.WriteFatalErrorAsync(nameof(AssetsController), nameof(GetBaseAsset), e);
@@ -229,6 +235,7 @@ namespace LykkeApi2.Controllers
             return Ok(response);
             }
 
+        [Authorize]
         [HttpPost("baseAsset")]
         [ApiExplorerSettings(GroupName = "Settings")]
         public async Task<IActionResult> SetBaseAsset([FromBody] BaseAssetUpdateModel model)
@@ -237,7 +244,7 @@ namespace LykkeApi2.Controllers
 
             try
             {
-                await _clientSettingsService.SetSettings(model.ClientId, request);
+                await _clientSettingsService.SetSettings(_requestContext.ClientId, request);
             }
             catch (Exception e)
             {
