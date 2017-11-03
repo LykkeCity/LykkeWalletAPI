@@ -125,17 +125,17 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
-        /// Get all client pledges. 
+        /// Get client pledge. 
         /// </summary>
         [HttpGet]
-        [SwaggerOperation("GetPledges")]
+        [SwaggerOperation("GetPledge")]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IEnumerable<ApiModels.GetPledgeResponse>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetPledges()
+        [ProducesResponseType(typeof(ApiModels.GetPledgeResponse), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetPledge()
         {
-            var pledges = await _pledgesClient.GetPledgesByClientId(_requestContext.ClientId);
-            var response = PledgesMapper.Instance.Map<IEnumerable<ApiModels.GetPledgeResponse>>(pledges);
+            var pledges = await _pledgesClient.GetPledgeByClientId(_requestContext.ClientId);
+            var response = PledgesMapper.Instance.Map<ApiModels.GetPledgeResponse>(pledges);
 
             return Ok(response);
         }
