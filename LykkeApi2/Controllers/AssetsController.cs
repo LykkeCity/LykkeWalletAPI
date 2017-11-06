@@ -7,11 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Common;
 using Common.Log;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.AutorestClient;
-using Lykke.Service.ClientSettings.Domain;
+using Lykke.Service.ClientAccount.Client.Models;
 
 namespace LykkeApi2.Controllers
 {
@@ -25,14 +23,14 @@ namespace LykkeApi2.Controllers
         #endregion
 
         private readonly ICachedAssetsService _assetsService;
-        private readonly IClientSettingsClient _clientSettingsService;
+        private readonly IClientAccountClient _clientAccountClient;
         private readonly ILog _log;
 
-        public AssetsController(ICachedAssetsService assetsService, IClientSettingsClient clientSettingsService,
+        public AssetsController(ICachedAssetsService assetsService, IClientAccountClient clientAccountClient,
             ILog log)
         {
             _assetsService = assetsService;
-            _clientSettingsService = clientSettingsService;
+            _clientAccountClient = clientAccountClient;
             _log = log;
         }
 
@@ -139,10 +137,10 @@ namespace LykkeApi2.Controllers
         [ApiExplorerSettings(GroupName = "Settings")]
         public async Task<IActionResult> GetBaseAsset([FromQuery] string clientId)
         {
-            BaseAsset response;
+            BaseAssetClientModel response;
             try
             {
-                response = await _clientSettingsService.GetSettings<BaseAsset>(clientId);
+                response = await _clientAccountClient.GetBaseAssetAsync(clientId);
             }
             catch (Exception e)
             {
@@ -157,11 +155,9 @@ namespace LykkeApi2.Controllers
         [ApiExplorerSettings(GroupName = "Settings")]
         public async Task<IActionResult> SetBaseAsset([FromBody] BaseAssetUpdateModel model)
         {
-            var request = new BaseAsset {BaseAssetId = model.BaseAsssetId};
-
             try
             {
-                await _clientSettingsService.SetSettings(model.ClientId, request);
+                await _clientAccountClient.SetBaseAssetAsync(model.ClientId, model.BaseAsssetId);
             }
             catch (Exception e)
             {

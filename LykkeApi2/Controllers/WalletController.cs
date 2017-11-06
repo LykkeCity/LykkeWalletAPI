@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -35,8 +34,10 @@ namespace LykkeApi2.Controllers
         [ApiExplorerSettings(GroupName = "Client")]
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
-            var wallet = await _clientAccountService.CreateWalletAsync(
-                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(_requestContext.ClientId, request.Type, request.Name));
+            var apiRequest =
+                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(
+                    _requestContext.ClientId, request.Name);
+            var wallet = await _clientAccountService.CreateWalletAsync(apiRequest);
 
             return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type };
         }

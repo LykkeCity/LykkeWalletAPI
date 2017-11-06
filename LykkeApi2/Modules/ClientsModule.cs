@@ -3,12 +3,11 @@ using Autofac;
 using Core.Settings;
 using Lykke.MarketProfileService.Client;
 using Lykke.Service.CandlesHistory.Client;
-using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.AutorestClient;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.Registration;
 using Lykke.Service.Session;
 using Lykke.SettingsReader;
+using Lykke.Service.ClientAccount.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -23,12 +22,7 @@ namespace LykkeApi2.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<ClientAccountService>()
-                .As<IClientAccountService>()
-                .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.ClientAccountServiceUrl));
-
-            builder.RegisterType<ClientSettingsClient>()
-                .As<IClientSettingsClient>();
+            builder.RegisterLykkeServiceClient(_serviceSettings.CurrentValue.ClientAccountServiceUrl);
 
             builder.RegisterType<HftInternalServiceAPI>()
                 .As<IHftInternalServiceAPI>()
