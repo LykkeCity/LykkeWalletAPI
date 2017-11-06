@@ -4,7 +4,7 @@ using LykkeApi2.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Threading.Tasks;
-using Lykke.Service.ClientAccount.Client.AutorestClient;
+using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using LykkeApi2.Infrastructure;
 using Xunit;
@@ -19,7 +19,7 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
         public async Task GetClientBalancesByClientId_ReturnsOk()
         {
             var context = new Mock<IRequestContext>();
-            var clientAccountService = new Mock<IClientAccountService>();
+            var clientAccountService = new Mock<IClientAccountClient>();
             var hftInternalService = new Mock<IHftInternalServiceAPI>();
             var balancesClient = new Mock<IBalancesClient>();
             balancesClient.Setup(x => x.GetClientBalances(It.IsAny<string>()))
@@ -39,7 +39,7 @@ namespace Lykke.WalletApiv2.Tests.ClientBalances
         public async Task GetClientBalancesByClientIdAndAssetId_ReturnsOk()
         {
             var context = new Mock<IRequestContext>();
-            var clientAccountService = new Mock<IClientAccountService>();
+            var clientAccountService = new Mock<IClientAccountClient>();
             var hftInternalService = new Mock<IHftInternalServiceAPI>();
             var balancesClient = new Mock<IBalancesClient>();
             balancesClient.Setup(x => x.GetClientBalanceByAssetId(It.IsAny<ClientBalanceByAssetIdModel>()))
