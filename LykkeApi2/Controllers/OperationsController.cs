@@ -56,7 +56,7 @@ namespace LykkeApi2.Controllers
 
             await _operationsApi.ApiOperationsTransferByIdPostAsync(id.Value,
                 new Lykke.Service.Operations.Client.AutorestClient.Models.CreateTransferCommand(
-                    new Guid(_requestContext.ClientId), cmd.Amount, cmd.WalletId, cmd.AssetId));
+                    new Guid(_requestContext.ClientId), cmd.Amount, cmd.SourceWalletId, cmd.WalletId, cmd.AssetId));
             
             return Created(Url.Action("Get", new { id }), id);
         }
