@@ -24,6 +24,7 @@ namespace LykkeApi2.Controllers
     public class WalletsController : Controller
     {
         private const string TradingWalletId = "trading";
+        private const string TradingWalletType = "Trading";
 
         private readonly IRequestContext _requestContext;
         private readonly IBalancesClient _balancesClient;
@@ -115,7 +116,9 @@ namespace LykkeApi2.Controllers
             if (wallets == null)
                 return NotFound();
 
-            return Ok(wallets.Select(wallet => new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description }));
+            var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
+            return Ok(wallets.Select(wallet => new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description,
+                ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key}));
         }
 
         /// <summary>
@@ -132,7 +135,9 @@ namespace LykkeApi2.Controllers
             if (wallet == null)
                 return NotFound();
 
-            return Ok(new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description });
+            var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
+            return Ok(new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description,
+                ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key});
         }
 
 
@@ -150,13 +155,14 @@ namespace LykkeApi2.Controllers
             result.Add(new WalletBalancesModel
             {
                 Id = TradingWalletId,
-                Type = "Trading",
+                Type = TradingWalletType,
                 Balances = clientBalances?.Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]
             });
 
             var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             if (wallets != null)
             {
+                var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
                 foreach (var wallet in wallets)
                 {
                     var balances = await _balancesClient.GetClientBalances(wallet.Id);
@@ -166,7 +172,8 @@ namespace LykkeApi2.Controllers
                         Type = wallet.Type,
                         Name = wallet.Name,
                         Description = wallet.Description,
-                        Balances = balances?.Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]
+                        Balances = balances?.Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0],
+                        ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
                     });
                 }
             }
@@ -235,13 +242,14 @@ namespace LykkeApi2.Controllers
             result.Add(new WalletAssetBalanceModel
             {
                 Id = TradingWalletId,
-                Type = "Trading",
+                Type = TradingWalletType,
                 Balances = clientBalance != null ? ClientBalanceResponseModel.Create(clientBalance) : null
             });
 
             var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             if (wallets != null)
             {
+                var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
                 foreach (var wallet in wallets)
                 {
                     var balance = await _balancesClient.GetClientBalanceByAssetId(
@@ -256,7 +264,8 @@ namespace LykkeApi2.Controllers
                         Type = wallet.Type,
                         Name = wallet.Name,
                         Description = wallet.Description,
-                        Balances = balance != null ? ClientBalanceResponseModel.Create(balance) : null
+                        Balances = balance != null ? ClientBalanceResponseModel.Create(balance) : null,
+                        ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
                     });
                 }
             }
