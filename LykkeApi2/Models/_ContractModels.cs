@@ -13,6 +13,7 @@
         public bool SwiftDepositEnabled { get; set; }
         public bool BlockchainDepositEnabled { get; set; }
         public string CategoryId { get; set; }
+        public bool IsBase { get; set; }
     }
 
     public class AssetDescriptionModel
