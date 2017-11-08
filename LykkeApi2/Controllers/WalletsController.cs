@@ -23,9 +23,6 @@ namespace LykkeApi2.Controllers
     [Route("api/wallets")]
     public class WalletsController : Controller
     {
-        private const string TradingWalletId = "trading";
-        private const string TradingWalletType = "Trading";
-
         private readonly IRequestContext _requestContext;
         private readonly IBalancesClient _balancesClient;
         private readonly IClientAccountClient _clientAccountClient;
@@ -154,8 +151,8 @@ namespace LykkeApi2.Controllers
             var clientBalances = await _balancesClient.GetClientBalances(_requestContext.ClientId);
             result.Add(new WalletBalancesModel
             {
-                Id = TradingWalletId,
-                Type = TradingWalletType,
+                Id = _requestContext.ClientId,
+                Type = TradingWalletStubs.TradingWalletType,
                 Balances = clientBalances?.Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]
             });
 
@@ -241,8 +238,8 @@ namespace LykkeApi2.Controllers
 
             result.Add(new WalletAssetBalanceModel
             {
-                Id = TradingWalletId,
-                Type = TradingWalletType,
+                Id = _requestContext.ClientId,
+                Type = TradingWalletStubs.TradingWalletType,
                 Balances = clientBalance != null ? ClientBalanceResponseModel.Create(clientBalance) : null
             });
 
