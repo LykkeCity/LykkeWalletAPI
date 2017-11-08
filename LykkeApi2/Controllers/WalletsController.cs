@@ -87,13 +87,11 @@ namespace LykkeApi2.Controllers
             if (wallet == null)
                 return NotFound();
 
-            // checking if this is HFT wallet
             // todo: always delete wallet through ClientAccountService; HFT internal service should process deleted messages by itself
-            var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
-            if (clientKeys.Any(x => x.Wallet == id))
+            var apiKey = (await _hftInternalService.GetKeysAsync(_requestContext.ClientId))?.FirstOrDefault(x => x.Wallet == id);
+            if (apiKey != null)
             {
-                await _hftInternalService.DeleteKeyAsync(id);
-                return Ok();
+                await _hftInternalService.DeleteKeyAsync(apiKey.Key);
             }
             await _clientAccountClient.DeleteWalletAsync(id);
             return Ok();
