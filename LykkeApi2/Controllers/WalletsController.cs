@@ -151,7 +151,7 @@ namespace LykkeApi2.Controllers
             var clientBalances = await _balancesClient.GetClientBalances(_requestContext.ClientId);
             result.Add(new WalletBalancesModel
             {
-                Id = TradingWalletStubs.TradingWalletId.ToString(),
+                Id = _requestContext.ClientId,
                 Type = TradingWalletStubs.TradingWalletType,
                 Balances = clientBalances?.Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]
             });
@@ -238,7 +238,7 @@ namespace LykkeApi2.Controllers
 
             result.Add(new WalletAssetBalanceModel
             {
-                Id = TradingWalletStubs.TradingWalletId.ToString(),
+                Id = _requestContext.ClientId,
                 Type = TradingWalletStubs.TradingWalletType,
                 Balances = clientBalance != null ? ClientBalanceResponseModel.Create(clientBalance) : null
             });
