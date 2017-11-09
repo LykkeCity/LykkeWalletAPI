@@ -24,7 +24,7 @@
     <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.15" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.0.9-beta" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="1.0.17" />
-    <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.50" />
+    <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.55" />
     <PackageReference Include="Lykke.Service.Operations.Client" Version="0.1.10" />
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="1.0.7" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.10-beta" />
