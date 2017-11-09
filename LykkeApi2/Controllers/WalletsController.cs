@@ -89,7 +89,7 @@ namespace LykkeApi2.Controllers
             if (wallet == null)
                 return NotFound();
 
-            wallet = await _clientAccountService.ModifyWalletAsync(id, new Lykke.Service.ClientAccount.Client.AutorestClient.Models.ModifyWalletRequest(request.Name));
+            wallet = await _clientAccountService.ModifyWalletAsync(id, new Lykke.Service.ClientAccount.Client.AutorestClient.Models.ModifyWalletRequest(request.Name, request.Description));
             if (wallet == null)
                 return NotFound();
 
