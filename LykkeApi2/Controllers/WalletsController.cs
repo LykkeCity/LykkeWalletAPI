@@ -23,6 +23,7 @@ namespace LykkeApi2.Controllers
     [Route("api/wallets")]
     public class WalletsController : Controller
     {
+        // todo: should be changed to Lykke.Service.ClientAccount.Client.AutorestClient.Models.WalletType.Trading after updating Lykke.Service.ClientAccount.Client nuget package
         private const string TradingWalletType = "Trading";
 
         private readonly IRequestContext _requestContext;
