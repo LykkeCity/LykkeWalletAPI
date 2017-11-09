@@ -45,7 +45,7 @@ namespace LykkeApi2.Controllers
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
             var wallet = await _clientAccountService.CreateWalletAsync(
-                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(_requestContext.ClientId, request.Type, request.Name, request.Description));
+                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(request.Type, _requestContext.ClientId, request.Name, request.Description));
 
             return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description };
         }
