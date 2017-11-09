@@ -71,6 +71,32 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
+        /// Modify existing wallet.
+        /// </summary>
+        /// <param name="id">Wallet id.</param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [ProducesResponseType(typeof(WalletModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpPut("{id}")]
+        [SwaggerOperation("ModifyWallet")]
+        public async Task<IActionResult> ModifyWallet(string id, [FromBody]ModifyWalletRequest request)
+        {
+            // checking if user owns the specified wallet
+            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
+            var wallet = wallets?.FirstOrDefault(x => x.Id == id);
+            if (wallet == null)
+                return NotFound();
+
+            wallet = await _clientAccountService.ModifyWalletAsync(id, new Lykke.Service.ClientAccount.Client.AutorestClient.Models.ModifyWalletRequest(request.Name));
+            if (wallet == null)
+                return NotFound();
+
+            return Ok(new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description });
+        }
+
+        /// <summary>
         /// Delete wallet.
         /// </summary>
         /// <param name="id"></param>
