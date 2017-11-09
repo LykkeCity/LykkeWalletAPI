@@ -7,6 +7,7 @@ namespace LykkeApi2.Models.Wallets
         public CreateWalletRequestValidator()
         {
             RuleFor(m => m.Name).NotEmpty();
+            RuleFor(m => m.Type).IsInEnum();
         }
     }
 }

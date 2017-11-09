@@ -54,8 +54,6 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
 
-            builder.RegisterLykkeServiceClient(_settings.CurrentValue.Services.AssetsServiceUrl);
-
             _services.AddSingleton<ClientAccountLogic>();
 
             builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();

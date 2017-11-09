@@ -6,9 +6,9 @@ using System.Net;
 using System.Threading.Tasks;
 using Common.Log;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.ClientAccount.Client.Models;
 using LykkeApi2.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 
@@ -42,7 +42,7 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(GetBaseAssetsRespModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GetBaseAssetsRespModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
             var assets = (await _assetsService.AssetGetAllAsync()).Where(x => !x.IsDisabled);
@@ -56,8 +56,8 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("{id}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(GetClientBaseAssetRespModel), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(GetClientBaseAssetRespModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get(string id)
         {
             var asset = await _assetsService.AssetGetAsync(id);
@@ -76,8 +76,8 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("{assetId}/attributes")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(AssetAttributesModel), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(AssetAttributesModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetAttributes(string assetId)
         {
             var keyValues = await _assetsService.AssetAttributeGetAllForAssetAsync(assetId);
@@ -94,8 +94,8 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("{assetId}/attributes/{key}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(KeyValue), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(KeyValue), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetAttributeByKey(string assetId, string key)
         {
             var keyValues = await _assetsService.AssetAttributeGetAsync(assetId, key);
@@ -111,7 +111,7 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("description")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(AssetDescriptionsResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetDescriptionsResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetDescriptions()
         {
             var res = await _assetsService.AssetExtendedInfoGetAllAsync();
@@ -125,7 +125,7 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("{assetId}/description")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(AssetDescriptionModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetDescriptionModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetDescription(string assetId)
         {
             var extendedInfo = await _assetsService.AssetExtendedInfoGetAsync(assetId) ??
@@ -158,7 +158,7 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("categories")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetCategories()
         {
             var res = await _assetsService.AssetCategoryGetAllAsync();
@@ -172,15 +172,15 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("categories{id}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetCategory(string id)
         {
             var res = await _assetsService.AssetCategoryGetAsync(id);
             if (res == null)
                 return NotFound();
 
-            return Ok(GetAssetCategoriesResponseModel.Create(new[] {res.ConvertToApiModel()}));
+            return Ok(GetAssetCategoriesResponseModel.Create(new[] { res.ConvertToApiModel() }));
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("extended")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(AssetExtendedResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetExtendedResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetsExtended()
         {
             var res = await _assetsService.AssetExtendedInfoGetAllAsync();
@@ -204,19 +204,21 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("{assetId}/extended")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(AssetExtendedResponseModel), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(AssetExtendedResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetsExtended(string assetId)
         {
             var res = await _assetsService.AssetExtendedInfoGetAsync(assetId);
             if (res == null)
                 return NotFound();
-            return Ok(AssetExtendedResponseModel.Create(new[] {res.ConvertTpApiModel()}));
+            return Ok(AssetExtendedResponseModel.Create(new[] { res.ConvertTpApiModel() }));
         }
 
         [Authorize]
         [HttpGet("baseAsset")]
         [ApiExplorerSettings(GroupName = "Settings")]
+        [ProducesResponseType(typeof(BaseAssetClientModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetBaseAsset()
         {
             BaseAssetClientModel response;
@@ -227,15 +229,17 @@ namespace LykkeApi2.Controllers
             catch (Exception e)
             {
                 await _log.WriteFatalErrorAsync(nameof(AssetsController), nameof(GetBaseAsset), e);
-                return BadRequest(new {message = e.Message});
+                return BadRequest(new { message = e.Message });
             }
 
             return Ok(response);
-            }
+        }
 
         [Authorize]
         [HttpPost("baseAsset")]
         [ApiExplorerSettings(GroupName = "Settings")]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> SetBaseAsset([FromBody] BaseAssetUpdateModel model)
         {
             try
@@ -245,7 +249,7 @@ namespace LykkeApi2.Controllers
             catch (Exception e)
             {
                 await _log.WriteFatalErrorAsync(nameof(AssetsController), nameof(SetBaseAsset), e);
-                return BadRequest(new {message = e.Message});
+                return BadRequest(new { message = e.Message });
             }
 
             return Ok();

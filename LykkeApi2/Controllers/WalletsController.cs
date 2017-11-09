@@ -44,7 +44,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("CreateWallet")]
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
-            var wallet = await _clientAccountClient.CreateWalletAsync(_requestContext.ClientId, request.Name, request.Description);
+            var wallet = await _clientAccountClient.CreateWalletAsync(_requestContext.ClientId, request.Type, request.Name, request.Description);
 
             return new WalletModel {Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description};
         }
@@ -67,6 +67,32 @@ namespace LykkeApi2.Controllers
                 return BadRequest();
 
             return Ok(new CreateApiKeyResponse { ApiKey = apiKey.Key, WalletId = apiKey.Wallet });
+        }
+
+        /// <summary>
+        /// Modify existing wallet.
+        /// </summary>
+        /// <param name="id">Wallet id.</param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [ProducesResponseType(typeof(WalletModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpPut("{id}")]
+        [SwaggerOperation("ModifyWallet")]
+        public async Task<IActionResult> ModifyWallet(string id, [FromBody]ModifyWalletRequest request)
+        {
+            // checking if user owns the specified wallet
+            var wallets = await _clientAccountClient.GetWalletsByClientIdAsync(_requestContext.ClientId);
+            var wallet = wallets?.FirstOrDefault(x => x.Id == id);
+            if (wallet == null)
+                return NotFound();
+
+            wallet = await _clientAccountClient.ModifyWalletAsync(id, request.Name, request.Description);
+            if (wallet == null)
+                return NotFound();
+
+            return Ok(new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description });
         }
 
         /// <summary>
