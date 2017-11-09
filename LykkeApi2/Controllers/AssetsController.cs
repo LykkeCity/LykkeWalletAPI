@@ -24,11 +24,11 @@ namespace LykkeApi2.Controllers
         #endregion
 
         private readonly IAssetsService _assetsService;
-        private readonly IClientAccountClient _clientAccountClient;
+        private readonly IClientAccountSettingsClient _clientAccountClient;
         private readonly IRequestContext _requestContext;
         private readonly ILog _log;
 
-        public AssetsController(IAssetsService assetsService, IClientAccountClient clientAccountClient, IRequestContext requestContext, ILog log)
+        public AssetsController(IAssetsService assetsService, IClientAccountSettingsClient clientAccountClient, IRequestContext requestContext, ILog log)
         {
             _assetsService = assetsService;
             _clientAccountClient = clientAccountClient;

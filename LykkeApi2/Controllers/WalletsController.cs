@@ -23,7 +23,7 @@ namespace LykkeApi2.Controllers
     [Route("api/wallets")]
     public class WalletsController : Controller
     {
-        private const string TradingWalletType = "Trading";
+        private string TradingWalletType => Lykke.Service.ClientAccount.Client.AutorestClient.Models.WalletType.Trading.ToString();
 
         private readonly IRequestContext _requestContext;
         private readonly IBalancesClient _balancesClient;
@@ -174,7 +174,6 @@ namespace LykkeApi2.Controllers
                 ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
             });
         }
-
 
         /// <summary>
         /// Get all wallets balances.

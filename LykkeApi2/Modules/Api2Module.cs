@@ -11,7 +11,6 @@ using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
-using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.RateCalculator.Client;
