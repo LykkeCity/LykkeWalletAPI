@@ -11,7 +11,6 @@ using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
-using Lykke.Service.ClientAccount.Client.Custom;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.RateCalculator.Client;
@@ -53,10 +52,6 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
-
-            _services.UseClientAccountClient(
-                ClientAccountServiceSettings.Create(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)), _log);
-
 
             _services.AddSingleton<ClientAccountLogic>();
 

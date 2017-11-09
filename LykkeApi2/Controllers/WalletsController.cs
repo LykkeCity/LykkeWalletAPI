@@ -23,8 +23,7 @@ namespace LykkeApi2.Controllers
     [Route("api/wallets")]
     public class WalletsController : Controller
     {
-        // todo: should be changed to Lykke.Service.ClientAccount.Client.AutorestClient.Models.WalletType.Trading after updating Lykke.Service.ClientAccount.Client nuget package
-        private const string TradingWalletType = "Trading";
+        private string TradingWalletType => Lykke.Service.ClientAccount.Client.AutorestClient.Models.WalletType.Trading.ToString();
 
         private readonly IRequestContext _requestContext;
         private readonly IBalancesClient _balancesClient;
@@ -48,7 +47,7 @@ namespace LykkeApi2.Controllers
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
             var wallet = await _clientAccountService.CreateWalletAsync(
-                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(_requestContext.ClientId, request.Type, request.Name, request.Description));
+                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(request.Type, _requestContext.ClientId, request.Name, request.Description));
 
             return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description };
         }
@@ -151,7 +150,6 @@ namespace LykkeApi2.Controllers
                 ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
             });
         }
-
 
         /// <summary>
         /// Get all wallets balances.
