@@ -217,7 +217,7 @@ namespace LykkeApi2.Controllers
         [Authorize]
         [HttpGet("baseAsset")]
         [ApiExplorerSettings(GroupName = "Settings")]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(BaseAssetClientModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetBaseAsset()
         {

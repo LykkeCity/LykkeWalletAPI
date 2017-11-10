@@ -73,6 +73,32 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
+        /// Modify existing wallet.
+        /// </summary>
+        /// <param name="id">Wallet id.</param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [ProducesResponseType(typeof(WalletModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpPut("{id}")]
+        [SwaggerOperation("ModifyWallet")]
+        public async Task<IActionResult> ModifyWallet(string id, [FromBody]ModifyWalletRequest request)
+        {
+            // checking if user owns the specified wallet
+            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
+            var wallet = wallets?.FirstOrDefault(x => x.Id == id);
+            if (wallet == null)
+                return NotFound();
+
+            wallet = await _clientAccountService.ModifyWalletAsync(id, new Lykke.Service.ClientAccount.Client.AutorestClient.Models.ModifyWalletRequest(request.Name, request.Description));
+            if (wallet == null)
+                return NotFound();
+
+            return Ok(new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description });
+        }
+
+        /// <summary>
         /// Delete wallet.
         /// </summary>
         /// <param name="id"></param>
@@ -89,13 +115,11 @@ namespace LykkeApi2.Controllers
             if (wallet == null)
                 return NotFound();
 
-            // checking if this is HFT wallet
             // todo: always delete wallet through ClientAccountService; HFT internal service should process deleted messages by itself
-            var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
-            if (clientKeys.Any(x => x.Wallet == id))
+            var apiKey = (await _hftInternalService.GetKeysAsync(_requestContext.ClientId))?.FirstOrDefault(x => x.Wallet == id);
+            if (apiKey != null)
             {
-                await _hftInternalService.DeleteKeyAsync(id);
-                return Ok();
+                await _hftInternalService.DeleteKeyAsync(apiKey.Key);
             }
             await _clientAccountService.DeleteWalletAsync(id);
             return Ok();
