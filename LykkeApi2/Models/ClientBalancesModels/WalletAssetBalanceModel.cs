@@ -7,5 +7,6 @@
         public string Type { get; set; }
         public string Description { get; set; }
         public ClientBalanceResponseModel Balances { get; set; }
+        public string ApiKey { get; set; }
     }
 }
