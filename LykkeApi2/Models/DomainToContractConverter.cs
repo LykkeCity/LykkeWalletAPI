@@ -23,7 +23,8 @@ namespace LykkeApi2.Models
                 BankCardsDepositEnabled = src.BankCardsDepositEnabled,
                 SwiftDepositEnabled = src.SwiftDepositEnabled,
                 BlockchainDepositEnabled = src.BlockchainDepositEnabled,
-                CategoryId = src.CategoryId
+                CategoryId = src.CategoryId,
+                IsBase = src.IsBase
             };
         }
 

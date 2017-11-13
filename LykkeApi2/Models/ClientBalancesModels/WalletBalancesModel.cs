@@ -9,5 +9,6 @@ namespace LykkeApi2.Models.ClientBalancesModels
         public string Type { get; set; }
         public string Description { get; set; }
         public IEnumerable<ClientBalanceResponseModel> Balances { get; set; }
+        public string ApiKey { get; set; }
     }
 }

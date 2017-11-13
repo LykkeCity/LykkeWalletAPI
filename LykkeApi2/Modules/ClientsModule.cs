@@ -28,8 +28,7 @@ namespace LykkeApi2.Modules
                 .As<IClientAccountService>()
                 .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.ClientAccountServiceUrl));
 
-            builder.RegisterType<ClientSettingsClient>()
-                .As<IClientSettingsClient>();
+            builder.RegisterLykkeServiceClient(_serviceSettings.CurrentValue.ClientAccountServiceUrl);
 
             builder.RegisterType<HftInternalServiceAPI>()
                 .As<IHftInternalServiceAPI>()
