@@ -45,6 +45,7 @@ namespace Core.Settings
         public string OperationsHistoryUrl { get; set; }
         public string HftInternalServiceUrl { get; set; }
         public string SessionUrl { get; set; }
+        public string PledgesServiceUrl { get; set; }
     }
 
     public class OperationsRepositoryClient

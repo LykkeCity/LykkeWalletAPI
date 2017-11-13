@@ -1,7 +1,7 @@
 ﻿using Common;
 using Core.CashOperations;
 using Core.Exchange;
-using Lykke.Service.Assets.Client.Custom;
+using Lykke.Service.Assets.Client.Models;
 using System;
 using System.Collections.Generic;
 using OrderAction = Core.Enumerators.OrderAction;
@@ -10,7 +10,7 @@ namespace LykkeApi2.Models.ApiContractModels
 {
     public static class ApiTransactionsConvertor
     {
-        public static ApiBalanceChangeModel ConvertToApiModel(this ICashInOutOperation cashInOutOperation, IAsset asset)
+        public static ApiBalanceChangeModel ConvertToApiModel(this ICashInOutOperation cashInOutOperation, Asset asset)
         {
             bool isSettled = !string.IsNullOrEmpty(cashInOutOperation.BlockChainHash); //ToDo: cashInOutOperation.IsSettled
             return new ApiBalanceChangeModel
@@ -26,16 +26,18 @@ namespace LykkeApi2.Models.ApiContractModels
                 AddressTo = cashInOutOperation.AddressTo,
                 IsSettled = isSettled,
                 Type = cashInOutOperation.Type.ToString(),
-                State = cashInOutOperation.State
+                State = cashInOutOperation.State,
+                TransactionId = cashInOutOperation.TransactionId,
+                ClientId = cashInOutOperation.ClientId,
             };
         }
 
-        private static string GetIcon(this IAsset asset)
+        private static string GetIcon(this Asset asset)
         {
             return asset.IdIssuer;
         }
 
-        public static ApiTransfer ConvertToApiModel(this ITransferEvent evnt, IAsset asset)
+        public static ApiTransfer ConvertToApiModel(this ITransferEvent evnt, Asset asset)
         {
             var isSettled = evnt.IsSettled ?? !string.IsNullOrEmpty(evnt.BlockChainHash);
             return new ApiTransfer
@@ -49,11 +51,13 @@ namespace LykkeApi2.Models.ApiContractModels
                 AddressFrom = evnt.AddressFrom,
                 AddressTo = evnt.AddressTo,
                 IsSettled = isSettled,
-                State = evnt.State
+                State = evnt.State,
+                ClientId = evnt.ClientId,
+                TransactionId = evnt.TransactionId
             };
         }
 
-        public static ApiCashOutAttempt ConvertToApiModel(this ICashOutRequest request, IAsset asset)
+        public static ApiCashOutAttempt ConvertToApiModel(this ICashOutRequest request, Asset asset)
         {
             return new ApiCashOutAttempt
             {
@@ -61,11 +65,12 @@ namespace LykkeApi2.Models.ApiContractModels
                 Id = request.Id,
                 Volume = request.Amount.TruncateDecimalPlaces(asset.Accuracy),
                 Asset = request.AssetId,
-                IconId = asset.GetIcon()
+                IconId = asset.GetIcon(),
+                ClientId = request.ClientId,
             };
         }
 
-        public static ApiLimitTradeEvent ConvertToApiModel(this ILimitTradeEvent limitTradeEvent, IAssetPair assetPair, int accuracy)
+        public static ApiLimitTradeEvent ConvertToApiModel(this ILimitTradeEvent limitTradeEvent, AssetPair assetPair, int accuracy)
         {
             var isBuy = limitTradeEvent.OrderType == Core.Enumerators.OrderType.Buy;
 
@@ -84,12 +89,13 @@ namespace LykkeApi2.Models.ApiContractModels
                 AssetPair = limitTradeEvent.AssetPair,
                 Status = limitTradeEvent.Status.ToString(),
                 Type = limitTradeEvent.OrderType.ToString(),
-                TotalCost = Math.Abs(converted)
+                TotalCost = Math.Abs(converted),
+                ClientId = limitTradeEvent.ClientId,
             };
         }
 
-        public static ApiTradeOperation ConvertToApiModel(this IClientTrade clientTrade, IAsset asset,
-           IMarketOrder marketOrder, IAssetPair assetPair)
+        public static ApiTradeOperation ConvertToApiModel(this IClientTrade clientTrade, Asset asset,
+           IMarketOrder marketOrder, AssetPair assetPair)
         {
             var isSettled = !string.IsNullOrEmpty(clientTrade.BlockChainHash); //ToDo: clientTrade.IsSettled
             return new ApiTradeOperation
@@ -105,11 +111,13 @@ namespace LykkeApi2.Models.ApiContractModels
                 MarketOrder = marketOrder?.ConvertToApiModel(assetPair, asset.Accuracy),
                 IsSettled = isSettled,
                 State = clientTrade.State,
-                IsLimitTrade = clientTrade.IsLimitOrderResult
+                IsLimitTrade = clientTrade.IsLimitOrderResult,
+                ClientId = clientTrade.ClientId,
+                TransactionId = clientTrade.TransactionId
             };
         }
 
-        public static ApiLimitOrder ConvertToApiModel(this LimitOrder limitOrder, IAssetPair assetPair, int accuracy)
+        public static ApiLimitOrder ConvertToApiModel(this LimitOrder limitOrder, AssetPair assetPair, int accuracy)
         {
             var isBuy = limitOrder.OrderAction() == OrderAction.Buy;
 
@@ -132,11 +140,12 @@ namespace LykkeApi2.Models.ApiContractModels
                 DateTime = limitOrder.CreatedAt.ToIsoDateTime(),
                 Accuracy = assetPair.Accuracy,
                 Price = rate,
-                OrderStatus = limitOrder.Status
+                OrderStatus = limitOrder.Status,
+                ClientId = limitOrder.ClientId,
             };
         }
 
-        public static ApiLimitOrdersAndTrades ConvertToApiModel(this LimitOrder limitOrder, IAssetPair assetPair,
+        public static ApiLimitOrdersAndTrades ConvertToApiModel(this LimitOrder limitOrder, AssetPair assetPair,
             ApiTradeOperation[] trades, int accuracy)
         {
             var isBuy = limitOrder.OrderAction() == OrderAction.Buy;
@@ -159,13 +168,14 @@ namespace LykkeApi2.Models.ApiContractModels
                     DateTime = limitOrder.CreatedAt.ToIsoDateTime(),
                     Accuracy = assetPair.Accuracy,
                     Price = rate,
-                    OrderStatus = limitOrder.Status
+                    OrderStatus = limitOrder.Status,
+                    ClientId = limitOrder.ClientId
                 },
                 Trades = trades
             };
         }
 
-        private static ApiMarketOrder ConvertToApiModel(this IMarketOrder marketOrder, IAssetPair assetPair, int accuracy)
+        private static ApiMarketOrder ConvertToApiModel(this IMarketOrder marketOrder, AssetPair assetPair, int accuracy)
         {
             var rate =
                 (!marketOrder.Straight ? 1 / marketOrder.Price : marketOrder.Price).TruncateDecimalPlaces(
@@ -188,11 +198,12 @@ namespace LykkeApi2.Models.ApiContractModels
                 DateTime = marketOrder.CreatedAt.ToIsoDateTime(),
                 Accuracy = assetPair.Accuracy,
                 Price = rate,
-                BaseAsset = marketOrder.Straight ? assetPair.BaseAssetId : assetPair.QuotingAssetId
+                BaseAsset = marketOrder.Straight ? assetPair.BaseAssetId : assetPair.QuotingAssetId,
+                ClientId = marketOrder.ClientId,
             };
         }
 
-        private static ApiTradeOperation ConvertToApiModel(this IClientTrade clientTrade, IAsset asset)
+        private static ApiTradeOperation ConvertToApiModel(this IClientTrade clientTrade, Asset asset)
         {
             var isSettled = !string.IsNullOrEmpty(clientTrade.BlockChainHash);
             return new ApiTradeOperation
@@ -208,11 +219,13 @@ namespace LykkeApi2.Models.ApiContractModels
                 IsSettled = isSettled,
                 State = clientTrade.State,
                 IsLimitTrade = clientTrade.IsLimitOrderResult,
-                OrderId = clientTrade.LimitOrderId
+                OrderId = clientTrade.LimitOrderId,
+                ClientId = clientTrade.ClientId,
+                TransactionId = clientTrade.TransactionId
             };
         }
 
-        public static ApiTradeOperation[] GetClientTrades(IClientTrade[] clientTrades, IDictionary<string, IAsset> assetsDict, IDictionary<string, IAssetPair> assetPairsDict,
+        public static ApiTradeOperation[] GetClientTrades(IClientTrade[] clientTrades, IDictionary<string, Asset> assetsDict, IDictionary<string, AssetPair> assetPairsDict,
             IDictionary<string, MarketOrder> marketOrdersDict)
         {
             var apiClientTrades = new List<ApiTradeOperation>();
@@ -243,7 +256,7 @@ namespace LykkeApi2.Models.ApiContractModels
             return apiClientTrades.ToArray();
         }
 
-        public static ApiTradeOperation[] GetLimitClientTrades(IClientTrade[] clientTrades, IDictionary<string, IAsset> assetsDict)
+        public static ApiTradeOperation[] GetLimitClientTrades(IClientTrade[] clientTrades, IDictionary<string, Asset> assetsDict)
         {
             var apiClientTrades = new List<ApiTradeOperation>();
 

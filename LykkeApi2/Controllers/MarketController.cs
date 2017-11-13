@@ -1,15 +1,15 @@
 ﻿using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Core.Exchange;
 using Lykke.Service.RateCalculator.Client;
 using LykkeApi2.Domain;
 using LykkeApi2.Models;
-using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LykkeApi2.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/market")]
     public class MarketController : Controller
     {
         private readonly IRateCalculatorClient _rateCalculator;
@@ -19,19 +19,28 @@ namespace LykkeApi2.Controllers
             _rateCalculator = rateCalculator;
         }
 
+        /// <summary>
+        /// Convert one asset to another.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         [HttpPost("converter")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        public async Task<ResponseModel<ConvertionResponse>> Convert([FromBody] ConvertionRequest request)
+        [ProducesResponseType(typeof(ConvertionResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Convert([FromBody] ConvertionRequest request)
         {
             var orderAction = BaseOrderExt.GetOrderAction(request.OrderAction);
             if (orderAction == null)
-                return ResponseModel<ConvertionResponse>.CreateInvalidFieldError(request.OrderAction,
-                    Phrases.InvalidValue);
+            {
+                ModelState.AddModelError("OrderAction", request.OrderAction);
+                return BadRequest(ModelState);
+            }
 
             var result = await _rateCalculator.GetMarketAmountInBaseAsync(request.AssetsFrom, request.BaseAssetId,
                 orderAction.Value.ToRateCalculatorDomain());
 
-            return ResponseModel<ConvertionResponse>.CreateOk(new ConvertionResponse {Converted = result.ToArray()});
+            return Ok(new ConvertionResponse {Converted = result.ToArray()});
         }
     }
 }

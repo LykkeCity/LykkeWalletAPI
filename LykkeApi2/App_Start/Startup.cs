@@ -91,7 +91,12 @@ namespace LykkeApi2
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
         {
-            app.UseCors("Lykke");
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyOrigin();
+                builder.AllowAnyHeader();
+                builder.AllowAnyMethod();
+            });
             app.Use(next => context =>
             {
                 context.Request.EnableRewind();
@@ -110,14 +115,14 @@ namespace LykkeApi2
                 name: "default-to-swagger",
                 template: "{controller=Swagger}");
             });
-            
+
             CreateErrorResponse responseFactory = exception => exception;
             app.UseMiddleware<GlobalErrorHandlerMiddleware>("WalletApiV2", responseFactory);
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
             });
-            
+
             app.UseSwagger();
             app.UseSwaggerUi(swaggerUrl: $"/swagger/{apiVersion}/swagger.json");
             app.UseStaticFiles();

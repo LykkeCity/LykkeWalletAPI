@@ -10,7 +10,7 @@ namespace LykkeApi2.Modules
     {
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().SingleInstance();            
+            builder.RegisterType<HttpContextAccessor>().As<IHttpContextAccessor>().InstancePerLifetimeScope();            
         }
     }
 }

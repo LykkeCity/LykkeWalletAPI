@@ -1,63 +1,54 @@
 ﻿using System;
-using System.Collections.Generic;
 using Common.Log;
 using LykkeApi2.Infrastructure;
-using LykkeApi2.Models.ResponceModels;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
 using System.Net;
 using System.Threading.Tasks;
-using Common;
-using Lykke.Service.Balances.AutorestClient.Models;
-using Lykke.Service.Balances.Client;
-using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.AutorestClient;
-using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;
-using LykkeApi2.Models;
 using LykkeApi2.Models.Auth;
 using LykkeApi2.Models.ClientAccountModels;
-using Microsoft.AspNetCore.Authorization;
-using Newtonsoft.Json;
-using ClientBalanceResponseModel = LykkeApi2.Models.ClientBalancesModels.ClientBalanceResponseModel;
 
 namespace LykkeApi2.Controllers
-{    
+{
     [LowerVersion(Devices = "IPhone,IPad", LowerVersion = 181)]
     [LowerVersion(Devices = "android", LowerVersion = 659)]
     [Route("api/client")]
-    public partial class ClientController : Controller
+    public class ClientController : Controller
     {
         private readonly ILog _log;
-        private readonly IBalancesClient _balancesClient;
-        private readonly ILykkeRegistrationClient _lykkeRegistrationClient;        
+        private readonly ILykkeRegistrationClient _lykkeRegistrationClient;
         private readonly ClientAccountLogic _clientAccountLogic;
         private readonly IRequestContext _requestContext;
 
         public ClientController(
             ILog log,
-            IBalancesClient balancesClient, 
-            ILykkeRegistrationClient lykkeRegistrationClient,                        
+            ILykkeRegistrationClient lykkeRegistrationClient,
             ClientAccountLogic clientAccountLogic,
             IRequestContext requestContext)
         {
-            _log = log;
-            _balancesClient = balancesClient;
-            _lykkeRegistrationClient = lykkeRegistrationClient;            
+            _log = log ?? throw new ArgumentNullException(nameof(log));
+            _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
             _clientAccountLogic = clientAccountLogic;
-            _requestContext = requestContext;
+            _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
         }
-        
+
+        /// <summary>
+        /// Register a new client.
+        /// </summary>
         [HttpPost("register")]
+        [SwaggerOperation("RegisterClient")]
+        [ProducesResponseType(typeof(AccountsRegistrationResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Post([FromBody]AccountRegistrationModel model)
         {
             if (await _clientAccountLogic.IsTraderWithEmailExistsForPartnerAsync(model.Email, model.PartnerId))
             {
                 ModelState.AddModelError("email", Phrases.ClientWithEmailIsRegistered);
-                return BadRequest(new ApiBadRequestResponse(ModelState));
+                return BadRequest(ModelState);
             }
 
             var registrationModel = new RegistrationModel
@@ -76,11 +67,11 @@ namespace LykkeApi2.Controllers
                 Referer = HttpContext.Request.Host.Host
             };
 
-            RegistrationResponse result = await _lykkeRegistrationClient.RegisterAsync(registrationModel);
+            var result = await _lykkeRegistrationClient.RegisterAsync(registrationModel);
 
             if (result == null)
-                return NotFound(new ApiResponse(HttpStatusCode.InternalServerError, Phrases.TechnicalProblems));
-            
+                return BadRequest(Phrases.TechnicalProblems);
+
             return Ok(new AccountsRegistrationResponseModel
             {
                 Token = result.Token,
@@ -96,7 +87,13 @@ namespace LykkeApi2.Controllers
             });
         }
 
+        /// <summary>
+        /// Authenticate.
+        /// </summary>
         [HttpPost("auth")]
+        [SwaggerOperation("Auth")]
+        [ProducesResponseType(typeof(AuthResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Auth([FromBody]AuthRequestModel model)
         {
             var authResult = await _lykkeRegistrationClient.AuthorizeAsync(new AuthModel
@@ -116,48 +113,6 @@ namespace LykkeApi2.Controllers
             {
                 AccessToken = authResult?.Token,
             });
-        }        
-
-        [Authorize]
-        [HttpGet("balances")]        
-        [SwaggerOperation("GetBalances")]
-        [ProducesResponseType(typeof(IEnumerable<ClientBalanceResponseModel>), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int) HttpStatusCode.NotFound)]
-        public async Task<IActionResult> Get()
-        {
-            await _log.WriteInfoAsync("api v2", JsonConvert.SerializeObject(_requestContext), null);
-
-            var clientBalances = await _balancesClient.GetClientBalances(_requestContext.ClientId);
-
-            if (clientBalances == null)
-            {
-                return NotFound(new ApiResponse(HttpStatusCode.NotFound, Phrases.ClientBalanceNotFound));
-            }
-
-            return Ok(clientBalances);
-        }
-
-        [Authorize]
-        [HttpGet("balances/{assetId}")]
-        [SwaggerOperation("GetBalanceByAssetId")]
-        [ProducesResponseType(typeof(ClientBalanceResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> GetClientBalanceByAssetId(string assetId)
-        {
-            var clientBalanceResult = await _balancesClient.GetClientBalanceByAssetId(
-                new ClientBalanceByAssetIdModel
-                {
-                    ClientId = _requestContext.ClientId,
-                    AssetId = assetId
-                });
-
-            if (clientBalanceResult != null && string.IsNullOrEmpty(clientBalanceResult.ErrorMessage))
-            {
-                return Ok(ClientBalanceResponseModel.Create(clientBalanceResult));
-            }
-
-            return NotFound(new ApiResponse(HttpStatusCode.NotFound,
-                clientBalanceResult?.ErrorMessage ?? Phrases.ClientBalanceNotFound));
         }
     }
 }

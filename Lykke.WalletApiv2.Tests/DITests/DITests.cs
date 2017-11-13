@@ -28,8 +28,14 @@ namespace Lykke.WalletApiv2.Tests.DITests
             //settings.WalletApiv2.DeploymentSettings.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.DeploymentSettings, mockUrl));
 
             var containerBuilder = new ContainerBuilder();
-            containerBuilder.RegisterModule(new Api2Module(new SettingsServiceReloadingManager<BaseSettings>("http://52.232.122.203/rr5999apiv2999dvgsert25uwheifn_WalletApiv2"), _mockLog.Object));
-            containerBuilder.RegisterType<AssetsController>();            
+
+            containerBuilder.RegisterModule(new Api2Module(new SettingsServiceReloadingManager<APIv2Settings>("http://settings.lykke-settings.svc.cluster.local/rr5999apiv2999dvgsert25uwheifn_WalletApiv2").Nested(x => x.WalletApiv2)
+                , _mockLog.Object));
+
+            containerBuilder.RegisterModule(new ClientsModule(new SettingsServiceReloadingManager<APIv2Settings>("http://settings.lykke-settings.svc.cluster.local/rr5999apiv2999dvgsert25uwheifn_WalletApiv2")
+                                                                                                                   .Nested(x => x.WalletApiv2).Nested(s => s.Services)));
+
+            containerBuilder.RegisterType<AssetsController>();
 
             //register your controller class here to test
 

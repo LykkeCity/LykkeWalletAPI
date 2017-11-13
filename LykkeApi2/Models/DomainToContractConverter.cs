@@ -1,17 +1,14 @@
-﻿using Common;
-using Lykke.Service.Assets.Client.Custom;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Lykke.Service.Assets.Client.Models;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LykkeApi2.Models
 {
     public static class DomainToContractConverter
     {
-        public static ApiAssetModel ConvertToApiModel(this Lykke.Service.Assets.Client.Custom.IAsset src)
+        public static ApiAssetModel ConvertToApiModel(this Asset src)
         {
             return new ApiAssetModel
             {
@@ -25,11 +22,12 @@ namespace LykkeApi2.Models
                 BankCardsDepositEnabled = src.BankCardsDepositEnabled,
                 SwiftDepositEnabled = src.SwiftDepositEnabled,
                 BlockchainDepositEnabled = src.BlockchainDepositEnabled,
-                CategoryId = src.CategoryId
+                CategoryId = src.CategoryId,
+                IsBase = src.IsBase
             };
         }
 
-        public static ApiAssetCategoryModel ConvertToApiModel(this Lykke.Service.Assets.Client.Custom.IAssetCategory src)
+        public static ApiAssetCategoryModel ConvertToApiModel(this AssetCategory src)
         {
             return new ApiAssetCategoryModel
             {
@@ -41,50 +39,59 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static AssetAttributesModel ConvertToApiModel(this IAssetAttributes src)
+        public static AssetAttributesModel ConvertToApiModel(this AssetAttributes src)
         {
             return new AssetAttributesModel
             {
-                Attrbuttes = src.Attributes.Select(aa => new KeyValue { Key = aa.Key, Value = aa.Value }).ToArray()
+                Attrbuttes = src.Attributes.Select(ConvertToApiModel).ToArray()
             };
 
         }
 
-        public static AssetDescriptionModel ConvertToApiModel(this Lykke.Service.Assets.Client.Custom.IAssetDescription src)
+        public static IAssetAttributesKeyValue ConvertToApiModel(this AssetAttribute src)
         {
-            return new AssetDescriptionModel
-            {
-                Id = src.Id,
-                AssetClass = src.AssetClass,
-                Description = src.Description,
-                IssuerName = src.IssuerName,
-                MarketCapitalization = src.MarketCapitalization,
-                NumberOfCoins = src.NumberOfCoins,
-                PopIndex = src.PopIndex,
-                AssetDescriptionUrl = src.AssetDescriptionUrl,
-                FullName = src.FullName
-            };
+            return new KeyValue { Key = src.Key, Value = src.Value };
 
         }
 
-        public static AssetExtended ConvertTpApiModel(this Lykke.Service.Assets.Client.Models.AssetExtended src)
-        {
-            var asset = src.Asset.ConvertToApiModel();
-            var description = src.Description.ConvertToApiModel();
-            var attributes = src.Attributes.ConvertToApiModel();
-            var category = src.Category.ConvertToApiModel();
+        //public static AssetDescriptionModel ConvertToApiModel(this AssetDescription src)
+        //{
+        //    return new AssetDescriptionModel
+        //    {
+        //        Id = src.Id,
+        //        AssetClass = src.AssetClass,
+        //        Description = src.Description,
+        //        IssuerName = src.IssuerName,
+        //        MarketCapitalization = src.MarketCapitalization,
+        //        NumberOfCoins = src.NumberOfCoins,
+        //        PopIndex = src.PopIndex,
+        //        AssetDescriptionUrl = src.AssetDescriptionUrl,
+        //        FullName = src.FullName
+        //    };
 
+        //}
+
+        public static AssetExtended ConvertTpApiModel(this AssetExtendedInfo src)
+        {
+            //var asset = src.Asset.ConvertToApiModel();
+            //var description = src.Description.ConvertToApiModel();
+            //var attributes = src.Attributes.ConvertToApiModel();
+            //var category = src.Category.ConvertToApiModel();
+            var asset = new ApiAssetModel { Id = src.Id, Name = src.FullName };
+            var description = new AssetDescriptionModel { Id = src.Id, Description = src.Description, AssetClass = src.AssetClass, FullName = src.FullName };
+            var category = new ApiAssetCategoryModel();
+            var attributes = new List<IAssetAttributesKeyValue>();
 
             return new AssetExtended
             {
                 Asset = asset,
                 Description = description,
                 Category = category,
-                Attributes = attributes.Attrbuttes
+                Attributes = attributes
             };
         }
 
-        public static AssetPairModel ConvertToApiModel(this Lykke.Service.Assets.Client.Custom.IAssetPair src)
+        public static AssetPairModel ConvertToApiModel(this AssetPair src)
         {
             return new AssetPairModel
             {
@@ -96,7 +103,7 @@ namespace LykkeApi2.Models
                 Name = src.Name,
                 QuotingAssetId = src.QuotingAssetId,
                 Source = src.Source,
-                Source2 = src.Source2,                
+                Source2 = src.Source2,
             };
         }
 
@@ -104,12 +111,12 @@ namespace LykkeApi2.Models
         {
             return new AssetPairRateModel
             {
-                 AskPrice = src.AskPrice,
-                 AskPriceTimestamp = src.AskPriceTimestamp, 
-                 AssetPair = src.AssetPair,
-                 BidPrice = src.BidPrice,
-                 BidPriceTimestamp = src.BidPriceTimestamp                      
+                AskPrice = src.AskPrice,
+                AskPriceTimestamp = src.AskPriceTimestamp,
+                AssetPair = src.AssetPair,
+                BidPrice = src.BidPrice,
+                BidPriceTimestamp = src.BidPriceTimestamp
             };
-        }        
+        }
     }
 }

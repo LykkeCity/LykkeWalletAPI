@@ -15,5 +15,14 @@ namespace LykkeApi2.Models.ClientBalancesModels
                 Balance = src.Balance,
             };
         }
+
+        public static ClientBalanceResponseModel Create(Lykke.Service.Balances.AutorestClient.Models.ClientBalanceResponseModel src)
+        {
+            return new ClientBalanceResponseModel
+            {
+                AssetId = src.AssetId,
+                Balance = src.Balance
+            };
+        }
     }
 }

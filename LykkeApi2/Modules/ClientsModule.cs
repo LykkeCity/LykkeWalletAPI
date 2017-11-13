@@ -7,6 +7,7 @@ using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.Registration;
 using Lykke.Service.Session;
 using Lykke.SettingsReader;
+using Lykke.Service.Pledges.Client;
 using Lykke.Service.ClientAccount.Client;
 
 namespace LykkeApi2.Modules
@@ -43,6 +44,10 @@ namespace LykkeApi2.Modules
             builder.RegisterType<ClientSessionsClient>()
                 .As<IClientSessionsClient>()
                 .WithParameter("serviceUrl", _serviceSettings.CurrentValue.SessionUrl);
+
+            builder.RegisterType<PledgesClient>()
+                .As<IPledgesClient>()
+                .WithParameter("serviceUrl", _serviceSettings.CurrentValue.PledgesServiceUrl);
         }
     }
 }

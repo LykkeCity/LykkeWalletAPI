@@ -6,7 +6,7 @@ namespace LykkeApi2.Models.ApiKey
     {
         public CreateApiKeyRequestValidator()
         {
-            RuleFor(m => m.ClientId).NotEmpty();
+            RuleFor(m => m.Name).NotEmpty();
         }
     }
 }

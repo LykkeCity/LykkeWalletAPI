@@ -1,42 +1,49 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.HftInternalService.Client.AutorestClient.Models;
+using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ApiKey;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.SwaggerGen.Annotations;
 
 namespace LykkeApi2.Controllers
 {
+    [Authorize]
     [Route("api/hft")]
     public class HftController : Controller
     {
         private readonly IHftInternalServiceAPI _hftInternalService;
+        private readonly IRequestContext _requestContext;
 
-        public HftController(IHftInternalServiceAPI hftInternalService)
+        public HftController(IHftInternalServiceAPI hftInternalService, IRequestContext requestContext)
         {
-            _hftInternalService = hftInternalService;
+            _hftInternalService = hftInternalService ?? throw new ArgumentNullException(nameof(hftInternalService));
+            _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
         }
 
-        [HttpPost("key")]
+        /// <summary>
+        /// Create new api-key for existing wallet.
+        /// </summary>
+        /// <param name="walletId"></param>
+        /// <returns></returns>
+        [HttpPut("{walletId}/regenerateKey")]
         [ProducesResponseType(typeof(CreateApiKeyResponse), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> CreateKey([FromBody]CreateApiKeyRequest request)
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [SwaggerOperation("RegenerateKey")]
+        public async Task<IActionResult> RegenerateKey(string walletId)
         {
-            var apiKey = await _hftInternalService.ApiKeysPostAsync(new CreateAccountRequest(request.ClientId));
-
-            if (apiKey == null)
-                return BadRequest();
-            
-            return Ok(new CreateApiKeyResponse { Key = apiKey.Key, Wallet = apiKey.Wallet });
-        }
-
-        [HttpDelete("{key}")]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> DeleteKey(string key)
-        {
-            await _hftInternalService.ApiKeysByKeyDeleteAsync(key);
-
-            return Ok();
+            var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
+            var existingApiKey = clientKeys.FirstOrDefault(x => x.Wallet == walletId);
+            if (existingApiKey != null)
+            {
+                var apiKey = await _hftInternalService.RegenerateKeyAsync(new RegenerateKeyRequest { ClientId = _requestContext.ClientId, WalletId = existingApiKey.Wallet });
+                return Ok(new CreateApiKeyResponse { ApiKey = apiKey.Key, WalletId = apiKey.Wallet });
+            }
+            return NotFound();
         }
     }
 }
