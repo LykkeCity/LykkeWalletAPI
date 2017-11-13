@@ -14,6 +14,7 @@ namespace LykkeApi2.Models
             {
                 Id = src.Id,
                 Name = src.Name,
+                DisplayId = src.DisplayId,
                 Accuracy = src.Accuracy,
                 Symbol = src.Symbol,
                 HideWithdraw = src.HideWithdraw,
