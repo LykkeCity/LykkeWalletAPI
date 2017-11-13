@@ -14,6 +14,7 @@ namespace LykkeApi2.Models
             {
                 Id = src.Id,
                 Name = src.Name,
+                DisplayId = src.DisplayId,
                 Accuracy = src.Accuracy,
                 Symbol = src.Symbol,
                 HideWithdraw = src.HideWithdraw,
@@ -22,7 +23,8 @@ namespace LykkeApi2.Models
                 BankCardsDepositEnabled = src.BankCardsDepositEnabled,
                 SwiftDepositEnabled = src.SwiftDepositEnabled,
                 BlockchainDepositEnabled = src.BlockchainDepositEnabled,
-                CategoryId = src.CategoryId
+                CategoryId = src.CategoryId,
+                IsBase = src.IsBase
             };
         }
 
