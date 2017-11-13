@@ -24,14 +24,15 @@ namespace LykkeApi2.Controllers
         #endregion
 
         private readonly IAssetsService _assetsService;
-        private readonly IClientAccountSettingsClient _clientAccountClient;
+        private readonly IClientAccountSettingsClient _clientAccountSettingsClient;
         private readonly IRequestContext _requestContext;
         private readonly ILog _log;
 
-        public AssetsController(IAssetsService assetsService, IClientAccountSettingsClient clientAccountClient, IRequestContext requestContext, ILog log)
+        public AssetsController(IAssetsService assetsService, IClientAccountSettingsClient clientAccountSettingsClient, IRequestContext requestContext,
+            ILog log)
         {
             _assetsService = assetsService;
-            _clientAccountClient = clientAccountClient;
+            _clientAccountSettingsClient = clientAccountSettingsClient;
             _requestContext = requestContext;
             _log = log;
         }
@@ -224,7 +225,7 @@ namespace LykkeApi2.Controllers
             BaseAssetClientModel response;
             try
             {
-                response = await _clientAccountClient.GetBaseAssetAsync(_requestContext.ClientId);
+                response = await _clientAccountSettingsClient.GetBaseAssetAsync(_requestContext.ClientId);
             }
             catch (Exception e)
             {
@@ -244,7 +245,7 @@ namespace LykkeApi2.Controllers
         {
             try
             {
-                await _clientAccountClient.SetBaseAssetAsync(_requestContext.ClientId, model.BaseAsssetId);
+                await _clientAccountSettingsClient.SetBaseAssetAsync(_requestContext.ClientId, model.BaseAsssetId);
             }
             catch (Exception e)
             {

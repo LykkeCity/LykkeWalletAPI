@@ -9,7 +9,6 @@ using Lykke.Service.Registration;
 using Lykke.Service.Session;
 using Lykke.SettingsReader;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.AutorestClient;
 
 namespace LykkeApi2.Modules
 {
@@ -24,10 +23,6 @@ namespace LykkeApi2.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<ClientAccountService>()
-                .As<IClientAccountService>()
-                .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.ClientAccountServiceUrl));
-
             builder.RegisterLykkeServiceClient(_serviceSettings.CurrentValue.ClientAccountServiceUrl);
 
             builder.RegisterType<HftInternalServiceAPI>()
