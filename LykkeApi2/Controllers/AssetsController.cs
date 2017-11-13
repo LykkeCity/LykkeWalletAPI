@@ -25,7 +25,7 @@ namespace LykkeApi2.Controllers
 
         private readonly IAssetsService _assetsService;
         private readonly IClientAccountSettingsClient _clientAccountSettingsClient;
-		private readonly IRequestContext _requestContext;
+        private readonly IRequestContext _requestContext;
         private readonly ILog _log;
 
         public AssetsController(IAssetsService assetsService, IClientAccountSettingsClient clientAccountSettingsClient, IRequestContext requestContext,
@@ -138,7 +138,7 @@ namespace LykkeApi2.Controllers
         }
 
         private static AssetDescriptionModel ConvertToAssetDescription(AssetExtendedInfo extendedInfo)
-                {
+        {
             return new AssetDescriptionModel
             {
                 Id = extendedInfo.Id,
@@ -182,7 +182,7 @@ namespace LykkeApi2.Controllers
                 return NotFound();
 
             return Ok(GetAssetCategoriesResponseModel.Create(new[] { res.ConvertToApiModel() }));
-            }
+        }
 
         /// <summary>
         ///     Get extended assets.
