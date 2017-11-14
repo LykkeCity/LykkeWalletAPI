@@ -4,10 +4,10 @@ using LykkeApi2.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Threading.Tasks;
-using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using LykkeApi2.Infrastructure;
 using Xunit;
+using Lykke.Service.ClientAccount.Client;
 
 namespace Lykke.WalletApiv2.Tests.ClientBalances
 {

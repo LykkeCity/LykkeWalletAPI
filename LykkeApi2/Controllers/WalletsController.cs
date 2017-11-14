@@ -27,13 +27,13 @@ namespace LykkeApi2.Controllers
 
         private readonly IRequestContext _requestContext;
         private readonly IBalancesClient _balancesClient;
-        private readonly IClientAccountClient _clientAccountClient;
+        private readonly IClientAccountClient _clientAccountService;
         private readonly IHftInternalServiceAPI _hftInternalService;
 
-        public WalletsController(IRequestContext requestContext, IClientAccountClient clientAccountClient, IBalancesClient balancesClient, IHftInternalServiceAPI hftInternalService)
+        public WalletsController(IRequestContext requestContext, IClientAccountClient clientAccountService, IBalancesClient balancesClient, IHftInternalServiceAPI hftInternalService)
         {
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
-            _clientAccountClient = clientAccountClient ?? throw new ArgumentNullException(nameof(clientAccountClient));
+            _clientAccountService = _clientAccountService ?? throw new ArgumentNullException(nameof(_clientAccountService));
             _balancesClient = balancesClient ?? throw new ArgumentNullException(nameof(balancesClient));
             _hftInternalService = hftInternalService ?? throw new ArgumentNullException(nameof(hftInternalService));
         }
@@ -46,9 +46,16 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("CreateWallet")]
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
-            var wallet = await _clientAccountClient.CreateWalletAsync(_requestContext.ClientId, request.Type, request.Name, request.Description);
+            var wallet = await _clientAccountService.CreateWalletAsync(_requestContext.ClientId, request.Type,
+                request.Name, request.Description);
 
-            return new WalletModel {Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description};
+            return new WalletModel
+            {
+                Id = wallet.Id,
+                Name = wallet.Name,
+                Type = wallet.Type,
+                Description = wallet.Description
+            };
         }
 
         /// <summary>
@@ -85,12 +92,12 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> ModifyWallet(string id, [FromBody]ModifyWalletRequest request)
         {
             // checking if user owns the specified wallet
-            var wallets = await _clientAccountClient.GetWalletsByClientIdAsync(_requestContext.ClientId);
+            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             var wallet = wallets?.FirstOrDefault(x => x.Id == id);
             if (wallet == null)
                 return NotFound();
 
-            wallet = await _clientAccountClient.ModifyWalletAsync(id, request.Name, request.Description);
+            wallet = await _clientAccountService.ModifyWalletAsync(id, request.Name, request.Description);
             if (wallet == null)
                 return NotFound();
 
@@ -110,7 +117,7 @@ namespace LykkeApi2.Controllers
         {
             // checking if user owns the specified wallet
 
-            var wallets = await _clientAccountClient.GetWalletsByClientIdAsync(_requestContext.ClientId);
+            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             var wallet = wallets?.FirstOrDefault(x => x.Id == id);
             if (wallet == null)
                 return NotFound();
@@ -121,7 +128,7 @@ namespace LykkeApi2.Controllers
             {
                 await _hftInternalService.DeleteKeyAsync(apiKey.Key);
             }
-            await _clientAccountClient.DeleteWalletAsync(id);
+            await _clientAccountService.DeleteWalletAsync(id);
             return Ok();
         }
 
@@ -134,7 +141,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetWallets")]
         public async Task<IActionResult> GetWallets()
         {
-            var wallets = await _clientAccountClient.GetWalletsByClientIdAsync(_requestContext.ClientId);
+            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
 
             if (wallets == null)
                 return NotFound();
@@ -159,7 +166,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetWallet(string id)
         {
-            var wallet = await _clientAccountClient.GetWalletAsync(id);
+            var wallet = await _clientAccountService.GetWalletAsync(id);
 
             if (wallet == null)
                 return NotFound();
@@ -186,7 +193,7 @@ namespace LykkeApi2.Controllers
         {
             var result = new List<WalletBalancesModel>();
 
-            var wallets = await _clientAccountClient.GetWalletsByClientIdAsync(_requestContext.ClientId);
+            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
             foreach (var wallet in wallets)
             {
@@ -232,7 +239,7 @@ namespace LykkeApi2.Controllers
             var clientBalances = await _balancesClient.GetClientBalances(walletId);
             if (clientBalances == null)
             {
-                var wallet = await _clientAccountClient.GetWalletAsync(walletId);
+                var wallet = await _clientAccountService.GetWalletAsync(walletId);
                 if (wallet == null)
                     return NotFound();
             }
@@ -252,7 +259,7 @@ namespace LykkeApi2.Controllers
         {
             var result = new List<WalletAssetBalanceModel>();
 
-            var wallets = await _clientAccountClient.GetWalletsByClientIdAsync(_requestContext.ClientId);
+            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
             foreach (var wallet in wallets)
             {

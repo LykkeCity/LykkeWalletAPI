@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
-using Lykke.Service.ClientAccount.Client.AutorestClient;
-using Lykke.Service.ClientAccount.Client.AutorestClient.Models;
+using Lykke.Service.ClientAccount.Client;
 using LykkeApi2.Models.ClientAccountModels;
 using LykkeApi2.Models.ValidationModels.RegistrationValidations;
 using LykkeApi2.Strings;
@@ -9,9 +8,9 @@ namespace LykkeApi2.Models.ValidationModels
 {
     public class RegistrationValidationModel : AbstractValidator<AccountRegistrationModel>
     {        
-        private readonly IClientAccountService _clientAccountService;
+        private readonly IClientAccountClient _clientAccountService;
         
-        public RegistrationValidationModel(IClientAccountService clientAccountService)
+        public RegistrationValidationModel(IClientAccountClient clientAccountService)
         {            
             _clientAccountService = clientAccountService;
             
@@ -23,8 +22,8 @@ namespace LykkeApi2.Models.ValidationModels
         }
 
         private bool IsEmaiVerified(AccountRegistrationModel instance, string value)
-        {            
-            return _clientAccountService.IsEmailVerified(new VerifiedEmailModel(instance.Email, instance.PartnerId)) ?? false;
+        {
+            return _clientAccountService.IsEmailVerifiedAsync(instance.Email, instance.PartnerId).Result ?? false;
         }
 
         //private bool IsTraderWithEmailExistsForPartner(AccountRegistrationModel instance, string foo)
