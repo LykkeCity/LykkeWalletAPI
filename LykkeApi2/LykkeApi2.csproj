@@ -23,7 +23,7 @@
     <PackageReference Include="Lykke.Logs" Version="3.2.2" />
     <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.15" />
     <PackageReference Include="Lykke.Service.Operations.Client" Version="1.0.5" />
-    <PackageReference Include="Lykke.Service.Balances.Client" Version="1.0.11" />
+    <PackageReference Include="Lykke.Service.Balances.Client" Version="1.0.14" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="1.0.17" />
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.55" />
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="1.0.7" />
