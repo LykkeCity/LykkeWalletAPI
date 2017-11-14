@@ -52,12 +52,9 @@ namespace LykkeApi2.Controllers
         [HttpPost]
         [Route("transfer/{id}")]
         [ApiExplorerSettings(GroupName = "Operations")]       
-        public async Task<IActionResult> Transfer([FromBody]CreateTransferRequest cmd, Guid? id)
+        public async Task<IActionResult> Transfer([FromBody]CreateTransferRequest cmd, Guid id)
         {
-            if (!id.HasValue)
-                return BadRequest(new { message = "Operation id is required" });
-            
-            await _operationsClient.Transfer(id.Value, 
+            await _operationsClient.Transfer(id, 
                 new CreateTransferCommand
                 {
                     ClientId = new Guid(_requestContext.ClientId),
@@ -79,14 +76,9 @@ namespace LykkeApi2.Controllers
         [HttpPost]
         [Route("cancel/{id}")]
         [ApiExplorerSettings(GroupName = "Operations")]
-        public async Task<IActionResult> Cancel(Guid? id)
+        public async Task Cancel(Guid id)
         {
-            if (!id.HasValue)
-                return BadRequest(new { message = "Operation id is required" });
-
-            await _operationsClient.Cancel(id.Value);
-
-            return Ok();
+            await _operationsClient.Cancel(id);            
         }
     }
 }
