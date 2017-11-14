@@ -2,7 +2,9 @@
 using System.Net;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Client.AutorestClient;
+using Lykke.Service.Operations.Contracts;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Operations;
 using Microsoft.AspNetCore.Authorization;
@@ -14,12 +16,12 @@ namespace LykkeApi2.Controllers
     [Route("api/operations")]
     public class OperationsController : Controller
     {
-        private readonly IOperationsAPI _operationsApi;
+        private readonly IOperationsClient _operationsClient;
         private readonly IRequestContext _requestContext;
 
-        public OperationsController(IOperationsAPI operationsApi, IRequestContext requestContext)
+        public OperationsController(IOperationsClient operationsClient, IRequestContext requestContext)
         {
-            _operationsApi = operationsApi;
+            _operationsClient = operationsClient;
             _requestContext = requestContext;
         }
 
@@ -36,7 +38,7 @@ namespace LykkeApi2.Controllers
             if (!id.HasValue)
                 return BadRequest(new { message = "id is required" });
 
-            var operation = await _operationsApi.ApiOperationsByIdGetAsync(id.Value);
+            var operation = await _operationsClient.Get(id.Value);
 
             if (operation == null)
                 return NotFound();
@@ -53,19 +55,21 @@ namespace LykkeApi2.Controllers
         [HttpPost]
         [Route("transfer/{id}")]
         [ApiExplorerSettings(GroupName = "Operations")]       
-        public async Task<IActionResult> Transfer([FromBody]CreateTransferCommand cmd, Guid? id)
+        public async Task<IActionResult> Transfer([FromBody]CreateTransferRequest cmd, Guid? id)
         {
             if (!id.HasValue)
                 return BadRequest(new { message = "Operation id is required" });
             
-            var result = await _operationsApi.ApiOperationsTransferByIdPostWithHttpMessagesAsync(id.Value,
-                new Lykke.Service.Operations.Client.AutorestClient.Models.CreateTransferCommand(
-                    new Guid(_requestContext.ClientId), cmd.Amount, cmd.SourceWalletId, cmd.WalletId, cmd.AssetId));
-
-            if (!result.Response.IsSuccessStatusCode)
-            {
-                return BadRequest(result.Body);
-            }
+            await _operationsClient.Transfer(id.Value, 
+                new CreateTransferCommand
+                {
+                    ClientId = new Guid(_requestContext.ClientId),
+                    Amount = cmd.Amount,
+                    SourceWalletId = 
+                    cmd.SourceWalletId,
+                    WalletId = cmd.WalletId,
+                    AssetId = cmd.AssetId                    
+                });
             
             return Created(Url.Action("Get", new { id }), id);
         }
@@ -83,17 +87,7 @@ namespace LykkeApi2.Controllers
             if (!id.HasValue)
                 return BadRequest(new { message = "Operation id is required" });
 
-            var result = await _operationsApi.ApiOperationsCancelByIdPostWithHttpMessagesAsync(id.Value);
-
-            if (result.Response.StatusCode == HttpStatusCode.NotFound)
-            {
-                return NotFound();
-            }
-
-            if (result.Response.StatusCode == HttpStatusCode.BadRequest)
-            {
-                return BadRequest(result.Body);
-            }
+            await _operationsClient.Cancel(id.Value);
 
             return Ok();
         }
