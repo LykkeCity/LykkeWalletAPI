@@ -33,12 +33,9 @@ namespace LykkeApi2.Controllers
         [HttpGet]
         [Route("{id}")]
         [ApiExplorerSettings(GroupName = "Operations")]
-        public async Task<IActionResult> Get(Guid? id)
+        public async Task<IActionResult> Get(Guid id)
         {
-            if (!id.HasValue)
-                return BadRequest(new { message = "id is required" });
-
-            var operation = await _operationsClient.Get(id.Value);
+            var operation = await _operationsClient.Get(id);
 
             if (operation == null)
                 return NotFound();
