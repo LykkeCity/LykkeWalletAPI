@@ -4,6 +4,8 @@ using Core.Settings;
 using Lykke.MarketProfileService.Client;
 using Lykke.Service.CandlesHistory.Client;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
+using Lykke.Service.Operations.Client;
+using Lykke.Service.Operations.Client.AutorestClient;
 using Lykke.Service.Registration;
 using Lykke.Service.Session;
 using Lykke.SettingsReader;
@@ -32,6 +34,8 @@ namespace LykkeApi2.Modules
             builder.RegisterType<LykkeMarketProfileServiceAPI>()
                 .As<ILykkeMarketProfileServiceAPI>()
                 .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.MarketProfileUrl));
+            
+            builder.RegisterOperationsClient(_serviceSettings.CurrentValue.OperationsUrl);
 
             builder.RegisterType<Candleshistoryservice>()
                 .As<ICandleshistoryservice>()
