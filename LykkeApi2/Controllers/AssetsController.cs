@@ -17,12 +17,6 @@ namespace LykkeApi2.Controllers
     [Route("api/assets")]
     public class AssetsController : Controller
     {
-        #region settings consts
-
-        private const string BaseAssetSetting = "BaseAsset";
-
-        #endregion
-
         private readonly IAssetsService _assetsService;
         private readonly IClientAccountSettingsClient _clientAccountSettingsClient;
         private readonly IRequestContext _requestContext;
@@ -59,13 +53,16 @@ namespace LykkeApi2.Controllers
         [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(GetClientBaseAssetRespModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Get(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest();
+
             var asset = await _assetsService.AssetGetAsync(id);
             if (asset == null)
             {
-                ModelState.AddModelError("id", $"Asset {id} does not exist");
-                return NotFound(ModelState);
+                return NotFound();
             }
             return Ok(GetClientBaseAssetRespModel.Create(asset.ConvertToApiModel()));
         }
@@ -171,12 +168,16 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("categories{id}")]
+        [HttpGet("categories/{id}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAssetCategory(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest();
+
             var res = await _assetsService.AssetCategoryGetAsync(id);
             if (res == null)
                 return NotFound();
