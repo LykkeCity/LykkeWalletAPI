@@ -1,14 +1,13 @@
 ﻿using Lykke.Service.ClientAccount.Client;
 using System.Threading.Tasks;
-using Lykke.Service.ClientAccount.Client.AutorestClient;
 
 namespace LykkeApi2.Credentials
 {
     public class ClientAccountLogic
     {        
-        private readonly IClientAccountService _clientAccountService;
+        private readonly IClientAccountClient _clientAccountService;
 
-        public ClientAccountLogic(IClientAccountService clientAccountService)
+        public ClientAccountLogic(IClientAccountClient clientAccountService)
         {            
             _clientAccountService = clientAccountService;
         }
