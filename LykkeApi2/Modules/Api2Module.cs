@@ -21,6 +21,7 @@ using LykkeApi2.Infrastructure;
 using LykkeApi2.Mappers;
 using LykkeApi2.Models.ApiContractModels;
 using Microsoft.Extensions.DependencyInjection;
+using Lykke.Service.ClientAccount.Client.AutorestClient;
 
 namespace LykkeApi2.Modules
 {
@@ -53,6 +54,9 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
+
+            builder.RegisterInstance<IClientAccountService>(
+              new ClientAccountService(new Uri(_settings.CurrentValue.Services.ClientAccountServiceUrl)));
 
             _services.AddSingleton<ClientAccountLogic>();
 
