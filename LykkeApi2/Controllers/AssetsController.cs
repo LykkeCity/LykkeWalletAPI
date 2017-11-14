@@ -171,12 +171,16 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet("categories{id}")]
+        [HttpGet("categories/{id}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAssetCategory(string id)
         {
+            if (string.IsNullOrEmpty(id))
+                return BadRequest();
+
             var res = await _assetsService.AssetCategoryGetAsync(id);
             if (res == null)
                 return NotFound();
