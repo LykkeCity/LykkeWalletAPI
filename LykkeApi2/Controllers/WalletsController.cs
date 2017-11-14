@@ -91,9 +91,8 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("ModifyWallet")]
         public async Task<IActionResult> ModifyWallet(string id, [FromBody]ModifyWalletRequest request)
         {
-            // checking if user owns the specified wallet
-            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
-            var wallet = wallets?.FirstOrDefault(x => x.Id == id);
+            // checking if wallet exists and user owns the specified wallet
+            var wallet = await GetClientWallet(id);
             if (wallet == null)
                 return NotFound();
 
@@ -115,9 +114,8 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("DeleteWallet")]
         public async Task<IActionResult> DeleteWallet(string id)
         {
-            // checking if user owns the specified wallet
-            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
-            var wallet = wallets?.FirstOrDefault(x => x.Id == id);
+            // checking if wallet exists and user owns the specified wallet
+            var wallet = await GetClientWallet(id);
             if (wallet == null)
                 return NotFound();
 
@@ -165,8 +163,8 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetWallet(string id)
         {
-            var wallet = await _clientAccountService.GetWalletAsync(id);
-
+            // checking if wallet exists and user owns the specified wallet
+            var wallet = await GetClientWallet(id);
             if (wallet == null)
                 return NotFound();
 
@@ -235,13 +233,12 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetWalletBalances(string walletId)
         {
+            // checking if wallet exists and user owns the specified wallet
+            var wallet = await GetClientWallet(walletId);
+            if (wallet == null)
+                return NotFound();
+
             var clientBalances = await _balancesClient.GetClientBalances(walletId);
-            if (clientBalances == null)
-            {
-                var wallet = await _clientAccountService.GetWalletAsync(walletId);
-                if (wallet == null)
-                    return NotFound();
-            }
 
             return Ok(clientBalances?.Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]);
         }
@@ -317,6 +314,11 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetWalletBalanceByAssetId(string walletId, string assetId)
         {
+            // checking if wallet exists and user owns the specified wallet
+            var wallet = await GetClientWallet(walletId);
+            if (wallet == null)
+                return NotFound();
+
             var clientBalanceResult = await _balancesClient.GetClientBalanceByAssetId(
                 new ClientBalanceByAssetIdModel
                 {
@@ -330,6 +332,12 @@ namespace LykkeApi2.Controllers
             }
 
             return NotFound();
+        }
+
+        private async Task<Lykke.Service.ClientAccount.Client.Models.WalletDtoModel> GetClientWallet(string walletId)
+        {
+            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
+            return wallets?.FirstOrDefault(x => x.Id == walletId);
         }
     }
 }
