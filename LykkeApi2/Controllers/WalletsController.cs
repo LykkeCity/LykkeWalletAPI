@@ -33,7 +33,7 @@ namespace LykkeApi2.Controllers
         public WalletsController(IRequestContext requestContext, IClientAccountClient clientAccountService, IBalancesClient balancesClient, IHftInternalServiceAPI hftInternalService)
         {
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
-            _clientAccountService = _clientAccountService ?? throw new ArgumentNullException(nameof(_clientAccountService));
+            _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
             _balancesClient = balancesClient ?? throw new ArgumentNullException(nameof(balancesClient));
             _hftInternalService = hftInternalService ?? throw new ArgumentNullException(nameof(hftInternalService));
         }
