@@ -5,7 +5,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Lykke.Service.Balances.AutorestClient.Models;
 using Lykke.Service.Balances.Client;
-using Lykke.Service.ClientAccount.Client.AutorestClient;
+using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ApiKey;
@@ -27,10 +27,10 @@ namespace LykkeApi2.Controllers
 
         private readonly IRequestContext _requestContext;
         private readonly IBalancesClient _balancesClient;
-        private readonly IClientAccountService _clientAccountService;
+        private readonly IClientAccountClient _clientAccountService;
         private readonly IHftInternalServiceAPI _hftInternalService;
 
-        public WalletsController(IRequestContext requestContext, IClientAccountService clientAccountService, IBalancesClient balancesClient, IHftInternalServiceAPI hftInternalService)
+        public WalletsController(IRequestContext requestContext, IClientAccountClient clientAccountService, IBalancesClient balancesClient, IHftInternalServiceAPI hftInternalService)
         {
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
@@ -46,10 +46,16 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("CreateWallet")]
         public async Task<WalletModel> CreateWallet([FromBody] CreateWalletRequest request)
         {
-            var wallet = await _clientAccountService.CreateWalletAsync(
-                new Lykke.Service.ClientAccount.Client.AutorestClient.Models.CreateWalletRequest(request.Type, _requestContext.ClientId, request.Name, request.Description));
+            var wallet = await _clientAccountService.CreateWalletAsync(_requestContext.ClientId, request.Type,
+                request.Name, request.Description);
 
-            return new WalletModel { Id = wallet.Id, Name = wallet.Name, Type = wallet.Type, Description = wallet.Description };
+            return new WalletModel
+            {
+                Id = wallet.Id,
+                Name = wallet.Name,
+                Type = wallet.Type,
+                Description = wallet.Description
+            };
         }
 
         /// <summary>
@@ -91,7 +97,7 @@ namespace LykkeApi2.Controllers
             if (wallet == null)
                 return NotFound();
 
-            wallet = await _clientAccountService.ModifyWalletAsync(id, new Lykke.Service.ClientAccount.Client.AutorestClient.Models.ModifyWalletRequest(request.Name, request.Description));
+            wallet = await _clientAccountService.ModifyWalletAsync(id, request.Name, request.Description);
             if (wallet == null)
                 return NotFound();
 
