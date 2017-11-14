@@ -130,18 +130,24 @@ namespace LykkeApi2.Controllers
                             {
                                 var operations =
                                     OperationsRepositoryMapper.Instance.Map<IEnumerable<ClientTrade>>(task.Result);
-                                clientTrades = operations
-                                    .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
-                                    .ToArray();
+                                if (operations != null && operations.Any())
+                                {
+                                    clientTrades = operations
+                                        .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                        .ToArray();
+                                }
                             }),
                     _cashOperationsRepositoryClient.GetByMultisigsAsync(clientMultisigs.ToArray())
                         .ContinueWith(task =>
                         {
                             var operations = OperationsRepositoryMapper.Instance.Map<IEnumerable<CashInOutOperation>>(
                                 task.Result);
-                            cashOperations = operations
-                                .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
-                                .ToArray();
+                            if (operations != null && operations.Any())
+                            {
+                                cashOperations = operations
+                                    .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                    .ToArray();
+                            }
                         }),
                     _transferEventsRepositoryClient.GetByMultisigsAsync(clientMultisigs.ToArray())
                         .ContinueWith(
@@ -149,9 +155,12 @@ namespace LykkeApi2.Controllers
                             {
                                 var operations =
                                     OperationsRepositoryMapper.Instance.Map<IEnumerable<TransferEvent>>(task.Result);
-                                transfers = operations
-                                    .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
-                                    .ToArray();
+                                if (operations != null && operations.Any())
+                                {
+                                    transfers = operations
+                                        .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                        .ToArray();
+                                }
                             }),
                     _cashOutAttemptRepositoryClient.GetRequestsAsync(_requestContext.ClientId)
                         .ContinueWith(
@@ -160,19 +169,24 @@ namespace LykkeApi2.Controllers
                                 var operations = OperationsRepositoryMapper.Instance
                                     .Map<IEnumerable<SwiftCashOutRequest>>(
                                         task.Result);
-                                cashOutAttempts = operations
-                                    .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
-                                    .ToArray();
+                                if (operations != null && operations.Any())
+                                {
+                                    cashOutAttempts = operations
+                                        .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                        .ToArray();
+                                }
                             }),
                     _limitTradeEventsRepositoryClient.GetAsync(_requestContext.ClientId).ContinueWith(
                         task =>
                         {
-                            var limitTradeEventsResult =
-                                OperationsRepositoryMapper.Instance.Map<IEnumerable<LimitTradeEvent>>(
+                            var operations = OperationsRepositoryMapper.Instance.Map<IEnumerable<LimitTradeEvent>>(
                                     task.Result);
-                            limitTradeEvents = limitTradeEventsResult
-                                .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
-                                .ToArray();
+                            if (operations != null && operations.Any())
+                            {
+                                limitTradeEvents = operations
+                                    .Where(itm => assets.ContainsKey(itm.AssetId) && !itm.IsHidden)
+                                    .ToArray();
+                            }
                         })
                 );
             }
@@ -187,30 +201,37 @@ namespace LykkeApi2.Controllers
                                 {
                                     var operations =
                                         OperationsRepositoryMapper.Instance.Map<IEnumerable<ClientTrade>>(task.Result);
-                                    clientTrades = operations
-                                        .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
-                                        .ToArray();
+                                    if (operations != null && operations.Any())
+                                    {
+                                        clientTrades = operations
+                                            .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
+                                            .ToArray();
+                                    }
                                 }),
                         _cashOperationsRepositoryClient.GetByMultisigsAsync(clientMultisigs.ToArray())
                             .ContinueWith(
                                 task =>
                                 {
-                                    var operations = OperationsRepositoryMapper.Instance
-                                        .Map<IEnumerable<CashInOutOperation>>(
+                                    var operations = OperationsRepositoryMapper.Instance.Map<IEnumerable<CashInOutOperation>>(
                                             task.Result);
-                                    cashOperations = operations
-                                        .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
-                                        .ToArray();
+                                    if (operations != null && operations.Any())
+                                    {
+                                        cashOperations = operations
+                                            .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
+                                            .ToArray();
+                                    }
                                 }),
                         _transferEventsRepositoryClient.GetByMultisigsAsync(clientMultisigs.ToArray()).ContinueWith(
                             task =>
                             {
-                                var operations =
-                                    OperationsRepositoryMapper.Instance
+                                var operations = OperationsRepositoryMapper.Instance
                                         .Map<IEnumerable<TransferEvent>>(task.Result);
-                                transfers = operations
-                                    .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
-                                    .ToArray();
+                                if (operations != null && operations.Any())
+                                {
+                                    transfers = operations
+                                        .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
+                                        .ToArray();
+                                }
                             }),
                         _cashOutAttemptRepositoryClient.GetRequestsAsync(_requestContext.ClientId)
                             .ContinueWith(
@@ -218,19 +239,24 @@ namespace LykkeApi2.Controllers
                                 {
                                     var operations = OperationsRepositoryMapper.Instance
                                         .Map<IEnumerable<SwiftCashOutRequest>>(task.Result);
-                                    cashOutAttempts = operations
-                                        .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
-                                        .ToArray();
+                                    if (operations != null && operations.Any())
+                                    {
+                                        cashOutAttempts = operations
+                                            .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
+                                            .ToArray();
+                                    }
                                 }),
                         _limitTradeEventsRepositoryClient.GetAsync(_requestContext.ClientId).ContinueWith(
                             task =>
                             {
-                                var limitTradeEventsResult =
-                                    OperationsRepositoryMapper.Instance.Map<IEnumerable<LimitTradeEvent>>(
+                                var operations = OperationsRepositoryMapper.Instance.Map<IEnumerable<LimitTradeEvent>>(
                                         task.Result);
-                                limitTradeEvents = limitTradeEventsResult
-                                    .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
-                                    .ToArray();
+                                if (operations != null && operations.Any())
+                                {
+                                    limitTradeEvents = operations
+                                        .Where(itm => itm.AssetId == assetId && !itm.IsHidden)
+                                        .ToArray();
+                                }
                             })
                     );
             }
