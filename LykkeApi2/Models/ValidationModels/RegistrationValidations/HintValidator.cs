@@ -10,19 +10,18 @@ namespace LykkeApi2.Models.ValidationModels.RegistrationValidations
         public HintValidator() : base(Phrases.InvalidPropertyValue)
         {
         }
+
         protected override bool IsValid(PropertyValidatorContext context)
         {
-            string hint = (string)context.PropertyValue;
-            if (!hint.ContainsHtml())
-                return true;
+            string hint = (string) context.PropertyValue;
 
-            return false;
+            return string.IsNullOrWhiteSpace(hint) ? true : hint.ContainsHtml() ? false : true;
         }
     }
 
     public static class HintValidatorExtensions
     {
-        public static IRuleBuilderOptions<T, string> ValidHintVlue<T>(
+        public static IRuleBuilderOptions<T, string> ValidHintValue<T>(
             this IRuleBuilder<T, string> ruleBuilder)
         {
             return ruleBuilder.SetValidator(new HintValidator());
