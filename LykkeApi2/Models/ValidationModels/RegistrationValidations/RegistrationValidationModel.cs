@@ -18,6 +18,8 @@ namespace LykkeApi2.Models.ValidationModels.RegistrationValidations
         {
             _clientAccountService = clientAccountService;
             _deploymentSettings = deploymentSettings;
+
+            RegisterRules();
         }
 
         private bool IsEmaiVerified(AccountRegistrationModel instance, string value)
