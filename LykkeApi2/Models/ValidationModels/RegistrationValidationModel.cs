@@ -15,7 +15,7 @@ namespace LykkeApi2.Models.ValidationModels
             _clientAccountService = clientAccountService;
             
             RuleFor(reg => reg.Email).NotNull();
-            RuleFor(reg => reg.Hint).ValidHintVlue();
+            RuleFor(reg => reg.Hint).ValidHintValue();
             RuleFor(reg => reg.Email).Must(IsEmaiVerified).WithMessage(Phrases.EmailNotVerified);
             //RuleFor(reg => reg.Email).Must(IsTraderWithEmailExistsForPartner).WithMessage(Phrases.ClientWithEmailIsRegistered);
 
