@@ -81,7 +81,7 @@ namespace LykkeApi2
             var log = CreateLogWithSlack(services, apiSettings.CurrentValue.WalletApiv2, apiSettings.ConnectionString(x => x.WalletApiv2.Db.LogsConnString));
 
             builder.RegisterModule(new Api2Module(apiSettings.Nested(x => x.WalletApiv2), log));
-            builder.RegisterModule(new ClientsModule(apiSettings.Nested(x => x.WalletApiv2.Services)));
+            builder.RegisterModule(new ClientsModule(apiSettings));
             builder.RegisterModule(new AspNetCoreModule());
             builder.Populate(services);
             ApplicationContainer = builder.Build();

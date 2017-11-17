@@ -6,11 +6,15 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
 using System.Net;
 using System.Threading.Tasks;
+using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;
 using LykkeApi2.Models.Auth;
 using LykkeApi2.Models.ClientAccountModels;
+using Microsoft.AspNetCore.Authorization;
+using Lykke.Service.PersonalData.Contract;
+using Lykke.Service.PersonalData.Contract.Models;
 
 namespace LykkeApi2.Controllers
 {
@@ -23,17 +27,20 @@ namespace LykkeApi2.Controllers
         private readonly ILykkeRegistrationClient _lykkeRegistrationClient;
         private readonly ClientAccountLogic _clientAccountLogic;
         private readonly IRequestContext _requestContext;
+        private readonly IPersonalDataService _personalDataService;
 
         public ClientController(
             ILog log,
             ILykkeRegistrationClient lykkeRegistrationClient,
             ClientAccountLogic clientAccountLogic,
-            IRequestContext requestContext)
+            IRequestContext requestContext,
+            IPersonalDataService personalDataService)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
             _clientAccountLogic = clientAccountLogic;
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
+            _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
         }
 
         /// <summary>
@@ -112,6 +119,35 @@ namespace LykkeApi2.Controllers
             return Ok(new AuthResponseModel
             {
                 AccessToken = authResult?.Token,
+            });
+        }
+
+        [Authorize]
+        [HttpGet("userInfo")]
+        [SwaggerOperation("UserInfo")]
+        [ProducesResponseType(typeof(UserInfoResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UserInfo()
+        {
+            IPersonalData personalData;
+
+            try
+            {
+                personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+            }
+            catch (Exception e)
+            {
+                await _log.WriteErrorAsync(nameof(ClientController), nameof(UserInfo),
+                    $"clientId = {_requestContext.ClientId}", e);
+
+                return StatusCode((int) HttpStatusCode.InternalServerError);
+            }
+
+            return Ok(new UserInfoResponseModel
+            {
+                Email = personalData?.Email,
+                FirstName = personalData?.FirstName,
+                LastName = personalData?.LastName
             });
         }
     }
