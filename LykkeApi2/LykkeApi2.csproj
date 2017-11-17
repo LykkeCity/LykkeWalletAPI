@@ -18,10 +18,10 @@
     <PackageReference Include="Autofac" Version="4.6.2" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="7.2.1" />
-    <PackageReference Include="Lykke.AzureStorage" Version="2.1.4" />
+    <PackageReference Include="Lykke.AzureStorage" Version="3.0.0" />
     <PackageReference Include="Lykke.Common" Version="3.0.2" />
     <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.0.14" />
-    <PackageReference Include="Lykke.Logs" Version="3.2.2" />
+    <PackageReference Include="Lykke.Logs" Version="3.2.3" />
     <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.15" />
     <PackageReference Include="Lykke.Service.Operations.Client" Version="1.0.5" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.0.14" />
@@ -33,11 +33,14 @@
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.28" />
     <PackageReference Include="Lykke.Service.Pledges.Client" Version="1.0.5-beta" />
     <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.11" />
-    <PackageReference Include="Lykke.Service.Registration" Version="1.0.32" />
+    <PackageReference Include="Lykke.Service.Registration" Version="1.0.33" />
     <PackageReference Include="Lykke.SettingsReader" Version="1.0.42" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="1.0.6" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
     <PackageReference Include="Swashbuckle.SwaggerGen" Version="6.0.0-beta902" />
     <PackageReference Include="Swashbuckle.SwaggerUi" Version="6.0.0-beta902" />
