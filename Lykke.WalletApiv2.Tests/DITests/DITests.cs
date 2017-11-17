@@ -32,8 +32,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
             containerBuilder.RegisterModule(new Api2Module(new SettingsServiceReloadingManager<APIv2Settings>("http://settings.lykke-settings.svc.cluster.local/rr5999apiv2999dvgsert25uwheifn_WalletApiv2").Nested(x => x.WalletApiv2)
                 , _mockLog.Object));
 
-            containerBuilder.RegisterModule(new ClientsModule(new SettingsServiceReloadingManager<APIv2Settings>("http://settings.lykke-settings.svc.cluster.local/rr5999apiv2999dvgsert25uwheifn_WalletApiv2")
-                                                                                                                   .Nested(x => x.WalletApiv2).Nested(s => s.Services)));
+            containerBuilder.RegisterModule(new ClientsModule(new SettingsServiceReloadingManager<APIv2Settings>("http://settings.lykke-settings.svc.cluster.local/rr5999apiv2999dvgsert25uwheifn_WalletApiv2")));
 
             containerBuilder.RegisterType<AssetsController>();
 
