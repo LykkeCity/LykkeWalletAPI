@@ -8,9 +8,8 @@ namespace Core.Settings
     public class APIv2Settings
     {
         public BaseSettings WalletApiv2 { get; set; }
-
-        public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
         public SlackNotificationsSettings SlackNotifications { get; set; }
+        public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
     }
 
     public class SlackNotificationsSettings
