@@ -6,6 +6,7 @@ using Common;
 using Common.Log;
 using Core.Identity;
 using Core.Mappers;
+using Core.Services;
 using Core.Settings;
 using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
@@ -39,6 +40,10 @@ namespace LykkeApi2.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
+            builder.RegisterType<HealthService>()
+                .As<IHealthService>()
+                .SingleInstance();
+
             builder.RegisterInstance(_settings).SingleInstance();
 
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
