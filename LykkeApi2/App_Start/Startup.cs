@@ -52,42 +52,42 @@ namespace LykkeApi2
         {
             try
             {
-                services.AddMvc(options =>
-                    {
-                        options.Filters.Add<ValidateModelAttribute>();
+            services.AddMvc(options =>
+                {
+                    options.Filters.Add<ValidateModelAttribute>();
                     })
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
-                    .AddJsonOptions(options =>
-                    {
-                        options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
-                    });
-
-                services.AddSwaggerGen(options =>
+                .AddJsonOptions(options =>
                 {
-                    options.DefaultLykkeConfiguration(apiVersion, appName);
-
-                    options.OperationFilter<ApiKeyHeaderOperationFilter>();
+                    options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
                 });
 
-                services.AddAuthentication(options =>
-                    {
-                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    })
-                    .AddScheme<LykkeAuthOptions, LykkeAuthHandler>("Bearer", options => { });
+            services.AddSwaggerGen(options =>
+            {
+                options.DefaultLykkeConfiguration(apiVersion, appName);
 
-                var builder = new ContainerBuilder();
-                var appSettings = Configuration.LoadSettings<APIv2Settings>();
-                Log = CreateLogWithSlack(services, appSettings);
+                options.OperationFilter<ApiKeyHeaderOperationFilter>();
+            });
 
-                builder.RegisterModule(new Api2Module(appSettings.Nested(x => x.WalletApiv2), Log));
-                builder.RegisterModule(new ClientsModule(appSettings.Nested(x => x.WalletApiv2.Services)));
-                builder.RegisterModule(new AspNetCoreModule());
-                builder.Populate(services);
-                ApplicationContainer = builder.Build();
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddScheme<LykkeAuthOptions, LykkeAuthHandler>("Bearer", options => { });
 
-                return new AutofacServiceProvider(ApplicationContainer);
-            }
+            var builder = new ContainerBuilder();
+            var appSettings = Configuration.LoadSettings<APIv2Settings>();
+            Log = CreateLogWithSlack(services, appSettings);
+
+            builder.RegisterModule(new Api2Module(appSettings.Nested(x => x.WalletApiv2), Log));
+            builder.RegisterModule(new ClientsModule(appSettings));
+            builder.RegisterModule(new AspNetCoreModule());
+            builder.Populate(services);
+            ApplicationContainer = builder.Build();
+
+            return new AutofacServiceProvider(ApplicationContainer);
+        }
             catch (Exception ex)
             {
                 Log?.WriteFatalErrorAsync(nameof(Startup), nameof(ConfigureServices), "", ex).Wait();
@@ -99,46 +99,46 @@ namespace LykkeApi2
         {
             try
             {
-                app.UseCors(builder =>
-                {
-                    builder.AllowAnyOrigin();
-                    builder.AllowAnyHeader();
-                    builder.AllowAnyMethod();
-                });
-                app.Use(next => context =>
-                {
-                    context.Request.EnableRewind();
+            app.UseCors(builder =>
+            {
+                builder.AllowAnyOrigin();
+                builder.AllowAnyHeader();
+                builder.AllowAnyMethod();
+            });
+            app.Use(next => context =>
+            {
+                context.Request.EnableRewind();
 
-                    return next(context);
-                });
+                return next(context);
+            });
 
-                if (env.IsDevelopment())
-                {
-                    app.UseDeveloperExceptionPage();
-                }
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
-                app.UseAuthentication();
-                app.UseMvc(routes =>
-                {
-                    routes.MapRoute(
-                        name: "default-to-swagger",
-                        template: "{controller=Swagger}");
-                });
+            app.UseAuthentication();
+            app.UseMvc(routes =>
+            {
+                routes.MapRoute(
+                name: "default-to-swagger",
+                template: "{controller=Swagger}");
+            });
 
-                CreateErrorResponse responseFactory = exception => exception;
-                app.UseMiddleware<GlobalErrorHandlerMiddleware>("WalletApiV2", responseFactory);
-                app.UseForwardedHeaders(new ForwardedHeadersOptions
-                {
-                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-                });
+            CreateErrorResponse responseFactory = exception => exception;
+            app.UseMiddleware<GlobalErrorHandlerMiddleware>("WalletApiV2", responseFactory);
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
 
-                app.UseSwagger();
-                app.UseSwaggerUi(swaggerUrl: $"/swagger/{apiVersion}/swagger.json");
-                app.UseStaticFiles();
+            app.UseSwagger();
+            app.UseSwaggerUi(swaggerUrl: $"/swagger/{apiVersion}/swagger.json");
+            app.UseStaticFiles();
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());
-            }
+        }
             catch (Exception ex)
             {
                 Log?.WriteFatalErrorAsync(nameof(Startup), nameof(ConfigureServices), "", ex).Wait();
@@ -155,7 +155,7 @@ namespace LykkeApi2
                 await Log.WriteMonitorAsync("", "", "Started");
             }
             catch (Exception ex)
-            {
+        {
                 await Log.WriteFatalErrorAsync(nameof(Startup), nameof(StartApplication), "", ex);
                 throw;
             }
@@ -172,8 +172,8 @@ namespace LykkeApi2
                     await Log.WriteMonitorAsync("", "", "Terminating");
                 }
 
-                ApplicationContainer.Dispose();
-            }
+            ApplicationContainer.Dispose();
+        }
             catch (Exception ex)
             {
                 if (Log != null)

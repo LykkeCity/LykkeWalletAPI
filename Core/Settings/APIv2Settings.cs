@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Linq;
 using Core.Enums;
+using Lykke.Service.PersonalData.Settings;
 
 namespace Core.Settings
 {
@@ -8,6 +9,7 @@ namespace Core.Settings
     {
         public BaseSettings WalletApiv2 { get; set; }
         public SlackNotificationsSettings SlackNotifications { get; set; }
+        public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
     }
 
     public class SlackNotificationsSettings
@@ -27,12 +29,6 @@ namespace Core.Settings
         public DbSettings Db { get; set; }
 
         public ServiceSettings Services { get; set; }
-
-        //public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
-
-        //public string ExchangeOperationsServiceUrl { get; set; }
-
-        // public double DefaultWithdrawalLimit { get; set; }
 
         public DeploymentSettings DeploymentSettings { get; set; }
     }

@@ -5,22 +5,25 @@ using Lykke.MarketProfileService.Client;
 using Lykke.Service.CandlesHistory.Client;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.Operations.Client;
-using Lykke.Service.Operations.Client.AutorestClient;
 using Lykke.Service.Registration;
 using Lykke.Service.Session;
 using Lykke.SettingsReader;
 using Lykke.Service.Pledges.Client;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.PersonalData.Client;
+using Lykke.Service.PersonalData.Contract;
 
 namespace LykkeApi2.Modules
 {
     public class ClientsModule : Module
     {
         private readonly IReloadingManager<ServiceSettings> _serviceSettings;
+        private readonly IReloadingManager<APIv2Settings> _apiSettings;
 
-        public ClientsModule(IReloadingManager<ServiceSettings> serviceSettings)
+        public ClientsModule(IReloadingManager<APIv2Settings> settings)
         {
-            _serviceSettings = serviceSettings;
+            _apiSettings = settings;
+            _serviceSettings = settings.Nested(x => x.WalletApiv2.Services);
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -52,6 +55,9 @@ namespace LykkeApi2.Modules
             builder.RegisterType<PledgesClient>()
                 .As<IPledgesClient>()
                 .WithParameter("serviceUrl", _serviceSettings.CurrentValue.PledgesServiceUrl);
+
+            builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
+                .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
         }
     }
 }
