@@ -6,6 +6,7 @@ namespace LykkeApi2.Models.ClientBalancesModels
     {
         public string AssetId { get; set; }
         public double? Balance { get; set; }
+        public double? Reserved { get; set; }
 
         public static ClientBalanceResponseModel Create(ClientBalanceModel src)
         {
@@ -13,6 +14,7 @@ namespace LykkeApi2.Models.ClientBalancesModels
             {
                 AssetId = src.AssetId,
                 Balance = src.Balance,
+                Reserved = src.Reserved
             };
         }
 
@@ -21,7 +23,8 @@ namespace LykkeApi2.Models.ClientBalancesModels
             return new ClientBalanceResponseModel
             {
                 AssetId = src.AssetId,
-                Balance = src.Balance
+                Balance = src.Balance,
+                Reserved = src.Reserved
             };
         }
     }

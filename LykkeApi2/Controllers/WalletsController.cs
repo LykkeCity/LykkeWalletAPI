@@ -271,7 +271,7 @@ namespace LykkeApi2.Controllers
                     Type = wallet.Type,
                     Name = wallet.Name,
                     Description = wallet.Description,
-                    Balances = balance != null ? ClientBalanceResponseModel.Create(balance) : new ClientBalanceResponseModel { AssetId = assetId, Balance = 0 },
+                    Balances = balance != null ? ClientBalanceResponseModel.Create(balance) : new ClientBalanceResponseModel { AssetId = assetId, Balance = 0, Reserved = 0},
                     ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
                 });
             }
