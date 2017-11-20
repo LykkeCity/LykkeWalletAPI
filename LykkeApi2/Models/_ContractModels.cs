@@ -15,6 +15,7 @@
         public bool BlockchainDepositEnabled { get; set; }
         public string CategoryId { get; set; }
         public bool IsBase { get; set; }
+        public string IconUrl { get; set; }
     }
 
     public class AssetDescriptionModel
