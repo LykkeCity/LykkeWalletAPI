@@ -35,10 +35,7 @@ namespace Core.Settings
 
     public class DbSettings
     {
-        public string LogsConnString { get; set; }
-        public string ClientPersonalInfoConnString { get; set; }
-        public string HMarketOrdersConnString { get; set; }
-        public string DictsConnString { get; set; }
+        public string LogsConnString { get; set; }        
     }
 
     public class ServiceSettings
@@ -47,25 +44,14 @@ namespace Core.Settings
         public string ClientAccountServiceUrl { get; set; }
         public string RegistrationUrl { get; set; }
         public string RateCalculatorServiceApiUrl { get; set; }
-        public string BalancesServiceUrl { get; set; }
-        public OperationsRepositoryClient OperationsRepositoryClient { get; set; }
+        public string BalancesServiceUrl { get; set; }        
         public string MarketProfileUrl { get; set; }
-        public string CandleHistoryUrl { get; set; }
-        public string OperationsHistoryUrl { get; set; }
+        public string CandleHistoryUrl { get; set; }        
         public string HftInternalServiceUrl { get; set; }
-        public string SessionUrl { get; set; }
-        public string PledgesServiceUrl { get; set; }
+        public string SessionUrl { get; set; }        
         public string OperationsUrl { get; set; }
     }
-
-    public class OperationsRepositoryClient
-    {
-        public string ServiceUrl { get; set; }
-        public int RequestTimeout { get; set; }
-    }
-
-
-
+    
     public class DeploymentSettings
     {
         public bool IsProduction { get; set; }

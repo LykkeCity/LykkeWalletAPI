@@ -5,22 +5,16 @@ using Autofac.Extensions.DependencyInjection;
 using Common;
 using Common.Log;
 using Core.Identity;
-using Core.Mappers;
 using Core.Services;
 using Core.Settings;
 using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
-using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.OperationsHistory.Client;
-using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
-using LykkeApi2.Mappers;
-using LykkeApi2.Models.ApiContractModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules
@@ -65,8 +59,7 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
 
-            RegisterDictionaryEntities(builder);
-            BindHistoryMappers(builder);
+            RegisterDictionaryEntities(builder);            
             BindServices(builder, _settings, _log);
             builder.Populate(_services);
         }
@@ -93,21 +86,7 @@ namespace LykkeApi2.Modules
 
         private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings, ILog log)
         {
-            builder.RegisterOperationsRepositoryClients(
-                settings.CurrentValue.Services.OperationsRepositoryClient.ServiceUrl, log,
-                settings.CurrentValue.Services.OperationsRepositoryClient.RequestTimeout);
-
-            builder.RegisterOperationsHistoryClient(settings.CurrentValue.Services.OperationsHistoryUrl, log);
-        }
-
-        private static void BindHistoryMappers(ContainerBuilder builder)
-        {
-            var historyMapProvider = new HistoryOperationMapProvider();
-            var historyMapper =
-                new HistoryOperationMapper<object, ApiBalanceChangeModel, ApiCashOutAttempt, ApiTradeOperation,
-                    ApiTransfer>(historyMapProvider);
-
-            builder.RegisterInstance(historyMapper).As<IHistoryOperationMapper<object, HistoryOperationSourceData>>();
-        }
+            
+        }       
     }
 }
