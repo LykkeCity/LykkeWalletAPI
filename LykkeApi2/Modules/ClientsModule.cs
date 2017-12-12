@@ -9,8 +9,10 @@ using Lykke.Service.Registration;
 using Lykke.Service.Session;
 using Lykke.SettingsReader;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
+using Common.Log;
 
 namespace LykkeApi2.Modules
 {
@@ -18,11 +20,13 @@ namespace LykkeApi2.Modules
     {
         private readonly IReloadingManager<ServiceSettings> _serviceSettings;
         private readonly IReloadingManager<APIv2Settings> _apiSettings;
+        private readonly ILog _log;
 
-        public ClientsModule(IReloadingManager<APIv2Settings> settings)
+        public ClientsModule(IReloadingManager<APIv2Settings> settings, ILog log)
         {
             _apiSettings = settings;
             _serviceSettings = settings.Nested(x => x.WalletApiv2.Services);
+            _log = log;
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -53,6 +57,8 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
+
+            builder.RegisterOperationsHistoryClient(_apiSettings.CurrentValue.OperationsHistoryServiceClient, _log);
         }
     }
 }
