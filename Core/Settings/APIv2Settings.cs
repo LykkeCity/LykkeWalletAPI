@@ -1,6 +1,4 @@
-﻿using System.Net;
-using System.Linq;
-using Core.Enums;
+﻿using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.PersonalData.Settings;
 
 namespace Core.Settings
@@ -10,6 +8,7 @@ namespace Core.Settings
         public BaseSettings WalletApiv2 { get; set; }
         public SlackNotificationsSettings SlackNotifications { get; set; }
         public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
+        public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
     }
 
     public class SlackNotificationsSettings
