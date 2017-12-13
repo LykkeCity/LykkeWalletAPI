@@ -12,6 +12,7 @@ using LykkeApi2.Models.History;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lykke.Service.ClientAccount.Client;
+using LykkeApi2.Services;
 
 namespace LykkeApi2.Controllers
 {
@@ -23,19 +24,25 @@ namespace LykkeApi2.Controllers
         private readonly IOperationsHistoryClient _operationsHistoryClient;
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountService;
+        private readonly DomainModelConverter _converter;
 
-        public HistoryController(IOperationsHistoryClient operationsHistoryClient, IRequestContext requestContext, IClientAccountClient clientAccountService)
+        public HistoryController(
+            IOperationsHistoryClient operationsHistoryClient, 
+            IRequestContext requestContext, 
+            IClientAccountClient clientAccountService, 
+            DomainModelConverter converter)
         {
             _operationsHistoryClient = operationsHistoryClient ?? throw new ArgumentNullException(nameof(operationsHistoryClient));
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
+            _converter = converter ?? throw new ArgumentNullException(nameof(converter));
         }
 
         [HttpGet("client")]
         [SwaggerOperation("GetByClientId")]
         [ApiExplorerSettings(GroupName = "History")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(IEnumerable<ApiHistoryRecordModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
             [FromQuery] string operationType,
             [FromQuery] string assetId,
@@ -51,7 +58,9 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
             }
 
-            return Ok(response.Records.Select(x => x.ToApiModel()));
+            var convertTasks = response.Records.Select(x => _converter.ToApiModel(x));
+
+            return Ok((await Task.WhenAll(convertTasks)).Where(x => x != null));
         }
 
         [HttpGet("wallet/{walletId}")]
@@ -59,7 +68,7 @@ namespace LykkeApi2.Controllers
         [ApiExplorerSettings(GroupName = "History")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(IEnumerable<ApiHistoryRecordModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
             [FromQuery] string operationType,
@@ -83,7 +92,9 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
             }
 
-            return Ok(response.Records.Select(x => x.ToApiModel()));
+            var convertTasks = response.Records.Select(x => _converter.ToApiModel(x));
+
+            return Ok((await Task.WhenAll(convertTasks)).Where(x => x != null));
         }
     }
 }

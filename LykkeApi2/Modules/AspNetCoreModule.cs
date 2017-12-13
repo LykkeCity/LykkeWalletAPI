@@ -1,7 +1,4 @@
 ﻿using Autofac;
-using Core.Identity;
-using LkeServices.Identity;
-using LykkeApi2.Infrastructure;
 using Microsoft.AspNetCore.Http;
 
 namespace LykkeApi2.Modules

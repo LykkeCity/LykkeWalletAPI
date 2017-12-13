@@ -1,10 +1,10 @@
-﻿using Core.Enumerators;
+﻿using Lykke.Service.OperationsRepository.Contract;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace LykkeApi2.Models.ApiContractModels
+namespace LykkeApi2.Models.Operations
 {
-    public class ApiTransfer
+    public class ApiTrade
     {
         public string Id { get; set; }
         public string DateTime { get; set; }
@@ -15,10 +15,11 @@ namespace LykkeApi2.Models.ApiContractModels
         public string AddressFrom { get; set; }
         public string AddressTo { get; set; }
         public bool IsSettled { get; set; }
-        public string ClientId { get; set; }
-        public string TransactionId { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         public TransactionStates State { get; set; }
+
+        public string LimitOrderId { get; set; }
+        public string MarketOrderId { get; set; }
     }
 }

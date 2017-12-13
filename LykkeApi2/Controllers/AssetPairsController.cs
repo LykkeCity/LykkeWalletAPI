@@ -46,11 +46,11 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(AssetPairResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
             var assetPairs = (await _assetPairs.Values()).Where(s => !s.IsDisabled);
-            return Ok(AssetPairResponseModel.Create(assetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(assetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
         }
 
         /// <summary>
@@ -60,14 +60,14 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("{id}")]
         [ApiExplorerSettings(GroupName = "Exchange")]
-        [ProducesResponseType(typeof(AssetPairResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int) HttpStatusCode.OK)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetPairById(string id)
         {
             var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == id);
             if (assetPair == null)
                 return NotFound($"AssetPair {id} does not exist");
-            return Ok(AssetPairResponseModel.Create(new List<AssetPairModel> {assetPair.ConvertToApiModel()}));
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(new List<AssetPairModel> {assetPair.ConvertToApiModel()}));
         }
 
         /// <summary>

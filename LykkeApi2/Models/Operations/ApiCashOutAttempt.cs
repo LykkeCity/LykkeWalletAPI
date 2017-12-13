@@ -1,6 +1,6 @@
-﻿namespace LykkeApi2.Models.ApiContractModels
+﻿namespace LykkeApi2.Models.Operations
 {
-    public class ApiCashOutCancelled
+    public class ApiCashOutAttempt
     {
         public string Id { get; set; }
         public string DateTime { get; set; }
