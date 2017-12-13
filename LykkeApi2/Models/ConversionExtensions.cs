@@ -11,7 +11,7 @@ using LykkeApi2.Models.Operations;
 
 namespace LykkeApi2.Models
 {
-    public static class DomainToContractConverter
+    public static class ConversionExtensions
     {
         private static string GetIcon(this Asset asset)
         {
@@ -186,7 +186,7 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static ApiTrade ConvertToApiModel(this IClientTrade clientTrade, Asset asset, AssetPair assetPair)
+        public static ApiTrade ConvertToApiModel(this IClientTrade clientTrade, Asset asset)
         {
             var isSettled = !string.IsNullOrEmpty(clientTrade.BlockChainHash);
 

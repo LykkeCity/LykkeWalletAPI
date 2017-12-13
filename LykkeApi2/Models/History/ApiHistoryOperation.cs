@@ -21,7 +21,7 @@ namespace LykkeApi2.Models.History
         public static ApiHistoryOperation Create(
             string id,
             DateTime dateTime,
-            ApiTrade tradeOperation = null,
+            ApiTrade trade = null,
             ApiBalanceChange cashInOut = null, 
             ApiTransfer transfer = null, 
             ApiCashOutAttempt cashOutAttempt = null,
@@ -34,7 +34,7 @@ namespace LykkeApi2.Models.History
                 Id = id,
                 DateTime = dateTime,
                 CashInOut = cashInOut,
-                Trade = tradeOperation,
+                Trade = trade,
                 Transfer = transfer,
                 CashOutAttempt = cashOutAttempt,
                 CashOutCancelled = cashOutCancelled,
