@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.SwaggerGen.Annotations;
 using System.Net;
 using System.Threading.Tasks;
-using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;

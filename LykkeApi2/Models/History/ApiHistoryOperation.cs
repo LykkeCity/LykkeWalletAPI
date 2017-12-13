@@ -1,28 +1,35 @@
-﻿using LykkeApi2.Models.ApiContractModels;
+﻿using LykkeApi2.Models.Operations;
 using System;
 
-namespace LykkeApi2.Models.TransactionHistoryModels
+namespace LykkeApi2.Models.History
 {
-    public class TransactionHistoryResponseModel
+    /// <summary>
+    /// Represents anny operation logged to history
+    /// </summary>
+    public class ApiHistoryOperation
     {
         public string Id { get; set; }
         public DateTime DateTime { get; set; }
-
-        public ApiBalanceChangeModel CashInOut { get; set; }
-        public ApiTradeOperation Trade { get; set; }
+        public ApiBalanceChange CashInOut { get; set; }
+        public ApiTrade Trade { get; set; }
         public ApiTransfer Transfer { get; set; }
-
         public ApiCashOutAttempt CashOutAttempt { get; set; }
         public ApiCashOutCancelled CashOutCancelled { get; set; }
         public ApiCashOutDone CashOutDone { get; set; }
-
         public ApiLimitTradeEvent LimitTradeEvent { get; set; }
 
-        public static TransactionHistoryResponseModel Create(DateTime dateTime, string id, ApiTradeOperation tradeOperation = null,
-            ApiBalanceChangeModel cashInOut = null, ApiTransfer transfer = null, ApiCashOutAttempt cashOutAttempt = null,
-            ApiCashOutCancelled cashOutCancelled = null, ApiCashOutDone apiCashOutDone = null, ApiLimitTradeEvent limitTradeEvent = null)
+        public static ApiHistoryOperation Create(
+            string id,
+            DateTime dateTime,
+            ApiTrade tradeOperation = null,
+            ApiBalanceChange cashInOut = null, 
+            ApiTransfer transfer = null, 
+            ApiCashOutAttempt cashOutAttempt = null,
+            ApiCashOutCancelled cashOutCancelled = null, 
+            ApiCashOutDone apiCashOutDone = null,
+            ApiLimitTradeEvent limitTradeEvent = null)
         {
-            return new TransactionHistoryResponseModel
+            return new ApiHistoryOperation
             {
                 Id = id,
                 DateTime = dateTime,

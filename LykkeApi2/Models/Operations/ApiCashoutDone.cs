@@ -1,4 +1,4 @@
-﻿namespace LykkeApi2.Models.ApiContractModels
+﻿namespace LykkeApi2.Models.Operations
 {
     public class ApiCashOutDone
     {

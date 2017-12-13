@@ -35,7 +35,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetByClientId")]
         [ApiExplorerSettings(GroupName = "History")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(IEnumerable<ApiHistoryRecordModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
             [FromQuery] string operationType,
             [FromQuery] string assetId,
@@ -59,7 +59,7 @@ namespace LykkeApi2.Controllers
         [ApiExplorerSettings(GroupName = "History")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(IEnumerable<ApiHistoryRecordModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
             [FromQuery] string operationType,

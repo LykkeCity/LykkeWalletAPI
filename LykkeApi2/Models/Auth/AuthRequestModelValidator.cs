@@ -1,6 +1,5 @@
 ﻿using Core.Constants;
 using FluentValidation;
-using LykkeApi2.Strings;
 
 namespace LykkeApi2.Models.Auth
 {
