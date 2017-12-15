@@ -7,12 +7,12 @@ using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Authorization;
-using Swashbuckle.SwaggerGen.Annotations;
 using LykkeApi2.Models.History;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lykke.Service.ClientAccount.Client;
 using LykkeApi2.Services;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
 {
@@ -84,7 +84,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetByWalletId")]
         [ApiExplorerSettings(GroupName = "History")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
@@ -99,7 +99,7 @@ namespace LykkeApi2.Controllers
 
             if (!wallets.Any(x => x.Id.Equals(walletId)))
             {
-                return BadRequest(ErrorResponse.Create("Wallet doesn't exist"));
+                return NotFound();
             }
 
             var response = await _operationsHistoryClient.GetByWalletId(walletId, operationType, assetId, take, skip);
