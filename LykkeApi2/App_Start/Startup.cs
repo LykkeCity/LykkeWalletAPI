@@ -52,14 +52,12 @@ namespace LykkeApi2
         {
             try
             {
-                services.AddMvc(options =>
-                    {
-                        options.Filters.Add<ValidateModelAttribute>();
-                    })
+                services.AddMvc(options => { options.Filters.Add<ValidateModelAttribute>(); })
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
                     .AddJsonOptions(options =>
                     {
-                        options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                        options.SerializerSettings.ContractResolver =
+                            new Newtonsoft.Json.Serialization.DefaultContractResolver();
                     });
 
                 services.AddSwaggerGen(options =>
@@ -133,7 +131,13 @@ namespace LykkeApi2
                 });
 
                 app.UseSwagger();
-                app.UseSwaggerUi(swaggerUrl: $"/swagger/{apiVersion}/swagger.json");
+
+                app.UseSwaggerUI(o =>
+                {
+                    o.RoutePrefix = "swagger/ui";
+                    o.SwaggerEndpoint($"/swagger/{apiVersion}/swagger.json", apiVersion);
+                });
+
                 app.UseStaticFiles();
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
@@ -193,23 +197,26 @@ namespace LykkeApi2
             aggregateLogger.AddLog(consoleLogger);
 
             //Creating slack notification service, which logs own azure queue processing messages to aggregate log
-            var slackService = services.UseSlackNotificationsSenderViaAzureQueue(new Lykke.AzureQueueIntegration.AzureQueueSettings
-            {
-                ConnectionString = settings.CurrentValue.SlackNotifications.AzureQueue.ConnectionString,
-                QueueName = settings.CurrentValue.SlackNotifications.AzureQueue.QueueName
-            }, aggregateLogger);
+            var slackService = services.UseSlackNotificationsSenderViaAzureQueue(
+                new Lykke.AzureQueueIntegration.AzureQueueSettings
+                {
+                    ConnectionString = settings.CurrentValue.SlackNotifications.AzureQueue.ConnectionString,
+                    QueueName = settings.CurrentValue.SlackNotifications.AzureQueue.QueueName
+                }, aggregateLogger);
 
             var dbLogConnectionStringManager = settings.Nested(x => x.WalletApiv2.Db.LogsConnString);
             var dbLogConnectionString = dbLogConnectionStringManager.CurrentValue;
 
             // Creating azure storage logger, which logs own messages to concole log
-            if (!string.IsNullOrEmpty(dbLogConnectionString) && !(dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}")))
+            if (!string.IsNullOrEmpty(dbLogConnectionString) &&
+                !(dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}")))
             {
                 var persistenceManager = new LykkeLogToAzureStoragePersistenceManager(
                     AzureTableStorage<LogEntity>.Create(dbLogConnectionStringManager, "LogApiv2", consoleLogger),
                     consoleLogger);
 
-                var slackNotificationsManager = new LykkeLogToAzureSlackNotificationsManager(slackService, consoleLogger);
+                var slackNotificationsManager =
+                    new LykkeLogToAzureSlackNotificationsManager(slackService, consoleLogger);
 
                 var azureStorageLogger = new LykkeLogToAzureStorage(
                     persistenceManager,

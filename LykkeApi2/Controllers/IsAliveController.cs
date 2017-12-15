@@ -5,7 +5,7 @@ using Core.Services;
 using LykkeApi2.Models;
 using LykkeApi2.Models.IsAlive;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.SwaggerGen.Annotations;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
 {

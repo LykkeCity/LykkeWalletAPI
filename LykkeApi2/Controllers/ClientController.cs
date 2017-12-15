@@ -3,7 +3,6 @@ using Common.Log;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.SwaggerGen.Annotations;
 using System.Net;
 using System.Threading.Tasks;
 using Lykke.Service.Registration;
@@ -14,6 +13,7 @@ using LykkeApi2.Models.ClientAccountModels;
 using Microsoft.AspNetCore.Authorization;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.PersonalData.Contract.Models;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
 {

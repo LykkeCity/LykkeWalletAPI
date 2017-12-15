@@ -7,12 +7,12 @@ using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Authorization;
-using Swashbuckle.SwaggerGen.Annotations;
 using LykkeApi2.Models.History;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lykke.Service.ClientAccount.Client;
 using LykkeApi2.Services;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
 {
@@ -38,6 +38,14 @@ namespace LykkeApi2.Controllers
             _converter = converter ?? throw new ArgumentNullException(nameof(converter));
         }
 
+        /// <summary>
+        /// Get history by client identifier
+        /// </summary>
+        /// <param name="operationType">The type of the operation, possible values: CashInOut, CashOutAttempt, ClientTrade, TransferEvent, LimitTradeEvent</param>
+        /// <param name="assetId">Asset identifier</param>
+        /// <param name="take">How many maximum items have to be returned</param>
+        /// <param name="skip">How many items skip before returning</param>
+        /// <returns></returns>
         [HttpGet("client")]
         [SwaggerOperation("GetByClientId")]
         [ApiExplorerSettings(GroupName = "History")]
@@ -63,11 +71,20 @@ namespace LykkeApi2.Controllers
             return Ok((await Task.WhenAll(convertTasks)).Where(x => x != null));
         }
 
+        /// <summary>
+        /// Getting history by wallet identifier
+        /// </summary>
+        /// <param name="walletId">Wallet identifier</param>
+        /// <param name="operationType">The type of the operation, possible values: CashInOut, CashOutAttempt, ClientTrade, TransferEvent, LimitTradeEvent</param>
+        /// <param name="assetId">Asset identifier</param>
+        /// <param name="take">How many maximum items have to be returned</param>
+        /// <param name="skip">How many items skip before returning</param>
+        /// <returns></returns>
         [HttpGet("wallet/{walletId}")]
         [SwaggerOperation("GetByWalletId")]
         [ApiExplorerSettings(GroupName = "History")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
@@ -82,7 +99,7 @@ namespace LykkeApi2.Controllers
 
             if (!wallets.Any(x => x.Id.Equals(walletId)))
             {
-                return BadRequest(ErrorResponse.Create("Wallet doesn't exist"));
+                return NotFound();
             }
 
             var response = await _operationsHistoryClient.GetByWalletId(walletId, operationType, assetId, take, skip);
