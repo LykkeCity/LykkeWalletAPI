@@ -80,7 +80,7 @@ namespace LykkeApi2.Controllers
 
             var wallets = await _clientAccountService.GetWalletsByClientIdAsync(clientId);
 
-            if (!wallets.Any(x => x.Id.Equals(wallets)))
+            if (!wallets.Any(x => x.Id.Equals(walletId)))
             {
                 return BadRequest(ErrorResponse.Create("Wallet doesn't exist"));
             }
