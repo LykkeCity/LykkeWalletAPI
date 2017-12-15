@@ -20,14 +20,16 @@
     <PackageReference Include="FluentValidation.AspNetCore" Version="7.2.1" />
     <PackageReference Include="Lykke.AzureStorage" Version="3.0.0" />
     <PackageReference Include="Lykke.Common" Version="3.0.2" />
-    <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.0.14" />
+    <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.0.20" />
     <PackageReference Include="Lykke.Logs" Version="3.2.3" />
     <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.15" />
     <PackageReference Include="Lykke.Service.Operations.Client" Version="1.0.5" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.0.17" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="1.0.17" />
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.55" />
-    <PackageReference Include="Lykke.Service.HftInternalService.Client" Version="1.0.9-beta" />
+    <PackageReference Include="Lykke.Service.HftInternalService.Client" Version="1.0.10" />
+    <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="1.0.13" />
+    <PackageReference Include="Lykke.Service.OperationsRepository.Contract" Version="1.0.8" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.28" />
     <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.11" />
     <PackageReference Include="Lykke.Service.Registration" Version="1.0.33" />
@@ -39,9 +41,10 @@
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
-    <PackageReference Include="Swashbuckle.SwaggerGen" Version="6.0.0-beta902" />
-    <PackageReference Include="Swashbuckle.SwaggerUi" Version="6.0.0-beta902" />
-	<PackageReference Include="Lykke.Service.Assets.Client" Version="2.0.6-beta" />
+    <PackageReference Include="NetJSON" Version="1.2.2" />
+	  <PackageReference Include="Lykke.Service.Assets.Client" Version="2.1.0.28" />
+	  <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="1.1.0" />
+	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>

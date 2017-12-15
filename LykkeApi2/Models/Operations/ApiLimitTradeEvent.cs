@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LykkeApi2.Models.ApiContractModels
+namespace LykkeApi2.Models.Operations
 {
     public class ApiLimitTradeEvent
     {
@@ -14,6 +14,5 @@ namespace LykkeApi2.Models.ApiContractModels
         public string Status { get; set; }
         public string Type { get; set; }
         public double TotalCost { get; set; }
-        public string ClientId { get; set; }
     }
 }

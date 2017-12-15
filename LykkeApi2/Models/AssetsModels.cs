@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Lykke.Service.Assets.Client.Models;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LykkeApi2.Models
 {
@@ -121,5 +120,13 @@ namespace LykkeApi2.Models
     {
         [Required]
         public string BaseAsssetId { get; set; }
+    }
+
+    public static class AssetExtensions
+    {
+        public static int GetDisplayAccuracy(this Asset asset)
+        {
+            return asset.DisplayAccuracy ?? asset.Accuracy;
+        }
     }
 }

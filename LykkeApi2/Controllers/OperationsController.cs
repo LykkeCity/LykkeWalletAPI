@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Net;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using Lykke.Service.Operations.Client;
-using Lykke.Service.Operations.Client.AutorestClient;
 using Lykke.Service.Operations.Contracts;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Operations;

@@ -2,9 +2,6 @@
 using Lykke.Service.CandlesHistory.Client.Models;
 using LykkeApi2.Strings;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LykkeApi2.Models.ValidationModels.CandleSticksRequestValidations
 {
