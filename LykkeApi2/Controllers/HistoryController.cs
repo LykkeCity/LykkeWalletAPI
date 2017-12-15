@@ -38,6 +38,14 @@ namespace LykkeApi2.Controllers
             _converter = converter ?? throw new ArgumentNullException(nameof(converter));
         }
 
+        /// <summary>
+        /// Get history by client identifier
+        /// </summary>
+        /// <param name="operationType">The type of the operation, possible values: CashInOut, CashOutAttempt, ClientTrade, TransferEvent, LimitTradeEvent</param>
+        /// <param name="assetId">Asset identifier</param>
+        /// <param name="take">How many maximum items have to be returned</param>
+        /// <param name="skip">How many items skip before returning</param>
+        /// <returns></returns>
         [HttpGet("client")]
         [SwaggerOperation("GetByClientId")]
         [ApiExplorerSettings(GroupName = "History")]
@@ -63,6 +71,15 @@ namespace LykkeApi2.Controllers
             return Ok((await Task.WhenAll(convertTasks)).Where(x => x != null));
         }
 
+        /// <summary>
+        /// Getting history by wallet identifier
+        /// </summary>
+        /// <param name="walletId">Wallet identifier</param>
+        /// <param name="operationType">The type of the operation, possible values: CashInOut, CashOutAttempt, ClientTrade, TransferEvent, LimitTradeEvent</param>
+        /// <param name="assetId">Asset identifier</param>
+        /// <param name="take">How many maximum items have to be returned</param>
+        /// <param name="skip">How many items skip before returning</param>
+        /// <returns></returns>
         [HttpGet("wallet/{walletId}")]
         [SwaggerOperation("GetByWalletId")]
         [ApiExplorerSettings(GroupName = "History")]
