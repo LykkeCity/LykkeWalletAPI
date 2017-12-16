@@ -45,7 +45,6 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
@@ -59,7 +58,6 @@ namespace LykkeApi2.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int) HttpStatusCode.OK)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetPairById(string id)
@@ -75,7 +73,6 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("rates")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(AssetPairRatesResponseModel), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetPairRates()
         {
@@ -100,7 +97,6 @@ namespace LykkeApi2.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpGet("rates/{assetPairId}")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(AssetPairRatesResponseModel), (int) HttpStatusCode.OK)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetPairRatesById([FromRoute] AssetPairRequestModel request)
