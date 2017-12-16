@@ -48,7 +48,6 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("client")]
         [SwaggerOperation("GetByClientId")]
-        [ApiExplorerSettings(GroupName = "History")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
@@ -82,7 +81,6 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("wallet/{walletId}")]
         [SwaggerOperation("GetByWalletId")]
-        [ApiExplorerSettings(GroupName = "History")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
