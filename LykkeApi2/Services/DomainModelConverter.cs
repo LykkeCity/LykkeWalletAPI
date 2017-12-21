@@ -10,6 +10,7 @@ using Lykke.Service.OperationsRepository.Contract.Cash;
 using LykkeApi2.Models;
 using LykkeApi2.Models.History;
 using LykkeApi2.Models.Operations;
+using Newtonsoft.Json;
 
 namespace LykkeApi2.Services
 {
@@ -48,19 +49,19 @@ namespace LykkeApi2.Services
             switch (operationType)
             {
                 case OperationType.CashInOut:
-                    cashInOut = NetJSON.NetJSON.Deserialize<CashOperationDto>(json);
+                    cashInOut = await Deserialize<CashOperationDto>(json);
                     break;
                 case OperationType.CashOutAttempt:
-                    cashoutAttempt = NetJSON.NetJSON.Deserialize<CashOutRequestDto>(json);
+                    cashoutAttempt = await Deserialize<CashOutRequestDto>(json);
                     break;
                 case OperationType.ClientTrade:
-                    clientTrade = NetJSON.NetJSON.Deserialize<ClientTradeDto>(json);
+                    clientTrade = await Deserialize<ClientTradeDto>(json);
                     break;
                 case OperationType.LimitTradeEvent:
-                    limitTradeEvent = NetJSON.NetJSON.Deserialize<LimitTradeEventDto>(json);
+                    limitTradeEvent = await Deserialize<LimitTradeEventDto>(json);
                     break;
                 case OperationType.TransferEvent:
-                    transferEvent = NetJSON.NetJSON.Deserialize<TransferEventDto>(json);
+                    transferEvent = await Deserialize<TransferEventDto>(json);
                     break;
                 default:
                     throw new Exception($"Unknown operation type: {operationType.ToString()}");
@@ -111,6 +112,19 @@ namespace LykkeApi2.Services
             }
 
             return model.ConvertToApiModel(assetPair, asset.GetDisplayAccuracy());
+        }
+
+        private async Task<T> Deserialize<T>(string json)
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<T>(json);
+            }
+            catch (Exception ex)
+            {
+                await _log.WriteErrorAsync(nameof(DomainModelConverter), nameof(Deserialize), json, ex);
+                throw;
+            }
         }
     }
 }
