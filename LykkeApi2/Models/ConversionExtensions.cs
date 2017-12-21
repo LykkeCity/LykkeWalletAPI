@@ -201,7 +201,9 @@ namespace LykkeApi2.Models
                 AddressFrom = clientTrade.AddressFrom,
                 AddressTo = clientTrade.AddressTo,
                 IsSettled = isSettled,
-                State = clientTrade.State
+                State = clientTrade.State,
+                LimitOrderId = clientTrade.LimitOrderId,
+                MarketOrderId = clientTrade.MarketOrderId
             };
         }
     }
