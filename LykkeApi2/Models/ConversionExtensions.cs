@@ -175,7 +175,7 @@ namespace LykkeApi2.Models
             {
                 DateTime = limitTradeEvent.CreatedDt,
                 Id = limitTradeEvent.Id,
-                Volume = Math.Abs(limitTradeEvent.Volume),
+                Volume = Math.Abs(limitTradeEvent.Volume.TruncateDecimalPlaces(accuracy, isBuy)),
                 Price = limitTradeEvent.Price,
                 OrderId = limitTradeEvent.OrderId,
                 Asset = limitTradeEvent.AssetId,
