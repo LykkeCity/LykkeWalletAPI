@@ -8,7 +8,7 @@ using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ApiKey;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.SwaggerGen.Annotations;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
 {

@@ -52,42 +52,40 @@ namespace LykkeApi2
         {
             try
             {
-            services.AddMvc(options =>
-                {
-                    options.Filters.Add<ValidateModelAttribute>();
-                    })
+                services.AddMvc(options => { options.Filters.Add<ValidateModelAttribute>(); })
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
-                .AddJsonOptions(options =>
+                    .AddJsonOptions(options =>
+                    {
+                        options.SerializerSettings.ContractResolver =
+                            new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                    });
+
+                services.AddSwaggerGen(options =>
                 {
-                    options.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                    options.DefaultLykkeConfiguration(apiVersion, appName);
+
+                    options.OperationFilter<ApiKeyHeaderOperationFilter>();
                 });
 
-            services.AddSwaggerGen(options =>
-            {
-                options.DefaultLykkeConfiguration(apiVersion, appName);
+                services.AddAuthentication(options =>
+                    {
+                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    })
+                    .AddScheme<LykkeAuthOptions, LykkeAuthHandler>("Bearer", options => { });
 
-                options.OperationFilter<ApiKeyHeaderOperationFilter>();
-            });
+                var builder = new ContainerBuilder();
+                var appSettings = Configuration.LoadSettings<APIv2Settings>();
+                Log = CreateLogWithSlack(services, appSettings);
 
-            services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddScheme<LykkeAuthOptions, LykkeAuthHandler>("Bearer", options => { });
+                builder.RegisterModule(new Api2Module(appSettings.Nested(x => x.WalletApiv2), Log));
+                builder.RegisterModule(new ClientsModule(appSettings, Log));
+                builder.RegisterModule(new AspNetCoreModule());
+                builder.Populate(services);
+                ApplicationContainer = builder.Build();
 
-            var builder = new ContainerBuilder();
-            var appSettings = Configuration.LoadSettings<APIv2Settings>();
-            Log = CreateLogWithSlack(services, appSettings);
-
-            builder.RegisterModule(new Api2Module(appSettings.Nested(x => x.WalletApiv2), Log));
-            builder.RegisterModule(new ClientsModule(appSettings));
-            builder.RegisterModule(new AspNetCoreModule());
-            builder.Populate(services);
-            ApplicationContainer = builder.Build();
-
-            return new AutofacServiceProvider(ApplicationContainer);
-        }
+                return new AutofacServiceProvider(ApplicationContainer);
+            }
             catch (Exception ex)
             {
                 Log?.WriteFatalErrorAsync(nameof(Startup), nameof(ConfigureServices), "", ex).Wait();
@@ -99,46 +97,52 @@ namespace LykkeApi2
         {
             try
             {
-            app.UseCors(builder =>
-            {
-                builder.AllowAnyOrigin();
-                builder.AllowAnyHeader();
-                builder.AllowAnyMethod();
-            });
-            app.Use(next => context =>
-            {
-                context.Request.EnableRewind();
+                app.UseCors(builder =>
+                {
+                    builder.AllowAnyOrigin();
+                    builder.AllowAnyHeader();
+                    builder.AllowAnyMethod();
+                });
+                app.Use(next => context =>
+                {
+                    context.Request.EnableRewind();
 
-                return next(context);
-            });
+                    return next(context);
+                });
 
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+                if (env.IsDevelopment())
+                {
+                    app.UseDeveloperExceptionPage();
+                }
 
-            app.UseAuthentication();
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                name: "default-to-swagger",
-                template: "{controller=Swagger}");
-            });
+                app.UseAuthentication();
+                app.UseMvc(routes =>
+                {
+                    routes.MapRoute(
+                        name: "default-to-swagger",
+                        template: "{controller=Swagger}");
+                });
 
-            CreateErrorResponse responseFactory = exception => exception;
-            app.UseMiddleware<GlobalErrorHandlerMiddleware>("WalletApiV2", responseFactory);
-            app.UseForwardedHeaders(new ForwardedHeadersOptions
-            {
-                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-            });
+                CreateErrorResponse responseFactory = exception => exception;
+                app.UseMiddleware<GlobalErrorHandlerMiddleware>("WalletApiV2", responseFactory);
+                app.UseForwardedHeaders(new ForwardedHeadersOptions
+                {
+                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                });
 
-            app.UseSwagger();
-            app.UseSwaggerUi(swaggerUrl: $"/swagger/{apiVersion}/swagger.json");
-            app.UseStaticFiles();
+                app.UseSwagger();
+
+                app.UseSwaggerUI(o =>
+                {
+                    o.RoutePrefix = "swagger/ui";
+                    o.SwaggerEndpoint($"/swagger/{apiVersion}/swagger.json", apiVersion);
+                });
+
+                app.UseStaticFiles();
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());
-        }
+            }
             catch (Exception ex)
             {
                 Log?.WriteFatalErrorAsync(nameof(Startup), nameof(ConfigureServices), "", ex).Wait();
@@ -155,7 +159,7 @@ namespace LykkeApi2
                 await Log.WriteMonitorAsync("", "", "Started");
             }
             catch (Exception ex)
-        {
+            {
                 await Log.WriteFatalErrorAsync(nameof(Startup), nameof(StartApplication), "", ex);
                 throw;
             }
@@ -172,8 +176,8 @@ namespace LykkeApi2
                     await Log.WriteMonitorAsync("", "", "Terminating");
                 }
 
-            ApplicationContainer.Dispose();
-        }
+                ApplicationContainer.Dispose();
+            }
             catch (Exception ex)
             {
                 if (Log != null)
@@ -193,23 +197,26 @@ namespace LykkeApi2
             aggregateLogger.AddLog(consoleLogger);
 
             //Creating slack notification service, which logs own azure queue processing messages to aggregate log
-            var slackService = services.UseSlackNotificationsSenderViaAzureQueue(new Lykke.AzureQueueIntegration.AzureQueueSettings
-            {
-                ConnectionString = settings.CurrentValue.SlackNotifications.AzureQueue.ConnectionString,
-                QueueName = settings.CurrentValue.SlackNotifications.AzureQueue.QueueName
-            }, aggregateLogger);
+            var slackService = services.UseSlackNotificationsSenderViaAzureQueue(
+                new Lykke.AzureQueueIntegration.AzureQueueSettings
+                {
+                    ConnectionString = settings.CurrentValue.SlackNotifications.AzureQueue.ConnectionString,
+                    QueueName = settings.CurrentValue.SlackNotifications.AzureQueue.QueueName
+                }, aggregateLogger);
 
             var dbLogConnectionStringManager = settings.Nested(x => x.WalletApiv2.Db.LogsConnString);
             var dbLogConnectionString = dbLogConnectionStringManager.CurrentValue;
 
             // Creating azure storage logger, which logs own messages to concole log
-            if (!string.IsNullOrEmpty(dbLogConnectionString) && !(dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}")))
+            if (!string.IsNullOrEmpty(dbLogConnectionString) &&
+                !(dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}")))
             {
                 var persistenceManager = new LykkeLogToAzureStoragePersistenceManager(
                     AzureTableStorage<LogEntity>.Create(dbLogConnectionStringManager, "LogApiv2", consoleLogger),
                     consoleLogger);
 
-                var slackNotificationsManager = new LykkeLogToAzureSlackNotificationsManager(slackService, consoleLogger);
+                var slackNotificationsManager =
+                    new LykkeLogToAzureSlackNotificationsManager(slackService, consoleLogger);
 
                 var azureStorageLogger = new LykkeLogToAzureStorage(
                     persistenceManager,

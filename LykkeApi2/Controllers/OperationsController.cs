@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Net;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using Lykke.Service.Operations.Client;
-using Lykke.Service.Operations.Client.AutorestClient;
 using Lykke.Service.Operations.Contracts;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Operations;
@@ -32,7 +29,6 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("{id}")]
-        [ApiExplorerSettings(GroupName = "Operations")]
         public async Task<IActionResult> Get(Guid id)
         {
             var operation = await _operationsClient.Get(id);
@@ -51,7 +47,6 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("transfer/{id}")]
-        [ApiExplorerSettings(GroupName = "Operations")]       
         public async Task<IActionResult> Transfer([FromBody]CreateTransferRequest cmd, Guid id)
         {
             await _operationsClient.Transfer(id, 
@@ -75,7 +70,6 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("cancel/{id}")]
-        [ApiExplorerSettings(GroupName = "Operations")]
         public async Task Cancel(Guid id)
         {
             await _operationsClient.Cancel(id);            

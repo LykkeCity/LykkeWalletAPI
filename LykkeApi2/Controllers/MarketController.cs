@@ -25,7 +25,6 @@ namespace LykkeApi2.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("converter")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(ConvertionResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Convert([FromBody] ConvertionRequest request)

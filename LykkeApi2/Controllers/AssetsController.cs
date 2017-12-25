@@ -36,7 +36,6 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(GetBaseAssetsRespModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
@@ -50,7 +49,6 @@ namespace LykkeApi2.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(GetClientBaseAssetRespModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -73,7 +71,6 @@ namespace LykkeApi2.Controllers
         /// <param name="assetId"></param>
         /// <returns></returns>
         [HttpGet("{assetId}/attributes")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(AssetAttributesModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetAttributes(string assetId)
@@ -91,7 +88,6 @@ namespace LykkeApi2.Controllers
         /// <param name="key"></param>
         /// <returns></returns>
         [HttpGet("{assetId}/attributes/{key}")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(KeyValue), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetAttributeByKey(string assetId, string key)
@@ -108,7 +104,6 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("description")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(AssetDescriptionsResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetDescriptions()
         {
@@ -122,7 +117,6 @@ namespace LykkeApi2.Controllers
         /// <param name="assetId"></param>
         /// <returns></returns>
         [HttpGet("{assetId}/description")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(AssetDescriptionModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetDescription(string assetId)
         {
@@ -155,7 +149,6 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("categories")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetCategories()
         {
@@ -169,7 +162,6 @@ namespace LykkeApi2.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("categories/{id}")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -190,7 +182,6 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("extended")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(AssetExtendedResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetsExtended()
         {
@@ -205,7 +196,6 @@ namespace LykkeApi2.Controllers
         /// <param name="assetId"></param>
         /// <returns></returns>
         [HttpGet("{assetId}/extended")]
-        [ApiExplorerSettings(GroupName = "Exchange")]
         [ProducesResponseType(typeof(AssetExtendedResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetsExtended(string assetId)
@@ -218,7 +208,6 @@ namespace LykkeApi2.Controllers
 
         [Authorize]
         [HttpGet("baseAsset")]
-        [ApiExplorerSettings(GroupName = "Settings")]
         [ProducesResponseType(typeof(BaseAssetClientModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetBaseAsset()
@@ -239,9 +228,8 @@ namespace LykkeApi2.Controllers
 
         [Authorize]
         [HttpPost("baseAsset")]
-        [ApiExplorerSettings(GroupName = "Settings")]
-        [ProducesResponseType((int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> SetBaseAsset([FromBody] BaseAssetUpdateModel model)
         {
             try

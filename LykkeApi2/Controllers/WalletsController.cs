@@ -13,7 +13,7 @@ using LykkeApi2.Models.ClientBalancesModels;
 using LykkeApi2.Models.Wallets;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.SwaggerGen.Annotations;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using ClientBalanceResponseModel = LykkeApi2.Models.ClientBalancesModels.ClientBalanceResponseModel;
 using CreateWalletRequest = LykkeApi2.Models.Wallets.CreateWalletRequest;
 
