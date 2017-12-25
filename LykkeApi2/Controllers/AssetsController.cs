@@ -231,6 +231,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int) HttpStatusCode.OK)]
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SetBaseAsset([FromBody] BaseAssetUpdateModel model)
         {
             try
@@ -249,7 +250,7 @@ namespace LykkeApi2.Controllers
             catch (Exception e)
             {
                 await _log.WriteFatalErrorAsync(nameof(AssetsController), nameof(SetBaseAsset), e);
-                return BadRequest(new {message = e.Message});
+                return StatusCode((int) HttpStatusCode.InternalServerError);
             }
 
             return Ok();
