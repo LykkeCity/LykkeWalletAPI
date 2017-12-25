@@ -228,8 +228,9 @@ namespace LykkeApi2.Controllers
 
         [Authorize]
         [HttpPost("baseAsset")]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> SetBaseAsset([FromBody] BaseAssetUpdateModel model)
         {
             try
@@ -238,7 +239,7 @@ namespace LykkeApi2.Controllers
                 var asset = assetResponse?.Body as Asset;
 
                 if (asset == null)
-                    return BadRequest(new {message = "Asset doesn't exist."});
+                    return NotFound();
 
                 if (!asset.IsBase)
                     return BadRequest(new {message = "Asset can't be set as base"});
