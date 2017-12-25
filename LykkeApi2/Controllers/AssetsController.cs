@@ -228,18 +228,29 @@ namespace LykkeApi2.Controllers
 
         [Authorize]
         [HttpPost("baseAsset")]
-        [ProducesResponseType((int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SetBaseAsset([FromBody] BaseAssetUpdateModel model)
         {
             try
             {
+                var assetResponse = await _assetsService.AssetGetWithHttpMessagesAsync(model.BaseAsssetId);
+                var asset = assetResponse?.Body as Asset;
+
+                if (asset == null)
+                    return NotFound();
+
+                if (!asset.IsBase)
+                    return BadRequest(new {message = "Asset can't be set as base"});
+
                 await _clientAccountSettingsClient.SetBaseAssetAsync(_requestContext.ClientId, model.BaseAsssetId);
             }
             catch (Exception e)
             {
                 await _log.WriteFatalErrorAsync(nameof(AssetsController), nameof(SetBaseAsset), e);
-                return BadRequest(new { message = e.Message });
+                return StatusCode((int) HttpStatusCode.InternalServerError);
             }
 
             return Ok();
