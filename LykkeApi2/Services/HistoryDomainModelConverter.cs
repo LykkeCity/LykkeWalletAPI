@@ -9,17 +9,16 @@ using Lykke.Service.OperationsRepository.Contract;
 using Lykke.Service.OperationsRepository.Contract.Cash;
 using LykkeApi2.Models;
 using LykkeApi2.Models.History;
-using LykkeApi2.Models.Operations;
 
 namespace LykkeApi2.Services
 {
-    public class DomainModelConverter
+    public class HistoryDomainModelConverter
     {
         private readonly CachedDataDictionary<string, Asset> _assetsCache;
         private readonly CachedDataDictionary<string, AssetPair> _assetPairsCache;
         private readonly ILog _log;
 
-        public DomainModelConverter(
+        public HistoryDomainModelConverter(
             CachedDataDictionary<string, Asset> assetsCache,
             CachedDataDictionary<string, AssetPair> assetPairsCache,
             ILog log)
@@ -31,73 +30,76 @@ namespace LykkeApi2.Services
 
         public async Task<ApiHistoryOperation> ToApiModel(HistoryRecordModel model)
         {
-            var operationType = (OperationType) Enum.Parse(typeof(OperationType), model.OpType);
+            var legacyOperationType = (OperationType) Enum.Parse(typeof(OperationType), model.OpType);
 
-            CashOperationDto cashInOut = null;
-            CashOutRequestDto cashoutAttempt = null;
-            ClientTradeDto clientTrade = null;
-            LimitTradeEventDto limitTradeEvent = null;
-            TransferEventDto transferEvent = null;
+            if (string.IsNullOrWhiteSpace(model.CustomData)) return null;
 
-            var json = model.CustomData;
-            if (string.IsNullOrWhiteSpace(json))
-            {
-                return null;
-            }
-
-            switch (operationType)
-            {
-                case OperationType.CashInOut:
-                    cashInOut = NetJSON.NetJSON.Deserialize<CashOperationDto>(json);
-                    break;
-                case OperationType.CashOutAttempt:
-                    cashoutAttempt = NetJSON.NetJSON.Deserialize<CashOutRequestDto>(json);
-                    break;
-                case OperationType.ClientTrade:
-                    clientTrade = NetJSON.NetJSON.Deserialize<ClientTradeDto>(json);
-                    break;
-                case OperationType.LimitTradeEvent:
-                    limitTradeEvent = NetJSON.NetJSON.Deserialize<LimitTradeEventDto>(json);
-                    break;
-                case OperationType.TransferEvent:
-                    transferEvent = NetJSON.NetJSON.Deserialize<TransferEventDto>(json);
-                    break;
-                default:
-                    throw new Exception($"Unknown operation type: {operationType.ToString()}");
-            }
-
-            var operationId = cashInOut?.Id ??
-                              cashoutAttempt?.Id ??
-                              clientTrade?.Id ??
-                              limitTradeEvent?.Id ??
-                              transferEvent?.Id;
+            ApiCashInHistoryOperation cashIn = null;
+            ApiCashOutHistoryOperation cashOut = null;
+            ApiTradeHistoryOperation trade = null;
 
             var asset = (await _assetsCache.Values()).FirstOrDefault(x => x.Id == model.Currency);
             if (asset == null)
             {
-                await _log.WriteWarningAsync(nameof(DomainModelConverter), nameof(ToApiModel),
+                await _log.WriteWarningAsync(nameof(HistoryDomainModelConverter), nameof(ToApiModel),
                     $"Unable to find asset in dictionary for assetId = {model.Currency}, walletId = {model.WalletId}");
                 return null;
             }
 
+            switch (legacyOperationType)
+            {
+                case OperationType.CashInOut:
+                    var cashInOut = NetJSON.NetJSON.Deserialize<CashOperationDto>(model.CustomData);
+
+                    cashIn = cashInOut.ConvertToCashInApiModel(asset);
+                    cashOut = cashInOut.ConvertToCashOutApiModel(asset);
+                    break;
+                case OperationType.CashOutAttempt:
+                    var cashOutRequest = NetJSON.NetJSON.Deserialize<CashOutRequestDto>(model.CustomData);
+
+                    cashOut = cashOutRequest.ConvertToApiModel(asset);
+                    break;
+                case OperationType.ClientTrade:
+                    var clientTrade = NetJSON.NetJSON.Deserialize<ClientTradeDto>(model.CustomData);
+
+                    trade = clientTrade.ConvertToApiModel(asset);
+                    break;
+                case OperationType.LimitTradeEvent:
+                    var limitTrade = NetJSON.NetJSON.Deserialize<LimitTradeEventDto>(model.CustomData);
+
+                    trade = await ConvertLimitTradeEvent(limitTrade, model.WalletId);
+                    break;
+                case OperationType.TransferEvent:
+                    var transfer = NetJSON.NetJSON.Deserialize<TransferEventDto>(model.CustomData);
+
+                    cashIn = transfer.ConvertToCashInApiModel(asset);
+                    cashOut = transfer.ConvertToCashOutApiModel(asset);
+                    break;
+                default:
+                    throw new Exception($"Unknown operation type: {legacyOperationType.ToString()}");
+            }
+
+            var operationId = cashIn?.Id ??
+                              cashOut?.Id ??
+                              trade?.Id;
+
             return ApiHistoryOperation.Create(
                 id: operationId,
                 dateTime: model.DateTime,
-                trade: clientTrade?.ConvertToApiModel(asset),
-                cashInOut: cashInOut?.ConvertToApiModel(asset),
-                cashOutAttempt: cashoutAttempt?.ConvertToApiModel(asset),
-                transfer: transferEvent?.ConvertToApiModel(asset),
-                limitTradeEvent: await ConvertLimitTradeEvent(limitTradeEvent, model.WalletId));
+                cashIn: cashIn,
+                cashout: cashOut,
+                trade: trade
+            );
         }
 
-        private async Task<ApiLimitTradeEvent> ConvertLimitTradeEvent(LimitTradeEventDto model, string walletId)
+        private async Task<ApiTradeHistoryOperation> ConvertLimitTradeEvent(LimitTradeEventDto model, string walletId)
         {
             if (model == null) return null;
 
             var assetPair = (await _assetPairsCache.Values()).FirstOrDefault(x => x.Id == model.AssetPair);
             if (assetPair == null)
             {
-                await _log.WriteWarningAsync(nameof(DomainModelConverter), nameof(ConvertLimitTradeEvent),
+                await _log.WriteWarningAsync(nameof(HistoryDomainModelConverter), nameof(ConvertLimitTradeEvent),
                     $"Unable to find asset pair in dictionary for assetPairId = {model.AssetPair}, walletId = {walletId}");
                 return null;
             }
@@ -105,7 +107,7 @@ namespace LykkeApi2.Services
             var asset = (await _assetsCache.Values()).FirstOrDefault(x => x.Id == assetPair.QuotingAssetId);
             if (asset == null)
             {
-                await _log.WriteWarningAsync(nameof(DomainModelConverter), nameof(ConvertLimitTradeEvent),
+                await _log.WriteWarningAsync(nameof(HistoryDomainModelConverter), nameof(ConvertLimitTradeEvent),
                     $"Unable to find asset in dictionary for limit trade quoting assetId = {assetPair.QuotingAssetId}, walletId = {walletId}");
                 return null;
             }
