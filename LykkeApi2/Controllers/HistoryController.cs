@@ -24,13 +24,13 @@ namespace LykkeApi2.Controllers
         private readonly IOperationsHistoryClient _operationsHistoryClient;
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountService;
-        private readonly DomainModelConverter _converter;
+        private readonly HistoryDomainModelConverter _converter;
 
         public HistoryController(
             IOperationsHistoryClient operationsHistoryClient, 
             IRequestContext requestContext, 
             IClientAccountClient clientAccountService, 
-            DomainModelConverter converter)
+            HistoryDomainModelConverter converter)
         {
             _operationsHistoryClient = operationsHistoryClient ?? throw new ArgumentNullException(nameof(operationsHistoryClient));
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
