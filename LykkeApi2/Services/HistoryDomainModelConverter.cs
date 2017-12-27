@@ -7,6 +7,7 @@ using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.OperationsHistory.Client.Models;
 using Lykke.Service.OperationsRepository.Contract;
 using Lykke.Service.OperationsRepository.Contract.Cash;
+using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
 using LykkeApi2.Models.History;
 using Newtonsoft.Json;
@@ -17,16 +18,19 @@ namespace LykkeApi2.Services
     {
         private readonly CachedDataDictionary<string, Asset> _assetsCache;
         private readonly CachedDataDictionary<string, AssetPair> _assetPairsCache;
+        private readonly IRequestContext _requestContext;
         private readonly ILog _log;
 
         public HistoryDomainModelConverter(
             CachedDataDictionary<string, Asset> assetsCache,
             CachedDataDictionary<string, AssetPair> assetPairsCache,
+            IRequestContext requestContext,
             ILog log)
         {
             _assetsCache = assetsCache ?? throw new ArgumentNullException(nameof(assetsCache));
             _assetPairsCache = assetPairsCache ?? throw new ArgumentNullException(nameof(assetPairsCache));
             _log = log ?? throw new ArgumentNullException(nameof(log));
+            _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
         }
 
         public async Task<ApiHistoryOperation> ToApiModel(HistoryRecordModel model)
@@ -68,8 +72,14 @@ namespace LykkeApi2.Services
                     break;
                 case OperationType.TransferEvent:
                     var transfer = JsonConvert.DeserializeObject<TransferEventDto>(model.CustomData);
-                    cashIn = transfer.ConvertToCashInApiModel(asset);
-                    cashOut = transfer.ConvertToCashOutApiModel(asset);
+                    if (_requestContext.ClientId == transfer.ClientId)
+                    {
+                        cashIn = transfer.ConvertToCashInApiModel(asset);
+                    }
+                    if (_requestContext.ClientId == transfer.FromId)
+                    {
+                        cashOut = transfer.ConvertToCashOutApiModel(asset);
+                    }
                     break;
                 default:
                     throw new Exception($"Unknown operation type: {legacyOperationType.ToString()}");
