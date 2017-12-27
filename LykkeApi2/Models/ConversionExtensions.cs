@@ -129,7 +129,7 @@ namespace LykkeApi2.Models
                 IsSettled = isSettled,
                 Type = operation.Type.ToString(),
                 State = operation.State,
-                ContextOperationType = nameof(OperationType.CashInOut)
+                ContextOperationType = nameof(ApiHistoryOperationType.CashIn)
             };
         }
 
@@ -155,8 +155,8 @@ namespace LykkeApi2.Models
                 IsSettled = isSettled,
                 Type = operation.Type.ToString(),
                 State = operation.State,
-                ContextOperationType = nameof(OperationType.CashInOut),
-                CashOutState = CashOutState.Regular
+                ContextOperationType = nameof(ApiHistoryOperationType.CashOut),
+                CashOutState = ApiCashOutState.Regular
             };
         }
 
@@ -178,9 +178,9 @@ namespace LykkeApi2.Models
                 State = operation.State,
                 IsSettled = isSettled,
                 Amount = -Math.Abs(amount),
-                ContextOperationType = nameof(OperationType.TransferEvent),
+                ContextOperationType = nameof(ApiHistoryOperationType.CashOut),
                 IsRefund = false,
-                CashOutState = CashOutState.Regular
+                CashOutState = ApiCashOutState.Regular
             };
         }
 
@@ -202,7 +202,7 @@ namespace LykkeApi2.Models
                 State = operation.State,
                 IsSettled = isSettled,
                 Amount = Math.Abs(amount),
-                ContextOperationType = nameof(OperationType.TransferEvent),
+                ContextOperationType = nameof(ApiHistoryOperationType.CashIn),
                 IsRefund = false
             };
         }
@@ -216,10 +216,10 @@ namespace LykkeApi2.Models
                 Asset = operation.AssetId,
                 AddressFrom = null,
                 Type = nameof(CashOperationType.None),
-                CashOutState = CashOutState.Request,
+                CashOutState = ApiCashOutState.Request,
                 Id = operation.Id,
                 DateTime = operation.DateTime.ToString(DateTimeFormat),
-                ContextOperationType = nameof(OperationType.CashOutAttempt),
+                ContextOperationType = nameof(ApiHistoryOperationType.CashOut),
                 BlockChainHash = operation.BlockchainHash ?? string.Empty,
                 State = operation.State,
                 IsSettled = isSettled,
@@ -242,7 +242,7 @@ namespace LykkeApi2.Models
                 MarketOrderId = null,
                 LimitOrderId = operation.OrderId,
                 Volume = Math.Abs(operation.Volume).TruncateDecimalPlaces(accuracy, isBuy),
-                ContextOperationType = nameof(OperationType.LimitTradeEvent),
+                ContextOperationType = nameof(ApiHistoryOperationType.Trade),
                 State = string.Empty,
                 IsSettled = false
             };
@@ -263,7 +263,7 @@ namespace LykkeApi2.Models
                 State = operation.State.ToString(),
                 MarketOrderId = operation.MarketOrderId,
                 LimitOrderId = operation.LimitOrderId,
-                ContextOperationType = nameof(OperationType.ClientTrade)
+                ContextOperationType = nameof(ApiHistoryOperationType.Trade)
             };
         }
     }
