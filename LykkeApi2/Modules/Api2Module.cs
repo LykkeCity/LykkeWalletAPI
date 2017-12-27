@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Common;
 using Common.Log;
 using Core.Identity;
 using Core.Services;
 using Core.Settings;
+using LkeServices;
 using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -16,21 +16,20 @@ using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Services;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Redis;
 
 namespace LykkeApi2.Modules
 {
     public class Api2Module : Module
     {
         private readonly ILog _log;
-        private readonly IServiceCollection _services;
         private readonly IReloadingManager<BaseSettings> _settings;
 
         public Api2Module(IReloadingManager<BaseSettings> settings, ILog log)
         {
             _settings = settings;
             _log = log;
-            _services = new ServiceCollection();
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -54,7 +53,7 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
 
-            _services.AddSingleton<ClientAccountLogic>();
+            builder.RegisterType<ClientAccountLogic>().AsSelf().SingleInstance();
 
             builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
 
@@ -64,7 +63,6 @@ namespace LykkeApi2.Modules
 
             RegisterDictionaryEntities(builder);            
             BindServices(builder, _settings, _log);
-            builder.Populate(_services);
         }
 
         private void RegisterDictionaryEntities(ContainerBuilder builder)
@@ -89,7 +87,18 @@ namespace LykkeApi2.Modules
 
         private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings, ILog log)
         {
-            
+            var redis = new RedisCache(new RedisCacheOptions
+            {
+                Configuration = settings.CurrentValue.CacheSettings.RedisConfiguration,
+                InstanceName = settings.CurrentValue.CacheSettings.FinanceDataCacheInstance
+            });
+
+            builder.RegisterInstance(redis).As<IDistributedCache>().SingleInstance();
+
+            builder.RegisterType<OrderBooksService>()
+                .As<IOrderBooksService>()
+                .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
+                .SingleInstance();
         }       
     }
 }
