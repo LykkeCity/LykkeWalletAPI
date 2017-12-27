@@ -25,6 +25,10 @@ namespace LykkeApi2.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(string assetPairId = null)
         {
+            assetPairId = string.IsNullOrEmpty(assetPairId)
+                ? null
+                : assetPairId.ToUpper();
+
             AssetPair pair = null;
 
             if (!string.IsNullOrEmpty(assetPairId))
