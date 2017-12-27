@@ -31,13 +31,7 @@ namespace LykkeApi2.Services
 
         public async Task<ApiHistoryOperation> ToApiModel(HistoryRecordModel model)
         {
-            var legacyOperationType = (OperationType) Enum.Parse(typeof(OperationType), model.OpType);
-
             if (string.IsNullOrWhiteSpace(model.CustomData)) return null;
-
-            ApiCashInHistoryOperation cashIn = null;
-            ApiCashOutHistoryOperation cashOut = null;
-            ApiTradeHistoryOperation trade = null;
 
             var asset = (await _assetsCache.Values()).FirstOrDefault(x => x.Id == model.Currency);
             if (asset == null)
@@ -47,32 +41,33 @@ namespace LykkeApi2.Services
                 return null;
             }
 
+            var legacyOperationType = (OperationType) Enum.Parse(typeof(OperationType), model.OpType);
+
+            ApiCashInHistoryOperation cashIn = null;
+            ApiCashOutHistoryOperation cashOut = null;
+            ApiTradeHistoryOperation trade = null;
+
             switch (legacyOperationType)
             {
                 case OperationType.CashInOut:
                     var cashInOut = JsonConvert.DeserializeObject<CashOperationDto>(model.CustomData);
-
                     cashIn = cashInOut.ConvertToCashInApiModel(asset);
                     cashOut = cashInOut.ConvertToCashOutApiModel(asset);
                     break;
                 case OperationType.CashOutAttempt:
                     var cashOutRequest = JsonConvert.DeserializeObject<CashOutRequestDto>(model.CustomData);
-
                     cashOut = cashOutRequest.ConvertToApiModel(asset);
                     break;
                 case OperationType.ClientTrade:
                     var clientTrade = JsonConvert.DeserializeObject<ClientTradeDto>(model.CustomData);
-
                     trade = clientTrade.ConvertToApiModel(asset);
                     break;
                 case OperationType.LimitTradeEvent:
                     var limitTrade = JsonConvert.DeserializeObject<LimitTradeEventDto>(model.CustomData);
-
                     trade = await ConvertLimitTradeEvent(limitTrade, model.WalletId);
                     break;
                 case OperationType.TransferEvent:
                     var transfer = JsonConvert.DeserializeObject<TransferEventDto>(model.CustomData);
-
                     cashIn = transfer.ConvertToCashInApiModel(asset);
                     cashOut = transfer.ConvertToCashOutApiModel(asset);
                     break;
