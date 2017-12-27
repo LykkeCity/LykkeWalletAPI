@@ -77,11 +77,12 @@ namespace LykkeApi2
                 var builder = new ContainerBuilder();
                 var appSettings = Configuration.LoadSettings<APIv2Settings>();
                 Log = CreateLogWithSlack(services, appSettings);
-
+                //call this before registering modules (because of IDistributedCache registration)
+                builder.Populate(services);
                 builder.RegisterModule(new Api2Module(appSettings.Nested(x => x.WalletApiv2), Log));
                 builder.RegisterModule(new ClientsModule(appSettings, Log));
                 builder.RegisterModule(new AspNetCoreModule());
-                builder.Populate(services);
+                
                 ApplicationContainer = builder.Build();
 
                 return new AutofacServiceProvider(ApplicationContainer);

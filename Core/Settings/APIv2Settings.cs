@@ -30,6 +30,7 @@ namespace Core.Settings
         public ServiceSettings Services { get; set; }
 
         public DeploymentSettings DeploymentSettings { get; set; }
+        public CacheSettings CacheSettings { get; set; }
     }
 
     public class DbSettings
@@ -54,5 +55,21 @@ namespace Core.Settings
     public class DeploymentSettings
     {
         public bool IsProduction { get; set; }
+    }
+
+    public class CacheSettings
+    {
+        public string FinanceDataCacheInstance { get; set; }
+        public string RedisConfiguration { get; set; }
+
+        public string OrderBooksCacheKeyPattern { get; set; }
+    }
+
+    public static class CacheSettingsExt
+    {
+        public static string GetOrderBookKey(this CacheSettings settings, string assetPairId, bool isBuy)
+        {
+            return string.Format(settings.OrderBooksCacheKeyPattern, assetPairId, isBuy);
+        }
     }
 }
