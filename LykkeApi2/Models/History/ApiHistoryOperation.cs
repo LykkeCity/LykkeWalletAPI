@@ -119,15 +119,10 @@ namespace LykkeApi2.Models.History
         public string DateTime { get; set; }
         public string Asset { get; set; }
         public double Volume { get; set; }
-        public string BlockChainHash { get; set; }
-        public string AddressFrom { get; set; }
-        public string AddressTo { get; set; }
         public bool IsSettled { get; set; }
         public string LimitOrderId { get; set; }
         public string MarketOrderId { get; set; }
         public string ContextOperationType { get; set; }
-
-        [JsonConverter(typeof(StringEnumConverter))]
-        public TransactionStates State { get; set; }
+        public string State { get; set; }
     }
 }

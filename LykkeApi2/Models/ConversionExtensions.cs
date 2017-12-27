@@ -13,10 +13,7 @@ namespace LykkeApi2.Models
 {
     public static class ConversionExtensions
     {
-        private static string GetIcon(this Asset asset)
-        {
-            return asset.IdIssuer;
-        }
+        private static string DateTimeFormat = "yyyy-MM-dd HH:mm:ss.fff";
 
         public static ApiAssetModel ConvertToApiModel(this Asset src)
         {
@@ -110,27 +107,6 @@ namespace LykkeApi2.Models
             };
         }
 
-        //public static ApiBalanceChange ConvertToApiModel(this ICashInOutOperation cashInOutOperation, Asset asset)
-        //{
-        //    bool isSettled = !string.IsNullOrEmpty(cashInOutOperation.BlockChainHash);
-
-        //    return new ApiBalanceChange
-        //    {
-        //        DateTime = cashInOutOperation.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-        //        Id = cashInOutOperation.Id,
-        //        Amount = cashInOutOperation.Amount.TruncateDecimalPlaces(asset.GetDisplayAccuracy()),
-        //        Asset = cashInOutOperation.AssetId,
-        //        IconId = asset.GetIcon(),
-        //        BlockChainHash = cashInOutOperation.BlockChainHash ?? string.Empty,
-        //        IsRefund = cashInOutOperation.IsRefund,
-        //        AddressFrom = cashInOutOperation.AddressFrom,
-        //        AddressTo = cashInOutOperation.AddressTo,
-        //        IsSettled = isSettled,
-        //        Type = cashInOutOperation.Type.ToString(),
-        //        State = cashInOutOperation.State
-        //    };
-        //}
-
         public static ApiCashInHistoryOperation ConvertToCashInApiModel(this ICashInOutOperation operation,
             Asset asset)
         {
@@ -142,7 +118,7 @@ namespace LykkeApi2.Models
 
             return new ApiCashInHistoryOperation
             {
-                DateTime = operation.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                DateTime = operation.DateTime.ToString(DateTimeFormat),
                 Id = operation.Id,
                 Amount = Math.Abs(amount),
                 Asset = operation.AssetId,
@@ -153,8 +129,7 @@ namespace LykkeApi2.Models
                 IsSettled = isSettled,
                 Type = operation.Type.ToString(),
                 State = operation.State,
-                //Todo: remove string
-                ContextOperationType = "CashIn"
+                ContextOperationType = nameof(OperationType.CashInOut)
             };
         }
 
@@ -169,7 +144,7 @@ namespace LykkeApi2.Models
 
             return new ApiCashOutHistoryOperation
             {
-                DateTime = operation.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                DateTime = operation.DateTime.ToString(DateTimeFormat),
                 Id = operation.Id,
                 Amount = -Math.Abs(amount),
                 Asset = operation.AssetId,
@@ -180,30 +155,10 @@ namespace LykkeApi2.Models
                 IsSettled = isSettled,
                 Type = operation.Type.ToString(),
                 State = operation.State,
-                //Todo: remove string
-                ContextOperationType = "CashOut",
+                ContextOperationType = nameof(OperationType.CashInOut),
                 CashOutState = CashOutState.Regular
             };
         }
-
-        //public static ApiTransfer ConvertToApiModel(this ITransferEvent evnt, Asset asset)
-        //{
-        //    var isSettled = evnt.IsSettled ?? !string.IsNullOrEmpty(evnt.BlockChainHash);
-
-        //    return new ApiTransfer
-        //    {
-        //        DateTime = evnt.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-        //        Id = evnt.Id,
-        //        Volume = evnt.Amount.TruncateDecimalPlaces(asset.GetDisplayAccuracy()),
-        //        Asset = evnt.AssetId,
-        //        IconId = asset.GetIcon(),
-        //        BlockChainHash = evnt.BlockChainHash ?? string.Empty,
-        //        AddressFrom = evnt.AddressFrom,
-        //        AddressTo = evnt.AddressTo,
-        //        IsSettled = isSettled,
-        //        State = evnt.State
-        //    };
-        //}
 
         public static ApiCashOutHistoryOperation ConvertToCashOutApiModel(this ITransferEvent operation, Asset asset)
         {
@@ -217,16 +172,13 @@ namespace LykkeApi2.Models
                 AddressFrom = operation.AddressFrom,
                 AddressTo = operation.AddressTo,
                 Id = operation.Id,
-                // Todo: use constant
-                DateTime = operation.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-                // Todo: remove string
-                Type = "Transfer",
-                BlockChainHash = operation.BlockChainHash,
+                DateTime = operation.DateTime.ToString(DateTimeFormat),
+                Type = string.Empty,
+                BlockChainHash = operation.BlockChainHash ?? string.Empty,
                 State = operation.State,
                 IsSettled = isSettled,
                 Amount = -Math.Abs(amount),
-                // Todo: remove string
-                ContextOperationType = "Transfer",
+                ContextOperationType = nameof(OperationType.TransferEvent),
                 IsRefund = false,
                 CashOutState = CashOutState.Regular
             };
@@ -243,37 +195,17 @@ namespace LykkeApi2.Models
                 Asset = operation.AssetId,
                 AddressFrom = operation.AddressFrom,
                 AddressTo = operation.AddressTo,
-                // Todo: remove string
-                Type = "Transfer",
+                Type = string.Empty,
                 Id = operation.Id,
-                DateTime = operation.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-                BlockChainHash = operation.BlockChainHash,
+                DateTime = operation.DateTime.ToString(DateTimeFormat),
+                BlockChainHash = operation.BlockChainHash ?? string.Empty,
                 State = operation.State,
                 IsSettled = isSettled,
                 Amount = Math.Abs(amount),
-                // Todo: remove string
-                ContextOperationType = "Transfer",
+                ContextOperationType = nameof(OperationType.TransferEvent),
                 IsRefund = false
             };
         }
-
-        public static ApiBaseCashOperation[] ConvertToApiModel(this ITransferEvent operation, Asset asset)
-        {
-            return new ApiBaseCashOperation[]
-                {operation.ConvertToCashInApiModel(asset), operation.ConvertToCashOutApiModel(asset)};
-        }
-
-        //public static ApiCashOutAttempt ConvertToApiModel(this ICashOutRequest request, Asset asset)
-        //{
-        //    return new ApiCashOutAttempt
-        //    {
-        //        Id = request.Id,
-        //        DateTime = request.DateTime.ToIsoDateTime(),
-        //        Volume = request.Amount.TruncateDecimalPlaces(asset.GetDisplayAccuracy()),
-        //        Asset = request.AssetId,
-        //        IconId = asset.GetIcon()
-        //    };
-        //}
 
         public static ApiCashOutHistoryOperation ConvertToApiModel(this ICashOutRequest operation, Asset asset)
         {
@@ -286,10 +218,9 @@ namespace LykkeApi2.Models
                 Type = nameof(CashOperationType.None),
                 CashOutState = CashOutState.Request,
                 Id = operation.Id,
-                DateTime = operation.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-                //todo: remove string
-                ContextOperationType = "CashOutRequest",
-                BlockChainHash = operation.BlockchainHash,
+                DateTime = operation.DateTime.ToString(DateTimeFormat),
+                ContextOperationType = nameof(OperationType.CashOutAttempt),
+                BlockChainHash = operation.BlockchainHash ?? string.Empty,
                 State = operation.State,
                 IsSettled = isSettled,
                 Amount = operation.Amount.TruncateDecimalPlaces(asset.GetDisplayAccuracy()),
@@ -298,69 +229,25 @@ namespace LykkeApi2.Models
             };
         }
 
-        //public static ApiLimitTradeEvent ConvertToApiModel(this ILimitTradeEvent limitTradeEvent, AssetPair assetPair,
-        //    int accuracy)
-        //{
-        //    var isBuy = limitTradeEvent.OrderType == OrderType.Buy;
-
-        //    var rate = limitTradeEvent.Price.TruncateDecimalPlaces(assetPair.Accuracy, isBuy);
-
-        //    var converted = (rate * limitTradeEvent.Volume).TruncateDecimalPlaces(accuracy, isBuy);
-
-        //    return new ApiLimitTradeEvent
-        //    {
-        //        DateTime = limitTradeEvent.CreatedDt,
-        //        Id = limitTradeEvent.Id,
-        //        Volume = Math.Abs(limitTradeEvent.Volume),
-        //        Price = limitTradeEvent.Price,
-        //        OrderId = limitTradeEvent.OrderId,
-        //        Asset = limitTradeEvent.AssetId,
-        //        AssetPair = limitTradeEvent.AssetPair,
-        //        Status = limitTradeEvent.Status.ToString(),
-        //        Type = limitTradeEvent.OrderType.ToString(),
-        //        TotalCost = Math.Abs(converted)
-        //    };
-        //}
-
         public static ApiTradeHistoryOperation ConvertToApiModel(this ILimitTradeEvent operation, AssetPair assetPair,
             int accuracy)
         {
             var isBuy = operation.OrderType == OrderType.Buy;
 
-            var rate = operation.Price.TruncateDecimalPlaces(assetPair.Accuracy, isBuy);
-
-            var converted = (rate * operation.Volume).TruncateDecimalPlaces(accuracy, isBuy);
-
             return new ApiTradeHistoryOperation
             {
-                DateTime = operation.CreatedDt.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                DateTime = operation.CreatedDt.ToString(DateTimeFormat),
                 Id = operation.Id,
                 Asset = operation.AssetId,
                 MarketOrderId = null,
                 LimitOrderId = operation.OrderId,
-                Volume = Math.Abs(operation.Volume).TruncateDecimalPlaces(accuracy, isBuy)
+                Volume = Math.Abs(operation.Volume).TruncateDecimalPlaces(accuracy, isBuy),
+                ContextOperationType = nameof(OperationType.LimitTradeEvent),
+                State = string.Empty,
+                IsSettled = false
             };
             
         }
-
-        //public static ApiTrade ConvertToApiModel(this IClientTrade clientTrade, Asset asset)
-        //{
-        //    var isSettled = !string.IsNullOrEmpty(clientTrade.BlockChainHash);
-
-        //    return new ApiTrade
-        //    {
-        //        DateTime = clientTrade.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
-        //        Id = clientTrade.Id,
-        //        Asset = clientTrade.AssetId,
-        //        Volume = clientTrade.Amount.TruncateDecimalPlaces(asset.Accuracy),
-        //        IconId = asset.GetIcon(),
-        //        BlockChainHash = clientTrade.BlockChainHash ?? string.Empty,
-        //        AddressFrom = clientTrade.AddressFrom,
-        //        AddressTo = clientTrade.AddressTo,
-        //        IsSettled = isSettled,
-        //        State = clientTrade.State
-        //    };
-        //}
 
         public static ApiTradeHistoryOperation ConvertToApiModel(this IClientTrade operation, Asset asset)
         {
@@ -368,17 +255,15 @@ namespace LykkeApi2.Models
 
             return new ApiTradeHistoryOperation
             {
-                DateTime = operation.DateTime.ToString("yyyy-MM-dd HH:mm:ss.fff"),
+                DateTime = operation.DateTime.ToString(DateTimeFormat),
                 Id = operation.Id,
                 Asset = operation.AssetId,
                 Volume = operation.Amount.TruncateDecimalPlaces(asset.Accuracy),
-                BlockChainHash = operation.BlockChainHash ?? string.Empty,
-                AddressFrom = operation.AddressFrom,
-                AddressTo = operation.AddressTo,
                 IsSettled = isSettled,
-                State = operation.State,
+                State = operation.State.ToString(),
                 MarketOrderId = operation.MarketOrderId,
-                LimitOrderId = operation.LimitOrderId
+                LimitOrderId = operation.LimitOrderId,
+                ContextOperationType = nameof(OperationType.ClientTrade)
             };
         }
     }
