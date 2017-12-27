@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Common;
 using Core.Domain.Orderbook;
 using Core.Services;
 using Lykke.Service.Assets.Client.Models;
+using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LykkeApi2.Controllers
@@ -23,6 +25,8 @@ namespace LykkeApi2.Controllers
             _orderBooksService = orderBooksService;
         }
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<OrderBookModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get(string assetPairId = null)
         {
             assetPairId = string.IsNullOrEmpty(assetPairId)
@@ -41,7 +45,7 @@ namespace LykkeApi2.Controllers
                 ? await _orderBooksService.GetAllAsync()
                 : await _orderBooksService.GetAsync(assetPairId);
 
-            return Ok(result);
+            return Ok(result.ToApiModel());
         }
     }
 }
