@@ -1,13 +1,18 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <Version>1.0.0</Version>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="1.0.13" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.28" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Reference Include="Lykke.Service.Assets.Client, Version=2.1.0.28, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\Users\Dmitry\.nuget\packages\lykke.service.assets.client\2.1.0.28\lib\netstandard1.6\Lykke.Service.Assets.Client.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Dictionaries" />
+  </ItemGroup>
 </Project>

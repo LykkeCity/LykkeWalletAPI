@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Lykke.AzureStorage, Version=3.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\Users\Dmitry\.nuget\packages\lykke.azurestorage\3.0.0\lib\netstandard2.0\Lykke.AzureStorage.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Storage, Version=8.4.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35">
+      <HintPath>..\..\..\..\Users\Dmitry\.nuget\packages\windowsazure.storage\8.4.0\lib\netstandard1.3\Microsoft.WindowsAzure.Storage.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

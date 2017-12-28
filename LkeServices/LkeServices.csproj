@@ -1,23 +1,24 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <Version>1.0.0</Version>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Remove="Setthings\**" />
     <EmbeddedResource Remove="Setthings\**" />
     <None Remove="Setthings\**" />
   </ItemGroup>
-
   <ItemGroup>
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="2.1.0.120" />
     <PackageReference Include="Lykke.Service.Session" Version="1.0.34-beta67" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <Reference Include="Lykke.Service.Assets.Client, Version=2.1.0.28, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\Users\Dmitry\.nuget\packages\lykke.service.assets.client\2.1.0.28\lib\netstandard1.6\Lykke.Service.Assets.Client.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>
