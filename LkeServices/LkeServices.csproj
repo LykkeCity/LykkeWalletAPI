@@ -16,9 +16,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Lykke.Service.Assets.Client, Version=2.1.0.28, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\Users\Dmitry\.nuget\packages\lykke.service.assets.client\2.1.0.28\lib\netstandard1.6\Lykke.Service.Assets.Client.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 </Project>
