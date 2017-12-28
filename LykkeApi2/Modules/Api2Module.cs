@@ -2,10 +2,13 @@
 using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using AzureRepositories.ExchangeSettings;
+using AzureStorage.Tables;
 using Common;
 using Common.Log;
 using Core.Candles;
 using Core.Enumerators;
+using Core.ExchangeSettings;
 using Core.Identity;
 using Core.Services;
 using Core.Settings;
@@ -77,7 +80,12 @@ namespace LykkeApi2.Modules
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
 
             builder.RegisterType<DomainModelConverter>().AsSelf();
+            builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
 
+            builder.RegisterInstance<IExchangeSettingsRepository>(
+                new ExchangeSettingsRepository(
+                    AzureTableStorage<ExchangeSettingsEntity>.Create(_settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString),
+                        "ExchangeSettings", _log)));
             RegisterDictionaryEntities(builder);            
             BindServices(builder, _settings, _log);
             builder.Populate(_services);
@@ -92,7 +100,7 @@ namespace LykkeApi2.Modules
                     async () =>
                         (await ctx.Resolve<IAssetsService>().AssetGetAllAsync()).ToDictionary(itm => itm.Id));
             }).SingleInstance();
-
+            
             builder.Register(c =>
             {
                 var ctx = c.Resolve<IComponentContext>();
