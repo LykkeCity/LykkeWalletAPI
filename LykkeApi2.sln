@@ -9,7 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. Infrastructure", "1. Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{B6ADDBDB-541F-49C5-B96E-3C0968E9D4B4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Tests", "2. Tests", "{F92247DB-2265-43BB-9F04-BD94A4C8EF06}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Tests", "3. Tests", "{F92247DB-2265-43BB-9F04-BD94A4C8EF06}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.WalletApiv2.Tests", "Lykke.WalletApiv2.Tests\Lykke.WalletApiv2.Tests.csproj", "{EEC9EE2E-28A2-434F-8D37-A87F241367D8}"
 EndProject
