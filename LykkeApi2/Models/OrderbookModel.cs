@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Core.Domain.Orderbook;
 
 namespace LykkeApi2.Models
@@ -14,7 +13,7 @@ namespace LykkeApi2.Models
         public List<VolumePrice> Levels { get; set; } = new List<VolumePrice>();
     }
 
-    public static class OrderBookModelExtensions
+    public static class OrderBookModelsExtensions
     {
         public static IEnumerable<OrderBookModel> ToApiModel(this IEnumerable<IOrderBook> src)
         {
@@ -23,8 +22,19 @@ namespace LykkeApi2.Models
                 AssetPair = orderbook.AssetPair,
                 IsBuy = orderbook.IsBuy,
                 Timestamp = orderbook.Timestamp,
-                Levels = orderbook.Prices
+                Levels = orderbook.Prices.ProcessPrices()
             });
+        }
+
+        public static List<VolumePrice> ProcessPrices(this IEnumerable<VolumePrice> prices)
+        {
+            return prices.Select(price => new VolumePrice
+            {
+                ClientId = price.ClientId,
+                Id = price.Id,
+                Price = price.Price,
+                Volume = Math.Abs(price.Volume)
+            }).ToList();
         }
     }
 }
