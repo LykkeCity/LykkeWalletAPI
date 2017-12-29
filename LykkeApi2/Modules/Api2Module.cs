@@ -18,7 +18,6 @@ using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
-using LykkeApi2.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
 
@@ -62,9 +61,7 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
 
-            builder.RegisterType<HistoryDomainModelConverter>().AsSelf();
             builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
-
             builder.RegisterInstance<IExchangeSettingsRepository>(
                 new ExchangeSettingsRepository(
                     AzureTableStorage<ExchangeSettingsEntity>.Create(_settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString),
