@@ -113,7 +113,7 @@ namespace LykkeApi2.Controllers
 
                 var watchlists = await GetAllWatchlists();
 
-                if (watchlists.Any(item => item.Name == model.Name))
+                if (watchlists.Any(item => item.Name == model.Name && item.Id != watchList.Id))
                     return BadRequest($"Watch-list with name '{model.Name}' already exists");
 
                 var newWatchList = new WatchList
