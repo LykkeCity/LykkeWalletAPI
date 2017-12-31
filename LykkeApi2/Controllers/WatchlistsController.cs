@@ -36,13 +36,8 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(IEnumerable<WatchList>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetWatchlists()
         {
-            var availableAssetIds = await GetAvailableAssetIdsAsync();
-
-            var result = (await _assetsService.WatchListGetAllAsync(_requestContext.ClientId))
-                .Select(x => FilterAssets(x, availableAssetIds))
-                .Where(x => x != null);
-
-            return Ok(result);
+            var watchlists = await GetAllWatchlists();
+            return Ok(watchlists);
         }
 
         [HttpGet("{id}")]
@@ -73,6 +68,14 @@ namespace LykkeApi2.Controllers
         {
             if (!await IsValidAsync(model.AssetIds))
                 return BadRequest("Wrong assets in 'AssetIds' list");
+            
+            if (string.IsNullOrEmpty(model.Name))
+                return BadRequest("Name can't be empty");
+
+            var watchlists = await GetAllWatchlists();
+
+            if (watchlists.Any(item => item.Name == model.Name))
+                return BadRequest($"Watch-list with name '{model.Name}' already exists");
 
             var watchList = new WatchList
             {
@@ -104,6 +107,14 @@ namespace LykkeApi2.Controllers
 
                 if (!await IsValidAsync(model.AssetIds))
                     return BadRequest("Wrong assets in 'AssetIds' list");
+
+                if (string.IsNullOrEmpty(model.Name))
+                    return BadRequest("Name can't be empty");
+
+                var watchlists = await GetAllWatchlists();
+
+                if (watchlists.Any(item => item.Name == model.Name))
+                    return BadRequest($"Watch-list with name '{model.Name}' already exists");
 
                 var newWatchList = new WatchList
                 {
@@ -168,12 +179,25 @@ namespace LykkeApi2.Controllers
             return watchList;
         }
 
-        private async Task<bool> IsValidAsync(IEnumerable<string> assetIds,
-            List<string> availableAssetIds = null)
+        private async Task<IEnumerable<WatchList>> GetAllWatchlists()
         {
+            var availableAssetIds = await GetAvailableAssetIdsAsync();
+
+            return (await _assetsService.WatchListGetAllAsync(_requestContext.ClientId))
+                .Select(x => FilterAssets(x, availableAssetIds))
+                .Where(x => x != null);
+        }
+
+        private async Task<bool> IsValidAsync(IEnumerable<string> assetIds, List<string> availableAssetIds = null)
+        {
+            var assets = assetIds.ToArray();
+
+            if (!assets.Any() || assets.Any(string.IsNullOrEmpty))
+                return false;
+
             availableAssetIds = availableAssetIds ?? await GetAvailableAssetIdsAsync();
 
-            return assetIds.Where(x => !string.IsNullOrEmpty(x))
+            return assets.Where(x => !string.IsNullOrEmpty(x))
                 .All(id => availableAssetIds.Contains(id));
         }
 
