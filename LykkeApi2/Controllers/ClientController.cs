@@ -118,6 +118,7 @@ namespace LykkeApi2.Controllers
             return Ok(new AuthResponseModel
             {
                 AccessToken = authResult?.Token,
+                NotificationsId = authResult?.NotificationsId
             });
         }
 
