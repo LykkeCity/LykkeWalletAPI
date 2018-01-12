@@ -1,4 +1,5 @@
-﻿using Lykke.Service.OperationsHistory.Client;
+﻿using System.Net;
+using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.PersonalData.Settings;
 
 namespace Core.Settings
@@ -9,6 +10,7 @@ namespace Core.Settings
         public SlackNotificationsSettings SlackNotifications { get; set; }
         public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
+        public MatchingEngineSettings MatchingEngineClient { set; get; }
     }
 
     public class SlackNotificationsSettings
@@ -51,6 +53,29 @@ namespace Core.Settings
         public string HftInternalServiceUrl { get; set; }
         public string SessionUrl { get; set; }        
         public string OperationsUrl { get; set; }
+    }
+    
+    public class MatchingEngineSettings
+    {
+        public IpEndpointSettings IpEndpoint { get; set; }
+    }
+
+    public class IpEndpointSettings
+    {
+        public string InternalHost { get; set; }
+        public string Host { get; set; }
+        public int Port { get; set; }
+
+        public IPEndPoint GetClientIpEndPoint(bool useInternal = false)
+        {
+            string host = useInternal ? InternalHost : Host;
+
+            if (IPAddress.TryParse(host, out var ipAddress))
+                return new IPEndPoint(ipAddress, Port);
+
+            var addresses = Dns.GetHostAddressesAsync(host).Result;
+            return new IPEndPoint(addresses[0], Port);
+        }
     }
     
     public class DeploymentSettings

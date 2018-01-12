@@ -1,5 +1,6 @@
 ﻿using System;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Core.Settings;
 using Lykke.MarketProfileService.Client;
 using Lykke.Service.CandlesHistory.Client;
@@ -13,12 +14,15 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Common.Log;
+using Lykke.Service.Assets.Client;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules
 {
     public class ClientsModule : Module
     {
         private readonly IReloadingManager<ServiceSettings> _serviceSettings;
+        private readonly IServiceCollection _services;
         private readonly IReloadingManager<APIv2Settings> _apiSettings;
         private readonly ILog _log;
 
@@ -26,6 +30,7 @@ namespace LykkeApi2.Modules
         {
             _apiSettings = settings;
             _serviceSettings = settings.Nested(x => x.WalletApiv2.Services);
+            _services = new ServiceCollection();
             _log = log;
         }
 
@@ -55,6 +60,14 @@ namespace LykkeApi2.Modules
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
 
             builder.RegisterOperationsHistoryClient(_apiSettings.CurrentValue.OperationsHistoryServiceClient, _log);
+            
+            _services.RegisterAssetsClient(AssetServiceSettings.Create(
+                new Uri(_serviceSettings.CurrentValue.AssetsServiceUrl),
+                TimeSpan.FromMinutes(1)));
+            
+            builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog: null, ignoreErrors: true);
+            
+            builder.Populate(_services);
         }
     }
 }
