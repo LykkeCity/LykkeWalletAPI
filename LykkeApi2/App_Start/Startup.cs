@@ -65,6 +65,7 @@ namespace LykkeApi2
                     options.DefaultLykkeConfiguration(apiVersion, appName);
 
                     options.OperationFilter<ApiKeyHeaderOperationFilter>();
+                    options.OperationFilter<ApiKeyHeaderAccessTokenOperationFilter>();
                 });
 
                 services.AddAuthentication(options =>
