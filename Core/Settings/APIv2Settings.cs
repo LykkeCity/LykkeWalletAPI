@@ -32,7 +32,15 @@ namespace Core.Settings
         public ServiceSettings Services { get; set; }
 
         public DeploymentSettings DeploymentSettings { get; set; }
+        
         public CacheSettings CacheSettings { get; set; }
+        
+        public OrdersSettings OrdersSettings { set; get; }
+    }
+
+    public class OrdersSettings
+    {
+        public double MaxLimitOrderDeviationPercent { set; get; }
     }
 
     public class DbSettings
