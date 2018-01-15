@@ -49,6 +49,8 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance(new DeploymentSettings());
 
+            builder.RegisterInstance(_settings.CurrentValue.OrdersSettings);
+
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
 
             builder.RegisterInstance<IAssetsService>(
