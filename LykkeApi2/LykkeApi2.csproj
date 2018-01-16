@@ -1,19 +1,14 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
-
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <Version>1.0.0</Version>
-    
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\netcoreapp2.0\LykkeApi2.xml</DocumentationFile>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>bin\Release\netcoreapp2.0\LykkeApi2.xml</DocumentationFile>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Autofac" Version="4.6.2" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.0" />
@@ -23,9 +18,9 @@
     <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.0.20" />
     <PackageReference Include="Lykke.Logs" Version="3.2.3" />
     <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.15" />
+    <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="1.2.1" />
     <PackageReference Include="Lykke.Service.Operations.Client" Version="1.0.5" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.0.17" />
-    <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="1.0.17" />
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.55" />
     <PackageReference Include="Lykke.Service.HftInternalService.Client" Version="1.0.10" />
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="1.0.13" />
@@ -41,20 +36,17 @@
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
-	  <PackageReference Include="Lykke.Service.Assets.Client" Version="2.1.0.28" />
-	  <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="1.1.0" />
-	  <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="1.1.0" />
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="2.1.0.28" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="1.1.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="1.1.0" />
   </ItemGroup>
-
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\LkeServices\LkeServices.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Strings\Phrases.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -62,18 +54,15 @@
       <DependentUpon>Phrases.resx</DependentUpon>
     </Compile>
   </ItemGroup>
-
   <ItemGroup>
     <None Update="Dockerfile">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-
   <ItemGroup>
     <EmbeddedResource Update="Strings\Phrases.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Phrases.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
 </Project>
