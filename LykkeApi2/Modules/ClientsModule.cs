@@ -15,6 +15,7 @@ using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Common.Log;
 using Lykke.Service.Assets.Client;
+using Lykke.Service.OperationsRepository.Client;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules
@@ -70,6 +71,8 @@ namespace LykkeApi2.Modules
                 TimeSpan.FromMinutes(1)));
             
             builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog: null, ignoreErrors: true);
+            
+            builder.RegisterOperationsRepositoryClients(_serviceSettings.CurrentValue.OperationsRepositoryClient, _log);
             
             builder.Populate(_services);
         }

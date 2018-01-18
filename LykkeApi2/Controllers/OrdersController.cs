@@ -1,13 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
 using Common.Log;
+using Core.Exchange;
 using Core.Settings;
 using Lykke.MatchingEngine.Connector.Abstractions.Models;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
+using Lykke.Service.OperationsRepository.AutorestClient.Models;
+using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using Lykke.Service.RateCalculator.Client;
 using LykkeApi2.Attributes;
 using LykkeApi2.Infrastructure;
@@ -28,21 +33,47 @@ namespace LykkeApi2.Controllers
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
         private readonly IMatchingEngineClient _matchingEngineClient;
         private readonly IRateCalculatorClient _rateCalculatorClient;
+        private readonly ILimitOrdersRepositoryClient _limitOrdersRepository;
         private readonly double _deviation;
 
         public OrdersController(IRequestContext requestContext,
             IAssetsServiceWithCache assetsServiceWithCache,
             IMatchingEngineClient matchingEngineClient,
             IRateCalculatorClient rateCalculatorClient,
+            ILimitOrdersRepositoryClient limitOrdersRepository,
             OrdersSettings ordersSettings)
         {
             _requestContext = requestContext;
             _assetsServiceWithCache = assetsServiceWithCache;
             _matchingEngineClient = matchingEngineClient;
             _rateCalculatorClient = rateCalculatorClient;
+            _limitOrdersRepository = limitOrdersRepository;
             _deviation = ordersSettings.MaxLimitOrderDeviationPercent / 100;
         }
+        
+        [HttpGet]
+        [SwaggerOperation("GetActiveLimitOrders")]
+        [ProducesResponseType(typeof(IEnumerable<LimitOrderResponseModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetLimitOrders()
+        {
+            var clientId = _requestContext.ClientId;
 
+            var orders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
+            
+            return Ok(orders.Select(x => new LimitOrderResponseModel
+            {
+                AssetPairId = x.AssetPairId,
+                CreateDateTime = x.CreatedAt,
+                Id = x.Id,
+                Price = (decimal)x.Price,
+                Voume = Math.Abs((decimal)x.Volume),
+                OrderAction = x.Volume > 0 ? "Buy" : "Sell",
+                Status = x.Status
+            }));
+        }
+        
+        
         [HttpPost("market")]
         [SwaggerOperation("PlaceMarketOrder")]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
@@ -110,7 +141,7 @@ namespace LykkeApi2.Controllers
                 throw new Exception("ME unavailable");
 
             if (response.Status != MeStatusCodes.Ok)
-                return BadRequest(new {message = $"ME result: {response.Status}"});
+                return BadRequest(new { message = $"ME responded: {response.Status}"});
 
             return Ok(order.Id);
         }
@@ -147,7 +178,7 @@ namespace LykkeApi2.Controllers
                 return BadRequest();
             }
 
-            var asset = await _assetsServiceWithCache.TryGetAssetAsync(order.);
+            var asset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             if (asset == null || asset.IsDisabled)
             {
                 return BadRequest();
@@ -161,6 +192,21 @@ namespace LykkeApi2.Controllers
 
             var id = Guid.NewGuid().ToString();
 
+            var price = order.Price.TruncateDecimalPlaces(pair.Accuracy);
+
+            var request = new LimitOrderCreateRequest
+            {
+                AssetPairId = pair.Id,
+                ClientId = clientId,
+                CreatedAt = DateTime.Now,
+                Id = id,
+                Price = price,
+                Volume = Math.Abs(volume) * (order.OrderAction == Models.Orders.OrderAction.Buy ? 1 : -1),
+                Straight = true
+            };
+            
+            await _limitOrdersRepository.AddAsync(request);
+            
             var response = await _matchingEngineClient.PlaceLimitOrderAsync(
                 new LimitOrderModel
                 {
@@ -168,13 +214,14 @@ namespace LykkeApi2.Controllers
                     ClientId = clientId,
                     Fee = null,
                     Id = id,
-                    Price = order.Price.TruncateDecimalPlaces(pair.Accuracy),
-                    Volume = volume
+                    Price = price,
+                    Volume = Math.Abs(volume),
+                    OrderAction = ToMeOrderAction(order.OrderAction)
                 });
 
             if (response.Status != MeStatusCodes.Ok)
             {
-                return BadRequest();
+                return BadRequest(new { message = $"ME responded: {response.Status}"});
             }
 
             return Ok(id);
