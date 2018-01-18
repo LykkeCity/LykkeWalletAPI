@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Lykke.Service.OperationsHistory.Client;
+using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
 
 namespace Core.Settings
@@ -61,6 +62,7 @@ namespace Core.Settings
         public string HftInternalServiceUrl { get; set; }
         public string SessionUrl { get; set; }        
         public string OperationsUrl { get; set; }
+        public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
     }
     
     public class MatchingEngineSettings
