@@ -26,7 +26,7 @@ namespace LykkeApi2.Controllers
 {
     [Authorize]
     [SignatureVerification]
-    [Route("api/[controller]")]
+    [Route("api/orders")]
     public class OrdersController : Controller
     {
         private readonly IRequestContext _requestContext;
@@ -72,7 +72,19 @@ namespace LykkeApi2.Controllers
                 Status = x.Status
             }));
         }
-        
+
+        [HttpPost("limit/{orderId}/cancel")]
+        [SwaggerOperation("CancelMarketOrder")]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        public async Task<IActionResult> CancelMarketOrder(string orderId)
+        {
+            await _limitOrdersRepository.CancelByIdAsync(orderId);
+            await _matchingEngineClient.CancelLimitOrderAsync(orderId);
+            
+            return Ok();
+        }
         
         [HttpPost("market")]
         [SwaggerOperation("PlaceMarketOrder")]
