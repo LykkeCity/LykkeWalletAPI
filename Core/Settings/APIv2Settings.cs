@@ -58,7 +58,8 @@ namespace Core.Settings
         public string RateCalculatorServiceApiUrl { get; set; }
         public string BalancesServiceUrl { get; set; }        
         public string MarketProfileUrl { get; set; }
-        public string CandleHistoryUrl { get; set; }        
+        public string CandleHistorySpotUrl { get; set; }
+        public string CandleHistoryMtUrl { get; set; }
         public string HftInternalServiceUrl { get; set; }
         public string SessionUrl { get; set; }        
         public string OperationsUrl { get; set; }
