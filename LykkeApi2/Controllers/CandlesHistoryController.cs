@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Core.Candles;
+using Core.Enumerators;
+using LkeServices.Candles;
 
 namespace LykkeApi2.Controllers
 {
@@ -15,12 +18,12 @@ namespace LykkeApi2.Controllers
     [ValidateModel]
     public class CandlesHistoryController : Controller
     {
-        private readonly ICandleshistoryservice _candleHistoryService;
+        private readonly ICandlesHistoryServiceProvider _candlesServiceProvider;
         private readonly ILog _log;
 
-        public CandlesHistoryController(ICandleshistoryservice candleHistoryService, ILog log)
+        public CandlesHistoryController(ICandlesHistoryServiceProvider candlesServiceProvider, ILog log)
         {
-            _candleHistoryService = candleHistoryService;
+            _candlesServiceProvider = candlesServiceProvider;
             _log = log;
         }
 
@@ -32,12 +35,14 @@ namespace LykkeApi2.Controllers
         /// <param name="timeInterval">Time interval</param>
         /// <param name="fromMoment">From moment in ISO 8601 (inclusive)</param>
         /// <param name="toMoment">To moment in ISO 8601 (exclusive)</param>
-        [HttpGet("{assetPairId}/{priceType}/{timeInterval}/{fromMoment:datetime}/{toMoment:datetime}")]
+        [HttpGet("{type}/{assetPairId}/{priceType}/{timeInterval}/{fromMoment:datetime}/{toMoment:datetime}")]
         public async Task<IActionResult> Get([FromRoute]CandleSticksRequestModel request)
         {
             try
             {
-                var candles = await _candleHistoryService.GetCandlesHistoryAsync(request.AssetPairId, (CandlePriceType)Enum.Parse(typeof(CandlePriceType), request.PriceType.ToString()), (CandleTimeInterval)Enum.Parse(typeof(CandleTimeInterval), request.TimeInterval.ToString()), request.FromMoment, request.ToMoment);
+                var candleHistoryService = _candlesServiceProvider.Get(request.Type);
+                
+                var candles = await candleHistoryService.GetCandlesHistoryAsync(request.AssetPairId, (CandlePriceType)Enum.Parse(typeof(CandlePriceType), request.PriceType.ToString()), (CandleTimeInterval)Enum.Parse(typeof(CandleTimeInterval), request.TimeInterval.ToString()), request.FromMoment, request.ToMoment);
                 
                 return Ok(candles.ToResponseModel());
             }
