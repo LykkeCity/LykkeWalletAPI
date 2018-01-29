@@ -47,7 +47,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(IEnumerable<HistoryOperation>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
-            [FromQuery] string operationType,
+            [FromQuery] HistoryOperationType? operationType,
             [FromQuery] string assetId,
             [FromQuery] int take,
             [FromQuery] int skip)
@@ -80,7 +80,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(IEnumerable<HistoryOperation>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
-            [FromQuery] string operationType,
+            [FromQuery] HistoryOperationType? operationType,
             [FromQuery] string assetId,
             [FromQuery] int take,
             [FromQuery] int skip)
