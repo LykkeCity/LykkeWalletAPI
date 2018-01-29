@@ -45,7 +45,7 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<Candleshistoryservice>()
                 .As<ICandleshistoryservice>()
-                .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.CandleHistoryUrl));
+                .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.CandleHistoryMtUrl));
 
             builder.RegisterType<LykkeRegistrationClient>()
                 .As<ILykkeRegistrationClient>()
