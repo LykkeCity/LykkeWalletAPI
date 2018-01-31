@@ -33,21 +33,18 @@ namespace LykkeApi2.Controllers
         private readonly IMatchingEngineClient _matchingEngineClient;
         private readonly IRateCalculatorClient _rateCalculatorClient;
         private readonly ILimitOrdersRepositoryClient _limitOrdersRepository;
-        private readonly double _deviation;
 
         public OrdersController(IRequestContext requestContext,
             IAssetsServiceWithCache assetsServiceWithCache,
             IMatchingEngineClient matchingEngineClient,
             IRateCalculatorClient rateCalculatorClient,
-            ILimitOrdersRepositoryClient limitOrdersRepository,
-            OrdersSettings ordersSettings)
+            ILimitOrdersRepositoryClient limitOrdersRepository)
         {
             _requestContext = requestContext;
             _assetsServiceWithCache = assetsServiceWithCache;
             _matchingEngineClient = matchingEngineClient;
             _rateCalculatorClient = rateCalculatorClient;
             _limitOrdersRepository = limitOrdersRepository;
-            _deviation = ordersSettings.MaxLimitOrderDeviationPercent / 100;
         }
         
         [HttpGet]
@@ -174,17 +171,6 @@ namespace LykkeApi2.Controllers
             }
 
             if (pair.IsDisabled)
-            {
-                return BadRequest();
-            }
-
-            var bestPrice =
-                await _rateCalculatorClient.GetBestPriceAsync(order.AssetPairId,
-                    order.OrderAction == Models.Orders.OrderAction.Buy);
-
-            if (order.OrderAction == Models.Orders.OrderAction.Buy && bestPrice * (1 - _deviation) > order.Price
-                || order.OrderAction == Models.Orders.OrderAction.Sell &&
-                bestPrice * (1 + _deviation) < order.Price)
             {
                 return BadRequest();
             }

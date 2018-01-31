@@ -35,15 +35,8 @@ namespace Core.Settings
         public DeploymentSettings DeploymentSettings { get; set; }
         
         public CacheSettings CacheSettings { get; set; }
-        
-        public OrdersSettings OrdersSettings { set; get; }
     }
-
-    public class OrdersSettings
-    {
-        public double MaxLimitOrderDeviationPercent { set; get; }
-    }
-
+    
     public class DbSettings
     {
         public string LogsConnString { get; set; }        
