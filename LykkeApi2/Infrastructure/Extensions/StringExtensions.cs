@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
+using Common;
 
 namespace LykkeApi2.Infrastructure.Extensions
 {
@@ -16,6 +18,11 @@ namespace LykkeApi2.Infrastructure.Extensions
                 .AsEnumerable()
                 .Select(s => s.Trim())
                 .ToList();
+        }
+        
+        public static bool IsValidEmailAndRowKey(this string src)
+        {
+            return src.IsValidEmail() && !Regex.IsMatch(src, @"[\p{C}|/|\\|#|?]+");
         }
     }
 }
