@@ -103,5 +103,32 @@ namespace LykkeApi2.Controllers
 
             return Ok(response.Records.Where(x => x != null));
         }
+        
+        [HttpGet("trades/{assetPairId}")]
+        [SwaggerOperation("GetAllTradesByPairId")]
+        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
+        [ProducesResponseType(typeof(IEnumerable<HistoryOperation>), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> GetAllTrades(string assetPairId,
+            [FromQuery] int take,
+            [FromQuery] int skip)
+        {
+            var clientId = _requestContext.ClientId;
+
+            var asset = assetPairId.Substring(3);
+            
+            var response = await _operationsHistoryClient.GetByClientId(clientId, HistoryOperationType.Trade, asset, take, skip);
+            
+            if (response.Error != null)
+            {
+                return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
+            }
+            
+            foreach (var x in response.Records.Where(x => x != null))
+            {
+                x.AssetPair = assetPairId;
+            }
+
+            return Ok(response.Records.Where(x => x != null));
+        }
     }
 }
