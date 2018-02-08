@@ -5,6 +5,7 @@ using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
+using Common;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;
@@ -13,6 +14,7 @@ using LykkeApi2.Models.ClientAccountModels;
 using Microsoft.AspNetCore.Authorization;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.PersonalData.Contract.Models;
+using LykkeApi2.Infrastructure.Extensions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
@@ -51,6 +53,15 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Post([FromBody]AccountRegistrationModel model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!model.Email.IsValidEmailAndRowKey())
+            {
+                ModelState.AddModelError("email", Phrases.InvalidEmailFormat);
+                return BadRequest(ModelState);
+            }
+            
             if (await _clientAccountLogic.IsTraderWithEmailExistsForPartnerAsync(model.Email, model.PartnerId))
             {
                 ModelState.AddModelError("email", Phrases.ClientWithEmailIsRegistered);
@@ -102,6 +113,15 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Auth([FromBody]AuthRequestModel model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (!model.Email.IsValidEmailAndRowKey())
+            {
+                ModelState.AddModelError("email", Phrases.InvalidEmailFormat);
+                return BadRequest(ModelState);
+            }
+            
             var authResult = await _lykkeRegistrationClient.AuthorizeAsync(new AuthModel
             {
                 ClientInfo = model.ClientInfo,
