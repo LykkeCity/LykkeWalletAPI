@@ -1,13 +1,9 @@
 ﻿using System;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Core.Settings;
 using Lykke.MarketProfileService.Client;
-using Lykke.Service.CandlesHistory.Client;
-using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Registration;
-using Lykke.Service.Session;
 using Lykke.SettingsReader;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.OperationsHistory.Client;
@@ -17,6 +13,10 @@ using Common.Log;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Lykke.Service.HftInternalService.Client;
+using Lykke.Service.Session.Client;
+using LykkeApi2.Infrastructure;
+using LykkeApi2.Settings;
 
 namespace LykkeApi2.Modules
 {
@@ -37,11 +37,10 @@ namespace LykkeApi2.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterLykkeServiceClient(_serviceSettings.CurrentValue.ClientAccountServiceUrl);
+            builder.RegisterType<PhoneSignFilter>();
 
-            builder.RegisterType<HftInternalServiceAPI>()
-                .As<IHftInternalServiceAPI>()
-                .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.HftInternalServiceUrl));
+            builder.RegisterLykkeServiceClient(_serviceSettings.CurrentValue.ClientAccountServiceUrl);
+            builder.RegisterHftInternalServiceClient(_serviceSettings.CurrentValue.HftInternalServiceUrl, _log);
 
             builder.RegisterType<LykkeMarketProfileServiceAPI>()
                 .As<ILykkeMarketProfileServiceAPI>()
@@ -53,9 +52,7 @@ namespace LykkeApi2.Modules
                 .As<ILykkeRegistrationClient>()
                 .WithParameter("serviceUrl", _serviceSettings.CurrentValue.RegistrationUrl);
 
-            builder.RegisterType<ClientSessionsClient>()
-                .As<IClientSessionsClient>()
-                .WithParameter("serviceUrl", _serviceSettings.CurrentValue.SessionUrl);
+            builder.RegisterRedisClientSession(_apiSettings.Nested(s => s.SessionsSettings).CurrentValue);
 
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));

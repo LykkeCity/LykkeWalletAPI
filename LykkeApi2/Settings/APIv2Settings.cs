@@ -1,9 +1,11 @@
 ﻿using System.Net;
+using LkeServices.Settings;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
+using Lykke.Service.Session.Client;
 
-namespace Core.Settings
+namespace LykkeApi2.Settings
 {
     public class APIv2Settings
     {
@@ -11,7 +13,8 @@ namespace Core.Settings
         public SlackNotificationsSettings SlackNotifications { get; set; }
         public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
-        public MatchingEngineSettings MatchingEngineClient { set; get; }
+        public MatchingEngineSettings MatchingEngineClient { set; get; }        
+        public SessionsSettings SessionsSettings { get; set; }
     }
 
     public class SlackNotificationsSettings
@@ -33,8 +36,15 @@ namespace Core.Settings
         public ServiceSettings Services { get; set; }
 
         public DeploymentSettings DeploymentSettings { get; set; }
-        
+
         public CacheSettings CacheSettings { get; set; }
+
+        public RabbitMqSettings RabbitMq { get; set; }
+    }
+
+    public class RabbitMqSettings
+    {
+        public string ConnectionString { get; set; }
     }
     
     public class DbSettings
@@ -58,7 +68,7 @@ namespace Core.Settings
         public string OperationsUrl { get; set; }
         public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
     }
-    
+
     public class MatchingEngineSettings
     {
         public IpEndpointSettings IpEndpoint { get; set; }
@@ -81,25 +91,9 @@ namespace Core.Settings
             return new IPEndPoint(addresses[0], Port);
         }
     }
-    
+
     public class DeploymentSettings
     {
         public bool IsProduction { get; set; }
-    }
-
-    public class CacheSettings
-    {
-        public string FinanceDataCacheInstance { get; set; }
-        public string RedisConfiguration { get; set; }
-
-        public string OrderBooksCacheKeyPattern { get; set; }
-    }
-
-    public static class CacheSettingsExt
-    {
-        public static string GetOrderBookKey(this CacheSettings settings, string assetPairId, bool isBuy)
-        {
-            return string.Format(settings.OrderBooksCacheKeyPattern, assetPairId, isBuy);
-        }
     }
 }

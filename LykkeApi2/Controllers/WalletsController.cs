@@ -136,6 +136,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(IEnumerable<WalletModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [SwaggerOperation("GetWallets")]
+        [ServiceFilter(typeof(PhoneSignFilter))]
         public async Task<IActionResult> GetWallets()
         {
             var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);

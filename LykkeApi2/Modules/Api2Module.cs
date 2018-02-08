@@ -11,7 +11,6 @@ using Core.Enumerators;
 using Core.ExchangeSettings;
 using Core.Identity;
 using Core.Services;
-using Core.Settings;
 using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Identity;
@@ -24,6 +23,7 @@ using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
+using LykkeApi2.Settings;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules
@@ -97,7 +97,7 @@ namespace LykkeApi2.Modules
                     async () =>
                         (await ctx.Resolve<IAssetsService>().AssetGetAllAsync()).ToDictionary(itm => itm.Id));
             }).SingleInstance();
-            
+
             builder.Register(c =>
             {
                 var ctx = c.Resolve<IComponentContext>();

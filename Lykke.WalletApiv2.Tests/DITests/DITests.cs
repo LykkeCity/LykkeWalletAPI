@@ -1,12 +1,12 @@
 using Autofac;
 using Common.Log;
-using Core.Settings;
 using LykkeApi2.Controllers;
 using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
 using Lykke.SettingsReader;
+using LykkeApi2.Settings;
 using Xunit;
 
 namespace Lykke.WalletApiv2.Tests.DITests
@@ -23,7 +23,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
             _mockLog = new Mock<ILog>();
 
             settings = new APIv2Settings();
-            settings.WalletApiv2 = new BaseSettings { Db = new DbSettings(), Services = new ServiceSettings(), DeploymentSettings = new DeploymentSettings() };
+            settings.WalletApiv2 = new BaseSettings { Services = new ServiceSettings(), DeploymentSettings = new DeploymentSettings() };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, mockUrl));
             //settings.WalletApiv2.DeploymentSettings.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.DeploymentSettings, mockUrl));
 
