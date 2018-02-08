@@ -4,7 +4,6 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AzureStorage.Tables;
 using Common.Log;
-using Core.Settings;
 using FluentValidation.AspNetCore;
 using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
@@ -15,6 +14,7 @@ using LykkeApi2.Models.ValidationModels;
 using LykkeApi2.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
+using LykkeApi2.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -80,6 +80,7 @@ namespace LykkeApi2
 
                 builder.RegisterModule(new Api2Module(appSettings.Nested(x => x.WalletApiv2), Log));
                 builder.RegisterModule(new ClientsModule(appSettings, Log));
+                builder.RegisterModule(new CqrsModule(appSettings.Nested(x => x.WalletApiv2), Log));
                 builder.RegisterModule(new AspNetCoreModule());
                 builder.Populate(services);
                 ApplicationContainer = builder.Build();
@@ -88,7 +89,7 @@ namespace LykkeApi2
             }
             catch (Exception ex)
             {
-                Log?.WriteFatalErrorAsync(nameof(Startup), nameof(ConfigureServices), "", ex).Wait();
+                Log?.WriteFatalError(nameof(Startup), nameof(ConfigureServices), ex);
                 throw;
             }
         }
@@ -145,7 +146,7 @@ namespace LykkeApi2
             }
             catch (Exception ex)
             {
-                Log?.WriteFatalErrorAsync(nameof(Startup), nameof(ConfigureServices), "", ex).Wait();
+                Log?.WriteFatalError(nameof(Startup), nameof(ConfigureServices), ex);
                 throw;
             }
         }
@@ -156,11 +157,11 @@ namespace LykkeApi2
             {
                 // NOTE: Service not yet recieve and process requests here
 
-                await Log.WriteMonitorAsync("", "", "Started");
+                Log.WriteMonitor("", "", "Started");
             }
             catch (Exception ex)
             {
-                await Log.WriteFatalErrorAsync(nameof(Startup), nameof(StartApplication), "", ex);
+                Log.WriteFatalError(nameof(Startup), nameof(StartApplication), ex);
                 throw;
             }
         }
@@ -173,7 +174,7 @@ namespace LykkeApi2
 
                 if (Log != null)
                 {
-                    await Log.WriteMonitorAsync("", "", "Terminating");
+                    Log.WriteMonitor("", "", "Terminating");
                 }
 
                 ApplicationContainer.Dispose();
@@ -182,7 +183,7 @@ namespace LykkeApi2
             {
                 if (Log != null)
                 {
-                    await Log.WriteFatalErrorAsync(nameof(Startup), nameof(CleanUp), "", ex);
+                    Log.WriteFatalError(nameof(Startup), nameof(CleanUp), ex);
                     (Log as IDisposable)?.Dispose();
                 }
                 throw;

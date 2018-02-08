@@ -6,7 +6,6 @@ using Common;
 using Common.Log;
 using Core.Identity;
 using Core.Services;
-using Core.Settings;
 using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -16,6 +15,7 @@ using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Services;
+using LykkeApi2.Settings;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules

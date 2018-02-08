@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Core.Constants;
 using Core.Identity;
-using Lykke.Service.Session;
+using Lykke.Service.Session.Client;
 using Microsoft.AspNetCore.Http;
 
 namespace LkeServices.Identity
@@ -77,10 +78,13 @@ namespace LkeServices.Identity
             {
                 (result.Identity as ClaimsIdentity)?.AddClaim(new Claim("PartnerId", session.PartnerId));
             }
-
-            if (session.Pinned)
+            
+            if (session.Tags != null)
             {
-                (result.Identity as ClaimsIdentity)?.AddClaim(new Claim("TokenType", "Pinned"));
+                foreach (var sessionTag in session.Tags)
+                {
+                    (result.Identity as ClaimsIdentity)?.AddClaim(new Claim("SessionTag", sessionTag));
+                }
             }
 
             _claimsCache.Set(token, result);

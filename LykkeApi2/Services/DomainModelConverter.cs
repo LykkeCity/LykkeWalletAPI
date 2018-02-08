@@ -76,7 +76,7 @@ namespace LykkeApi2.Services
             var asset = (await _assetsCache.Values()).FirstOrDefault(x => x.Id == model.Currency);
             if (asset == null)
             {
-                await _log.WriteWarningAsync(nameof(DomainModelConverter), nameof(ToApiModel),
+                _log.WriteWarning(nameof(DomainModelConverter), nameof(ToApiModel),
                     $"Unable to find asset in dictionary for assetId = {model.Currency}, walletId = {model.WalletId}");
                 return null;
             }
@@ -98,7 +98,7 @@ namespace LykkeApi2.Services
             var assetPair = (await _assetPairsCache.Values()).FirstOrDefault(x => x.Id == model.AssetPair);
             if (assetPair == null)
             {
-                await _log.WriteWarningAsync(nameof(DomainModelConverter), nameof(ConvertLimitTradeEvent),
+                _log.WriteWarning(nameof(DomainModelConverter), nameof(ConvertLimitTradeEvent),
                     $"Unable to find asset pair in dictionary for assetPairId = {model.AssetPair}, walletId = {walletId}");
                 return null;
             }
@@ -106,7 +106,7 @@ namespace LykkeApi2.Services
             var asset = (await _assetsCache.Values()).FirstOrDefault(x => x.Id == assetPair.QuotingAssetId);
             if (asset == null)
             {
-                await _log.WriteWarningAsync(nameof(DomainModelConverter), nameof(ConvertLimitTradeEvent),
+                _log.WriteWarning(nameof(DomainModelConverter), nameof(ConvertLimitTradeEvent),
                     $"Unable to find asset in dictionary for limit trade quoting assetId = {assetPair.QuotingAssetId}, walletId = {walletId}");
                 return null;
             }
