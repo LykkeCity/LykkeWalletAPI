@@ -43,7 +43,8 @@ namespace LykkeApi2.Controllers
                 var candleHistoryService = _candlesServiceProvider.Get(request.Type);
                 
                 var candles = await candleHistoryService.GetCandlesHistoryAsync(request.AssetPairId, (CandlePriceType)Enum.Parse(typeof(CandlePriceType), request.PriceType.ToString()), (CandleTimeInterval)Enum.Parse(typeof(CandleTimeInterval), request.TimeInterval.ToString()), request.FromMoment, request.ToMoment);
-                return Ok(candles);
+                
+                return Ok(candles.ToResponseModel());
             }
             catch (ErrorResponseException ex)
             {
