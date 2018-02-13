@@ -4,9 +4,12 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common;
 using Common.Log;
+using Core.Candles;
+using Core.Enumerators;
 using Core.Identity;
 using Core.Services;
 using Core.Settings;
+using LkeServices.Candles;
 using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -46,7 +49,7 @@ namespace LykkeApi2.Modules
             builder.RegisterRateCalculatorClient(_settings.CurrentValue.Services.RateCalculatorServiceApiUrl, _log);
 
             builder.RegisterBalancesClient(_settings.CurrentValue.Services.BalancesServiceUrl, _log);
-
+            
             builder.RegisterInstance(new DeploymentSettings());
 
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
@@ -55,6 +58,16 @@ namespace LykkeApi2.Modules
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
 
             _services.AddSingleton<ClientAccountLogic>();
+            
+            _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
+            {
+                var provider = new CandlesHistoryServiceProvider();
+
+                provider.RegisterMarket(MarketType.Spot, _settings.CurrentValue.Services.CandleHistorySpotUrl);
+                provider.RegisterMarket(MarketType.Mt, _settings.CurrentValue.Services.CandleHistoryMtUrl);
+
+                return provider;
+            });
 
             builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
 
