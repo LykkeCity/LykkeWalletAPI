@@ -27,14 +27,14 @@ namespace LykkeApi2
 {
     public class Startup
     {
+        public const string ApiVersion = "v2";
+        public const string ApiTitle = "Lykke Wallet API v2";
+        public const string ComponentName = "WalletApiV2";
+
         public IHostingEnvironment Environment { get; }
         public IContainer ApplicationContainer { get; private set; }
         public IConfigurationRoot Configuration { get; set; }
         public ILog Log { get; private set; }
-
-        public const string apiVersion = "v2";
-        public const string appName = "Lykke Wallet API v2";
-
 
         public Startup(IHostingEnvironment env)
         {
@@ -62,7 +62,7 @@ namespace LykkeApi2
 
                 services.AddSwaggerGen(options =>
                 {
-                    options.DefaultLykkeConfiguration(apiVersion, appName);
+                    options.DefaultLykkeConfiguration(ApiVersion, ApiTitle);
 
                     options.OperationFilter<ApiKeyHeaderOperationFilter>();
                     options.OperationFilter<ApiKeyHeaderAccessTokenOperationFilter>();
@@ -100,6 +100,8 @@ namespace LykkeApi2
         {
             try
             {
+                app.UseLykkeMiddleware(ComponentName, ex => new { Message = "Technical problem" });
+
                 app.UseCors(builder =>
                 {
                     builder.AllowAnyOrigin();
@@ -126,19 +128,16 @@ namespace LykkeApi2
                         template: "{controller=Swagger}");
                 });
 
-                CreateErrorResponse responseFactory = exception => exception;
-                app.UseMiddleware<GlobalErrorHandlerMiddleware>("WalletApiV2", responseFactory);
                 app.UseForwardedHeaders(new ForwardedHeadersOptions
                 {
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
                 });
 
                 app.UseSwagger();
-
                 app.UseSwaggerUI(o =>
                 {
                     o.RoutePrefix = "swagger/ui";
-                    o.SwaggerEndpoint($"/swagger/{apiVersion}/swagger.json", apiVersion);
+                    o.SwaggerEndpoint($"/swagger/{ApiVersion}/swagger.json", ApiVersion);
                 });
 
                 app.UseStaticFiles();
@@ -148,7 +147,7 @@ namespace LykkeApi2
             }
             catch (Exception ex)
             {
-                Log?.WriteFatalError(nameof(Startup), nameof(ConfigureServices), ex);
+                Log?.WriteFatalError(nameof(Startup), nameof(Configure), ex);
                 throw;
             }
         }
@@ -157,7 +156,7 @@ namespace LykkeApi2
         {
             try
             {
-                // NOTE: Service not yet recieve and process requests here
+                // NOTE: Service not yet receive and process requests here
 
                 Log.WriteMonitor("", "", "Started");
             }
@@ -172,7 +171,7 @@ namespace LykkeApi2
         {
             try
             {
-                // NOTE: Service can't recieve and process requests here, so you can destroy all resources
+                // NOTE: Service can't receive and process requests here, so you can destroy all resources
 
                 if (Log != null)
                 {
@@ -210,7 +209,7 @@ namespace LykkeApi2
             var dbLogConnectionStringManager = settings.Nested(x => x.WalletApiv2.Db.LogsConnString);
             var dbLogConnectionString = dbLogConnectionStringManager.CurrentValue;
 
-            // Creating azure storage logger, which logs own messages to concole log
+            // Creating azure storage logger, which logs own messages to console log
             if (!string.IsNullOrEmpty(dbLogConnectionString) &&
                 !(dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}")))
             {
