@@ -68,8 +68,8 @@ namespace LykkeApi2.Modules
             {
                 var provider = new CandlesHistoryServiceProvider();
 
-                provider.RegisterMarket(MarketType.Spot, _settings.CurrentValue.Services.CandleHistoryMtUrl);
-                provider.RegisterMarket(MarketType.Mt, _settings.CurrentValue.Services.CandleHistorySpotUrl);
+                provider.RegisterMarket(MarketType.Spot, _settings.CurrentValue.Services.CandleHistorySpotUrl);
+                provider.RegisterMarket(MarketType.Mt, _settings.CurrentValue.Services.CandleHistoryMtUrl);
 
                 return provider;
             });
