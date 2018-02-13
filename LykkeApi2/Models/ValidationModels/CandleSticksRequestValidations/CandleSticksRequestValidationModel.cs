@@ -11,11 +11,11 @@ namespace LykkeApi2.Models.ValidationModels.CandleSticksRequestValidations
         {
             RuleFor(r=>r.AssetPairId).NotEmpty().WithMessage(Phrases.FieldShouldNotBeEmpty);
 
-            PriceType priceTypeParsed;
+            CandlePriceType priceTypeParsed;
             
             RuleFor(r=> Enum.TryParse(r.PriceType.ToString(), out priceTypeParsed)).Equal(true).WithName("PriceType").WithMessage((request) => $"Unknown priceType {request.PriceType}");
 
-            TimeInterval timeIntervalParsed;
+            CandleTimeInterval timeIntervalParsed;
             RuleFor(r => Enum.TryParse(r.TimeInterval.ToString(), out timeIntervalParsed)).Equal(true).WithName("TimeInterval").WithMessage((request) => $"Unknown timeInterval {request.TimeInterval}");            
         }
     }
