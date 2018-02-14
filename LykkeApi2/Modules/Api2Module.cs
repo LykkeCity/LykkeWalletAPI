@@ -9,6 +9,7 @@ using Core.Enumerators;
 using Core.Identity;
 using Core.Services;
 using Core.Settings;
+using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
@@ -19,6 +20,8 @@ using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Services;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules
@@ -57,7 +60,7 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
 
-            _services.AddSingleton<ClientAccountLogic>();
+            builder.RegisterType<ClientAccountLogic>().AsSelf().SingleInstance();
             
             _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
             {
@@ -102,7 +105,18 @@ namespace LykkeApi2.Modules
 
         private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings, ILog log)
         {
-            
+            var redis = new RedisCache(new RedisCacheOptions
+            {
+                Configuration = settings.CurrentValue.CacheSettings.RedisConfiguration,
+                InstanceName = settings.CurrentValue.CacheSettings.FinanceDataCacheInstance
+            });
+
+            builder.RegisterInstance(redis).As<IDistributedCache>().SingleInstance();
+
+            builder.RegisterType<OrderBooksService>()
+                .As<IOrderBooksService>()
+                .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
+                .SingleInstance();
         }       
     }
 }
