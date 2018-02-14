@@ -10,6 +10,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Lykke.Service.Assets.Client" Version="2.1.0.28" />
+    <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.0.55" />
     <PackageReference Include="Lykke.Service.Session" Version="1.0.34-beta67" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.1" />
   </ItemGroup>

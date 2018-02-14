@@ -1,31 +1,31 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Common;
-using Core.ExchangeSettings;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Assets.Client.Models.Extensions;
+using Lykke.Service.ClientAccount.Client;
 
 namespace LkeServices
 {
     public class SrvAssetsHelper
     {
-        private readonly IExchangeSettingsRepository _exchangeSettingsRepository;
         private readonly IAssetsService _assetsService;
         private readonly CachedDataDictionary<string, Asset> _cachedAssetsDictionary;
         private readonly CachedDataDictionary<string, AssetPair> _assetPairsDictionary;
+        private readonly IClientAccountSettingsClient _clientAccountSettingsClient;
 
         public SrvAssetsHelper(
-            IExchangeSettingsRepository exchangeSettingsRepository,
             IAssetsService assetsService,
             CachedDataDictionary<string, Asset> cachedAssetsDictionary,
-            CachedDataDictionary<string, AssetPair> assetPairsDictionary
+            CachedDataDictionary<string, AssetPair> assetPairsDictionary,
+            IClientAccountSettingsClient clientAccountSettingsClient
             )
         {
-            _exchangeSettingsRepository = exchangeSettingsRepository;
             _assetsService = assetsService;
             _cachedAssetsDictionary = cachedAssetsDictionary;
             _assetPairsDictionary = assetPairsDictionary;
+            _clientAccountSettingsClient = clientAccountSettingsClient;
         }
         
         public async Task<Asset[]> GetAssetsForClient(string clientId, bool isIosDevice, string partnerId = null)
@@ -52,9 +52,8 @@ namespace LkeServices
         public async Task<Asset> GetBaseAssetForClient(string clientId, bool isIosDevice, string partnerId)
         {
             var assetsForClient = (await GetAssetsForClient(clientId, isIosDevice, partnerId)).Where(x => x.IsBase);
-            var exchangeSettings = await _exchangeSettingsRepository.GetOrDefaultAsync(clientId);
 
-            var baseAsset = exchangeSettings.BaseAsset(isIosDevice);
+            var baseAsset = (await _clientAccountSettingsClient.GetBaseAssetAsync(clientId)).BaseAssetId;
 
             if (string.IsNullOrEmpty(baseAsset))
             {
