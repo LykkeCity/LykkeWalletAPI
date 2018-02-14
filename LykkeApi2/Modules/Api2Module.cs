@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Common;
 using Common.Log;
 using Core.Candles;
@@ -21,18 +22,21 @@ using LykkeApi2.Infrastructure;
 using LykkeApi2.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules
 {
     public class Api2Module : Module
     {
         private readonly ILog _log;
+        private readonly IServiceCollection _services;
         private readonly IReloadingManager<BaseSettings> _settings;
 
         public Api2Module(IReloadingManager<BaseSettings> settings, ILog log)
         {
             _settings = settings;
             _log = log;
+            _services = new ServiceCollection();
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -76,6 +80,7 @@ namespace LykkeApi2.Modules
 
             RegisterDictionaryEntities(builder);            
             BindServices(builder, _settings, _log);
+            builder.Populate(_services);
         }
 
         private void RegisterDictionaryEntities(ContainerBuilder builder)
