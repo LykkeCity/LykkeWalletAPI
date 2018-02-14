@@ -1,5 +1,7 @@
 ﻿using System;
 using Lykke.Contracts.Operations;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace LykkeApi2.Models.Operations
 {
@@ -7,7 +9,9 @@ namespace LykkeApi2.Models.Operations
     {
         public Guid Id { get; set; }
         public DateTime Created { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
         public OperationType Type { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
         public OperationStatus Status { get; set; }
     }
 
