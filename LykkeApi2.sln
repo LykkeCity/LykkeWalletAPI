@@ -9,15 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "1. Infrastructure", "1. Inf
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{B6ADDBDB-541F-49C5-B96E-3C0968E9D4B4}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Tests", "3. Tests", "{F92247DB-2265-43BB-9F04-BD94A4C8EF06}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Tests", "2. Tests", "{F92247DB-2265-43BB-9F04-BD94A4C8EF06}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.WalletApiv2.Tests", "Lykke.WalletApiv2.Tests\Lykke.WalletApiv2.Tests.csproj", "{EEC9EE2E-28A2-434F-8D37-A87F241367D8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LkeServices", "LkeServices\LkeServices.csproj", "{F013FA52-4048-463C-A931-20C386ECCFA5}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Repositories", "2. Repositories", "{ADAB3310-7DD6-47D0-A5B2-074C7AD8A25C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureRepositories", "AzureRepositories\AzureRepositories.csproj", "{7796BCDA-5FA3-4C22-A151-789DE43D4D73}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +37,6 @@ Global
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7796BCDA-5FA3-4C22-A151-789DE43D4D73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7796BCDA-5FA3-4C22-A151-789DE43D4D73}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7796BCDA-5FA3-4C22-A151-789DE43D4D73}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7796BCDA-5FA3-4C22-A151-789DE43D4D73}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,7 +45,6 @@ Global
 		{B6ADDBDB-541F-49C5-B96E-3C0968E9D4B4} = {7E25EA3D-F2C3-466A-8300-49CA73CB4432}
 		{EEC9EE2E-28A2-434F-8D37-A87F241367D8} = {F92247DB-2265-43BB-9F04-BD94A4C8EF06}
 		{F013FA52-4048-463C-A931-20C386ECCFA5} = {7E25EA3D-F2C3-466A-8300-49CA73CB4432}
-		{7796BCDA-5FA3-4C22-A151-789DE43D4D73} = {ADAB3310-7DD6-47D0-A5B2-074C7AD8A25C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1385F3E1-C385-4E6D-8CBB-C867C7802C6F}
