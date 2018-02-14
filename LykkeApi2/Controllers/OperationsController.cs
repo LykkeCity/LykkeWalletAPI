@@ -36,7 +36,7 @@ namespace LykkeApi2.Controllers
             if (operation == null)
                 return NotFound();
 
-            return Ok(operation);
+            return Ok(operation.ToApiModel());
         }
 
         /// <summary>
