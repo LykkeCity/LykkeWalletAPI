@@ -51,12 +51,12 @@ namespace LkeServices
 
         public async Task<Asset> GetBaseAssetForClient(string clientId, bool isIosDevice, string partnerId)
         {
-            var assetsForClient = (await GetAssetsForClient(clientId, isIosDevice, partnerId)).Where(x => x.IsBase);
-
             var baseAsset = (await _clientAccountSettingsClient.GetBaseAssetAsync(clientId)).BaseAssetId;
 
             if (string.IsNullOrEmpty(baseAsset))
             {
+                var assetsForClient = (await GetAssetsForClient(clientId, isIosDevice, partnerId)).Where(x => x.IsBase);
+                
                 baseAsset = assetsForClient.GetFirstAssetId();
             }
 
