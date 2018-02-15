@@ -30,7 +30,6 @@ namespace LykkeApi2.Models
         {
             return prices.Select(price => new VolumePrice
             {
-                ClientId = price.ClientId,
                 Id = price.Id,
                 Price = price.Price,
                 Volume = Math.Abs(price.Volume)
