@@ -49,8 +49,7 @@ namespace LykkeApi2.Settings
     
     public class DbSettings
     {
-        public string LogsConnString { get; set; }        
-        public string ClientPersonalInfoConnString { get; set; }        
+        public string LogsConnString { get; set; }               
     }
 
     public class ServiceSettings

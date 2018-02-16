@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Lykke.Service.ClientAccount.Client;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.OperationsHistory.AutorestClient.Models;
+using LykkeApi2.Models.History;
 using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 
 namespace LykkeApi2.Controllers
@@ -37,7 +38,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get history by client identifier
         /// </summary>
-        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade</param>
+        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
         /// <param name="assetId">Asset identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
@@ -45,7 +46,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("client")]
         [SwaggerOperation("GetByClientId")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(IEnumerable<HistoryOperation>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
             [FromQuery] HistoryOperationType? operationType,
             [FromQuery] string assetId,
@@ -61,14 +62,14 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
             }
 
-            return Ok(response.Records.Where(x => x != null));
+            return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
         }
 
         /// <summary>
         /// Getting history by wallet identifier
         /// </summary>
         /// <param name="walletId">Wallet identifier</param>
-        /// <param name="operationType">The type of the operation, possible values: CashInOut, CashOutAttempt, ClientTrade, TransferEvent, LimitTradeEvent</param>
+        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
         /// <param name="assetId">Asset identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
@@ -77,7 +78,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetByWalletId")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IEnumerable<HistoryOperation>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
             [FromQuery] HistoryOperationType? operationType,
@@ -101,7 +102,7 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
             }
 
-            return Ok(response.Records.Where(x => x != null));
+            return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
         }
         
         [HttpGet("trades/{assetPairId}")]

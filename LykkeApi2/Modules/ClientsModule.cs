@@ -47,7 +47,7 @@ namespace LykkeApi2.Modules
                 .WithParameter("baseUri", new Uri(_serviceSettings.CurrentValue.MarketProfileUrl));
             
             builder.RegisterOperationsClient(_serviceSettings.CurrentValue.OperationsUrl);
-
+            
             builder.RegisterType<LykkeRegistrationClient>()
                 .As<ILykkeRegistrationClient>()
                 .WithParameter("serviceUrl", _serviceSettings.CurrentValue.RegistrationUrl);
