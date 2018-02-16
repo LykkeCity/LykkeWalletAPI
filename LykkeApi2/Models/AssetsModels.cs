@@ -129,4 +129,17 @@ namespace LykkeApi2.Models
             return asset.DisplayAccuracy ?? asset.Accuracy;
         }
     }
+
+    public class AssetIdsResponse
+    {
+        public IEnumerable<string> AssetIds { get; set; }
+
+        public static AssetIdsResponse Create(IEnumerable<string> assetIds)
+        {
+            return new AssetIdsResponse()
+            {
+                AssetIds = assetIds
+            };
+        }
+    }
 }

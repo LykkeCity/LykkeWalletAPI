@@ -255,5 +255,22 @@ namespace LykkeApi2.Controllers
 
             return Ok();
         }
+        
+        /// <summary>
+        ///     Get assets available for the user based on regulations.
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("available")]
+        [ProducesResponseType(typeof(AssetIdsResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetAvailableAssets()
+        {
+            var assetsIds = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
+            if (assetsIds == null)
+                return NotFound();
+            
+            return Ok(AssetIdsResponse.Create(assetsIds));
+        }
     }
 }
