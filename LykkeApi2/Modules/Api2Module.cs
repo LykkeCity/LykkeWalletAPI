@@ -20,7 +20,6 @@ using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
-using LykkeApi2.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
@@ -72,14 +71,12 @@ namespace LykkeApi2.Modules
 
                 return provider;
             });
-
+            
             builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
 
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
-
-            builder.RegisterType<DomainModelConverter>().AsSelf();
-            builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
             
+            builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
             RegisterDictionaryEntities(builder);            
             BindServices(builder, _settings, _log);
             builder.Populate(_services);
