@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Lykke.Service.ClientAccount.Client;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.OperationsHistory.AutorestClient.Models;
+using LykkeApi2.Models.History;
 using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 
 namespace LykkeApi2.Controllers
@@ -45,7 +46,7 @@ namespace LykkeApi2.Controllers
         [HttpGet("client")]
         [SwaggerOperation("GetByClientId")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(IEnumerable<HistoryOperation>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
             [FromQuery] HistoryOperationType? operationType,
             [FromQuery] string assetId,
@@ -61,7 +62,7 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
             }
 
-            return Ok(response.Records.Where(x => x != null));
+            return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
         }
 
         /// <summary>
@@ -77,7 +78,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetByWalletId")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IEnumerable<HistoryOperation>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
             [FromQuery] HistoryOperationType? operationType,
@@ -101,7 +102,7 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
             }
 
-            return Ok(response.Records.Where(x => x != null));
+            return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
         }
     }
 }
