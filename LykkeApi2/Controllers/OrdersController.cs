@@ -4,17 +4,11 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
-using Common.Log;
-using Core.Exchange;
-using Core.Settings;
 using Lykke.MatchingEngine.Connector.Abstractions.Models;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.Service.Assets.Client;
-using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.OperationsRepository.AutorestClient.Models;
 using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
-using Lykke.Service.RateCalculator.Client;
-using LykkeApi2.Attributes;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Orders;
 using Microsoft.AspNetCore.Authorization;
@@ -31,19 +25,16 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
         private readonly IMatchingEngineClient _matchingEngineClient;
-        private readonly IRateCalculatorClient _rateCalculatorClient;
         private readonly ILimitOrdersRepositoryClient _limitOrdersRepository;
 
         public OrdersController(IRequestContext requestContext,
             IAssetsServiceWithCache assetsServiceWithCache,
             IMatchingEngineClient matchingEngineClient,
-            IRateCalculatorClient rateCalculatorClient,
             ILimitOrdersRepositoryClient limitOrdersRepository)
         {
             _requestContext = requestContext;
             _assetsServiceWithCache = assetsServiceWithCache;
             _matchingEngineClient = matchingEngineClient;
-            _rateCalculatorClient = rateCalculatorClient;
             _limitOrdersRepository = limitOrdersRepository;
         }
         
@@ -72,10 +63,16 @@ namespace LykkeApi2.Controllers
         [HttpPost("limit/{orderId}/cancel")]
         [SwaggerOperation("CancelMarketOrder")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> CancelMarketOrder(string orderId)
         {
+            var clientId = _requestContext.ClientId;
+
+            var activeOrders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
+
+            if (activeOrders.All(x => x.Id != orderId))
+                return NotFound();
+            
             await _limitOrdersRepository.CancelByIdAsync(orderId);
             await _matchingEngineClient.CancelLimitOrderAsync(orderId);
             
@@ -128,7 +125,7 @@ namespace LykkeApi2.Controllers
                 request.Volume.TruncateDecimalPlaces(straight ? baseAsset.Accuracy : quotingAsset.Accuracy);
             if (Math.Abs(volume) < double.Epsilon)
             {
-                return BadRequest(new {message = $"Required volume is less than asset accuracy."});
+                return BadRequest(CreateErrorMessage("Required volume is less than asset accuracy"));
             }
 
             var order = new MarketOrderModel
@@ -149,7 +146,7 @@ namespace LykkeApi2.Controllers
                 throw new Exception("ME unavailable");
 
             if (response.Status != MeStatusCodes.Ok)
-                return BadRequest(new { message = $"ME responded: {response.Status}"});
+                return BadRequest(CreateErrorMessage($"ME responded: {response.Status}"));
 
             return Ok(order.Id);
         }
@@ -206,8 +203,6 @@ namespace LykkeApi2.Controllers
 
             try
             {
-                throw new Exception();
-                
                 var response = await _matchingEngineClient.PlaceLimitOrderAsync(
                     new LimitOrderModel
                     {
@@ -225,17 +220,21 @@ namespace LykkeApi2.Controllers
 
                 if (response.Status != MeStatusCodes.Ok)
                 {
-                    return BadRequest(new { message = $"ME responded: {response.Status}"});
+                    return BadRequest(CreateErrorMessage($"ME responded: {response.Status}"));
                 }
             }
             catch (Exception)
             {
-                // delete order if ME failed
-                await _limitOrdersRepository.RemoveAsync(id, clientId);
+                await _limitOrdersRepository.RemoveAsync(clientId, id);
                 throw;
             }
             
             return Ok(id);
+        }
+
+        private object CreateErrorMessage(string errorMessage)
+        {
+            return new {message = errorMessage};
         }
 
         private OrderAction ToMeOrderAction(Models.Orders.OrderAction action)
