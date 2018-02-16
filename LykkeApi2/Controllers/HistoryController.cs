@@ -38,7 +38,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get history by client identifier
         /// </summary>
-        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade</param>
+        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
         /// <param name="assetId">Asset identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
@@ -69,7 +69,7 @@ namespace LykkeApi2.Controllers
         /// Getting history by wallet identifier
         /// </summary>
         /// <param name="walletId">Wallet identifier</param>
-        /// <param name="operationType">The type of the operation, possible values: CashInOut, CashOutAttempt, ClientTrade, TransferEvent, LimitTradeEvent</param>
+        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
         /// <param name="assetId">Asset identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
