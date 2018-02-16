@@ -25,7 +25,6 @@ using OrderAction = Lykke.MatchingEngine.Connector.Abstractions.Models.OrderActi
 namespace LykkeApi2.Controllers
 {
     [Authorize]
-    [SignatureVerification]
     [Route("api/orders")]
     public class OrdersController : Controller
     {
@@ -204,24 +203,38 @@ namespace LykkeApi2.Controllers
             };
             
             await _limitOrdersRepository.AddAsync(request);
-            
-            var response = await _matchingEngineClient.PlaceLimitOrderAsync(
-                new LimitOrderModel
-                {
-                    AssetPairId = pair.Id,
-                    ClientId = clientId,
-                    Fee = null,
-                    Id = id,
-                    Price = price,
-                    Volume = Math.Abs(volume),
-                    OrderAction = ToMeOrderAction(order.OrderAction)
-                });
 
-            if (response.Status != MeStatusCodes.Ok)
+            try
             {
-                return BadRequest(new { message = $"ME responded: {response.Status}"});
-            }
+                throw new Exception();
+                
+                var response = await _matchingEngineClient.PlaceLimitOrderAsync(
+                    new LimitOrderModel
+                    {
+                        AssetPairId = pair.Id,
+                        ClientId = clientId,
+                        Fee = null,
+                        Id = id,
+                        Price = price,
+                        Volume = Math.Abs(volume),
+                        OrderAction = ToMeOrderAction(order.OrderAction)
+                    });
+                
+                if (response == null)
+                    throw new Exception("ME unavailable");
 
+                if (response.Status != MeStatusCodes.Ok)
+                {
+                    return BadRequest(new { message = $"ME responded: {response.Status}"});
+                }
+            }
+            catch (Exception)
+            {
+                // delete order if ME failed
+                await _limitOrdersRepository.RemoveAsync(id, clientId);
+                throw;
+            }
+            
             return Ok(id);
         }
 
