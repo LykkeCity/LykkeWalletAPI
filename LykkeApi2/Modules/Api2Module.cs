@@ -30,11 +30,13 @@ namespace LykkeApi2.Modules
     {
         private readonly ILog _log;
         private readonly IServiceCollection _services;
+        private readonly IReloadingManager<APIv2Settings> _apiSettings;
         private readonly IReloadingManager<BaseSettings> _settings;
 
-        public Api2Module(IReloadingManager<BaseSettings> settings, ILog log)
+        public Api2Module(IReloadingManager<APIv2Settings> settings, ILog log)
         {
-            _settings = settings;
+            _apiSettings = settings;
+            _settings = settings.Nested(x => x.WalletApiv2);
             _log = log;
             _services = new ServiceCollection();
         }
@@ -46,6 +48,7 @@ namespace LykkeApi2.Modules
                 .SingleInstance();
 
             builder.RegisterInstance(_settings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
 
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 

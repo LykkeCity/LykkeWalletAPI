@@ -7,13 +7,17 @@ using Common;
 using Lykke.MatchingEngine.Connector.Abstractions.Models;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.Service.Assets.Client;
+using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.OperationsRepository.AutorestClient.Models;
 using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Orders;
+using LykkeApi2.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using FeeType = Lykke.Service.FeeCalculator.AutorestClient.Models.FeeType;
 using OrderAction = Lykke.MatchingEngine.Connector.Abstractions.Models.OrderAction;
 
 namespace LykkeApi2.Controllers
@@ -26,16 +30,23 @@ namespace LykkeApi2.Controllers
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
         private readonly IMatchingEngineClient _matchingEngineClient;
         private readonly ILimitOrdersRepositoryClient _limitOrdersRepository;
+        private readonly IFeeCalculatorClient _feeCalculatorClient;
+        private readonly FeeSettings _feeSettings;
 
         public OrdersController(IRequestContext requestContext,
             IAssetsServiceWithCache assetsServiceWithCache,
             IMatchingEngineClient matchingEngineClient,
-            ILimitOrdersRepositoryClient limitOrdersRepository)
+            ILimitOrdersRepositoryClient limitOrdersRepository,
+            IFeeCalculatorClient feeCalculatorClient,
+            FeeSettings feeSettings
+            )
         {
             _requestContext = requestContext;
             _assetsServiceWithCache = assetsServiceWithCache;
             _matchingEngineClient = matchingEngineClient;
             _limitOrdersRepository = limitOrdersRepository;
+            _feeCalculatorClient = feeCalculatorClient;
+            _feeSettings = feeSettings;
         }
         
         [HttpGet]
@@ -128,6 +139,8 @@ namespace LykkeApi2.Controllers
                 return BadRequest(CreateErrorMessage("Required volume is less than asset accuracy"));
             }
 
+            var fee = await GetMarketOrderFee(clientId, pair, request.OrderAction);
+
             var order = new MarketOrderModel
             {
                 Id = Guid.NewGuid().ToString(),
@@ -137,7 +150,7 @@ namespace LykkeApi2.Controllers
                 Straight = straight,
                 Volume = Math.Abs(volume),
                 OrderAction = ToMeOrderAction(request.OrderAction),
-                Fee = null
+                Fee = fee
             };
 
             var response = await _matchingEngineClient.HandleMarketOrderAsync(order);
@@ -187,7 +200,8 @@ namespace LykkeApi2.Controllers
             var id = Guid.NewGuid().ToString();
 
             var price = order.Price.TruncateDecimalPlaces(pair.Accuracy);
-
+            var fee = await GetLimitOrderFee(clientId, pair, order.OrderAction);
+            
             var request = new LimitOrderCreateRequest
             {
                 AssetPairId = pair.Id,
@@ -196,7 +210,7 @@ namespace LykkeApi2.Controllers
                 Id = id,
                 Price = price,
                 Volume = Math.Abs(volume) * (order.OrderAction == Models.Orders.OrderAction.Buy ? 1 : -1),
-                Straight = true
+                Straight = true,
             };
             
             await _limitOrdersRepository.AddAsync(request);
@@ -208,11 +222,11 @@ namespace LykkeApi2.Controllers
                     {
                         AssetPairId = pair.Id,
                         ClientId = clientId,
-                        Fee = null,
+                        Fee = fee,
                         Id = id,
                         Price = price,
                         Volume = Math.Abs(volume),
-                        OrderAction = ToMeOrderAction(order.OrderAction)
+                        OrderAction = ToMeOrderAction(order.OrderAction),
                     });
                 
                 if (response == null)
@@ -253,6 +267,58 @@ namespace LykkeApi2.Controllers
             }
 
             return orderAction;
+        }
+        
+        private Lykke.Service.FeeCalculator.AutorestClient.Models.OrderAction ToFeeOrderAction(Models.Orders.OrderAction action)
+        {
+            Lykke.Service.FeeCalculator.AutorestClient.Models.OrderAction orderAction;
+            switch (action)
+            {
+                case Models.Orders.OrderAction.Buy:
+                    orderAction = Lykke.Service.FeeCalculator.AutorestClient.Models.OrderAction.Buy;
+                    break;
+                case Models.Orders.OrderAction.Sell:
+                    orderAction = Lykke.Service.FeeCalculator.AutorestClient.Models.OrderAction.Sell;
+                    break;
+                default:
+                    throw new Exception("Unknown order action");
+            }
+
+            return orderAction;
+        }
+        
+        private async Task<MarketOrderFeeModel> GetMarketOrderFee(string clientId, AssetPair assetPair, Models.Orders.OrderAction orderAction)
+        {
+            var fee = await _feeCalculatorClient.GetMarketOrderAssetFee(clientId, assetPair.Id, assetPair.BaseAssetId,
+                ToFeeOrderAction(orderAction));
+
+            return new MarketOrderFeeModel
+            {
+                Size = (double)fee.Amount,
+                AssetId = new []{ fee.TargetAssetId },
+                SizeType = fee.Type == FeeType.Absolute 
+                    ? (int)FeeSizeType.ABSOLUTE 
+                    : (int)FeeSizeType.PERCENTAGE,
+                SourceClientId = clientId,
+                TargetClientId = fee.TargetWalletId ?? _feeSettings.TargetClientId.WalletApi,
+                Type = fee.Amount == 0m
+                    ? (int)MarketOrderFeeType.CLIENT_FEE
+                    : (int)MarketOrderFeeType.NO_FEE
+            };
+        }
+
+        private async Task<LimitOrderFeeModel> GetLimitOrderFee(string clientId, AssetPair assetPair, Models.Orders.OrderAction orderAction)
+        {
+            var fee = await _feeCalculatorClient.GetLimitOrderFees(clientId, assetPair.Id, assetPair.BaseAssetId, ToFeeOrderAction(orderAction));
+
+            return new LimitOrderFeeModel
+            {
+                MakerSize = (double)fee.MakerFeeSize,
+                TakerSize = (double)fee.TakerFeeSize,
+                SourceClientId = clientId,
+                TargetClientId = _feeSettings.TargetClientId.WalletApi,
+                Type = fee.MakerFeeSize == 0m && fee.TakerFeeSize == 0m ? (int)LimitOrderFeeType.NO_FEE : (int)LimitOrderFeeType.CLIENT_FEE
+            };
         }
     }
 }
