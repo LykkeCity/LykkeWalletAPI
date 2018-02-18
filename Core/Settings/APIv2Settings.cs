@@ -12,6 +12,8 @@ namespace Core.Settings
         public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }
+        public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
+        public FeeSettings FeeSettings { set; get; }
     }
 
     public class SlackNotificationsSettings
@@ -61,6 +63,21 @@ namespace Core.Settings
     public class MatchingEngineSettings
     {
         public IpEndpointSettings IpEndpoint { get; set; }
+    }
+    
+    public class FeeCalculatorSettings
+    {
+        public string ServiceUrl { get; set; }
+    }
+
+    public class FeeSettings
+    {
+        public TargetClientIdFeeSettings TargetClientId { get; set; }
+    }
+    
+    public class TargetClientIdFeeSettings
+    {
+        public string WalletApi { get; set; }
     }
 
     public class IpEndpointSettings
