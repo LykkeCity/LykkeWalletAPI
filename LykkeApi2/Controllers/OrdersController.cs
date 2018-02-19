@@ -95,6 +95,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ServiceFilter(typeof(PhoneSignFilter))]
         public async Task<IActionResult> PlaceMarketOrder([FromBody] MarketOrderRequest request)
         {
             var clientId = _requestContext.ClientId;
