@@ -301,8 +301,11 @@ namespace LykkeApi2.Controllers
                 SourceClientId = clientId,
                 TargetClientId = fee.TargetWalletId ?? _feeSettings.TargetClientId.WalletApi,
                 Type = fee.Amount == 0m
-                    ? (int)MarketOrderFeeType.CLIENT_FEE
-                    : (int)MarketOrderFeeType.NO_FEE
+                    ? (int)MarketOrderFeeType.NO_FEE
+                    : (int)MarketOrderFeeType.CLIENT_FEE,
+                AssetId = string.IsNullOrEmpty(fee.TargetAssetId)
+                    ? Array.Empty<string>()
+                    : new []{ fee.TargetAssetId }
             };
         }
 
