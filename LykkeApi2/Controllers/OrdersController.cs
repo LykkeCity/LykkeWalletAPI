@@ -295,7 +295,6 @@ namespace LykkeApi2.Controllers
             return new MarketOrderFeeModel
             {
                 Size = (double)fee.Amount,
-                AssetId = new []{ fee.TargetAssetId },
                 SizeType = fee.Type == FeeType.Absolute 
                     ? (int)FeeSizeType.ABSOLUTE 
                     : (int)FeeSizeType.PERCENTAGE,
