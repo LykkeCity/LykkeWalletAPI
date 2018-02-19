@@ -115,14 +115,14 @@ namespace LykkeApi2.Controllers
             [FromQuery] int take,
             [FromQuery] int skip)
         {
-            var response = await _operationsHistoryClient.GetTrades(assetPairId, skip, take);
+            var response = await _operationsHistoryClient.GetTradesAsync(assetPairId, take, skip);
             
             if (response.Error != null)
             {
                 return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
             }
 
-            return Ok(response.Records.Where(x => x != null));
+            return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
         }
     }
 }

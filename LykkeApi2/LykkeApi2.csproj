@@ -27,7 +27,7 @@
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.1.21" />
     <PackageReference Include="Lykke.Service.HftInternalService.Client" Version="1.0.10" />
     <PackageReference Include="Lykke.MatchingEngineConnector" Version="1.0.39" />
-    <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.0.5" />
+    <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.0.6" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client.Core" Version="1.0.28" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.94" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Contract" Version="1.0.9" />
