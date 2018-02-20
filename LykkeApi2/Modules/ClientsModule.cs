@@ -18,6 +18,7 @@ using Lykke.Service.HftInternalService.Client;
 using Lykke.Service.Session.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Settings;
+using Lykke.Service.Affiliate.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -69,7 +70,9 @@ namespace LykkeApi2.Modules
             builder.RegisterOperationsRepositoryClients(_serviceSettings.CurrentValue.OperationsRepositoryClient, _log);
             
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
-            
+
+            builder.RegisterAffiliateClient(_serviceSettings.CurrentValue.AffiliateServiceClient.ServiceUrl, _log);
+
             builder.Populate(_services);
         }
     }
