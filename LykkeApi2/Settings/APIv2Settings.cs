@@ -18,7 +18,6 @@ namespace LykkeApi2.Settings
         public SessionsSettings SessionsSettings { get; set; }
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
         public FeeSettings FeeSettings { set; get; }
-        public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
     }
 
     public class SlackNotificationsSettings
