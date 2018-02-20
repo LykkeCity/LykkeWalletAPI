@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Lykke.Service.Affiliate.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
@@ -12,6 +13,7 @@ namespace Core.Settings
         public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }
+        public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
     }
 
     public class SlackNotificationsSettings
@@ -56,6 +58,7 @@ namespace Core.Settings
         public string SessionUrl { get; set; }        
         public string OperationsUrl { get; set; }
         public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
+        public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
     }
     
     public class MatchingEngineSettings
