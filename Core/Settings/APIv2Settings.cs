@@ -13,7 +13,6 @@ namespace Core.Settings
         public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }
-        public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
     }
 
     public class SlackNotificationsSettings
