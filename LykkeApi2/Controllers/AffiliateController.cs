@@ -37,39 +37,61 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
-        [Route("stats")]
-        [ProducesResponseType(typeof(AffiliateStatisticsResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Stats()
+        [Route("link")]
+        [ProducesResponseType(typeof(AffiliateLinkResponse), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetLink()
         {
+            AffiliateLinkResponse response = null;
+
             var links = await _affiliateClient.GetLinks(_requestContext.ClientId);
+            var link = links.FirstOrDefault();
 
-            if (links.Count() == 0)
+            if (link != null)
             {
-                LinkModel linkModel;
-                try
+                response = new AffiliateLinkResponse
                 {
-                    const string redirectUrl = "https://lykke.com";
-                    linkModel = await _affiliateClient.RegisterLink(_requestContext.ClientId, redirectUrl);
-                }
-                catch (HttpOperationException e)
-                {
-                    await _log.WriteErrorAsync(nameof(AffiliateController), nameof(Stats), e);
-                    return BadRequest(new { message = e.Response.Content });
-                }
-
-                await _log.WriteInfoAsync(nameof(AffiliateController), nameof(Stats), $"Url: {linkModel.Url}. RedirectUrl: {linkModel.RedirectUrl}");
-
-                return Ok(new AffiliateStatisticsResponse
-                {
-                    Url = linkModel.Url,
-                    RedirectUrl = linkModel.RedirectUrl,
-                    ReferralsCount = 0,
-                    TotalBonus = 0,
-                    TotalTradeVolume = 0
-                });
+                    Url = link.Url,
+                    RedirectUrl = link.RedirectUrl
+                };
             }
 
+            return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("create")]
+        [ProducesResponseType(typeof(AffiliateLinkResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> CreateLink()
+        {
+            LinkModel link;
+            try
+            {
+                const string redirectUrl = "https://lykke.com";
+                link = await _affiliateClient.RegisterLink(_requestContext.ClientId, redirectUrl);
+            }
+            catch (HttpOperationException e)
+            {
+                await _log.WriteErrorAsync(nameof(AffiliateController), nameof(GetStats), e);
+                return BadRequest(new { message = e.Response.Content });
+            }
+
+            await _log.WriteInfoAsync(nameof(AffiliateController), nameof(GetStats), 
+                $"ClientId: {_requestContext.ClientId}. Url: {link.Url}. RedirectUrl: {link.RedirectUrl}");
+
+            return Ok(new AffiliateLinkResponse
+            {
+                Url = link.Url,
+                RedirectUrl = link.RedirectUrl
+            });
+        }
+
+
+        [HttpGet]
+        [Route("stats")]
+        [ProducesResponseType(typeof(AffiliateStatisticsResponse), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetStats()
+        {
             var referrals = await _affiliateClient.GetReferrals(_requestContext.ClientId);
 
             var stats = (await _affiliateClient.GetStats(_requestContext.ClientId)).ToList();
@@ -80,8 +102,6 @@ namespace LykkeApi2.Controllers
 
             return Ok(new AffiliateStatisticsResponse
             {
-                Url = links.First().Url,
-                RedirectUrl = links.First().RedirectUrl,
                 ReferralsCount = referrals.Count(),
                 TotalBonus = bonuses,
                 TotalTradeVolume = tradeVolumes
