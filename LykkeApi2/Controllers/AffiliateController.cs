@@ -23,10 +23,10 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
-        [Route("get")]
+        [Route("getlinks")]
         public async Task<IActionResult> Get()
         {
-            //var val = await _affiliateClient.Get();
+            var val = await _affiliateClient.GetLinks(_requestContext.ClientId);
             return Ok();
         }
     }
