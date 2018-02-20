@@ -10,7 +10,6 @@ namespace LykkeApi2.Models.ClientAccountModels
 
         public string FullName { get; set; }
 
-        [Required]
         public string ContactPhone { get; set; }
 
         [Required]
