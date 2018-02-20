@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using LkeServices.Settings;
+using Lykke.Service.Affiliate.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
@@ -68,6 +69,7 @@ namespace LykkeApi2.Settings
         public string SessionUrl { get; set; }        
         public string OperationsUrl { get; set; }
         public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
+        public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
     }
 
     public class MatchingEngineSettings
