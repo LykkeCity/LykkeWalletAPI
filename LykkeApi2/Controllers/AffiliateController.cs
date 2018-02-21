@@ -39,23 +39,24 @@ namespace LykkeApi2.Controllers
         [HttpGet]
         [Route("link")]
         [ProducesResponseType(typeof(AffiliateLinkResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetLink()
         {
-            AffiliateLinkResponse response = null;
-
             var links = await _affiliateClient.GetLinks(_requestContext.ClientId);
             var link = links.FirstOrDefault();
 
             if (link != null)
             {
-                response = new AffiliateLinkResponse
+                return Ok(new AffiliateLinkResponse
                 {
                     Url = link.Url,
                     RedirectUrl = link.RedirectUrl
-                };
+                });
             }
-
-            return Ok(response);
+            else
+            {
+                return NotFound();
+            }
         }
 
         [HttpPost]
