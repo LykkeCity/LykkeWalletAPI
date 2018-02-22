@@ -140,7 +140,7 @@ namespace LykkeApi2.Controllers
                 return BadRequest(CreateErrorMessage("Required volume is less than asset accuracy"));
             }
 
-            var fee = await GetMarketOrderFee(clientId, pair, request.OrderAction);
+            var fee = await GetMarketOrderFee(clientId, request.AssetPairId, request.AssetId, request.OrderAction);
 
             var order = new MarketOrderModel
             {
@@ -151,7 +151,7 @@ namespace LykkeApi2.Controllers
                 Straight = straight,
                 Volume = Math.Abs(volume),
                 OrderAction = ToMeOrderAction(request.OrderAction),
-                Fee = fee
+                Fees = new []{ fee }
             };
 
             var response = await _matchingEngineClient.HandleMarketOrderAsync(order);
@@ -288,10 +288,9 @@ namespace LykkeApi2.Controllers
             return orderAction;
         }
         
-        private async Task<MarketOrderFeeModel> GetMarketOrderFee(string clientId, AssetPair assetPair, Models.Orders.OrderAction orderAction)
+        private async Task<MarketOrderFeeModel> GetMarketOrderFee(string clientId, string assetPairId, string assetId, Models.Orders.OrderAction orderAction)
         {
-            var fee = await _feeCalculatorClient.GetMarketOrderAssetFee(clientId, assetPair.Id, assetPair.BaseAssetId,
-                ToFeeOrderAction(orderAction));
+            var fee = await _feeCalculatorClient.GetMarketOrderAssetFee(clientId, assetPairId, assetId, ToFeeOrderAction(orderAction));
 
             return new MarketOrderFeeModel
             {
