@@ -17,6 +17,7 @@ using Common.Log;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Lykke.Service.Affiliate.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -70,6 +71,8 @@ namespace LykkeApi2.Modules
             
             builder.RegisterOperationsRepositoryClients(_serviceSettings.CurrentValue.OperationsRepositoryClient, _log);
             
+            builder.RegisterAffiliateClient(_serviceSettings.CurrentValue.AffiliateServiceClient.ServiceUrl, _log);
+
             builder.Populate(_services);
         }
     }
