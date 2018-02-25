@@ -5,7 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="1.2.1" />
-    <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.0.1" />
+    <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.0.7" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.94" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.28" />
   </ItemGroup>
