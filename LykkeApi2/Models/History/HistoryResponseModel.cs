@@ -20,6 +20,10 @@ namespace LykkeApi2.Models.History
         public string AssetPair { get; set; }
         
         public double? Price { get; set; }
+        
+        public double FeeSize { get; set; }
+        
+        public FeeType FeeType { get; set; }
     }
 
     public static class HistoryOperationToResponseConverter
@@ -38,7 +42,9 @@ namespace LykkeApi2.Models.History
                 Amount = operation.Amount,
                 Asset = operation.Asset,
                 AssetPair = operation.AssetPair,
-                Price = operation.Price
+                Price = operation.Price,
+                FeeSize = operation.FeeSize,
+                FeeType = operation.FeeType
             };
         }
     }
