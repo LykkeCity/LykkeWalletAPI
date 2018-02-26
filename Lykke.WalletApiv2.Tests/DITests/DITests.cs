@@ -6,51 +6,64 @@ using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
-using Lykke.SettingsReader;
+using Lykke.Service.OperationsHistory.Client;
+using Lykke.Service.OperationsRepository.Client;
+using Lykke.Service.PersonalData.Settings;
+using Lykke.SettingsReader.ReloadingManager;
 using Xunit;
 
 namespace Lykke.WalletApiv2.Tests.DITests
 {
     public class DITests
     {
-        private readonly Mock<ILog> _mockLog;
-        private readonly string mockUrl = "http://localhost";
-        private readonly APIv2Settings settings;
-        private IContainer container;
+        private const string MockUrl = "http://localhost";
+        private readonly IContainer _container;
 
         public DITests()
         {
-            _mockLog = new Mock<ILog>();
+            var mockLog = new Mock<ILog>();
 
-            settings = new APIv2Settings();
-            settings.WalletApiv2 = new BaseSettings { Db = new DbSettings(), Services = new ServiceSettings(), DeploymentSettings = new DeploymentSettings() };
-            settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, mockUrl));
-            //settings.WalletApiv2.DeploymentSettings.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.DeploymentSettings, mockUrl));
+            var settings = new APIv2Settings
+            {
+                FeeSettings = new FeeSettings(),
+                WalletApiv2 = new BaseSettings
+                {
+                    Db = new DbSettings(),
+                    Services = new ServiceSettings
+                    {
+                        OperationsRepositoryClient = new OperationsRepositoryServiceClientSettings{ServiceUrl = MockUrl, RequestTimeout = 300}
+                    },
+                    DeploymentSettings = new DeploymentSettings(),
+                    CacheSettings = new CacheSettings()
+                },
+                OperationsHistoryServiceClient = new OperationsHistoryServiceClientSettings{ServiceUrl = MockUrl},
+                FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},
+                PersonalDataServiceSettings = new PersonalDataServiceSettings{ServiceUri = MockUrl},
+                MatchingEngineClient = new MatchingEngineSettings{IpEndpoint = new IpEndpointSettings{Host = "127.0.0.1", Port = 80}}
+            };
+            settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
 
             var containerBuilder = new ContainerBuilder();
 
-            containerBuilder.RegisterModule(new Api2Module(new SettingsServiceReloadingManager<APIv2Settings>("http://settings.lykke-settings.svc.cluster.local/rr5999apiv2999dvgsert25uwheifn_WalletApiv2").Nested(x => x.WalletApiv2)
-                , _mockLog.Object));
-
-            containerBuilder.RegisterModule(new ClientsModule(new SettingsServiceReloadingManager<APIv2Settings>("http://settings.lykke-settings.svc.cluster.local/rr5999apiv2999dvgsert25uwheifn_WalletApiv2"), _mockLog.Object));
+            containerBuilder.RegisterModule(new Api2Module(ConstantReloadingManager.From(settings), mockLog.Object));
+            containerBuilder.RegisterModule(new ClientsModule(ConstantReloadingManager.From(settings), mockLog.Object));
+            containerBuilder.RegisterModule(new AspNetCoreModule());
 
             containerBuilder.RegisterType<AssetsController>();
 
             //register your controller class here to test
-
-            this.container = containerBuilder.Build();
+            _container = containerBuilder.Build();
         }
-
 
         [Fact]
         public void Test_InstantiateControllers()
         {
             //Arrange
-            var controllersToTest = container.ComponentRegistry.Registrations.Where(r => typeof(Controller).IsAssignableFrom(r.Activator.LimitType)).Select(r => r.Activator.LimitType).ToList();
+            var controllersToTest = _container.ComponentRegistry.Registrations.Where(r => typeof(Controller).IsAssignableFrom(r.Activator.LimitType)).Select(r => r.Activator.LimitType).ToList();
             controllersToTest.ForEach(controller =>
             {
                 //Act-Assert - ok if no exception
-                this.container.Resolve(controller);
+                this._container.Resolve(controller);
             });
         }
     }
