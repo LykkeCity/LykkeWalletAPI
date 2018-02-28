@@ -19,10 +19,5 @@ namespace LykkeApi2.Infrastructure.Extensions
                 .Select(s => s.Trim())
                 .ToList();
         }
-        
-        public static bool IsValidEmailAndRowKey(this string src)
-        {
-            return src.IsValidEmail() && !Regex.IsMatch(src, @"[\p{C}|/|\\|#|?]+");
-        }
     }
 }
