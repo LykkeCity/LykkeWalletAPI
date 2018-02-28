@@ -65,19 +65,11 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateLink()
         {
-            LinkModel link;
-            try
-            {
-                const string redirectUrl = "https://lykke.com";
-                link = await _affiliateClient.RegisterLink(_requestContext.ClientId, redirectUrl);
-            }
-            catch (HttpOperationException e)
-            {
-                await _log.WriteErrorAsync(nameof(AffiliateController), nameof(GetStats), e);
-                return BadRequest(new { message = e.Response.Content });
-            }
+            const string redirectUrl = "https://lykke.com";
 
-            await _log.WriteInfoAsync(nameof(AffiliateController), nameof(GetStats), 
+            var link = await _affiliateClient.RegisterLink(_requestContext.ClientId, redirectUrl);
+
+            await _log.WriteInfoAsync(nameof(AffiliateController), nameof(CreateLink),
                 $"ClientId: {_requestContext.ClientId}. Url: {link.Url}. RedirectUrl: {link.RedirectUrl}");
 
             return Ok(new AffiliateLinkResponse
@@ -98,7 +90,7 @@ namespace LykkeApi2.Controllers
             var stats = (await _affiliateClient.GetStats(_requestContext.ClientId)).ToList();
 
             var bonuses = await GetAmountInBtc(stats.ToDictionary(x => x.AssetId, x => x.BonusVolume));
-            
+
             var tradeVolumes = await GetAmountInBtc(stats.ToDictionary(x => x.AssetId, x => x.TradeVolume));
 
             return Ok(new AffiliateStatisticsResponse
