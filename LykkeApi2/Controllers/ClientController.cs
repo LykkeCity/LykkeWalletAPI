@@ -175,18 +175,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Features()
         {
-            FeaturesSettingsModel features;
-
-            try
-            {
-                features = await _clientAccountService.GetFeaturesAsync(_requestContext.ClientId);
-            }
-            catch (Exception e)
-            {
-                await _log.WriteErrorAsync(nameof(ClientController), nameof(UserInfo), $"clientId = {_requestContext.ClientId}", e);
-
-                return StatusCode((int)HttpStatusCode.InternalServerError);
-            }
+            var features = await _clientAccountService.GetFeaturesAsync(_requestContext.ClientId);
 
             return Ok(new FeaturesResponseModel
             {
