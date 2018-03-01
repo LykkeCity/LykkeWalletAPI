@@ -318,7 +318,16 @@ namespace LykkeApi2.Controllers
                 TakerSize = (double)fee.TakerFeeSize,
                 SourceClientId = clientId,
                 TargetClientId = _feeSettings.TargetClientId.WalletApi,
-                Type = fee.MakerFeeSize == 0m && fee.TakerFeeSize == 0m ? (int)LimitOrderFeeType.NO_FEE : (int)LimitOrderFeeType.CLIENT_FEE
+                Type = fee.MakerFeeSize == 0m && fee.TakerFeeSize == 0m 
+                    ? (int)LimitOrderFeeType.NO_FEE 
+                    : (int)LimitOrderFeeType.CLIENT_FEE,
+                MakerFeeModificator = (double)fee.MakerFeeModificator,
+                MakerSizeType = fee.MakerFeeType == FeeType.Absolute 
+                    ? (int)FeeSizeType.ABSOLUTE 
+                    : (int)FeeSizeType.PERCENTAGE,
+                TakerSizeType = fee.TakerFeeType == FeeType.Absolute 
+                    ? (int)FeeSizeType.ABSOLUTE 
+                    : (int)FeeSizeType.PERCENTAGE
             };
         }
     }
