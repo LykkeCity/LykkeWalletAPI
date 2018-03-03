@@ -18,7 +18,6 @@ namespace LykkeApi2.Models
                 Name = src.Name,
                 DisplayId = src.DisplayId,
                 Accuracy = src.Accuracy,
-                Symbol = src.Symbol,
                 HideWithdraw = src.HideWithdraw,
                 HideDeposit = src.HideDeposit,
                 KycNeeded = src.KycNeeded,
