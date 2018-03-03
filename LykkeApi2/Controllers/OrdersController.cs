@@ -141,10 +141,6 @@ namespace LykkeApi2.Controllers
                 return BadRequest(CreateErrorMessage("Required volume is less than asset accuracy"));
             }
 
-            var fees = _baseSettings.EnableFees
-                ? new[] {await GetMarketOrderFee(clientId, request.AssetPairId, request.AssetId, request.OrderAction)}
-                : null;
-
             var order = new MarketOrderModel
             {
                 Id = Guid.NewGuid().ToString(),
@@ -153,9 +149,12 @@ namespace LykkeApi2.Controllers
                 ReservedLimitVolume = null,
                 Straight = straight,
                 Volume = Math.Abs(volume),
-                OrderAction = ToMeOrderAction(request.OrderAction),
-                Fees = fees
+                OrderAction = ToMeOrderAction(request.OrderAction)
             };
+
+            if (_baseSettings.EnableFees)
+                order.Fees = new[]
+                    {await GetMarketOrderFee(clientId, request.AssetPairId, request.AssetId, request.OrderAction)};
 
             var response = await _matchingEngineClient.HandleMarketOrderAsync(order);
 
@@ -204,10 +203,6 @@ namespace LykkeApi2.Controllers
             var id = Guid.NewGuid().ToString();
 
             var price = order.Price.TruncateDecimalPlaces(pair.Accuracy);
-
-            var fee = _baseSettings.EnableFees
-                ? await GetLimitOrderFee(clientId, pair, order.OrderAction)
-                : null;
             
             var request = new LimitOrderCreateRequest
             {
@@ -224,17 +219,20 @@ namespace LykkeApi2.Controllers
 
             try
             {
-                var response = await _matchingEngineClient.PlaceLimitOrderAsync(
-                    new LimitOrderModel
-                    {
-                        AssetPairId = pair.Id,
-                        ClientId = clientId,
-                        Fee = fee,
-                        Id = id,
-                        Price = price,
-                        Volume = Math.Abs(volume),
-                        OrderAction = ToMeOrderAction(order.OrderAction),
-                    });
+                var limitOrderModel = new LimitOrderModel
+                {
+                    AssetPairId = pair.Id,
+                    ClientId = clientId,
+                    Id = id,
+                    Price = price,
+                    Volume = Math.Abs(volume),
+                    OrderAction = ToMeOrderAction(order.OrderAction),
+                };
+
+                if (_baseSettings.EnableFees)
+                    limitOrderModel.Fee = await GetLimitOrderFee(clientId, pair, order.OrderAction);
+
+                var response = await _matchingEngineClient.PlaceLimitOrderAsync(limitOrderModel);
                 
                 if (response == null)
                     throw new Exception("ME unavailable");
