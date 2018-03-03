@@ -32,14 +32,15 @@ namespace LykkeApi2.Controllers
         private readonly ILimitOrdersRepositoryClient _limitOrdersRepository;
         private readonly IFeeCalculatorClient _feeCalculatorClient;
         private readonly FeeSettings _feeSettings;
+        private readonly BaseSettings _baseSettings;
 
         public OrdersController(IRequestContext requestContext,
             IAssetsServiceWithCache assetsServiceWithCache,
             IMatchingEngineClient matchingEngineClient,
             ILimitOrdersRepositoryClient limitOrdersRepository,
             IFeeCalculatorClient feeCalculatorClient,
-            FeeSettings feeSettings
-            )
+            FeeSettings feeSettings,
+            BaseSettings baseSettings)
         {
             _requestContext = requestContext;
             _assetsServiceWithCache = assetsServiceWithCache;
@@ -47,6 +48,7 @@ namespace LykkeApi2.Controllers
             _limitOrdersRepository = limitOrdersRepository;
             _feeCalculatorClient = feeCalculatorClient;
             _feeSettings = feeSettings;
+            _baseSettings = baseSettings;
         }
         
         [HttpGet]
@@ -139,7 +141,9 @@ namespace LykkeApi2.Controllers
                 return BadRequest(CreateErrorMessage("Required volume is less than asset accuracy"));
             }
 
-            var fee = await GetMarketOrderFee(clientId, request.AssetPairId, request.AssetId, request.OrderAction);
+            var fees = _baseSettings.EnableFees
+                ? new[] {await GetMarketOrderFee(clientId, request.AssetPairId, request.AssetId, request.OrderAction)}
+                : null;
 
             var order = new MarketOrderModel
             {
@@ -150,7 +154,7 @@ namespace LykkeApi2.Controllers
                 Straight = straight,
                 Volume = Math.Abs(volume),
                 OrderAction = ToMeOrderAction(request.OrderAction),
-                Fees = new []{ fee }
+                Fees = fees
             };
 
             var response = await _matchingEngineClient.HandleMarketOrderAsync(order);
@@ -200,7 +204,10 @@ namespace LykkeApi2.Controllers
             var id = Guid.NewGuid().ToString();
 
             var price = order.Price.TruncateDecimalPlaces(pair.Accuracy);
-            var fee = await GetLimitOrderFee(clientId, pair, order.OrderAction);
+
+            var fee = _baseSettings.EnableFees
+                ? await GetLimitOrderFee(clientId, pair, order.OrderAction)
+                : null;
             
             var request = new LimitOrderCreateRequest
             {

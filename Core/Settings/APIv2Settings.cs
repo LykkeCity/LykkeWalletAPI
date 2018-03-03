@@ -38,6 +38,8 @@ namespace Core.Settings
         public DeploymentSettings DeploymentSettings { get; set; }
         
         public CacheSettings CacheSettings { get; set; }
+
+        public bool EnableFees { get; set; }
     }
 
     public class DbSettings
