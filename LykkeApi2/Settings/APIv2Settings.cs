@@ -43,6 +43,8 @@ namespace LykkeApi2.Settings
         public CacheSettings CacheSettings { get; set; }
 
         public RabbitMqSettings RabbitMq { get; set; }
+
+        public bool EnableFees { get; set; }
     }
 
     public class RabbitMqSettings
