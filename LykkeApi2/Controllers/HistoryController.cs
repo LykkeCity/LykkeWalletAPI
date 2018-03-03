@@ -3,16 +3,16 @@ using System.Linq;
 using System.Net;
 using Lykke.Service.OperationsHistory.Client;
 using LykkeApi2.Infrastructure;
-using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Authorization;
-using LykkeApi2.Models.History;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Lykke.Service.ClientAccount.Client;
-using LykkeApi2.Services;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Lykke.Service.OperationsHistory.AutorestClient.Models;
+using LykkeApi2.Models.History;
+using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 
 namespace LykkeApi2.Controllers
 {
@@ -24,24 +24,21 @@ namespace LykkeApi2.Controllers
         private readonly IOperationsHistoryClient _operationsHistoryClient;
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountService;
-        private readonly DomainModelConverter _converter;
 
         public HistoryController(
             IOperationsHistoryClient operationsHistoryClient, 
             IRequestContext requestContext, 
-            IClientAccountClient clientAccountService, 
-            DomainModelConverter converter)
+            IClientAccountClient clientAccountService)
         {
             _operationsHistoryClient = operationsHistoryClient ?? throw new ArgumentNullException(nameof(operationsHistoryClient));
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
-            _converter = converter ?? throw new ArgumentNullException(nameof(converter));
         }
 
         /// <summary>
         /// Get history by client identifier
         /// </summary>
-        /// <param name="operationType">The type of the operation, possible values: CashInOut, CashOutAttempt, ClientTrade, TransferEvent, LimitTradeEvent</param>
+        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
         /// <param name="assetId">Asset identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
@@ -49,9 +46,9 @@ namespace LykkeApi2.Controllers
         [HttpGet("client")]
         [SwaggerOperation("GetByClientId")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
-            [FromQuery] string operationType,
+            [FromQuery] HistoryOperationType? operationType,
             [FromQuery] string assetId,
             [FromQuery] int take,
             [FromQuery] int skip)
@@ -65,16 +62,14 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
             }
 
-            var convertTasks = response.Records.Select(x => _converter.ToApiModel(x));
-
-            return Ok((await Task.WhenAll(convertTasks)).Where(x => x != null));
+            return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
         }
 
         /// <summary>
         /// Getting history by wallet identifier
         /// </summary>
         /// <param name="walletId">Wallet identifier</param>
-        /// <param name="operationType">The type of the operation, possible values: CashInOut, CashOutAttempt, ClientTrade, TransferEvent, LimitTradeEvent</param>
+        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
         /// <param name="assetId">Asset identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
@@ -83,10 +78,10 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetByWalletId")]
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IEnumerable<ApiHistoryOperation>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
-            [FromQuery] string operationType,
+            [FromQuery] HistoryOperationType? operationType,
             [FromQuery] string assetId,
             [FromQuery] int take,
             [FromQuery] int skip)
@@ -107,9 +102,7 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
             }
 
-            var convertTasks = response.Records.Select(x => _converter.ToApiModel(x));
-
-            return Ok((await Task.WhenAll(convertTasks)).Where(x => x != null));
+            return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
         }
     }
 }

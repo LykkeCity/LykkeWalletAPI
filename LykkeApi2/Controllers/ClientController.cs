@@ -5,6 +5,7 @@ using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
+using Common;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;
@@ -13,7 +14,11 @@ using LykkeApi2.Models.ClientAccountModels;
 using Microsoft.AspNetCore.Authorization;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.PersonalData.Contract.Models;
+using LykkeApi2.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccount.Client.Models;
 
 namespace LykkeApi2.Controllers
 {
@@ -27,19 +32,22 @@ namespace LykkeApi2.Controllers
         private readonly ClientAccountLogic _clientAccountLogic;
         private readonly IRequestContext _requestContext;
         private readonly IPersonalDataService _personalDataService;
+        private readonly IClientAccountClient _clientAccountService;
 
         public ClientController(
             ILog log,
             ILykkeRegistrationClient lykkeRegistrationClient,
             ClientAccountLogic clientAccountLogic,
             IRequestContext requestContext,
-            IPersonalDataService personalDataService)
+            IPersonalDataService personalDataService,
+            IClientAccountClient clientAccountService)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
             _clientAccountLogic = clientAccountLogic;
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
+            _clientAccountService = clientAccountService;
         }
 
         /// <summary>
@@ -48,14 +56,17 @@ namespace LykkeApi2.Controllers
         [HttpPost("register")]
         [SwaggerOperation("RegisterClient")]
         [ProducesResponseType(typeof(AccountsRegistrationResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Post([FromBody]AccountRegistrationModel model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState.GetErrorMessage());
+
+            if (!model.Email.IsValidEmailAndRowKey())
+                return BadRequest(Phrases.InvalidEmailFormat);
+            
             if (await _clientAccountLogic.IsTraderWithEmailExistsForPartnerAsync(model.Email, model.PartnerId))
-            {
-                ModelState.AddModelError("email", Phrases.ClientWithEmailIsRegistered);
-                return BadRequest(ModelState);
-            }
+                return BadRequest(Phrases.ClientWithEmailIsRegistered);
 
             var registrationModel = new RegistrationModel
             {
@@ -99,9 +110,15 @@ namespace LykkeApi2.Controllers
         [HttpPost("auth")]
         [SwaggerOperation("Auth")]
         [ProducesResponseType(typeof(AuthResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Auth([FromBody]AuthRequestModel model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState.GetErrorMessage());
+
+            if (!model.Email.IsValidEmailAndRowKey())
+                return BadRequest(Phrases.InvalidEmailFormat);
+            
             var authResult = await _lykkeRegistrationClient.AuthorizeAsync(new AuthModel
             {
                 ClientInfo = model.ClientInfo,
@@ -148,6 +165,21 @@ namespace LykkeApi2.Controllers
                 Email = personalData?.Email,
                 FirstName = personalData?.FirstName,
                 LastName = personalData?.LastName
+            });
+        }
+
+        [Authorize]
+        [HttpGet("features")]
+        [SwaggerOperation("Features")]
+        [ProducesResponseType(typeof(FeaturesResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Features()
+        {
+            var features = await _clientAccountService.GetFeaturesAsync(_requestContext.ClientId);
+
+            return Ok(new FeaturesResponseModel
+            {
+                AffiliateEnabled = features.AffiliateEnabled
             });
         }
     }
