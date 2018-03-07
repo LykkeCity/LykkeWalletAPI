@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -19,6 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using FeeType = Lykke.Service.FeeCalculator.AutorestClient.Models.FeeType;
 using OrderAction = Lykke.MatchingEngine.Connector.Abstractions.Models.OrderAction;
+using OrderStatus = Lykke.Service.OperationsRepository.AutorestClient.Models.OrderStatus;
 
 namespace LykkeApi2.Controllers
 {
@@ -237,9 +239,18 @@ namespace LykkeApi2.Controllers
                 
                 if (response == null)
                     throw new Exception("ME unavailable");
+                    
+                if(response.Status == MeStatusCodes.Runtime)
+                    throw new Exception("ME error");
 
                 if (response.Status != MeStatusCodes.Ok)
                 {
+                    await _limitOrdersRepository.FinalizeAsync(
+                        new LimitOrderFinalizeRequest
+                        {
+                            OrderId = id,
+                            OrderStatus = MeStatusCodeToOperationsRepositoryOrderStatus(response.Status)
+                        });
                     return BadRequest(CreateErrorMessage($"ME responded: {response.Status}"));
                 }
             }
@@ -335,6 +346,37 @@ namespace LykkeApi2.Controllers
                     ? (int)FeeSizeType.ABSOLUTE 
                     : (int)FeeSizeType.PERCENTAGE
             };
+        }
+
+        private OrderStatus MeStatusCodeToOperationsRepositoryOrderStatus(MeStatusCodes code)
+        {
+            switch (code)
+            {
+                case MeStatusCodes.Ok:
+                    return OrderStatus.InOrderBook;
+                case MeStatusCodes.LowBalance:
+                    return OrderStatus.NotEnoughFunds;
+                case MeStatusCodes.UnknownAsset:
+                    return OrderStatus.UnknownAsset;
+                case MeStatusCodes.NoLiquidity:
+                    return OrderStatus.NoLiquidity;
+                case MeStatusCodes.NotEnoughFunds:
+                    return OrderStatus.NotEnoughFunds;
+                case MeStatusCodes.Dust:
+                    return OrderStatus.Dust;
+                case MeStatusCodes.ReservedVolumeHigherThanBalance:
+                    return OrderStatus.ReservedVolumeGreaterThanBalance;
+                case MeStatusCodes.NotFound:
+                    return OrderStatus.UnknownAsset;
+                case MeStatusCodes.LeadToNegativeSpread:
+                    return OrderStatus.LeadToNegativeSpread;
+                case MeStatusCodes.TooSmallVolume:
+                    return OrderStatus.TooSmallVolume;
+                case MeStatusCodes.InvalidFee:
+                    return OrderStatus.InvalidFee;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(code), code, null);
+            }
         }
     }
 }
