@@ -16,8 +16,7 @@ namespace LykkeApi2.Settings
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
-        public FeeSettings FeeSettings { set; get; }
-        public SessionsSettings SessionsSettings { get; set; }
+        public FeeSettings FeeSettings { set; get; }        
     }
 
     public class SlackNotificationsSettings
