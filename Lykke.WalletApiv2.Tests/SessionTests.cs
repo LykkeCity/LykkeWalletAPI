@@ -17,13 +17,7 @@ namespace Lykke.WalletApiv2.Tests
         {
             var builder = new ContainerBuilder();
 
-            builder.RegisterRedisClientSession(
-                new SessionsSettings
-                {
-                    RedisCluster = new[] {"redis-master.lykke-sessions.svc.cluster.local:6379"},
-                    SessionIdleTimeout = TimeSpan.FromDays(3),
-                    PhoneKeyTtl = TimeSpan.FromMinutes(5)
-                });
+            builder.RegisterClientSessionClient("redis-master.lykke-sessions.svc.cluster.local", new LogToConsole());
 
             var container = builder.Build();
             var client = container.Resolve<IClientSessionsClient>();

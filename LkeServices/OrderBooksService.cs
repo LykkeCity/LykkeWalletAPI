@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Common;
 using Core.Domain.Orderbook;
 using Core.Services;
-using LkeServices.Settings;
 using Lykke.Service.Assets.Client.Models;
 using Microsoft.Extensions.Caching.Distributed;
 

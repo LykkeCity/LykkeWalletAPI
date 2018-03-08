@@ -55,7 +55,7 @@ namespace LykkeApi2.Modules
                 .As<ILykkeRegistrationClient>()
                 .WithParameter("serviceUrl", _serviceSettings.CurrentValue.RegistrationUrl);
 
-            builder.RegisterRedisClientSession(_apiSettings.Nested(s => s.SessionsSettings).CurrentValue);
+            builder.RegisterClientSessionClient(_apiSettings.Nested(s => s.WalletApiv2.Services.SessionUrl).CurrentValue, _log);
 
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));

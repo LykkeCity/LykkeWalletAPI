@@ -2,7 +2,6 @@
 using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AzureStorage.Tables;
 using Common;
 using Common.Log;
 using Core.Candles;
@@ -19,9 +18,9 @@ using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
+using LykkeApi2.Settings;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
-using LykkeApi2.Settings;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules

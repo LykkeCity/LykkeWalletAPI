@@ -1,4 +1,4 @@
-﻿namespace LkeServices.Settings
+namespace LkeServices
 {
     public class CacheSettings
     {

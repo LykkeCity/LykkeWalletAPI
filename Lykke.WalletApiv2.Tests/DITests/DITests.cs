@@ -5,7 +5,7 @@ using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
-using LkeServices.Settings;
+using LkeServices;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;

@@ -1,5 +1,5 @@
-﻿using System.Net;
-using LkeServices.Settings;
+using System.Net;
+using LkeServices;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
@@ -15,7 +15,6 @@ namespace LykkeApi2.Settings
         public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }        
-        public SessionsSettings SessionsSettings { get; set; }
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
         public FeeSettings FeeSettings { set; get; }
     }
