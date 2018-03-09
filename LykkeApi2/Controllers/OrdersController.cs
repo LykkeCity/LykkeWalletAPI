@@ -242,18 +242,18 @@ namespace LykkeApi2.Controllers
                 
                 if (response == null)
                     throw new Exception("ME unavailable");
-                    
-                if(response.Status == MeStatusCodes.Runtime)
-                    throw new Exception("ME error");
 
                 if (response.Status != MeStatusCodes.Ok)
                 {
+                    var status = MeStatusCodeToOperationsRepositoryOrderStatus(response.Status);
+                    
                     await _limitOrdersRepository.FinalizeAsync(
                         new LimitOrderFinalizeRequest
                         {
                             OrderId = id,
-                            OrderStatus = MeStatusCodeToOperationsRepositoryOrderStatus(response.Status)
+                            OrderStatus = status
                         });
+                    
                     return BadRequest(CreateErrorMessage($"ME responded: {response.Status}"));
                 }
             }
