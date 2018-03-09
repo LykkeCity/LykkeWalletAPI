@@ -20,6 +20,7 @@ using Lykke.Service.Session.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Settings;
 using Lykke.Service.Affiliate.Client;
+using Lykke.Service.ClientDictionaries.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -65,6 +66,8 @@ namespace LykkeApi2.Modules
             _services.RegisterAssetsClient(AssetServiceSettings.Create(
                 new Uri(_serviceSettings.CurrentValue.AssetsServiceUrl),
                 TimeSpan.FromMinutes(1)));
+            
+            builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);
             
             builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog: null, ignoreErrors: true);
             

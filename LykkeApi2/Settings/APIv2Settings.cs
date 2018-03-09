@@ -1,6 +1,7 @@
 using System.Net;
 using LkeServices;
 using Lykke.Service.Affiliate.Client;
+using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
@@ -14,7 +15,8 @@ namespace LykkeApi2.Settings
         public SlackNotificationsSettings SlackNotifications { get; set; }
         public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
-        public MatchingEngineSettings MatchingEngineClient { set; get; }        
+        public MatchingEngineSettings MatchingEngineClient { set; get; }
+        public ClientDictionariesServiceClientSettings ClientDictionariesServiceClient { get; set; }
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
         public FeeSettings FeeSettings { set; get; }
     }
