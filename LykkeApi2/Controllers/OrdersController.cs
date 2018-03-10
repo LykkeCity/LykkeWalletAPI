@@ -174,7 +174,7 @@ namespace LykkeApi2.Controllers
 
         [HttpPost("limit")]
         [SwaggerOperation("PlaceLimitOrder")]
-        //[ServiceFilter(typeof(PhoneSignFilter))]
+        [ServiceFilter(typeof(PhoneSignFilter))]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
