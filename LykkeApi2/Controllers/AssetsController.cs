@@ -39,8 +39,16 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(GetBaseAssetsRespModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
-            var assets = (await _assetsService.AssetGetAllAsync()).Where(x => !x.IsDisabled);
-            return Ok(GetBaseAssetsRespModel.Create(assets.Select(itm => itm.ConvertToApiModel()).ToArray()));
+            var allAssets = await _assetsService.AssetGetAllAsync();
+            
+            return Ok(
+                GetBaseAssetsRespModel.Create(
+                    allAssets
+                        .Where(x => !x.IsDisabled)
+                        .Select(x => x.ConvertToApiModel())
+                        .OrderBy(x => x.DisplayId == null)
+                        .ThenBy(x => x.DisplayId)
+                        .ToArray()));
         }
 
         /// <summary>
