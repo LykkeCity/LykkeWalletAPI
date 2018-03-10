@@ -25,21 +25,21 @@ namespace LykkeApi2.Controllers
         }
         
         [HttpGet("{key}")]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(DataModel), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetKey(string key)
         {
             var response = await _clientDictionariesClient.GetAsync(_requestContext.ClientId, key);
 
-            return response.Error == null ? Ok(response.Data) : Error(response.Error);
+            return response.Error == null ? Ok(new DataModel { Data = response.Data}) : Error(response.Error);
         }
         
         [HttpPost("{key}")]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        public async Task<IActionResult> SetKey(string key, [FromBody] SetKeyRequest request)
+        public async Task<IActionResult> SetKey(string key, [FromBody] DataModel request)
         {
             var response = await _clientDictionariesClient.SetAsync(_requestContext.ClientId, key, request.Data);
 
@@ -47,7 +47,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpDelete("{key}")]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> DeleteKey(string key)
