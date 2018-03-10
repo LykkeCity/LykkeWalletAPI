@@ -1,6 +1,6 @@
 ﻿namespace LykkeApi2.Models.Dictionary
 {
-    public class SetKeyRequest
+    public class DataModel
     {
         public string Data { set; get; }
     }
