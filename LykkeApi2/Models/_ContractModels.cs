@@ -1,4 +1,8 @@
-﻿namespace LykkeApi2.Models
+﻿using System.Collections.Generic;
+using Lykke.Service.FeeCalculator.AutorestClient.Models;
+using Newtonsoft.Json;
+
+namespace LykkeApi2.Models
 {
     public class AssetModel
     {
@@ -32,5 +36,12 @@
         public string Id { get; set; }
         public string Name { get; set; }
         public int? SortOrder { get; set; }
+    }
+    public class ApiFee
+    {
+        public double BankCardsFeeSizePercentage { get; set; }
+
+        [JsonProperty("CashOut")]
+        public List<CashoutFee> CashOut { get; set; }
     }
 }

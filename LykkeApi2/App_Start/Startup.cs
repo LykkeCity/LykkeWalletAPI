@@ -83,7 +83,8 @@ namespace LykkeApi2
                 builder.RegisterModule(new Api2Module(appSettings, Log));
                 builder.RegisterModule(new ClientsModule(appSettings, Log));
                 builder.RegisterModule(new AspNetCoreModule());
-                
+                builder.RegisterModule(new DefaultValueModule());
+
                 ApplicationContainer = builder.Build();
 
                 return new AutofacServiceProvider(ApplicationContainer);
