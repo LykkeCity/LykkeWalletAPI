@@ -77,7 +77,7 @@ namespace LykkeApi2.Controllers
 
         [HttpPost("limit/{orderId}/cancel")]
         [SwaggerOperation("CancelLimitOrder")]
-        [ServiceFilter(typeof(PhoneSignFilter))]
+        //[ServiceFilter(typeof(PhoneSignFilter))]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> CancelLimitOrder(string orderId)
@@ -97,11 +97,10 @@ namespace LykkeApi2.Controllers
         
         [HttpPost("market")]
         [SwaggerOperation("PlaceMarketOrder")]
-        [ServiceFilter(typeof(PhoneSignFilter))]
+        //[ServiceFilter(typeof(PhoneSignFilter))]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        [ServiceFilter(typeof(PhoneSignFilter))]
         public async Task<IActionResult> PlaceMarketOrder([FromBody] MarketOrderRequest request)
         {
             var clientId = _requestContext.ClientId;
