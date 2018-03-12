@@ -97,7 +97,7 @@ namespace LykkeApi2.Controllers
         
         [HttpPost("market")]
         [SwaggerOperation("PlaceMarketOrder")]
-        //[ServiceFilter(typeof(PhoneSignFilter))]
+        [ServiceFilter(typeof(PhoneSignFilter))]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
