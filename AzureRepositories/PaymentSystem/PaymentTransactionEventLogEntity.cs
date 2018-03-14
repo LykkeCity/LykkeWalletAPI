@@ -2,15 +2,11 @@
 using Core.PaymentSystem;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace LkeServices.PaymentSystem
+namespace AzureRepositories.PaymentSystem
 {
     public class PaymentTransactionEventLogEntity : TableEntity, IPaymentTransactionEventLog
     {
-        internal static string GeneratePartitionKey(string transactionId)
-        {
-            return transactionId;
-        }
-
+        internal static string GeneratePartitionKey(string transactionId) => transactionId;
         public string PaymentTransactionId => PartitionKey;
         public DateTime DateTime { get; set; }
         public string TechData { get; set; }

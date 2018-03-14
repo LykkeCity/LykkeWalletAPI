@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using AzureStorage;
 using Core.PaymentSystem;
 
-namespace LkeServices.PaymentSystem
+namespace AzureRepositories.PaymentSystem
 {
     public class PaymentTransactionEventsLog : IPaymentTransactionEventsLog
     {

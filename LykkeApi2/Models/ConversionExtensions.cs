@@ -1,8 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core.Exchange;
+using Core.GlobalSettings;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.ClientAccount.Client.Models;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
+using LykkeApi2.Models.Settings;
 
 namespace LykkeApi2.Models
 {
@@ -109,5 +113,28 @@ namespace LykkeApi2.Models
             };
         }
 
+        public static AppSettingsModel ConvertToApiModel(this IExchangeSettings exchange, Asset asset,
+            IAppGlobalSettings appGlobalSettings, RefundAddressSettingsModel refundSettings, ApiFee feeSettings)
+        {
+            return new AppSettingsModel
+            {
+                RateRefreshPeriod = 5000,
+                BaseAsset = asset.ConvertToApiModel(),
+                SignOrder = exchange.SignOrder,
+                DepositUrl = appGlobalSettings.DepositUrl,
+                DebugMode = appGlobalSettings.DebugMode,
+                RefundSettings = refundSettings.ConvertToApiModel(),
+                MarketOrderPriceDeviation = appGlobalSettings.MarketOrderPriceDeviation,
+                FeeSettings = feeSettings
+            };
+        }
+
+        public static RefundAddressSettingsModel ConvertToApiModel(this RefundAddressSettingsModel refundSettings)
+        {
+            return new RefundAddressSettingsModel
+            {
+                Address = refundSettings.Address
+            };
+        }
     }
 }

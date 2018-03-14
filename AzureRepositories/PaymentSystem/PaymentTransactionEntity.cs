@@ -3,32 +3,24 @@ using Common;
 using Core.PaymentSystem;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace LkeServices.PaymentSystem
+namespace AzureRepositories.PaymentSystem
 {
     public class PaymentTransactionEntity : TableEntity, IPaymentTransaction
     {
 
-        public static class IndexCommon
+        public static string GeneratePartitionKey()
         {
-            public static string GeneratePartitionKey()
-            {
-                return "BCO";
-            }
-
+            return "BCO";
         }
 
-        public static class IndexByClient
+        public static string GeneratePartitionKey(string clientId)
         {
-            public static string GeneratePartitionKey(string clientId)
-            {
-                return clientId;
-            }
+            return clientId;
+        }
 
-            public static string GenerateRowKey(string orderId)
-            {
-                return orderId;
-            }
-
+        public static string GenerateRowKey(string orderId)
+        {
+            return orderId;
         }
 
         public int Id { get; set; }
@@ -57,6 +49,7 @@ namespace LkeServices.PaymentSystem
         public string Info { get; set; }
         CashInPaymentSystem IPaymentTransaction.PaymentSystem => GetPaymentSystem();
 
+        //TODO to property
         internal void SetPaymentSystem(CashInPaymentSystem data)
         {
             PaymentSystem = data.ToString();
@@ -66,7 +59,7 @@ namespace LkeServices.PaymentSystem
         {
             return PaymentSystem.ParseEnum(CashInPaymentSystem.Unknown);
         }
-
+        //________________
 
         public double? Rate { get; set; }
         public string AggregatorTransactionId { get; set; }
@@ -79,6 +72,7 @@ namespace LkeServices.PaymentSystem
         public double FeeAmount { get; set; }
         public string MeTransactionId { get; set; }
 
+        //TODO SAVE IT
         public static PaymentTransactionEntity Create(IPaymentTransaction src)
         {
             var result = new PaymentTransactionEntity

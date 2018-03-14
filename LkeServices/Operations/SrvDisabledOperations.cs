@@ -2,6 +2,7 @@
 using Common;
 using Core;
 using Core.Constants;
+using Core.GlobalSettings;
 using Lykke.Service.Assets.Client.Models;
 
 namespace LkeServices.Operations
@@ -15,7 +16,7 @@ namespace LkeServices.Operations
         public SrvDisabledOperations(
             CachedDataDictionary<string, AssetPair> assetsPairsDict,
             CachedTradableAssetsDictionary tradableAssetsDict,
-            IAppGlobalSettingsRepositry appGlobalSettingsRepo)
+            IAppGlobalSettingsRepository appGlobalSettingsRepo)
         {
             _assetsPairsDict = assetsPairsDict;
             _tradableAssetsDict = tradableAssetsDict;
@@ -24,9 +25,9 @@ namespace LkeServices.Operations
 
         public async Task<bool> IsOperationForAssetDisabled(string assetId)
         {
-            var settings = await _appGlobalSettingsRepo.GetAsync();
-            bool btcBlockchainOpsDisabled = settings.BitcoinBlockchainOperationsDisabled;
-            bool btcOnlyDisabled = settings.BtcOperationsDisabled;
+            var settings = await _appGlobalSettingsRepo.GetFromDbOrDefault();
+            var btcBlockchainOpsDisabled = settings.BitcoinBlockchainOperationsDisabled;
+            var btcOnlyDisabled = settings.BtcOperationsDisabled;
 
             return btcOnlyDisabled && assetId == LykkeConstants.BitcoinAssetId ||
                    btcBlockchainOpsDisabled && await IsBtcBlockchainAsset(assetId);

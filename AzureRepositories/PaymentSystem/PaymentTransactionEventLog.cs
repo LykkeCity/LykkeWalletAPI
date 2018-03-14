@@ -1,7 +1,7 @@
 ﻿using System;
 using Core.PaymentSystem;
 
-namespace LkeServices.PaymentSystem
+namespace AzureRepositories.PaymentSystem
 {
     public class PaymentTransactionEventLog : IPaymentTransactionEventLog
     {

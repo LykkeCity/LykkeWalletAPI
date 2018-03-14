@@ -6,7 +6,7 @@ using AzureStorage;
 using AzureStorage.Tables.Templates.Index;
 using Core.PaymentSystem;
 
-namespace LkeServices.PaymentSystem
+namespace AzureRepositories.PaymentSystem
 {
     public class PaymentTransactionsRepository : IPaymentTransactionsRepository
     {
@@ -26,13 +26,12 @@ namespace LkeServices.PaymentSystem
         {
 
             var commonEntity = PaymentTransactionEntity.Create(src);
-            commonEntity.PartitionKey = PaymentTransactionEntity.IndexCommon.GeneratePartitionKey();
+            commonEntity.PartitionKey = PaymentTransactionEntity.GeneratePartitionKey();
             await _tableStorage.InsertAndGenerateRowKeyAsDateTimeAsync(commonEntity, src.Created);
 
             var entityByClient = PaymentTransactionEntity.Create(src);
-            entityByClient.PartitionKey = PaymentTransactionEntity.IndexByClient.GeneratePartitionKey(src.ClientId);
-            entityByClient.RowKey = PaymentTransactionEntity.IndexByClient.GenerateRowKey(src.Id);
-
+            entityByClient.PartitionKey = PaymentTransactionEntity.GeneratePartitionKey(src.ClientId);
+            entityByClient.RowKey = PaymentTransactionEntity.GenerateRowKey(src.Id);
 
             var index = AzureMultiIndex.Create(IndexPartitionKey, src.Id, commonEntity, entityByClient);
 
@@ -47,13 +46,13 @@ namespace LkeServices.PaymentSystem
         public async Task<IEnumerable<IPaymentTransaction>> GetAsync(DateTime from, DateTime to, Func<IPaymentTransaction, bool> filter)
         {
             to = to.Date.AddDays(1);
-            var partitionKey = PaymentTransactionEntity.IndexCommon.GeneratePartitionKey();
+            var partitionKey = PaymentTransactionEntity.GeneratePartitionKey();
             return await _tableStorage.WhereAsync(partitionKey, from, to, ToIntervalOption.ExcludeTo, filter);
         }
 
         public async Task<IEnumerable<IPaymentTransaction>> GetByClientIdAsync(string clientId)
         {
-            var partitionKey = PaymentTransactionEntity.IndexByClient.GeneratePartitionKey(clientId);
+            var partitionKey = PaymentTransactionEntity.GeneratePartitionKey(clientId);
             return await _tableStorage.GetDataAsync(partitionKey);
         }
 
@@ -70,8 +69,8 @@ namespace LkeServices.PaymentSystem
             var existingRecord =
                 await
                     _tableStorage.GetDataAsync(
-                        PaymentTransactionEntity.IndexByClient.GeneratePartitionKey(paymentTransaction.ClientId),
-                        PaymentTransactionEntity.IndexByClient.GenerateRowKey(paymentTransaction.Id));
+                        PaymentTransactionEntity.GeneratePartitionKey(paymentTransaction.ClientId),
+                        PaymentTransactionEntity.GenerateRowKey(paymentTransaction.Id));
 
             if (existingRecord != null)
                 return null;
@@ -109,7 +108,7 @@ namespace LkeServices.PaymentSystem
 
         public async Task<IEnumerable<IPaymentTransaction>> ScanAndFindAsync(Func<IPaymentTransaction, bool> callback)
         {
-            var partitionKey = PaymentTransactionEntity.IndexCommon.GeneratePartitionKey();
+            var partitionKey = PaymentTransactionEntity.GeneratePartitionKey();
             return await _tableStorage.GetDataAsync(partitionKey, callback);
         }
 
@@ -139,7 +138,7 @@ namespace LkeServices.PaymentSystem
         public async Task<IPaymentTransaction> GetLastByDate(string clientId)
         {
 
-            var partitionKey = PaymentTransactionEntity.IndexByClient.GeneratePartitionKey(clientId);
+            var partitionKey = PaymentTransactionEntity.GeneratePartitionKey(clientId);
 
             var entities = await _tableStorage.GetDataAsync(partitionKey);
 
