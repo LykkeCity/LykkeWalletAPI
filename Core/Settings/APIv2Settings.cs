@@ -11,7 +11,7 @@ namespace Core.Settings
     {
         public BaseSettings WalletApiv2 { get; set; }
         public SlackNotificationsSettings SlackNotifications { get; set; }
-        public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
+        public PersonalDataServiceClientSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public ClientDictionariesServiceClientSettings ClientDictionariesServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }
