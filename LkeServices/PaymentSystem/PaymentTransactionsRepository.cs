@@ -10,10 +10,10 @@ namespace LkeServices.PaymentSystem
 {
     public class PaymentTransactionsRepository : IPaymentTransactionsRepository
     {
+        private const string IndexPartitionKey = "IDX";
+
         private readonly INoSQLTableStorage<PaymentTransactionEntity> _tableStorage;
         private readonly INoSQLTableStorage<AzureMultiIndex> _tableStorageIndices;
-
-        private const string IndexPartitionKey = "IDX";
 
         public PaymentTransactionsRepository(INoSQLTableStorage<PaymentTransactionEntity> tableStorage,
             INoSQLTableStorage<AzureMultiIndex> tableStorageIndices)
@@ -36,12 +36,10 @@ namespace LkeServices.PaymentSystem
 
             var index = AzureMultiIndex.Create(IndexPartitionKey, src.Id, commonEntity, entityByClient);
 
-
             await Task.WhenAll(
                 _tableStorage.InsertAsync(entityByClient),
                 _tableStorageIndices.InsertAsync(index)
             );
-
         }
 
         public async Task<IEnumerable<IPaymentTransaction>> GetAsync(DateTime from, DateTime to, Func<IPaymentTransaction, bool> filter)
@@ -97,7 +95,6 @@ namespace LkeServices.PaymentSystem
             });
         }
 
-
         public async Task<IPaymentTransaction> SetAggregatorTransactionId(string id, string aggregatorTransactionId)
         {
             return await _tableStorageIndices.MergeAsync(IndexPartitionKey, id, _tableStorage, entity =>
@@ -134,19 +131,14 @@ namespace LkeServices.PaymentSystem
                 return entity;
             });
         }
-
-
+        
         public async Task<IPaymentTransaction> GetLastByDate(string clientId)
         {
 
-            var partitionKey = PaymentTransactionEntity.IndexByClient.GeneratePartitionKey(clientId);
-
+            var partitionKey = PaymentTransactionEntity.GeneratePartitionKey(clientId);
             var entities = await _tableStorage.GetDataAsync(partitionKey);
 
             return entities.OrderByDescending(itm => itm.Created).FirstOrDefault();
         }
-
-
     }
-
 }
