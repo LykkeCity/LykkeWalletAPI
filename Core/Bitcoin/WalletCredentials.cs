@@ -10,19 +10,15 @@
         public string ColoredMultiSig { get; set; }
         public bool PreventTxDetection { get; set; }
         public string EncodedPrivateKey { get; set; }
-
         /// <summary>
         /// Conversion wallet is used for accepting BTC deposit and transfering needed LKK amount
         /// </summary>
         public string BtcConversionWalletPrivateKey { get; set; }
-
         public string BtcConversionWalletAddress { get; set; }
-
         //EthContract in fact. ToDo: rename
         public string EthConversionWalletAddress { get; set; }
         public string EthAddress { get; set; }
         public string EthPublicKey { get; set; }
-
         public string SolarCoinWalletAddress { get; set; }
         public string ChronoBankContract { get; set; }
         public string QuantaContract { get; set; }
