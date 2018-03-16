@@ -51,7 +51,6 @@ namespace LykkeApi2.Controllers
         private readonly CachedAssetsDictionary _cachedAssetsDictionary;
         private readonly IRequestContext _requestContext;
 
-
         public BankCardPaymentUrlController(
             IPaymentSystemFacade paymentSystemFacade,
             IPaymentTransactionsRepository paymentTransactionsRepository,

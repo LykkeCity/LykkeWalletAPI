@@ -25,20 +25,15 @@ namespace Core.Settings
     public class AzureQueueSettings
     {
         public string ConnectionString { get; set; }
-
         public string QueueName { get; set; }
     }
 
     public class BaseSettings
     {
         public DbSettings Db { get; set; }
-
         public ServiceSettings Services { get; set; }
-
         public DeploymentSettings DeploymentSettings { get; set; }
-        
         public CacheSettings CacheSettings { get; set; }
-
         public bool EnableFees { get; set; }
         public PaymentSystemsSettings PaymentSystems { get; set; }
 
@@ -113,7 +108,6 @@ namespace Core.Settings
     {
         public string FinanceDataCacheInstance { get; set; }
         public string RedisConfiguration { get; set; }
-
         public string OrderBooksCacheKeyPattern { get; set; }
     }
 

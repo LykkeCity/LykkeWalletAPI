@@ -11,7 +11,6 @@
         /// Localized Error message
         /// </summary>
         public string Message { get; set; }
-
         public object Details { get; set; }
     }
 }

@@ -17,17 +17,13 @@
         BackupWarning = 9,
         BackupRequired = 10,
         MaintananceMode = 11,
-
         NoData = 12,
         ShouldOpenNewChannel = 13,
         ShouldProvideNewTempPubKey = 14,
         ShouldProcesOffchainRequest = 15,
         NoOffchainLiquidity = 16,
-
         GeneralError = 19,
-
         AddressShouldBeGenerated = 20,
-
         ExpiredAccessToken = 30,
         BadAccessToken = 31,
         NoEncodedMainKey = 32,
@@ -40,9 +36,7 @@
         NotEnoughLiquidity = 62,
         InvalidCashoutAddress = 63,
         MinVolumeViolation = 64,
-
         PendingDisclaimer = 70,
-
         BadRequest = 999,
         NotEnoughGas = 1000
     }

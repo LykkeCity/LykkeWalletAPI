@@ -18,9 +18,7 @@ namespace AzureRepositories.PaymentSystem
         public PaymentStatus Status { get; set; }
         public CashInPaymentSystem PaymentSystem { get; set; }
         public string Info { get; set; }
-
         public string OtherData { get; set; }
-
         public double FeeAmount { get; set; }
         public string MeTransactionId { get; set; }
 
@@ -35,7 +33,6 @@ namespace AzureRepositories.PaymentSystem
             string info = "",
             PaymentStatus status = PaymentStatus.Created)
         {
-
             return new PaymentTransaction
             {
                 Id = id,
@@ -55,7 +52,6 @@ namespace AzureRepositories.PaymentSystem
 
     public static class PaymentTransactionExt
     {
-
         public static object GetInfo(this IPaymentTransaction src, Type expectedType = null, bool throwExeption = false)
         {
 
@@ -67,7 +63,6 @@ namespace AzureRepositories.PaymentSystem
                 return null;
             }
 
-
             var type = PaymentSystemsAndOtherInfo.PsAndOtherInfoLinks[src.PaymentSystem];
 
             if (expectedType != null)
@@ -76,16 +71,13 @@ namespace AzureRepositories.PaymentSystem
                     throw new Exception("Payment system and Other info does not match for transactionId:" + src.Id);
             }
 
-
             return Newtonsoft.Json.JsonConvert.DeserializeObject(src.Info, type);
-
         }
 
         public static T GetInfo<T>(this IPaymentTransaction src)
         {
             return (T)GetInfo(src, typeof(T), true);
         }
-
 
         public static bool AreMoneyOnOurAccount(this IPaymentTransaction src)
         {

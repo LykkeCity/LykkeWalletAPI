@@ -13,7 +13,8 @@ namespace LykkeApi2.Infrastructure
         private readonly ICacheManager _cacheManager;
         private readonly IAppGlobalSettingsRepository _appGlobalSettings;
                          
-        public DisableOnMaintenanceFilter(ICacheManager cacheManager, IAppGlobalSettingsRepository appGlobalSettings)
+        public DisableOnMaintenanceFilter(ICacheManager cacheManager, 
+            IAppGlobalSettingsRepository appGlobalSettings)
         {
             _cacheManager = cacheManager;
             _appGlobalSettings = appGlobalSettings;

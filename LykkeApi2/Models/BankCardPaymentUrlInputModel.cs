@@ -13,27 +13,16 @@ namespace LykkeApi2.Models
         /// Amount in currency defined by CurrencyCode
         /// </summary>
         public double Amount { get; set; }
-
         public string AssetId { get; set; }
-
         public string WalletId { get; set; }
-
         public string FirstName { get; set; }
-
         public string LastName { get; set; }
-
         public string City { get; set; }
-
         public string Zip { get; set; }
-
         public string Address { get; set; }
-
         public string Country { get; set; }
-
         public string Email { get; set; }
-
         public string Phone { get; set; }
-
         public string DepositOption { get; set; }
 
         [JsonIgnore]
@@ -44,10 +33,7 @@ namespace LykkeApi2.Models
                 if (string.IsNullOrWhiteSpace(DepositOption))
                     return Models.DepositOption.BankCard;
 
-                if (Enum.TryParse(DepositOption, out DepositOption tmpOption))
-                    return tmpOption;
-
-                return Models.DepositOption.BankCard;
+                return Enum.TryParse(DepositOption, out DepositOption tmpOption) ? tmpOption : Models.DepositOption.BankCard;
             }
         }
 

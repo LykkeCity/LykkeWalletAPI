@@ -2,8 +2,8 @@
 {
     public class ResponseModel
     {
-        public ErrorModel Error { get; set; }
         private static readonly ResponseModel OkInstance = new ResponseModel();
+        public ErrorModel Error { get; set; }
 
         public static ResponseModel CreateInvalidFieldError(string field, string message)
         {
