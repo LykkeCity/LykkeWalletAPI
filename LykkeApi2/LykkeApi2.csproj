@@ -16,7 +16,7 @@
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.1" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="7.4.0" />
     <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.3.1" />
-    <PackageReference Include="Lykke.Cqrs" Version="2.1.1" />
+    <PackageReference Include="Lykke.Cqrs" Version="4.4.0" />
     <PackageReference Include="Lykke.Messaging.RabbitMq" Version="0.1.15" />
     <PackageReference Include="Lykke.Contracts" Version="1.0.43" />
     <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.6" />
@@ -42,7 +42,7 @@
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.28" />
     <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.12" />
     <PackageReference Include="Lykke.Service.Registration" Version="1.1.1" />
-    <PackageReference Include="Lykke.Service.Session.Client" Version="1.4.0" />
+    <PackageReference Include="Lykke.Service.Session.Client" Version="1.6.1" />
     <PackageReference Include="Lykke.SettingsReader" Version="2.1.0" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="2.0.1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.2.0" />
@@ -51,8 +51,10 @@
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.0" />
     <PackageReference Include="NetJSON" Version="1.2.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.2" />
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="3.3.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="1.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="1.1.0" />
   </ItemGroup>
@@ -80,5 +82,9 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>Phrases.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Domain\Commands\" />
+    <Folder Include="Services" />
   </ItemGroup>
 </Project>
