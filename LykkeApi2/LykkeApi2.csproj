@@ -21,7 +21,6 @@
     <PackageReference Include="Lykke.Contracts" Version="1.0.43" />
     <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.6" />
     <PackageReference Include="Lykke.Service.Assets.Client" Version="3.3.1" />
-    <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="1.2.1" />
     <PackageReference Include="Lykke.MatchingEngineConnector" Version="2.2.0" />
     <PackageReference Include="Lykke.AzureStorage" Version="5.0.1" />
     <PackageReference Include="Lykke.Common" Version="4.5.0" />
@@ -30,6 +29,7 @@
     <PackageReference Include="Lykke.Logs" Version="3.6.0" />
     <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.15" />
     <PackageReference Include="Lykke.Service.FeeCalculator.Client" Version="1.7.0" />
+    <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
     <PackageReference Include="Lykke.Service.Operations.Client" Version="1.1.1" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.0.21" />
