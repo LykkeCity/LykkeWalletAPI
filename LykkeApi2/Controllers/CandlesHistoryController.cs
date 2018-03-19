@@ -7,6 +7,7 @@ using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Core.Candles;
 using Core.Enumerators;
@@ -36,6 +37,8 @@ namespace LykkeApi2.Controllers
         /// <param name="fromMoment">From moment in ISO 8601 (inclusive)</param>
         /// <param name="toMoment">To moment in ISO 8601 (exclusive)</param>
         [HttpGet("{type}/{assetPairId}/{priceType}/{timeInterval}/{fromMoment:datetime}/{toMoment:datetime}")]
+        [ProducesResponseType(typeof(CandleSticksResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get([FromRoute]CandleSticksRequestModel request)
         {
             try
