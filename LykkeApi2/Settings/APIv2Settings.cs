@@ -40,14 +40,7 @@ namespace LykkeApi2.Settings
         public DeploymentSettings DeploymentSettings { get; set; }
 
         public CacheSettings CacheSettings { get; set; }
-
-        public RabbitMqSettings RabbitMq { get; set; }
-    }
-
-    public class RabbitMqSettings
-    {
-        public string ConnectionString { get; set; }
-    }
+    }    
 
     public class DbSettings
     {

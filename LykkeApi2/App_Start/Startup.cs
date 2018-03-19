@@ -80,8 +80,7 @@ namespace LykkeApi2
                 //call this before registering modules (because of IDistributedCache registration)
                 builder.Populate(services);
                 builder.RegisterModule(new Api2Module(appSettings, Log));
-                builder.RegisterModule(new ClientsModule(appSettings, Log));
-                builder.RegisterModule(new CqrsModule(appSettings.Nested(x => x.WalletApiv2), Log));
+                builder.RegisterModule(new ClientsModule(appSettings, Log));                
                 builder.RegisterModule(new AspNetCoreModule());
                 
                 ApplicationContainer = builder.Build();
