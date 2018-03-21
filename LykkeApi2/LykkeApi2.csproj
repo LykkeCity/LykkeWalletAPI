@@ -19,9 +19,9 @@
     <PackageReference Include="Lykke.Cqrs" Version="4.4.0" />
     <PackageReference Include="Lykke.Messaging.RabbitMq" Version="0.1.15" />
     <PackageReference Include="Lykke.Contracts" Version="1.0.43" />
+    <PackageReference Include="Lykke.MatchingEngineConnector" Version="3.0.2" />
     <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.6" />
     <PackageReference Include="Lykke.Service.Assets.Client" Version="3.3.1" />
-    <PackageReference Include="Lykke.MatchingEngineConnector" Version="2.2.0" />
     <PackageReference Include="Lykke.AzureStorage" Version="5.0.1" />
     <PackageReference Include="Lykke.Common" Version="6.0.0" />
     <PackageReference Include="Lykke.Cqrs" Version="2.1.1" />
