@@ -40,6 +40,7 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
         /// <param name="assetId">Asset identifier</param>
+        /// <param name="assetPairId">Asset pair identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
         /// <returns></returns>
@@ -50,12 +51,13 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> GetByClientId(
             [FromQuery] HistoryOperationType? operationType,
             [FromQuery] string assetId,
+            [FromQuery] string assetPairId,
             [FromQuery] int take,
             [FromQuery] int skip)
         {
             var clientId = _requestContext.ClientId;
 
-            var response = await _operationsHistoryClient.GetByClientId(clientId, operationType, assetId, take, skip);
+            var response = await _operationsHistoryClient.GetByClientId(clientId, operationType, assetId, assetPairId, take, skip);
 
             if (response.Error != null)
             {
@@ -71,6 +73,7 @@ namespace LykkeApi2.Controllers
         /// <param name="walletId">Wallet identifier</param>
         /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
         /// <param name="assetId">Asset identifier</param>
+        /// <param name="assetPairId">Asset pair identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
         /// <returns></returns>
@@ -83,6 +86,7 @@ namespace LykkeApi2.Controllers
             string walletId,
             [FromQuery] HistoryOperationType? operationType,
             [FromQuery] string assetId,
+            [FromQuery] string assetPairId,
             [FromQuery] int take,
             [FromQuery] int skip)
         {
@@ -95,7 +99,7 @@ namespace LykkeApi2.Controllers
                 return NotFound();
             }
 
-            var response = await _operationsHistoryClient.GetByWalletId(walletId, operationType, assetId, take, skip);
+            var response = await _operationsHistoryClient.GetByWalletId(walletId, operationType, assetId, assetPairId, take, skip);
 
             if (response.Error != null)
             {
