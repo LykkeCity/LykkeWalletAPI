@@ -181,6 +181,11 @@ namespace LykkeApi2.Controllers
         {
             var clientId = _requestContext.ClientId;
 
+            if (order.Price <= 0)
+            {
+                return BadRequest();
+            }
+
             var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(order.AssetPairId);
 
             if (pair == null)
