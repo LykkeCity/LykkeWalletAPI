@@ -24,11 +24,11 @@ namespace LykkeApi2.Controllers
         /// Checks service is alive
         /// </summary>
         /// <returns></returns>
-        [HttpPost]
+        [HttpGet]
         [SwaggerOperation("IsAlive")]
         [ProducesResponseType(typeof(IsAliveResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
-        public IActionResult Post()
+        public IActionResult Get()
         {
             var healthViolationMessage = _healthService.GetHealthViolationMessage();
             if (healthViolationMessage != null)

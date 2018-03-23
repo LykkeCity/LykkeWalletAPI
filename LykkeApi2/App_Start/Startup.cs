@@ -75,8 +75,6 @@ namespace LykkeApi2
                     })
                     .AddScheme<LykkeAuthOptions, LykkeAuthHandler>("Bearer", options => { });
 
-                //services.AddScoped<DisableOnMaintenanceFilter>();
-
                 var builder = new ContainerBuilder();
                 var appSettings = Configuration.LoadSettings<APIv2Settings>();
                 Log = CreateLogWithSlack(services, appSettings);
