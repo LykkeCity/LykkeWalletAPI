@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using Lykke.Service.Affiliate.Client;
+using Lykke.Service.AssetDisclaimers.Client;
+using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
@@ -15,6 +17,8 @@ namespace Core.Settings
         public MatchingEngineSettings MatchingEngineClient { set; get; }
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
         public FeeSettings FeeSettings { set; get; }
+        public AssetDisclaimersServiceClientSettings AssetDisclaimersServiceClient { get; set; }
+
     }
 
     public class SlackNotificationsSettings
@@ -37,17 +41,21 @@ namespace Core.Settings
         public bool EnableFees { get; set; }
         public PaymentSystemsSettings PaymentSystems { get; set; }
 
+
     }
 
     public class DbSettings
     {
-        public string LogsConnString { get; set; }               
+        public string LogsConnString { get; set; }
+        public string ClientPersonalInfoConnString { get; set; }
+
     }
 
     public class ServiceSettings
     {
         public string AssetsServiceUrl { get; set; }
         public string ClientAccountServiceUrl { get; set; }
+        public string LimitationsServiceUrl { get; set; }
         public string RegistrationUrl { get; set; }
         public string RateCalculatorServiceApiUrl { get; set; }
         public string BalancesServiceUrl { get; set; }        
@@ -59,6 +67,9 @@ namespace Core.Settings
         public string OperationsUrl { get; set; }
         public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
         public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
+        public KycServiceClientSettings KycServiceClient { get; set; }
+
+
     }
     
     public class MatchingEngineSettings
@@ -118,4 +129,6 @@ namespace Core.Settings
             return string.Format(settings.OrderBooksCacheKeyPattern, assetPairId, isBuy);
         }
     }
+
+    
 }

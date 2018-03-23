@@ -125,13 +125,20 @@ namespace LkeServices.PaymentSystem
 
         private PaymentSystemSelectionResult Select(string assetId, string isoCountryCode, string clientPaymentSystem, OwnerType owner)
         {
-            if (owner == OwnerType.Mt)
+            switch (owner)
             {
-                return new PaymentSystemSelectionResult
-                {
-                    PaymentSystem = CashInPaymentSystem.Fxpaygate,
-                    ServiceUrl = SelectFxPaygateService(OwnerType.Mt)
-                };
+                case OwnerType.Mt_LYKKEVU:
+                    return new PaymentSystemSelectionResult
+                    {
+                        PaymentSystem = CashInPaymentSystem.Fxpaygate,
+                        ServiceUrl = SelectFxPaygateService(OwnerType.Mt_LYKKEVU)
+                    };
+                case OwnerType.Mt_LYKKECY:
+                    return new PaymentSystemSelectionResult
+                    {
+                        PaymentSystem = CashInPaymentSystem.Fxpaygate,
+                        ServiceUrl = SelectFxPaygateService(OwnerType.Mt_LYKKECY)
+                    };
             }
 
             var paymentSystem = CashInPaymentSystem.CreditVoucher;

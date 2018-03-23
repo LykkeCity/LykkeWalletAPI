@@ -6,14 +6,16 @@ namespace AzureRepositories.Exchange
 {
     public class ExchangeSettingsRepository : IExchangeSettingsRepository
     {
+        public string GeneratePartitionKey() => "ExchngSettings";
+        public string GenerateRowKey(string clientId) => clientId;
+
         private readonly IExchangeSettings _defaultExchangeSettings;
         private readonly INoSQLTableStorage<ExchangeSettingsEntity> _tableStorage;
-        private readonly ExchangeSettingsEntity _exchangeSettingsEntity;
 
-        public ExchangeSettingsRepository(INoSQLTableStorage<ExchangeSettingsEntity> tableStorage, ExchangeSettingsEntity exchangeSettingsEntity, IExchangeSettings defaultExchangeSettings)
+        
+        public ExchangeSettingsRepository(INoSQLTableStorage<ExchangeSettingsEntity> tableStorage, IExchangeSettings defaultExchangeSettings)
         {
             _tableStorage = tableStorage;
-            _exchangeSettingsEntity = exchangeSettingsEntity;
             _defaultExchangeSettings = defaultExchangeSettings;
         }
 
@@ -24,8 +26,8 @@ namespace AzureRepositories.Exchange
 
         public async Task<IExchangeSettings> GetAsync(string clientId)
         {
-            var partitionKey = _exchangeSettingsEntity.GeneratePartitionKey();
-            var rowKey = _exchangeSettingsEntity.GenerateRowKey(clientId);
+            var partitionKey = GeneratePartitionKey();
+            var rowKey = GenerateRowKey(clientId);
             return await _tableStorage.GetDataAsync(partitionKey, rowKey);
         }
     }

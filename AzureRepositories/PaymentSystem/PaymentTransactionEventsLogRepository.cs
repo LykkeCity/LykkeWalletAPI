@@ -5,11 +5,11 @@ using Core.PaymentSystem;
 
 namespace AzureRepositories.PaymentSystem
 {
-    public class PaymentTransactionEventsLog : IPaymentTransactionEventsLog
+    public class PaymentTransactionEventsLogRepository : IPaymentTransactionEventsLogRepository
     {
         private readonly INoSQLTableStorage<PaymentTransactionEventLogEntity> _tableStorage;
 
-        public PaymentTransactionEventsLog(INoSQLTableStorage<PaymentTransactionEventLogEntity> tableStorage)
+        public PaymentTransactionEventsLogRepository(INoSQLTableStorage<PaymentTransactionEventLogEntity> tableStorage)
         {
             _tableStorage = tableStorage;
         }

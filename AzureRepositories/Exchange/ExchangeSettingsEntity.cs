@@ -14,14 +14,6 @@ namespace AzureRepositories.Exchange
         public string BaseAssetOther { get; }
         public bool SignOrder { get; }
 
-        public string GeneratePartitionKey()
-        {
-            return "ExchngSettings";
-        }
-
-        public string GenerateRowKey(string clientId)
-        {
-            return clientId;
-        }
+    
     }
 }
