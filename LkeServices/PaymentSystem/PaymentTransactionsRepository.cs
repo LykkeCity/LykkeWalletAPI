@@ -130,7 +130,6 @@ namespace LkeServices.PaymentSystem
         
         public async Task<IPaymentTransaction> GetLastByDate(string clientId)
         {
-
             var partitionKey = PaymentTransactionEntity.GeneratePartitionKey(clientId);
             var entities = await _tableStorage.GetDataAsync(partitionKey);
 

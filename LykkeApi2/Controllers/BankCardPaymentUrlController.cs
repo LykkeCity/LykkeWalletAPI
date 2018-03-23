@@ -167,7 +167,6 @@ namespace LykkeApi2.Controllers
                     ReloadRegex = neverMatchUrlRegex,
                     UrlsToFormatRegex = neverMatchUrlRegex,
                 });
-
             }
             catch (Exception e)
             {
