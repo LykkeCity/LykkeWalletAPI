@@ -6,12 +6,14 @@ namespace AzureRepositories.PaymentSystem
 {
     public class PaymentTransactionEventLogEntity : TableEntity, IPaymentTransactionEventLog
     {
-        internal static string GeneratePartitionKey(string transactionId) => transactionId;
-        public string PaymentTransactionId => PartitionKey;
+      
         public DateTime DateTime { get; set; }
         public string TechData { get; set; }
         public string Message { get; set; }
         public string Who { get; set; }
+
+        public static string GeneratePartitionKey(string transactionId) => transactionId;
+        public string PaymentTransactionId => PartitionKey;
 
         public static PaymentTransactionEventLogEntity Create(IPaymentTransactionEventLog src)
         {
