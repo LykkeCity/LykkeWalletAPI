@@ -28,14 +28,6 @@ namespace LkeServices.GlobalSettings
         public DateTime? IcoStartDt { get; set; }
         public bool ShowIcoBanner { get; set; }
 
-        public string GeneratePartitionKey()
-        {
-            return "Setup";
-        }
-
-        public string GenerateRowKey()
-        {
-            return "AppSettings";
-        }
+     
     }
 }

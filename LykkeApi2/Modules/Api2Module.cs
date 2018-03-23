@@ -2,19 +2,31 @@
 using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using AzureRepositories.Exchange;
+using AzureRepositories.GlobalSettings;
+using AzureRepositories.PaymentSystem;
+using AzureStorage;
 using AzureStorage.Tables;
+using AzureStorage.Tables.Templates.Index;
 using Common;
+using Common.Cache;
 using Common.Log;
+using Core;
 using Core.Candles;
 using Core.Enumerators;
+using Core.Exchange;
+using Core.GlobalSettings;
 using Core.Identity;
+using Core.PaymentSystem;
 using Core.Services;
 using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Identity;
+using LkeServices.PaymentSystem;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
+using Lykke.Service.Limitations.Client;
 using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
@@ -59,7 +71,7 @@ namespace LykkeApi2.Modules
             builder.RegisterRateCalculatorClient(_settings.CurrentValue.Services.RateCalculatorServiceApiUrl, _log);
 
             builder.RegisterBalancesClient(_settings.CurrentValue.Services.BalancesServiceUrl, _log);
-            
+
             builder.RegisterInstance(new DeploymentSettings());
 
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
@@ -68,7 +80,7 @@ namespace LykkeApi2.Modules
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
 
             builder.RegisterType<ClientAccountLogic>().AsSelf().SingleInstance();
-            
+
             _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
             {
                 var provider = new CandlesHistoryServiceProvider();
@@ -78,16 +90,24 @@ namespace LykkeApi2.Modules
 
                 return provider;
             });
-            
+
             builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
 
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
-            
+
+            builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
+
+            builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
+            builder.RegisterType<PaymentSystemFacade>().As<IPaymentSystemFacade>();
+            builder.RegisterType<LimitationsServiceClient>().As<ILimitationsServiceClient>();
+            builder.RegisterType<DisableOnMaintenanceFilter>();
+            builder.RegisterType<CachedAssetsDictionary>();
+
             RegisterDictionaryEntities(builder);
-            
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
-            
             BindServices(builder, _settings, _log);
+            BindRepositories(builder, _settings, _log);
+            BindMicroservices(builder, _settings);
             builder.Populate(_services);
         }
 
@@ -103,6 +123,18 @@ namespace LykkeApi2.Modules
                     60);
             }).SingleInstance();
 
+
+            builder.Register(x =>
+            {
+                var assetsService = x.Resolve<IComponentContext>().Resolve<IAssetsService>();
+
+                return new CachedAssetsDictionary
+                (
+                    async () => (await assetsService.AssetGetAllAsync(includeNonTradable: true)).ToDictionary(itm => itm.Id)
+                );
+
+            }).SingleInstance();
+
             builder.Register(c =>
             {
                 var ctx = c.Resolve<IComponentContext>();
@@ -111,6 +143,19 @@ namespace LykkeApi2.Modules
                         (await ctx.Resolve<IAssetsService>().AssetPairGetAllAsync())
                         .ToDictionary(itm => itm.Id),
                     60);
+            }).SingleInstance();
+
+            builder.Register(x =>
+            {
+                var ctx = x.Resolve<IComponentContext>();
+
+                return new CachedTradableAssetsDictionary
+                (
+                    async () =>
+                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync())
+                        .ToDictionary(itm => itm.Id)
+                );
+
             }).SingleInstance();
         }
 
@@ -128,6 +173,60 @@ namespace LykkeApi2.Modules
                 .As<IOrderBooksService>()
                 .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
                 .SingleInstance();
-        }       
+
+
+        }
+
+        private static void BindRepositories(ContainerBuilder builder, IReloadingManager<BaseSettings> settings,
+            ILog log)
+        {
+            builder.Register(y => AzureTableStorage<ExchangeSettingsEntity>.Create(
+                    settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "ExchangeSettings", log))
+                .As(typeof(INoSQLTableStorage<ExchangeSettingsEntity>));
+
+            builder.Register(y =>
+                    AzureTableStorage<AppGlobalSettingsEntity>.Create(
+                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "Setup", log))
+                .As(typeof(INoSQLTableStorage<AppGlobalSettingsEntity>));
+
+            builder.Register(y =>
+                    AzureTableStorage<PaymentTransactionEntity>.Create(
+                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "PaymentTransactions", log))
+                .As(typeof(INoSQLTableStorage<PaymentTransactionEntity>));
+
+            builder.Register(y =>
+                    AzureTableStorage<AzureMultiIndex>.Create(
+                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "PaymentTransactions", log))
+                .As(typeof(INoSQLTableStorage<AzureMultiIndex>));
+
+            builder.Register(y =>
+                    AzureTableStorage<IdentityEntity>.Create(
+                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "Setup", log))
+                .As(typeof(INoSQLTableStorage<IdentityEntity>));
+
+            builder.Register(y =>
+                    AzureTableStorage<IdentityEntity>.Create(
+                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "Setup", log))
+                .As(typeof(INoSQLTableStorage<IdentityEntity>));
+
+            builder.Register(y =>
+                    AzureTableStorage<PaymentTransactionEventLogEntity>.Create(
+                        settings.ConnectionString(x => x.Db.LogsConnString), "PaymentsLog", log))
+                .As(typeof(INoSQLTableStorage<PaymentTransactionEventLogEntity>));
+
+            builder.RegisterInstance(settings.CurrentValue.PaymentSystems);
+
+            builder.RegisterType<AppGlobalSettingsRepository>().As<IAppGlobalSettingsRepository>();
+            builder.RegisterType<ExchangeSettingsRepository>().As<IExchangeSettingsRepository>();
+            builder.RegisterType<PaymentTransactionsRepository>().As<IPaymentTransactionsRepository>();
+            builder.RegisterType<IdentityRepository>().As<IIdentityRepository>();
+            builder.RegisterType<PaymentTransactionEventsLogRepository>().As<IPaymentTransactionEventsLogRepository>();
+        }
+
+        private static void BindMicroservices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings)
+        {
+            builder.RegisterLimitationsServiceClient(settings.CurrentValue.Services.LimitationsServiceUrl);
+
+        }
     }
 }

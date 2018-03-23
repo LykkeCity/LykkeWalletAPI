@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using AzureRepositories.PaymentSystem;
 using Common;
+using Core;
 using Core.PaymentSystem;
+using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.PersonalData.Contract.Models;
+using LykkeApi2.Strings;
 using Newtonsoft.Json;
 
 namespace LykkeApi2.Models
@@ -13,6 +18,7 @@ namespace LykkeApi2.Models
         /// Amount in currency defined by CurrencyCode
         /// </summary>
         public double Amount { get; set; }
+
         public string AssetId { get; set; }
         public string WalletId { get; set; }
         public string FirstName { get; set; }
@@ -33,7 +39,9 @@ namespace LykkeApi2.Models
                 if (string.IsNullOrWhiteSpace(DepositOption))
                     return Models.DepositOption.BankCard;
 
-                return Enum.TryParse(DepositOption, out DepositOption tmpOption) ? tmpOption : Models.DepositOption.BankCard;
+                return Enum.TryParse(DepositOption, out DepositOption tmpOption)
+                    ? tmpOption
+                    : Models.DepositOption.BankCard;
             }
         }
 
@@ -75,7 +83,7 @@ namespace LykkeApi2.Models
             };
         }
 
-        public  string GetCountryIso3Code()
+        public string GetCountryIso3Code()
         {
             if (string.IsNullOrWhiteSpace(Country))
                 return null;
@@ -102,5 +110,6 @@ namespace LykkeApi2.Models
 
             throw new Exception($"Country code {Country} not found in CountryManager");
         }
+
     }
 }
