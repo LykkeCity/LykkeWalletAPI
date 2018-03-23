@@ -2,7 +2,7 @@
 
 namespace Core.Identity
 {
-    public interface IIdentityGenerator
+    public interface IIdentityRepository
     {
         Task<int> GenerateNewIdAsync();
     }
