@@ -8,9 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Common;
 using Core.Candles;
 using Core.Enumerators;
 using LkeServices.Candles;
+using Lykke.Service.Assets.Client;
+using Lykke.Service.Assets.Client.Models;
 
 namespace LykkeApi2.Controllers
 {
@@ -19,11 +22,19 @@ namespace LykkeApi2.Controllers
     public class CandlesHistoryController : Controller
     {
         private readonly ICandlesHistoryServiceProvider _candlesServiceProvider;
+        private readonly CachedDataDictionary<string, AssetPair> _assetPairs;
+        private readonly IAssetsService _assetsService;
         private readonly ILog _log;
 
-        public CandlesHistoryController(ICandlesHistoryServiceProvider candlesServiceProvider, ILog log)
+        public CandlesHistoryController(
+            ICandlesHistoryServiceProvider candlesServiceProvider,
+            IAssetsService assetsService,
+            CachedDataDictionary<string, AssetPair> assetPairs,
+            ILog log)
         {
             _candlesServiceProvider = candlesServiceProvider;
+            _assetsService = assetsService;
+            _assetPairs = assetPairs;
             _log = log;
         }
 
@@ -41,10 +52,24 @@ namespace LykkeApi2.Controllers
             try
             {
                 var candleHistoryService = _candlesServiceProvider.Get(request.Type);
-                
-                var candles = await candleHistoryService.GetCandlesHistoryAsync(request.AssetPairId, (CandlePriceType)Enum.Parse(typeof(CandlePriceType), request.PriceType.ToString()), (CandleTimeInterval)Enum.Parse(typeof(CandleTimeInterval), request.TimeInterval.ToString()), request.FromMoment, request.ToMoment);
 
-                return Ok(candles.ToResponseModel());
+                var candles = await candleHistoryService.GetCandlesHistoryAsync(
+                    request.AssetPairId,
+                    (CandlePriceType) Enum.Parse(typeof(CandlePriceType), request.PriceType.ToString()),
+                    (CandleTimeInterval) Enum.Parse(typeof(CandleTimeInterval), request.TimeInterval.ToString()),
+                    request.FromMoment,
+                    request.ToMoment);
+
+                var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == request.AssetPairId);
+
+                var baseAsset = await _assetsService.AssetGetAsync(assetPair.BaseAssetId);
+
+                var quotingAsset = await _assetsService.AssetGetAsync(assetPair.QuotingAssetId);
+
+                return Ok(
+                    candles.ToResponseModel(
+                        baseAsset.DisplayAccuracy ?? baseAsset.Accuracy,
+                        quotingAsset.DisplayAccuracy ?? quotingAsset.Accuracy));
             }
             catch (ErrorResponseException ex)
             {
