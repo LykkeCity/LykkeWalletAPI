@@ -24,18 +24,18 @@ namespace LykkeApi2.Controllers
         /// Checks service is alive
         /// </summary>
         /// <returns></returns>
-        [HttpPost]
+        [HttpGet]
         [SwaggerOperation("IsAlive")]
         [ProducesResponseType(typeof(IsAliveResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
-        public IActionResult Post()
+        public IActionResult Get()
         {
-            var healthViloationMessage = _healthService.GetHealthViolationMessage();
-            if (healthViloationMessage != null)
+            var healthViolationMessage = _healthService.GetHealthViolationMessage();
+            if (healthViolationMessage != null)
             {
                 return StatusCode(
                     (int)HttpStatusCode.InternalServerError,
-                    ErrorResponse.Create($"Service is unhealthy: {healthViloationMessage}"));
+                    ErrorResponse.Create($"Service is unhealthy: {healthViolationMessage}"));
             }
 
             // NOTE: Feel free to extend IsAliveResponse, to display job-specific indicators

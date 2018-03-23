@@ -70,6 +70,5 @@ namespace AzureRepositories.PaymentSystem
             result.SetPaymentSystem(src.PaymentSystem);
             return result;
         }
-
     }
 }

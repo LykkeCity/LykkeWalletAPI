@@ -13,7 +13,5 @@ namespace AzureRepositories.Exchange
         public string BaseAssetIos { get; }
         public string BaseAssetOther { get; }
         public bool SignOrder { get; }
-
-    
     }
 }

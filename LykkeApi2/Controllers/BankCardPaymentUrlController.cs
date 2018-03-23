@@ -172,7 +172,6 @@ namespace LykkeApi2.Controllers
             }
             catch (Exception e)
             {
-
                 await _paymentTransactionEventsLog.WriteAsync(
                     PaymentTransactionEventLog.Create(transactionId, e.Message, "Payment Url creation fail", clientId));
 
