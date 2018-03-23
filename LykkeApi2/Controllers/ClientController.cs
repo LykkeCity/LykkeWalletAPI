@@ -158,11 +158,18 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError);
             }
 
+            var country = (await _personalDataService.GetAsync(_requestContext.ClientId)).Country;
+
+            if (string.IsNullOrEmpty(country))
+                country = "CHE";
+
             return Ok(new UserInfoResponseModel
             {
                 Email = personalData?.Email,
                 FirstName = personalData?.FirstName,
-                LastName = personalData?.LastName
+                LastName = personalData?.LastName,
+                Country = country,
+                Phone = personalData?.ContactPhone
             });
         }
 
