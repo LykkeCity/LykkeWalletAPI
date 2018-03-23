@@ -3,7 +3,7 @@ using LykkeApi2.Models.ClientAccountModels;
 
 namespace LykkeApi2.Models.ValidationModels
 {
-    public class BankCardPaymentUrlInputValidationModel : AbstractValidator<BankCardPaymentUrlInputModel>
+    public class BankCardPaymentUrlInputValidationModel : AbstractValidator<BankCardPaymentUrlRequestModel>
     {
         public BankCardPaymentUrlInputValidationModel()
         {

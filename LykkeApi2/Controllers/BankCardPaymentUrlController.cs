@@ -65,7 +65,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("Post")]
         [ProducesResponseType(typeof(IsAliveResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Post([FromBody]BankCardPaymentUrlInputModel input)
+        public async Task<IActionResult> Post([FromBody]BankCardPaymentUrlRequestModel input)
         {
             string clientId = this.GetClientId();
 
