@@ -54,7 +54,6 @@ namespace AzureRepositories.PaymentSystem
     {
         public static object GetInfo(this IPaymentTransaction src, Type expectedType = null, bool throwExeption = false)
         {
-
             if (!PaymentSystemsAndOtherInfo.PsAndOtherInfoLinks.ContainsKey(src.PaymentSystem))
             {
                 if (throwExeption)

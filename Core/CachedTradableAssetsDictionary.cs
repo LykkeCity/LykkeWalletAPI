@@ -11,7 +11,6 @@ namespace Core
         public CachedTradableAssetsDictionary(Func<Task<Dictionary<string, Asset>>> getData, int validDataInSeconds = 300)
             : base(getData, validDataInSeconds)
         {
-
         }
     }
 }

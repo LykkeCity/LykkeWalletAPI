@@ -24,7 +24,6 @@ namespace AzureRepositories.PaymentSystem
 
         public async Task CreateAsync(IPaymentTransaction src)
         {
-
             var commonEntity = PaymentTransactionEntity.Create(src);
             commonEntity.PartitionKey = PaymentTransactionEntity.GeneratePartitionKey();
             await _tableStorage.InsertAndGenerateRowKeyAsDateTimeAsync(commonEntity, src.Created);
@@ -53,7 +52,6 @@ namespace AzureRepositories.PaymentSystem
             var partitionKey = PaymentTransactionEntity.GeneratePartitionKey(clientId);
             return await _tableStorage.GetDataAsync(partitionKey);
         }
-
 
         public async Task<IPaymentTransaction> GetByTransactionIdAsync(string id)
         {
@@ -111,13 +109,11 @@ namespace AzureRepositories.PaymentSystem
 
         public async Task<IPaymentTransaction> SetStatus(string id, PaymentStatus status)
         {
-
             return await _tableStorageIndices.MergeAsync(IndexPartitionKey, id, _tableStorage, entity =>
             {
                 entity.SetPaymentStatus(status);
                 return entity;
             });
-
         }
 
         public async Task<IPaymentTransaction> SetAsOkAsync(string id, double depositedAmount, double? rate)

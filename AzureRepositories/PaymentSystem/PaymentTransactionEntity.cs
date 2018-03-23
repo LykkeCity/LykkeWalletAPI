@@ -7,12 +7,8 @@ namespace AzureRepositories.PaymentSystem
 {
     public class PaymentTransactionEntity : TableEntity, IPaymentTransaction
     {
-        public static string GeneratePartitionKey() => "BCO";
-        public static string GeneratePartitionKey(string clientId) => clientId;
-        public static string GenerateRowKey(string orderId) => orderId;
         public int Id { get; set; }
         public string TransactionId { get; set; }
-        string IPaymentTransaction.Id => TransactionId ?? Id.ToString();
         public string ClientId { get; set; }
         public DateTime Created { get; set; }
         public string Info { get; set; }
@@ -26,6 +22,12 @@ namespace AzureRepositories.PaymentSystem
         public double FeeAmount { get; set; }
         public string MeTransactionId { get; set; }
         public string Status { get; set; }
+
+        string IPaymentTransaction.Id => TransactionId ?? Id.ToString();
+
+        public static string GeneratePartitionKey() => "BCO";
+        public static string GeneratePartitionKey(string clientId) => clientId;
+        public static string GenerateRowKey(string orderId) => orderId;
 
         internal void SetPaymentStatus(PaymentStatus data)
         {
