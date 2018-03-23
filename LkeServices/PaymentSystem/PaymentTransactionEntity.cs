@@ -70,6 +70,5 @@ namespace LkeServices.PaymentSystem
             result.SetPaymentSystem(src.PaymentSystem);
             return result;
         }
-
     }
 }

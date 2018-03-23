@@ -11,7 +11,6 @@ namespace LkeServices.Exchange
 
         private readonly IExchangeSettings _defaultExchangeSettings;
         private readonly INoSQLTableStorage<ExchangeSettingsEntity> _tableStorage;
-
         
         public ExchangeSettingsRepository(INoSQLTableStorage<ExchangeSettingsEntity> tableStorage, IExchangeSettings defaultExchangeSettings)
         {
