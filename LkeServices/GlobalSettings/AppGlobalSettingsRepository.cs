@@ -21,6 +21,8 @@ namespace LkeServices.GlobalSettings
             _defaultAppGlobalSettings = defaultAppGlobalSettings;
         }
 
+      
+
         public async Task<IAppGlobalSettings> GetFromDbOrDefault()
         {
             return await GetAsync() ?? _defaultAppGlobalSettings;

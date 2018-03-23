@@ -20,9 +20,9 @@ namespace LkeServices.Identity
             await
                 _tableStorage
                     .InsertOrModifyAsync(
-                        IdentityEntity.GeneratePartitionKey,
+                        IdentityEntity.GeneratePartitionKey,
                         IdentityEntity.GenerateRowKey,
-                        IdentityEntity.Create, indEnt =>
+                        IdentityEntity.Create, indEnt =>
                         {
                             result = ++indEnt.Value;
                             return true;

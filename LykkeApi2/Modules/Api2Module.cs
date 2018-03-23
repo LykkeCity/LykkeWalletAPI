@@ -126,7 +126,6 @@ namespace LykkeApi2.Modules
                     60);
             }).SingleInstance();
 
-
             builder.Register(x =>
             {
                 var assetsService = x.Resolve<IComponentContext>().Resolve<IAssetsService>();

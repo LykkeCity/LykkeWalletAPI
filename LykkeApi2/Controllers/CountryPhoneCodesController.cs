@@ -1,11 +1,9 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Core.Countries;
 using Lykke.Service.PersonalData.Contract;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LykkeApi2.Controllers
