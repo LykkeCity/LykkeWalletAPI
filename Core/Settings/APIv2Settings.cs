@@ -142,6 +142,4 @@ namespace Core.Settings
             return string.Format(settings.OrderBooksCacheKeyPattern, assetPairId, isBuy);
         }
     }
-
-    
 }
