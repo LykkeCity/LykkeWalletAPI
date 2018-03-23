@@ -132,7 +132,6 @@ namespace LykkeApi2.Modules
                 (
                     async () => (await assetsService.AssetGetAllAsync(includeNonTradable: true)).ToDictionary(itm => itm.Id)
                 );
-
             }).SingleInstance();
 
             builder.Register(c =>
@@ -155,7 +154,6 @@ namespace LykkeApi2.Modules
                         (await ctx.Resolve<IAssetsService>().AssetGetAllAsync())
                         .ToDictionary(itm => itm.Id)
                 );
-
             }).SingleInstance();
         }
 
@@ -226,7 +224,6 @@ namespace LykkeApi2.Modules
         private static void BindMicroservices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings)
         {
             builder.RegisterLimitationsServiceClient(settings.CurrentValue.Services.LimitationsServiceUrl);
-
         }
     }
 }
