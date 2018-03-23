@@ -49,18 +49,18 @@ namespace LkeServices
             return result.Where(x => !x.NotLykkeAsset).ToArray();
         }
 
-        public async Task<Asset> GetBaseAssetForClient(string clientId, bool isIosDevice, string partnerId)
+        public async Task<string> GetBaseAssetIdForClient(string clientId, bool isIosDevice, string partnerId)
         {
-            var baseAsset = (await _clientAccountSettingsClient.GetBaseAssetAsync(clientId)).BaseAssetId;
+            var baseAssetId = (await _clientAccountSettingsClient.GetBaseAssetAsync(clientId)).BaseAssetId;
 
-            if (string.IsNullOrEmpty(baseAsset))
+            if (string.IsNullOrEmpty(baseAssetId))
             {
                 var assetsForClient = (await GetAssetsForClient(clientId, isIosDevice, partnerId)).Where(x => x.IsBase);
                 
-                baseAsset = assetsForClient.GetFirstAssetId();
+                baseAssetId = assetsForClient.GetFirstAssetId();
             }
 
-            return await _cachedAssetsDictionary.GetItemAsync(baseAsset);
+            return baseAssetId;
         }
 
         public async Task<AssetPair[]> GetAssetsPairsForClient(string clientId, bool isIosDevice, string partnerId, bool ignoreBase = false)
@@ -69,7 +69,7 @@ namespace LkeServices
             var result = (await _assetPairsDictionary.Values()).Where(x => !x.IsDisabled);
 
             if (!ignoreBase)
-                result = result.WhichHaveAssets((await GetBaseAssetForClient(clientId, isIosDevice, partnerId)).Id);
+                result = result.WhichHaveAssets(await GetBaseAssetIdForClient(clientId, isIosDevice, partnerId));
 
             return result.WhichConsistsOfAssets(assetsForClient.Select(x => x.Id).ToArray()).ToArray();
         }
