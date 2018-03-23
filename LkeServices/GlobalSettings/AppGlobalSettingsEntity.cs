@@ -27,7 +27,5 @@ namespace LkeServices.GlobalSettings
         public DateTime? IcoStartDtForWhitelisted { get; set; }
         public DateTime? IcoStartDt { get; set; }
         public bool ShowIcoBanner { get; set; }
-
-     
     }
 }

@@ -1,24 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using AzureRepositories.PaymentSystem;
 using Common;
-using Core;
 using Core.PaymentSystem;
-using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.PersonalData.Contract.Models;
-using LykkeApi2.Strings;
 using Newtonsoft.Json;
 
 namespace LykkeApi2.Models
 {
-    public class BankCardPaymentUrlInputModel
+    public class BankCardPaymentUrlRequestModel
     {
         /// <summary>
         /// Amount in currency defined by CurrencyCode
         /// </summary>
         public double Amount { get; set; }
-
         public string AssetId { get; set; }
         public string WalletId { get; set; }
         public string FirstName { get; set; }
@@ -45,7 +39,7 @@ namespace LykkeApi2.Models
             }
         }
 
-        public static BankCardPaymentUrlInputModel Create(IPaymentTransaction pt, IPersonalData personalData)
+        public static BankCardPaymentUrlRequestModel Create(IPaymentTransaction pt, IPersonalData personalData)
         {
             if (pt.PaymentSystem != CashInPaymentSystem.CreditVoucher
                 && pt.PaymentSystem != CashInPaymentSystem.Fxpaygate)
@@ -53,7 +47,7 @@ namespace LykkeApi2.Models
 
             var info = pt.GetInfo<OtherPaymentInfo>();
 
-            return new BankCardPaymentUrlInputModel
+            return new BankCardPaymentUrlRequestModel
             {
                 Address = info.Address,
                 Amount = pt.Amount,
@@ -68,9 +62,9 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static BankCardPaymentUrlInputModel Create(IPersonalData personalData)
+        public static BankCardPaymentUrlRequestModel Create(IPersonalData personalData)
         {
-            return new BankCardPaymentUrlInputModel
+            return new BankCardPaymentUrlRequestModel
             {
                 Address = personalData.Address,
                 City = personalData.City,
@@ -110,6 +104,5 @@ namespace LykkeApi2.Models
 
             throw new Exception($"Country code {Country} not found in CountryManager");
         }
-
     }
 }
