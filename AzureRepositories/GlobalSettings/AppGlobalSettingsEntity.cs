@@ -2,7 +2,7 @@
 using Core.GlobalSettings;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace LkeServices.GlobalSettings
+namespace AzureRepositories.GlobalSettings
 {
     public class AppGlobalSettingsEntity : TableEntity, IAppGlobalSettings
     {
@@ -27,15 +27,5 @@ namespace LkeServices.GlobalSettings
         public DateTime? IcoStartDtForWhitelisted { get; set; }
         public DateTime? IcoStartDt { get; set; }
         public bool ShowIcoBanner { get; set; }
-
-        public string GeneratePartitionKey()
-        {
-            return "Setup";
-        }
-
-        public string GenerateRowKey()
-        {
-            return "AppSettings";
-        }
     }
 }

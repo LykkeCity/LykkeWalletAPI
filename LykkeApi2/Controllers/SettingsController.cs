@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LykkeApi2.Controllers
 {
     [Authorize]
-    [Route("api/Setting")]
+    [Route("api/[controller]")]
     [Produces("application/json")]
     [LowerVersion(Devices = "android", LowerVersion = 961)]
     public class SettingController : Controller

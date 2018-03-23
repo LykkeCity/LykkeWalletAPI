@@ -2,7 +2,7 @@
 using Core.Exchange;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace LkeServices.Exchange
+namespace AzureRepositories.Exchange
 {
     public class ExchangeSettingsEntity : TableEntity, IExchangeSettings 
     {
@@ -13,15 +13,5 @@ namespace LkeServices.Exchange
         public string BaseAssetIos { get; }
         public string BaseAssetOther { get; }
         public bool SignOrder { get; }
-
-        public string GeneratePartitionKey()
-        {
-            return "ExchngSettings";
-        }
-
-        public string GenerateRowKey(string clientId)
-        {
-            return clientId;
-        }
     }
 }

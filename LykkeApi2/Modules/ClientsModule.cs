@@ -18,6 +18,9 @@ using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Lykke.Service.Affiliate.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Kyc.Client;
+using Lykke.Service.PersonalData.Settings;
 
 namespace LykkeApi2.Modules
 {
@@ -61,8 +64,14 @@ namespace LykkeApi2.Modules
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
 
+               
+
             builder.RegisterOperationsHistoryClient(_apiSettings.CurrentValue.OperationsHistoryServiceClient, _log);
-            
+
+            builder.RegisterInstance(
+                    new KycStatusServiceClient(_apiSettings.CurrentValue.WalletApiv2.Services.KycServiceClient, _log))
+                .As<IKycStatusService>().SingleInstance();
+
             _services.RegisterAssetsClient(AssetServiceSettings.Create(
                 new Uri(_serviceSettings.CurrentValue.AssetsServiceUrl),
                 TimeSpan.FromMinutes(1)));

@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Autofac;
-using Common.Log;
-using Core.Settings;
-using LkeServices.Exchange;
-using LkeServices.GlobalSettings;
-using Lykke.SettingsReader;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Autofac;
+using AzureRepositories.Exchange;
+using AzureRepositories.GlobalSettings;
+using Core.Exchange;
+using Core.GlobalSettings;
 
 namespace LykkeApi2.Modules
 {
@@ -20,13 +14,14 @@ namespace LykkeApi2.Modules
             {
                 DepositUrl = "http://mock-bankcards.azurewebsites.net/",
                 DebugMode = true
-            });
+            }).As<IAppGlobalSettings>();
+
             builder.Register((c, p) => new ExchangeSettings
             {
                 BaseAssetIos = string.Empty,
                 BaseAssetOther = string.Empty,
                 SignOrder = true
-            });
+            }).As<IExchangeSettings>();
         }
     }
 }

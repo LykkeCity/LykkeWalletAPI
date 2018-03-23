@@ -2,19 +2,21 @@
 using AzureStorage;
 using Core.GlobalSettings;
 
-namespace LkeServices.GlobalSettings
+namespace AzureRepositories.GlobalSettings
 {
     public class AppGlobalSettingsRepository : IAppGlobalSettingsRepository
     {
-        private readonly INoSQLTableStorage<AppGlobalSettingsEntity> _tableStorage;
-        private readonly AppGlobalSettingsEntity _appGlobalSettingsEntity;
-        private readonly AppGlobalSettings _defaultAppGlobalSettings;
+        public string GeneratePartitionKey() => "Setup";
 
-        public AppGlobalSettingsRepository(AppGlobalSettingsEntity appGlobalSettingsEntity, 
-            INoSQLTableStorage<AppGlobalSettingsEntity> tableStorage, 
-            AppGlobalSettings defaultAppGlobalSettings)
+        public string GenerateRowKey() => "AppSettings";
+
+        private readonly INoSQLTableStorage<AppGlobalSettingsEntity> _tableStorage;
+        private readonly IAppGlobalSettings _defaultAppGlobalSettings;
+       
+
+        public AppGlobalSettingsRepository(INoSQLTableStorage<AppGlobalSettingsEntity> tableStorage, 
+            IAppGlobalSettings defaultAppGlobalSettings)
         {
-            _appGlobalSettingsEntity = appGlobalSettingsEntity;
             _tableStorage = tableStorage;
             _defaultAppGlobalSettings = defaultAppGlobalSettings;
         }
@@ -26,8 +28,8 @@ namespace LkeServices.GlobalSettings
 
         private async Task<IAppGlobalSettings> GetAsync()
         {
-            var partitionKey = _appGlobalSettingsEntity.GeneratePartitionKey();
-            var rowKey = _appGlobalSettingsEntity.GenerateRowKey();
+            var partitionKey = GeneratePartitionKey();
+            var rowKey = GenerateRowKey();
             return await _tableStorage.GetDataAsync(partitionKey, rowKey);
         }
     }
