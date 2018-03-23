@@ -113,19 +113,18 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static AppSettingsModel ConvertToApiModel(this IExchangeSettings exchange, Asset asset,
-            IAppGlobalSettings appGlobalSettings, RefundAddressSettingsModel refundSettings, ApiFee feeSettings)
+        public static AppSettingsModel ConvertToAppSettingsModel(this IExchangeSettings exchange, string assetId,
+            IAppGlobalSettings appGlobalSettings, RefundAddressSettingsModel refundSettings)
         {
             return new AppSettingsModel
             {
                 RateRefreshPeriod = 5000,
-                BaseAsset = asset.ConvertToApiModel(),
+                BaseAssetId = assetId,
                 SignOrder = exchange.SignOrder,
                 DepositUrl = appGlobalSettings.DepositUrl,
                 DebugMode = appGlobalSettings.DebugMode,
                 RefundSettings = refundSettings.ConvertToApiModel(),
                 MarketOrderPriceDeviation = appGlobalSettings.MarketOrderPriceDeviation,
-                FeeSettings = feeSettings
             };
         }
 

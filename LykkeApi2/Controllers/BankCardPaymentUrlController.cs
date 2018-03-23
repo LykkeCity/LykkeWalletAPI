@@ -61,7 +61,7 @@ namespace LykkeApi2.Controllers
             _feeCalculatorClient = feeCalculatorClient;
             _requestContext = requestContext;
         }
-        
+
         [HttpPost]
         [SwaggerOperation("Post")]
         [ProducesResponseType(typeof(IsAliveResponse), (int)HttpStatusCode.OK)]
@@ -77,23 +77,22 @@ namespace LykkeApi2.Controllers
 
             var pd = await _personalDataService.GetAsync(clientId);
 
+            //TODO  check is a phone number is equal pd.Phone
+
             if (string.IsNullOrWhiteSpace(pd.PaymentSystem) || !Enum.TryParse(pd.PaymentSystem, out CashInPaymentSystem paymentSystem))
                 paymentSystem = CashInPaymentSystem.Unknown;
 
             if (input.DepositOptionEnum == DepositOption.Other)
                 paymentSystem = CashInPaymentSystem.CreditVoucher; // https://lykkex.atlassian.net/browse/LWDEV-4665
 
-            var checkResult = await _limitationsServiceClient.CheckAsync(
-                clientId,
-                input.AssetId,
-                input.Amount,
-                CurrencyOperationType.CardCashIn);
+            var checkResult = await _limitationsServiceClient.CheckAsync(clientId, input.AssetId, input.Amount, CurrencyOperationType.CardCashIn);
+
             if (!checkResult.IsValid)
-                return StatusCode(
-                    (int)ErrorCodeType.LimitationCheckFailed,
-                    checkResult.FailMessage);
+                return StatusCode( (int)ErrorCodeType.LimitationCheckFailed, checkResult.FailMessage);
 
             var transactionId = (await _identityGenerator.GenerateNewIdAsync()).ToString();
+
+            const string formatOfDateOfBirth = "yyyy-MM-dd";
 
             var info = OtherPaymentInfo.Create(
                 input.FirstName,
@@ -104,7 +103,7 @@ namespace LykkeApi2.Controllers
                 input.Country,
                 input.Email,
                 phoneNumberE164,
-                pd.DateOfBirth?.ToString("yyyy-MM-dd"))
+                pd.DateOfBirth?.ToString(formatOfDateOfBirth))
             .ToJson();
 
             var bankCardsFee = await _feeCalculatorClient.GetBankCardFees();
@@ -115,7 +114,7 @@ namespace LykkeApi2.Controllers
                 var feeAmount = Math.Round(input.Amount * bankCardsFee.Percentage, 15);
                 var feeAmountTruncated = feeAmount.TruncateDecimalPlaces(asset.Accuracy, true);
 
-                var pt = PaymentTransaction.Create(
+                var paymentTransaction = PaymentTransaction.Create(
                     transactionId,
                     paymentSystem,
                     clientId,
@@ -145,13 +144,11 @@ namespace LykkeApi2.Controllers
                         ErrorResponse.Create(Phrases.OperationProhibited));
                 }
 
-                pt.PaymentSystem = urlData.PaymentSystem;
+                paymentTransaction.PaymentSystem = urlData.PaymentSystem;
 
-                await _paymentTransactionsRepository.CreateAsync(pt);
-                await _paymentTransactionEventsLog.WriteAsync(
-                    PaymentTransactionEventLog.Create(transactionId, "", "Registered", clientId));
-                await _paymentTransactionEventsLog.WriteAsync(
-                    PaymentTransactionEventLog.Create(transactionId, urlData.PaymentUrl, "Payment Url has created", clientId));
+                await _paymentTransactionsRepository.CreateAsync(paymentTransaction);
+                await _paymentTransactionEventsLog.WriteAsync(PaymentTransactionEventLog.Create(transactionId, "", "Registered", clientId));
+                await _paymentTransactionEventsLog.WriteAsync(PaymentTransactionEventLog.Create(transactionId, urlData.PaymentUrl, "Payment Url has created", clientId));
 
                 // mode=iframe is for Mobile version 
                 if (!string.IsNullOrWhiteSpace(urlData.PaymentUrl))
@@ -159,14 +156,11 @@ namespace LykkeApi2.Controllers
                         + (urlData.PaymentUrl.Contains("?") ? "&" : "?")
                         + "mode=iframe";
 
-                const string neverMatchUrlRegex = "^$";
-                return Ok(new BankCardPaymentUrlResponseModel()
+                return Ok(new BankCardPaymentUrlResponseModel
                 {
                     Url = urlData.PaymentUrl,
                     OkUrl = urlData.OkUrl,
-                    FailUrl = urlData.FailUrl,
-                    ReloadRegex = neverMatchUrlRegex,
-                    UrlsToFormatRegex = neverMatchUrlRegex,
+                    FailUrl = urlData.FailUrl
                 });
             }
             catch (Exception e)
