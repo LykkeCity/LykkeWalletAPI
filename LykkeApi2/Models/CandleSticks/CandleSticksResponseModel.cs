@@ -23,7 +23,7 @@ namespace LykkeApi2.Models
 
     public static class CandleSticksToResponseConverter
     {
-        public static CandleSticksResponseModel ToResponseModel(this CandlesHistoryResponseModel model)
+        public static CandleSticksResponseModel ToResponseModel(this CandlesHistoryResponseModel model, int baseAssetAccuracy, int quotingAssetAccuracy)
         {
             var resp = new CandleSticksResponseModel();
 
@@ -34,8 +34,8 @@ namespace LykkeApi2.Models
                 Close = x.Close,
                 High = x.High,
                 Low = x.Low,
-                Volume = x.TradingVolume,
-                OppositeVolume = x.TradingOppositeVolume
+                Volume = Math.Round(x.TradingVolume, baseAssetAccuracy),
+                OppositeVolume =  Math.Round(x.TradingOppositeVolume, quotingAssetAccuracy)
             }).ToList();
 
             return resp;
