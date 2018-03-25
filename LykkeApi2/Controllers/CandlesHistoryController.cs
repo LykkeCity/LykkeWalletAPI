@@ -49,7 +49,6 @@ namespace LykkeApi2.Controllers
         /// <param name="toMoment">To moment in ISO 8601 (exclusive)</param>
         [HttpGet("{type}/{assetPairId}/{priceType}/{timeInterval}/{fromMoment:datetime}/{toMoment:datetime}")]
         [ProducesResponseType(typeof(CandleSticksResponseModel), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get([FromRoute]CandleSticksRequestModel request)
         {
@@ -58,7 +57,7 @@ namespace LykkeApi2.Controllers
                 var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == request.AssetPairId);
 
                 if (assetPair == null)
-                    return NotFound();
+                    return NotFound("Asset pair not found");
                 
                 var candleHistoryService = _candlesServiceProvider.Get(request.Type);
 
