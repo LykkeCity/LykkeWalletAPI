@@ -54,6 +54,11 @@ namespace LykkeApi2.Controllers
         {
             try
             {
+                var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == request.AssetPairId);
+
+                if (assetPair == null)
+                    return NotFound("Asset pair not found");
+                
                 var candleHistoryService = _candlesServiceProvider.Get(request.Type);
 
                 var candles = await candleHistoryService.GetCandlesHistoryAsync(
@@ -62,8 +67,6 @@ namespace LykkeApi2.Controllers
                     (CandleTimeInterval) Enum.Parse(typeof(CandleTimeInterval), request.TimeInterval.ToString()),
                     request.FromMoment,
                     request.ToMoment);
-
-                var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == request.AssetPairId);
 
                 var baseAsset = await _assetsService.AssetGetAsync(assetPair.BaseAssetId);
 
