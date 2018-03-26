@@ -12,6 +12,7 @@ using LykkeApi2.Models;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
 using LykkeApi2.Models.ValidationModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LykkeApi2.Controllers
@@ -56,6 +57,7 @@ namespace LykkeApi2.Controllers
         ///     Get available asset pairs.
         /// </summary>
         /// <returns></returns>
+        [Authorize]
         [HttpGet("available")]
         [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailable()
