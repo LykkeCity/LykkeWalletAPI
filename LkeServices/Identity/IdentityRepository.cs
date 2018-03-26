@@ -16,19 +16,19 @@ namespace LkeServices.Identity
 
         public async Task<int> GenerateNewIdAsync()
         {
-            var identityEntity = IdentityEntity.Create();
+            var result = 0;
             await
                 _tableStorage
                     .InsertOrModifyAsync(
-                        IdentityEntity.GeneratePartitionKey, 
+                        IdentityEntity.GeneratePartitionKey,
                         IdentityEntity.GenerateRowKey,
-                        () => identityEntity, indEnt => 
+                        IdentityEntity.Create, indEnt =>
                         {
-                            indEnt.Value++;
+                            result = ++indEnt.Value;
                             return true;
                         }
                     );
-            return identityEntity.Value;
+            return result;
         }
     }
 }
