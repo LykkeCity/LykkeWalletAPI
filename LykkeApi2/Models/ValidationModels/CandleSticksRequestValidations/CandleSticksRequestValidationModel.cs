@@ -2,6 +2,7 @@
 using Lykke.Service.CandlesHistory.Client.Models;
 using LykkeApi2.Strings;
 using System;
+using LykkeApi2.Models.CandleSticks;
 
 namespace LykkeApi2.Models.ValidationModels.CandleSticksRequestValidations
 {
