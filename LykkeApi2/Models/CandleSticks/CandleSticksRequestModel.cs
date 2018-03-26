@@ -1,23 +1,21 @@
-﻿using Core.Enums;
-using Microsoft.AspNetCore.Mvc;
-using System;
+﻿using System;
 using Core.Enumerators;
+using Lykke.Service.CandlesHistory.Client.Models;
 
-namespace LykkeApi2.Models
+namespace LykkeApi2.Models.CandleSticks
 {
     public class CandleSticksRequestModel
     {
-        [FromRoute]
         public MarketType Type { get; set; }
-        [FromRoute]
+        
         public string AssetPairId { get; set; }
-        [FromRoute]
-        public EnPriceType PriceType { get; set; }
-        [FromRoute]
-        public EnTimeInterval TimeInterval { get; set; }
-        [FromRoute]
+        
+        public CandlePriceType PriceType { get; set; }
+        
+        public CandleTimeInterval TimeInterval { get; set; }
+        
         public DateTime FromMoment { get; set; }
-        [FromRoute]
+        
         public DateTime ToMoment { get; set; }
     }
 }

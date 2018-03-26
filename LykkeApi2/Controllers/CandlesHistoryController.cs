@@ -15,6 +15,7 @@ using Core.Enumerators;
 using LkeServices.Candles;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
+using LykkeApi2.Models.CandleSticks;
 
 namespace LykkeApi2.Controllers
 {
@@ -25,32 +26,41 @@ namespace LykkeApi2.Controllers
         private readonly ICandlesHistoryServiceProvider _candlesServiceProvider;
         private readonly CachedDataDictionary<string, AssetPair> _assetPairs;
         private readonly IAssetsService _assetsService;
-        private readonly ILog _log;
 
         public CandlesHistoryController(
             ICandlesHistoryServiceProvider candlesServiceProvider,
             IAssetsService assetsService,
-            CachedDataDictionary<string, AssetPair> assetPairs,
-            ILog log)
+            CachedDataDictionary<string, AssetPair> assetPairs)
         {
             _candlesServiceProvider = candlesServiceProvider;
             _assetsService = assetsService;
             _assetPairs = assetPairs;
-            _log = log;
         }
 
         /// <summary>
-        /// AssetPairs candles history
+        /// AssetPairs candles history (deprecated)
         /// </summary>
         /// <param name="assetPairId">Asset pair ID</param>
         /// <param name="priceType">Price type</param>
         /// <param name="timeInterval">Time interval</param>
         /// <param name="fromMoment">From moment in ISO 8601 (inclusive)</param>
         /// <param name="toMoment">To moment in ISO 8601 (exclusive)</param>
+        [Obsolete]
         [HttpGet("{type}/{assetPairId}/{priceType}/{timeInterval}/{fromMoment:datetime}/{toMoment:datetime}")]
         [ProducesResponseType(typeof(CandleSticksResponseModel), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.NotFound)]
-        public async Task<IActionResult> Get([FromRoute]CandleSticksRequestModel request)
+        public Task<IActionResult> Get([FromRoute]CandleSticksRequestModel request)
+        {
+            return GetCandles(request);
+        }
+
+        /// <summary>
+        /// AssetPairs candles history
+        /// </summary>
+        [HttpGet("")]
+        [ProducesResponseType(typeof(CandleSticksResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetCandles([FromQuery]CandleSticksRequestModel request)
         {
             try
             {
@@ -58,13 +68,13 @@ namespace LykkeApi2.Controllers
 
                 if (assetPair == null)
                     return NotFound("Asset pair not found");
-                
+
                 var candleHistoryService = _candlesServiceProvider.Get(request.Type);
                 
                 var candles = await candleHistoryService.GetCandlesHistoryAsync(
                     request.AssetPairId,
-                    (CandlePriceType) Enum.Parse(typeof(CandlePriceType), request.PriceType.ToString()),
-                    (CandleTimeInterval) Enum.Parse(typeof(CandleTimeInterval), request.TimeInterval.ToString()),
+                    request.PriceType,
+                    request.TimeInterval,
                     request.FromMoment,
                     request.ToMoment);
 
