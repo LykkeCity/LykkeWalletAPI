@@ -9,17 +9,17 @@ namespace LykkeApi2.Controllers
     [Authorize]
     [Produces("application/json")]
     [Route("api/[controller]")]
-    public class CountryPhoneCodesController : Controller
+    public class DictionaryController : Controller
     {
         private readonly ICountryPhoneCodeService _countryPhoneCodeService;
 
-        public CountryPhoneCodesController(ICountryPhoneCodeService countryPhoneCodeService)
+        public DictionaryController(ICountryPhoneCodeService countryPhoneCodeService)
         {
             _countryPhoneCodeService = countryPhoneCodeService;
         }
 
         [HttpGet]
-        public ResponseModel<CountriesResponseModel> Get()
+        public ResponseModel<CountriesResponseModel> GetCountryPhoneCodes()
         {
             return ResponseModel<CountriesResponseModel>
                 .CreateOk(new CountriesResponseModel
