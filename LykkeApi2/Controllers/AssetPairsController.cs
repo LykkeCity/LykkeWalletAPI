@@ -12,6 +12,7 @@ using LykkeApi2.Models;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
 using LykkeApi2.Models.ValidationModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LykkeApi2.Controllers
@@ -50,6 +51,27 @@ namespace LykkeApi2.Controllers
         {
             var assetPairs = (await _assetPairs.Values()).Where(s => !s.IsDisabled);
             return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(assetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
+        }
+        
+        /// <summary>
+        ///     Get available asset pairs.
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("available")]
+        [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> GetAvailable()
+        {
+            var allAssetPairs = (await _assetPairs.Values()).Where(s => !s.IsDisabled);
+            
+            var assetsIds = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
+
+            var availableAssetPairs =
+                allAssetPairs.Where(x =>
+                    assetsIds.Contains(x.BaseAssetId) &&
+                    assetsIds.Contains(x.QuotingAssetId));
+            
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(availableAssetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
         }
 
         /// <summary>
