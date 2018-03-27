@@ -73,11 +73,12 @@ namespace LykkeApi2.Controllers
                 RemainingVolume = Math.Abs((decimal)(x.RemainingVolume ?? 0)),
                 OrderAction = x.Volume > 0 ? OrderAction.Buy.ToString() : OrderAction.Sell.ToString(),
                 Status = x.Status
-            }));
+            })
+            .OrderByDescending(x => x.CreateDateTime));
         }
 
         [HttpPost("limit/{orderId}/cancel")]
-        [SwaggerOperation("CancelLimitOrder")]        
+        [SwaggerOperation("CancelLimitOrder")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> CancelLimitOrder(string orderId)
