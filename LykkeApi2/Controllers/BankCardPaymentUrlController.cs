@@ -61,6 +61,43 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext;
         }
 
+
+        [HttpGet]
+        [SwaggerOperation("Get")]
+        public async Task<IActionResult> Get()
+        {
+            var clientId = _requestContext.ClientId;
+
+            try
+            {
+                var lastOrder = await _paymentTransactionsRepository.GetLastByDate(clientId);
+                var personalData = await _personalDataService.GetAsync(clientId);
+
+                BankCardPaymentUrlRequestModel result;
+                if (lastOrder != null
+                    && (lastOrder.PaymentSystem == CashInPaymentSystem.CreditVoucher
+                        || lastOrder.PaymentSystem == CashInPaymentSystem.Fxpaygate))
+                {
+                    result = BankCardPaymentUrlRequestModel.Create(lastOrder, personalData);
+                }
+                else
+                {
+                    result = BankCardPaymentUrlRequestModel.Create(personalData);
+                }
+
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                await _log.WriteErrorAsync("BankCardPaymentUrlFormValuesController", "Get", string.Empty, e);
+
+                return StatusCode(
+                    (int)ErrorCodeType.RuntimeProblem,
+                    ErrorResponse.Create(Phrases.TechnicalProblems));
+            }
+        }
+
+
         [HttpPost]
         [SwaggerOperation("Post")]
         [ProducesResponseType(typeof(IsAliveResponse), (int)HttpStatusCode.OK)]
@@ -76,7 +113,6 @@ namespace LykkeApi2.Controllers
 
             var pd = await _personalDataService.GetAsync(clientId);
 
-            //TODO  check is a phone number is equal pd.Phone
 
             if (string.IsNullOrWhiteSpace(pd.PaymentSystem) || !Enum.TryParse(pd.PaymentSystem, out CashInPaymentSystem paymentSystem))
                 paymentSystem = CashInPaymentSystem.Unknown;
@@ -102,7 +138,9 @@ namespace LykkeApi2.Controllers
                 input.Country,
                 input.Email,
                 phoneNumberE164,
-                pd.DateOfBirth?.ToString(formatOfDateOfBirth))
+                pd.DateOfBirth?.ToString(formatOfDateOfBirth),
+                input.OkUrl,
+                input.FailUrl)
             .ToJson();
 
             var bankCardsFee = await _feeCalculatorClient.GetBankCardFees();
