@@ -70,6 +70,7 @@ namespace LykkeApi2.Controllers
                 Id = x.Id,
                 Price = (decimal)x.Price,
                 Voume = Math.Abs((decimal)x.Volume),
+                RemainingVolume = Math.Abs((decimal)(x.RemainingVolume ?? 0)),
                 OrderAction = x.Volume > 0 ? OrderAction.Buy.ToString() : OrderAction.Sell.ToString(),
                 Status = x.Status
             }));

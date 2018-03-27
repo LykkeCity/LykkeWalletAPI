@@ -11,5 +11,6 @@ namespace LykkeApi2.Models.Orders
         public DateTime CreateDateTime { set; get; }
         public string OrderAction { set; get; }
         public string Status { set; get; }
+        public decimal RemainingVolume { get; set; }
     }
 }
