@@ -6,7 +6,7 @@ namespace LykkeApi2.Models.Orders
     {
         public string Id { set; get; }
         public string AssetPairId { set; get; }
-        public decimal Voume { set; get; }
+        public decimal Volume { set; get; }
         public decimal Price { set; get; }
         public DateTime CreateDateTime { set; get; }
         public string OrderAction { set; get; }
