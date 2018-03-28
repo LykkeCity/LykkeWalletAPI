@@ -77,16 +77,12 @@ namespace LkeServices.PaymentSystem
                     ErrorMessage = $"Asset {assetId} is not supported by {selection.PaymentSystem} payment system.",
                 };
 
-            GetUrlDataResult urlData;
-            //using (var paymentService = _(selection.ServiceUrl))
-            //{
-                urlData = await _paymentGatewayClient.GetUrlData(
+            var urlData = await _paymentGatewayClient.GetUrlData(
                     orderId,
                     clientId,
                     amount,
                     assetId,
                     otherInfoJson);
-            //}
 
             var result = new PaymentUrlData
             {
