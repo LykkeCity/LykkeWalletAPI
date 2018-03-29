@@ -13,6 +13,7 @@ using Common.Cache;
 using Common.Log;
 using Core;
 using Core.Candles;
+using Core.Countries;
 using Core.Enumerators;
 using Core.Exchange;
 using Core.GlobalSettings;
@@ -21,6 +22,7 @@ using Core.PaymentSystem;
 using Core.Services;
 using LkeServices;
 using LkeServices.Candles;
+using LkeServices.Countries;
 using LkeServices.Identity;
 using LkeServices.PaymentSystem;
 using Lykke.Payments.Client;
@@ -100,6 +102,7 @@ namespace LykkeApi2.Modules
             builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
 
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
+            builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
             builder.RegisterType<PaymentSystemFacade>().As<IPaymentSystemFacade>();
             builder.RegisterInstance(new PaymentGatewayServiceClient(_settings.CurrentValue.PaymentSystems.CreditVouchers.ServiceUrls[0])).As<IPaymentGatewayService>();
             builder.RegisterType<LimitationsServiceClient>().As<ILimitationsServiceClient>();
