@@ -14,6 +14,7 @@ namespace LkeServices.PaymentSystem
     public class PaymentSystemFacade : IPaymentSystemFacade
     {
         private readonly IClientAccountClient _clientAccountClient;
+        private readonly IPaymentGatewayService _paymentGatewayClient;
         private readonly FxpaygateSettings _fxpaygateSettings;
         private readonly CreditVouchersSettings _creditVouchersSettings;
 
@@ -25,9 +26,11 @@ namespace LkeServices.PaymentSystem
         }
 
         public PaymentSystemFacade(PaymentSystemsSettings paymentSystemsSettings,
-            IClientAccountClient clientAccountClient)
+            IClientAccountClient clientAccountClient, 
+            IPaymentGatewayService paymentGatewayClient)
         {
             _clientAccountClient = clientAccountClient;
+            _paymentGatewayClient = paymentGatewayClient;
             _fxpaygateSettings = paymentSystemsSettings.Fxpaygate;
             _creditVouchersSettings = paymentSystemsSettings.CreditVouchers;
         }
@@ -75,16 +78,12 @@ namespace LkeServices.PaymentSystem
                     ErrorMessage = $"Asset {assetId} is not supported by {selection.PaymentSystem} payment system.",
                 };
 
-            GetUrlDataResult urlData;
-            using (var paymentService = new PaymentGatewayServiceClient(selection.ServiceUrl))
-            {
-                urlData = await paymentService.GetUrlData(
+            var urlData = await _paymentGatewayClient.GetUrlData(
                     orderId,
                     clientId,
                     amount,
                     assetId,
                     otherInfoJson);
-            }
 
             var result = new PaymentUrlData
             {
