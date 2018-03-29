@@ -110,7 +110,6 @@ namespace LykkeApi2.Controllers
             var phoneNumberE164 = input.Phone.PreparePhoneNum().ToE164Number();
             var pd = await _personalDataService.GetAsync(clientId);
 
-
             if (string.IsNullOrWhiteSpace(pd.PaymentSystem) || !Enum.TryParse(pd.PaymentSystem, out CashInPaymentSystem paymentSystem))
                 paymentSystem = CashInPaymentSystem.Unknown;
 
