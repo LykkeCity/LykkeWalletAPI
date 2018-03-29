@@ -62,7 +62,6 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext;
         }
 
-
         [HttpGet]
         [SwaggerOperation("Get")]
         public async Task<IActionResult> Get()
@@ -98,7 +97,6 @@ namespace LykkeApi2.Controllers
             }
         }
 
-
         [HttpPost]
         [SwaggerOperation("Post")]
         [ProducesResponseType(typeof(IsAliveResponse), (int)HttpStatusCode.OK)]
@@ -111,9 +109,7 @@ namespace LykkeApi2.Controllers
                 input.AssetId = LykkeConstants.UsdAssetId;
 
             var phoneNumberE164 = input.Phone.PreparePhoneNum().ToE164Number();
-
             var pd = await _personalDataService.GetAsync(clientId);
-
 
             if (string.IsNullOrWhiteSpace(pd.PaymentSystem) || !Enum.TryParse(pd.PaymentSystem, out CashInPaymentSystem paymentSystem))
                 paymentSystem = CashInPaymentSystem.Unknown;
