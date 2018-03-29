@@ -26,6 +26,7 @@ namespace LykkeApi2.Models
         public string DepositOption { get; set; }
         public string OkUrl { get; set; }
         public string FailUrl { get; set; }
+
         [JsonIgnore]
         public DepositOption DepositOptionEnum
         {
