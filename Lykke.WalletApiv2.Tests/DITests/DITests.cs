@@ -5,6 +5,7 @@ using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
+using Core.Settings;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Client;

@@ -3,7 +3,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Core.Constants;
 using Core.Identity;
-using Lykke.Service.Session;
+using Lykke.Service.Session.Client;
 using Microsoft.AspNetCore.Http;
 
 namespace LkeServices.Identity
