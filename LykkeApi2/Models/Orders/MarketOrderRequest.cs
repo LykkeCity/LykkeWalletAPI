@@ -3,8 +3,7 @@
     public class MarketOrderRequest
     {
         public string AssetPairId { get; set; }
-        public string AssetId { get; set; }
-        public OrderAction OrderAction { get; set; }
+        public string AssetId { get; set; }        
         public double Volume { get; set; }
     }
     

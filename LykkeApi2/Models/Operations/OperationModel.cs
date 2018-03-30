@@ -1,5 +1,5 @@
 ﻿using System;
-using Lykke.Contracts.Operations;
+using Lykke.Service.Operations.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 

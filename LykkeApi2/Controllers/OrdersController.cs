@@ -5,18 +5,25 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
-using Core.Settings;
 using Lykke.MatchingEngine.Connector.Abstractions.Models;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.FeeCalculator.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Operations.Client;
+using Lykke.Service.Operations.Contracts;
 using Lykke.Service.OperationsRepository.AutorestClient.Models;
 using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
+using Lykke.Service.PersonalData.Contract;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Orders;
-using Microsoft.AspNetCore.Authorization;
+using LykkeApi2.Settings;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Rest;
+using Newtonsoft.Json.Linq;
+using Refit;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using FeeType = Lykke.Service.FeeCalculator.AutorestClient.Models.FeeType;
 using OrderAction = Lykke.MatchingEngine.Connector.Abstractions.Models.OrderAction;
@@ -24,33 +31,51 @@ using OrderStatus = Lykke.Service.OperationsRepository.AutorestClient.Models.Ord
 
 namespace LykkeApi2.Controllers
 {
-    [Authorize]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     [Route("api/orders")]
     public class OrdersController : Controller
     {
         private readonly IRequestContext _requestContext;
+        private readonly IPersonalDataService _personalDataService;
+        private readonly IKycStatusService _kycStatusService;
+        private readonly IClientAccountClient _clientAccountClient;
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
         private readonly IMatchingEngineClient _matchingEngineClient;
         private readonly ILimitOrdersRepositoryClient _limitOrdersRepository;
         private readonly IFeeCalculatorClient _feeCalculatorClient;
         private readonly FeeSettings _feeSettings;
+        private readonly IOperationsClient _operationsClient;
         private readonly BaseSettings _baseSettings;
+        private readonly IcoSettings _icoSettings;
+        private readonly GlobalSettings _globalSettings;
 
         public OrdersController(IRequestContext requestContext,
+            IPersonalDataService personalDataService,
+            IKycStatusService kycStatusService,
+            IClientAccountClient clientAccountClient,
             IAssetsServiceWithCache assetsServiceWithCache,
             IMatchingEngineClient matchingEngineClient,
             ILimitOrdersRepositoryClient limitOrdersRepository,
             IFeeCalculatorClient feeCalculatorClient,
             FeeSettings feeSettings,
-            BaseSettings baseSettings)
+            IOperationsClient operationsClient,
+            BaseSettings baseSettings,
+            IcoSettings icoSettings,
+            GlobalSettings globalSettings)
         {
             _requestContext = requestContext;
+            _personalDataService = personalDataService;
+            _kycStatusService = kycStatusService;
+            _clientAccountClient = clientAccountClient;
             _assetsServiceWithCache = assetsServiceWithCache;
             _matchingEngineClient = matchingEngineClient;
             _limitOrdersRepository = limitOrdersRepository;
             _feeCalculatorClient = feeCalculatorClient;
             _feeSettings = feeSettings;
+            _operationsClient = operationsClient;
             _baseSettings = baseSettings;
+            _icoSettings = icoSettings;
+            _globalSettings = globalSettings;
         }
         
         [HttpGet]
@@ -103,72 +128,120 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> PlaceMarketOrder([FromBody] MarketOrderRequest request)
         {
+            var id = Guid.NewGuid();
+
             var clientId = _requestContext.ClientId;
 
-            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
+            var asset = await _assetsServiceWithCache.TryGetAssetAsync(request.AssetId);
+            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);            
+
+            if (asset == null)
+            {
+                return NotFound($"Asset '{request.AssetId}' not found.");
+            }
 
             if (pair == null)
             {
-                return NotFound();
+                return NotFound($"Asset pair '{request.AssetPairId}' not found.");
             }
 
             if (pair.IsDisabled)
+            {                
+                return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
+            }
+            
+            if (request.AssetId != pair.BaseAssetId && request.AssetId != pair.QuotingAssetId)
             {
                 return BadRequest();
             }
 
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
-
-            if (baseAsset == null)
-            {
-                return NotFound();
-            }
-
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
-            if (quotingAsset == null)
+            var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+            
+            var command = new CreateMarketOrderCommand
             {
-                return BadRequest();
-            }
-
-            if (request.AssetId != baseAsset.Id && request.AssetId != baseAsset.Name &&
-                request.AssetId != quotingAsset.Id && request.AssetId != quotingAsset.Name)
-            {
-                return BadRequest();
-            }
-
-            var straight = request.AssetId == baseAsset.Id || request.AssetId == baseAsset.Name;
-            var volume =
-                request.Volume.TruncateDecimalPlaces(straight ? baseAsset.Accuracy : quotingAsset.Accuracy);
-            if (Math.Abs(volume) < double.Epsilon)
-            {
-                return BadRequest(CreateErrorMessage("Required volume is less than asset accuracy"));
-            }
-
-            var order = new MarketOrderModel
-            {
-                Id = Guid.NewGuid().ToString(),
-                AssetPairId = pair.Id,
-                ClientId = clientId,
-                ReservedLimitVolume = null,
-                Straight = straight,
-                Volume = Math.Abs(volume),
-                OrderAction = ToMeOrderAction(request.OrderAction)
+                AssetId = request.AssetId,
+                AssetPairId = request.AssetPairId,
+                Volume = request.Volume,
+                Asset = new AssetShortModel
+                {
+                    Id = asset.Id,
+                    Blockchain = asset.Blockchain.ToString(),
+                    IsTradable = asset.IsTradable,
+                    IsTrusted = asset.IsTrusted
+                },
+                AssetPair = new AssetPairModel
+                {
+                    Id = request.AssetPairId,
+                    BaseAsset = new AssetModel
+                    {
+                        Id = baseAsset.Id,
+                        IsTradable = baseAsset.IsTradable,
+                        IsTrusted = baseAsset.IsTrusted,
+                        Accuracy = baseAsset.Accuracy,
+                        Blockchain = baseAsset.Blockchain.ToString(),
+                        KycNeeded = baseAsset.KycNeeded,
+                        LykkeEntityId = baseAsset.LykkeEntityId
+                    },
+                    QuotingAsset = new AssetModel
+                    {
+                        Id = quotingAsset.Id,
+                        IsTradable = quotingAsset.IsTradable,
+                        IsTrusted = quotingAsset.IsTrusted,
+                        Accuracy = quotingAsset.Accuracy,
+                        Blockchain = quotingAsset.Blockchain.ToString(),
+                        KycNeeded = quotingAsset.KycNeeded,
+                        LykkeEntityId = quotingAsset.LykkeEntityId
+                    },
+                    MinVolume = pair.MinVolume,
+                    MinInvertedVolume = pair.MinInvertedVolume
+                },
+                Client = new ClientModel
+                {
+                    Id = new Guid(_requestContext.ClientId),
+                    TradesBlocked = (await _clientAccountClient.GetCashOutBlockAsync(clientId)).TradesBlocked,
+                    BackupDone = (await _clientAccountClient.GetBackupAsync(clientId)).BackupDone,
+                    KycStatus = (await _kycStatusService.GetKycStatusAsync(clientId)).ToString(),
+                    PersonalData = new PersonalDataModel
+                    {
+                        Country = personalData.Country,
+                        CountryFromID = personalData.CountryFromID,
+                        CountryFromPOA = personalData.CountryFromPOA
+                    }
+                },
+                GlobalSettings = new GlobalSettingsModel
+                {                    
+                    BlockedAssetPairs = _globalSettings.BlockedAssetPairs,
+                    BitcoinBlockchainOperationsDisabled = _globalSettings.BitcoinBlockchainOperationsDisabled,
+                    BtcOperationsDisabled = _globalSettings.BtcOperationsDisabled,
+                    IcoSettings = new IcoSettingsModel
+                    {
+                        LKK2YAssetId = _icoSettings.LKK2YAssetId,
+                        RestrictedCountriesIso3 = _icoSettings.RestrictedCountriesIso3
+                    },
+                    FeeSettings = new FeeSettingsModel
+                    {
+                        FeeEnabled = _baseSettings.EnableFees,
+                        TargetClientId = _feeSettings.TargetClientId.WalletApi
+                    }
+                }
             };
 
-            if (_baseSettings.EnableFees)
-                order.Fees = new[]
-                    {await GetMarketOrderFee(clientId, request.AssetPairId, request.AssetId, request.OrderAction)};
-
-            var response = await _matchingEngineClient.HandleMarketOrderAsync(order);
-
-            if (response == null)
-                throw new Exception("ME unavailable");
-
-            if (response.Status != MeStatusCodes.Ok)
-                return BadRequest(CreateErrorMessage($"ME responded: {response.Status}"));
-
-            return Ok(order.Id);
+            try
+            {
+                await _operationsClient.PlaceMarketOrder(id, command);
+            }
+            catch (HttpOperationException e)
+            {
+                if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+                    return BadRequest(JObject.Parse(e.Response.Content));
+                
+                throw;
+            }            
+            
+            return Created(Url.Action("Get", "Operations", new { id }), id);
         }
 
         [HttpPost("limit")]
