@@ -5,6 +5,9 @@ using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
+using Lykke.Service.Affiliate.Client;
+using Lykke.Service.ClientDictionaries.Client;
+using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
@@ -25,17 +28,22 @@ namespace Lykke.WalletApiv2.Tests.DITests
 
             var settings = new APIv2Settings
             {
+                GlobalSettings = new GlobalSettings(),
                 FeeSettings = new FeeSettings(),
+                IcoSettings = new IcoSettings(),
+                KycServiceClient = new KycServiceClientSettings(),
                 WalletApiv2 = new BaseSettings
                 {
                     Db = new DbSettings(),
                     Services = new ServiceSettings
                     {
-                        OperationsRepositoryClient = new OperationsRepositoryServiceClientSettings{ServiceUrl = MockUrl, RequestTimeout = 300}
+                        OperationsRepositoryClient = new OperationsRepositoryServiceClientSettings{ServiceUrl = MockUrl, RequestTimeout = 300},
+                        AffiliateServiceClient = new AffiliateServiceClientSettings { ServiceUrl = MockUrl }
                     },
                     DeploymentSettings = new DeploymentSettings(),
-                    CacheSettings = new CacheSettings()
-                },
+                    CacheSettings = new CacheSettings(),                    
+                },                
+                ClientDictionariesServiceClient = new ClientDictionariesServiceClientSettings() { ServiceUrl = MockUrl },
                 OperationsHistoryServiceClient = new OperationsHistoryServiceClientSettings{ServiceUrl = MockUrl},
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},                
                 MatchingEngineClient = new MatchingEngineSettings{IpEndpoint = new IpEndpointSettings{Host = "127.0.0.1", Port = 80}}
