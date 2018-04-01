@@ -222,7 +222,7 @@ namespace LykkeApi2.Controllers
                     {
                         AssetPairId = pair.Id,
                         ClientId = clientId,
-                        Fee = fee,
+                        Fees = new []{ fee },
                         Id = id,
                         Price = price,
                         Volume = Math.Abs(volume),
