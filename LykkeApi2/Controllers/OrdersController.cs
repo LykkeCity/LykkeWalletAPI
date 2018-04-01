@@ -239,7 +239,7 @@ namespace LykkeApi2.Controllers
                 };
 
                 if (_baseSettings.EnableFees)
-                    limitOrderModel.Fee = await GetLimitOrderFee(clientId, pair, order.OrderAction);
+                    limitOrderModel.Fees = new [] { await GetLimitOrderFee(clientId, pair, order.OrderAction) };
 
                 var response = await _matchingEngineClient.PlaceLimitOrderAsync(limitOrderModel);
                 
