@@ -18,6 +18,7 @@ using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
+using LykkeApi2.Services;
 using LykkeApi2.Settings;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
@@ -48,6 +49,9 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.IcoSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.GlobalSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.KycServiceClient).SingleInstance();
 
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 

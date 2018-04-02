@@ -1,11 +1,10 @@
 using System.Net;
-using LkeServices;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
+using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
-using Lykke.Service.Session.Client;
 
 namespace LykkeApi2.Settings
 {
@@ -13,12 +12,23 @@ namespace LykkeApi2.Settings
     {
         public BaseSettings WalletApiv2 { get; set; }
         public SlackNotificationsSettings SlackNotifications { get; set; }
-        public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
+        public PersonalDataServiceClientSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
-        public MatchingEngineSettings MatchingEngineClient { set; get; }
         public ClientDictionariesServiceClientSettings ClientDictionariesServiceClient { get; set; }
+        public MatchingEngineSettings MatchingEngineClient { set; get; }
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
         public FeeSettings FeeSettings { set; get; }
+        public IcoSettings IcoSettings { get; set; }
+
+        public GlobalSettings GlobalSettings { get; set; }
+        public KycServiceClientSettings KycServiceClient { get; set; }
+    }
+
+    public class GlobalSettings
+    {
+        public string[] BlockedAssetPairs { get; set; }
+        public bool BitcoinBlockchainOperationsDisabled { get; set; }
+        public bool BtcOperationsDisabled { get; set; }
     }
 
     public class SlackNotificationsSettings
@@ -44,6 +54,12 @@ namespace LykkeApi2.Settings
         public CacheSettings CacheSettings { get; set; }
 
         public bool EnableFees { get; set; }
+    }
+
+    public class IcoSettings
+    {
+        public string LKK2YAssetId;
+        public string[] RestrictedCountriesIso3 { get; set; }
     }
 
     public class DbSettings
@@ -109,5 +125,21 @@ namespace LykkeApi2.Settings
     public class DeploymentSettings
     {
         public bool IsProduction { get; set; }
+    }
+
+    public class CacheSettings
+    {
+        public string FinanceDataCacheInstance { get; set; }
+        public string RedisConfiguration { get; set; }
+
+        public string OrderBooksCacheKeyPattern { get; set; }
+    }
+
+    public static class CacheSettingsExt
+    {
+        public static string GetOrderBookKey(this CacheSettings settings, string assetPairId, bool isBuy)
+        {
+            return string.Format(settings.OrderBooksCacheKeyPattern, assetPairId, isBuy);
+        }
     }
 }

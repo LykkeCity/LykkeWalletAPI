@@ -7,6 +7,9 @@ using Moq;
 using System.Linq;
 using LkeServices;
 using Lykke.Service.Affiliate.Client;
+using Lykke.Service.Affiliate.Client;
+using Lykke.Service.ClientDictionaries.Client;
+using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
@@ -27,7 +30,10 @@ namespace Lykke.WalletApiv2.Tests.DITests
 
             var settings = new APIv2Settings
             {
+                GlobalSettings = new GlobalSettings(),
                 FeeSettings = new FeeSettings(),
+                IcoSettings = new IcoSettings(),
+                KycServiceClient = new KycServiceClientSettings(),
                 WalletApiv2 = new BaseSettings
                 {
                     Db = new DbSettings(),
@@ -37,11 +43,12 @@ namespace Lykke.WalletApiv2.Tests.DITests
                         AffiliateServiceClient = new AffiliateServiceClientSettings{ServiceUrl = MockUrl}
                     },
                     DeploymentSettings = new DeploymentSettings(),
-                    CacheSettings = new CacheSettings()
+                    CacheSettings = new CacheSettings(),                    
                 },
+                ClientDictionariesServiceClient = new ClientDictionariesServiceClientSettings() { ServiceUrl = MockUrl },
                 OperationsHistoryServiceClient = new OperationsHistoryServiceClientSettings{ServiceUrl = MockUrl},
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},
-                PersonalDataServiceSettings = new PersonalDataServiceSettings{ServiceUri = MockUrl},
+                PersonalDataServiceSettings = new PersonalDataServiceClientSettings{ServiceUri = MockUrl},
                 MatchingEngineClient = new MatchingEngineSettings{IpEndpoint = new IpEndpointSettings{Host = "127.0.0.1", Port = 80}},
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
