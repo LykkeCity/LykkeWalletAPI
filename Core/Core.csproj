@@ -10,18 +10,11 @@
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.173" />
     <PackageReference Include="Lykke.Service.Assets.Client" Version="3.3.2" />
+    <PackageReference Include="Lykke.Service.Balances.Client" Version="1.0.21" />
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.0.1" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.94" />
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.1.0" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.96" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.54" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Lykke.Service.Balances.Client">
-      <HintPath>..\..\..\..\.nuget\packages\lykke.service.balances.client\1.0.21\lib\netstandard2.0\Lykke.Service.Balances.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="Lykke.Service.ClientDictionaries.Client">
-      <HintPath>..\..\..\..\.nuget\packages\lykke.service.clientdictionaries.client\1.0.1\lib\netstandard2.0\Lykke.Service.ClientDictionaries.Client.dll</HintPath>
-    </Reference>
   </ItemGroup>
 </Project>
