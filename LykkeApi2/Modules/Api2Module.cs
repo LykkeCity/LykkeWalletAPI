@@ -26,8 +26,6 @@ using LkeServices.Candles;
 using LkeServices.Countries;
 using LkeServices.Identity;
 using LkeServices.PaymentSystem;
-using Lykke.Payments.Client;
-using Lykke.Payments.Contracts;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
@@ -100,7 +98,6 @@ namespace LykkeApi2.Modules
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
             builder.RegisterType<PaymentSystemFacade>().As<IPaymentSystemFacade>();
-            builder.RegisterInstance(new PaymentGatewayServiceClient(_settings.CurrentValue.PaymentSystems.CreditVouchers.ServiceUrls[0])).As<IPaymentGatewayService>();
             builder.RegisterType<LimitationsServiceClient>().As<ILimitationsServiceClient>();
             builder.RegisterType<DisableOnMaintenanceFilter>();
             builder.RegisterType<CachedAssetsDictionary>();
