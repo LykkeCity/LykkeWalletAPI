@@ -1,4 +1,9 @@
-﻿namespace Core.Bitcoin
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Lykke.Service.Balances.AutorestClient.Models;
+
+namespace Core.Bitcoin
 {
     public interface IWalletCredentialsRepository
     {
