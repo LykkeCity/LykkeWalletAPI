@@ -2,7 +2,7 @@
 using Core.Exchange;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace LkeServices.Exchange
+namespace AzureRepositories.Exchange
 {
     public class ExchangeSettingsEntity : TableEntity, IExchangeSettings 
     {

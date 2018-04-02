@@ -1,6 +1,6 @@
 ﻿using Core.Exchange;
 
-namespace LkeServices.Exchange
+namespace AzureRepositories.Exchange
 {
     public class ExchangeSettings : IExchangeSettings
     {

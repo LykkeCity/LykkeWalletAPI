@@ -17,7 +17,8 @@ namespace LkeServices.PaymentSystem
         private readonly FxpaygateSettings _fxpaygateSettings;
         private readonly CreditVouchersSettings _creditVouchersSettings;
 
-        public class PaymentSystemSelectionResult
+        //TODO set to private
+        private class PaymentSystemSelectionResult
         {
             public CashInPaymentSystem PaymentSystem { get; set; }
             public string ServiceUrl { get; set; }
@@ -100,7 +101,7 @@ namespace LkeServices.PaymentSystem
 
         public async Task<string> GetSourceClientIdAsync(CashInPaymentSystem paymentSystem, OwnerType owner)
         {
-            string serviceUrl = paymentSystem == CashInPaymentSystem.CreditVoucher
+            var serviceUrl = paymentSystem == CashInPaymentSystem.CreditVoucher
                 ? SelectCreditVouchersService()
                 : SelectFxPaygateService(owner);
             using (var paymentService = new PaymentGatewayServiceClient(serviceUrl))
@@ -140,11 +141,11 @@ namespace LkeServices.PaymentSystem
                     };
             }
 
-            CashInPaymentSystem paymentSystem = CashInPaymentSystem.CreditVoucher;
-            string serviceUrl = SelectCreditVouchersService();
+            var paymentSystem = CashInPaymentSystem.CreditVoucher;
+            var serviceUrl = SelectCreditVouchersService();
 
-            CardPaymentSystem byClient = CardPaymentSystem.Unknown;
-            bool hasClientFixedSystem = false;
+            var byClient = CardPaymentSystem.Unknown;
+            var hasClientFixedSystem = false;
             if (!string.IsNullOrWhiteSpace(clientPaymentSystem))
                 hasClientFixedSystem = Enum.TryParse(clientPaymentSystem, out byClient);
 

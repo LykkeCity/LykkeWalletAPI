@@ -2,7 +2,7 @@
 using Core.PaymentSystem;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace LkeServices.PaymentSystem
+namespace AzureRepositories.PaymentSystem
 {
     public class PaymentTransactionEventLogEntity : TableEntity, IPaymentTransactionEventLog
     {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using AzureRepositories.PaymentSystem;
 using Common;
 using Common.Log;
 using Core.Constants;
@@ -8,13 +9,13 @@ using Core.Identity;
 using Core.PaymentSystem;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
+using Lykke.Service.Limitations.Client;
 using Lykke.Service.PersonalData.Contract;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
 using LykkeApi2.Models.IsAlive;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -22,7 +23,7 @@ namespace LykkeApi2.Controllers
 {
     [Produces("application/json")]
     [Authorize]
-    //[ServiceFilter(typeof(DisableOnMaintenanceFilter))]
+    [ServiceFilter(typeof(DisableOnMaintenanceFilter))]
     [Route("api/[controller]")]
     public class BankCardPaymentUrlController : Controller
     {
@@ -102,7 +103,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Post([FromBody]BankCardPaymentUrlRequestModel input)
         {
-            string clientId = this.GetClientId();
+            var clientId = _requestContext.ClientId;
 
             if (string.IsNullOrWhiteSpace(input.AssetId))
                 input.AssetId = LykkeConstants.UsdAssetId;
@@ -155,8 +156,8 @@ namespace LykkeApi2.Controllers
                     feeAmountTruncated,
                     input.AssetId,
                     input.WalletId,
-                    assetToDeposit: input.AssetId,
-                    info: info);
+                    input.AssetId,
+                    info);
 
                 var urlData = await _paymentSystemFacade.GetUrlDataAsync(
                     paymentSystem.ToString(),

@@ -1,7 +1,7 @@
 ﻿using System;
 using Core.GlobalSettings;
 
-namespace LkeServices.GlobalSettings
+namespace AzureRepositories.GlobalSettings
 {
     public class AppGlobalSettings : IAppGlobalSettings
     {

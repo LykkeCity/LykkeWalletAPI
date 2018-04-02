@@ -2,7 +2,7 @@
 using AzureStorage;
 using Core.Exchange;
 
-namespace LkeServices.Exchange
+namespace AzureRepositories.Exchange
 {
     public class ExchangeSettingsRepository : IExchangeSettingsRepository
     {

@@ -2,7 +2,7 @@
 using Core.GlobalSettings;
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace LkeServices.GlobalSettings
+namespace AzureRepositories.GlobalSettings
 {
     public class AppGlobalSettingsEntity : TableEntity, IAppGlobalSettings
     {
