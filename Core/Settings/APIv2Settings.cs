@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
+using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
