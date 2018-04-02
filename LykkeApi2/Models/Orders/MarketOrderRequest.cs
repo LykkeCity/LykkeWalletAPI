@@ -5,6 +5,7 @@
         public string AssetPairId { get; set; }
         public string AssetId { get; set; }        
         public double Volume { get; set; }
+        public OrderAction OrderAction { get; set; }
     }
     
     public enum OrderAction

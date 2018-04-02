@@ -12,7 +12,6 @@ using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Contracts;
 using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using Lykke.Service.PersonalData.Contract;
-using Lykke.Service.PersonalData.Contract.Models;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Orders;
 using LykkeApi2.Settings;
@@ -145,9 +144,23 @@ namespace LykkeApi2.Controllers
 
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
-            var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
             
-            var command = await CreateOrderCommand<CreateOrderCommand>(request.AssetId, request.AssetPairId, request.Volume, asset, baseAsset, quotingAsset, pair, personalData);
+            var command = new CreateMarketOrderCommand
+            {
+                AssetId = request.AssetId,
+                AssetPair = new AssetPairModel
+                {
+                    Id = request.AssetPairId,
+                    BaseAsset = ConvertAssetToAssetModel(baseAsset),
+                    QuotingAsset = ConvertAssetToAssetModel(quotingAsset),
+                    MinVolume = pair.MinVolume,
+                    MinInvertedVolume = pair.MinInvertedVolume
+                },
+                Volume = Math.Abs(request.Volume),
+                OrderAction = request.OrderAction == Models.Orders.OrderAction.Buy ? Lykke.Service.Operations.Contracts.OrderAction.Buy : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+                Client = await GetClientModel(),
+                GlobalSettings = GetGlobalSettings()
+            };
 
             try
             {
@@ -172,14 +185,8 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> PlaceLimitOrder([FromBody] LimitOrderRequest request)
         {
             var id = Guid.NewGuid();
-
-            var asset = await _assetsServiceWithCache.TryGetAssetAsync(request.AssetId);
+           
             var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
-
-            if (asset == null)
-            {
-                return NotFound($"Asset '{request.AssetId}' not found.");
-            }
 
             if (pair == null)
             {
@@ -190,19 +197,27 @@ namespace LykkeApi2.Controllers
             {
                 return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
             }
-
-            if (request.AssetId != pair.BaseAssetId && request.AssetId != pair.QuotingAssetId)
-            {
-                return BadRequest();
-            }
-
+            
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
-            var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
-
-            var command = await CreateOrderCommand<CreateLimitOrderCommand>(request.AssetId, request.AssetPairId, request.Volume, asset, baseAsset, quotingAsset, pair, personalData);
-            command.Price = request.Price;
-
+            
+            var command = new CreateLimitOrderCommand
+            {
+                AssetPair = new AssetPairModel
+                {
+                    Id = request.AssetPairId,
+                    BaseAsset = ConvertAssetToAssetModel(baseAsset),
+                    QuotingAsset = ConvertAssetToAssetModel(quotingAsset),
+                    MinVolume = pair.MinVolume,
+                    MinInvertedVolume = pair.MinInvertedVolume
+                },
+                Volume = Math.Abs(request.Volume),
+                Price = request.Price,
+                OrderAction = request.OrderAction == Models.Orders.OrderAction.Buy ? Lykke.Service.Operations.Contracts.OrderAction.Buy : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+                Client = await GetClientModel(),
+                GlobalSettings = GetGlobalSettings()
+            };
+            
             try
             {
                 await _operationsClient.PlaceLimitOrder(id, command);
@@ -215,86 +230,58 @@ namespace LykkeApi2.Controllers
                 throw;
             }
 
-            return Created(Url.Action("Get", "Operations", new { id }), id);
+            return Created(Url.Action("Get", "Operations", new { id }), id);                  
+        }        
+
+        private AssetModel ConvertAssetToAssetModel(Asset asset)
+        {
+            return new AssetModel
+            {
+                Id = asset.Id,
+                IsTradable = asset.IsTradable,
+                IsTrusted = asset.IsTrusted,
+                Accuracy = asset.Accuracy,
+                Blockchain = asset.Blockchain.ToString(),
+                KycNeeded = asset.KycNeeded,
+                LykkeEntityId = asset.LykkeEntityId
+            };
         }
 
-        private async Task<T> CreateOrderCommand<T>(
-            string assetId, 
-            string assetPairId, 
-            double volume, 
-            Asset asset, 
-            Asset baseAsset, 
-            Asset quotingAsset, 
-            AssetPair pair,             
-            IPersonalData personalData)
-            where T : CreateOrderCommand, new()
+        private async Task<ClientModel> GetClientModel()
         {
-            return new T
+            var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+
+            return new ClientModel
             {
-                AssetId = assetId,
-                AssetPairId = assetPairId,
-                Volume = volume,
-                Asset = new AssetShortModel
+                Id = new Guid(_requestContext.ClientId),
+                TradesBlocked = (await _clientAccountClient.GetCashOutBlockAsync(personalData.Id)).TradesBlocked,
+                BackupDone = (await _clientAccountClient.GetBackupAsync(personalData.Id)).BackupDone,
+                KycStatus = (await _kycStatusService.GetKycStatusAsync(personalData.Id)).ToString(),
+                PersonalData = new PersonalDataModel
                 {
-                    Id = asset.Id,
-                    Blockchain = asset.Blockchain.ToString(),
-                    IsTradable = asset.IsTradable,
-                    IsTrusted = asset.IsTrusted
-                },
-                AssetPair = new AssetPairModel
+                    Country = personalData.Country,
+                    CountryFromID = personalData.CountryFromID,
+                    CountryFromPOA = personalData.CountryFromPOA
+                }
+            };
+        }
+
+        private GlobalSettingsModel GetGlobalSettings()
+        {
+            return new GlobalSettingsModel
+            {
+                BlockedAssetPairs = _globalSettings.BlockedAssetPairs,
+                BitcoinBlockchainOperationsDisabled = _globalSettings.BitcoinBlockchainOperationsDisabled,
+                BtcOperationsDisabled = _globalSettings.BtcOperationsDisabled,
+                IcoSettings = new IcoSettingsModel
                 {
-                    Id = assetPairId,
-                    BaseAsset = new AssetModel
-                    {
-                        Id = baseAsset.Id,
-                        IsTradable = baseAsset.IsTradable,
-                        IsTrusted = baseAsset.IsTrusted,
-                        Accuracy = baseAsset.Accuracy,
-                        Blockchain = baseAsset.Blockchain.ToString(),
-                        KycNeeded = baseAsset.KycNeeded,
-                        LykkeEntityId = baseAsset.LykkeEntityId
-                    },
-                    QuotingAsset = new AssetModel
-                    {
-                        Id = quotingAsset.Id,
-                        IsTradable = quotingAsset.IsTradable,
-                        IsTrusted = quotingAsset.IsTrusted,
-                        Accuracy = quotingAsset.Accuracy,
-                        Blockchain = quotingAsset.Blockchain.ToString(),
-                        KycNeeded = quotingAsset.KycNeeded,
-                        LykkeEntityId = quotingAsset.LykkeEntityId
-                    },
-                    MinVolume = pair.MinVolume,
-                    MinInvertedVolume = pair.MinInvertedVolume
+                    LKK2YAssetId = _icoSettings.LKK2YAssetId,
+                    RestrictedCountriesIso3 = _icoSettings.RestrictedCountriesIso3
                 },
-                Client = new ClientModel
+                FeeSettings = new FeeSettingsModel
                 {
-                    Id = new Guid(_requestContext.ClientId),
-                    TradesBlocked = (await _clientAccountClient.GetCashOutBlockAsync(personalData.Id)).TradesBlocked,
-                    BackupDone = (await _clientAccountClient.GetBackupAsync(personalData.Id)).BackupDone,
-                    KycStatus = (await _kycStatusService.GetKycStatusAsync(personalData.Id)).ToString(),
-                    PersonalData = new PersonalDataModel
-                    {
-                        Country = personalData.Country,
-                        CountryFromID = personalData.CountryFromID,
-                        CountryFromPOA = personalData.CountryFromPOA
-                    }
-                },
-                GlobalSettings = new GlobalSettingsModel
-                {                    
-                    BlockedAssetPairs = _globalSettings.BlockedAssetPairs,
-                    BitcoinBlockchainOperationsDisabled = _globalSettings.BitcoinBlockchainOperationsDisabled,
-                    BtcOperationsDisabled = _globalSettings.BtcOperationsDisabled,
-                    IcoSettings = new IcoSettingsModel
-                    {
-                        LKK2YAssetId = _icoSettings.LKK2YAssetId,
-                        RestrictedCountriesIso3 = _icoSettings.RestrictedCountriesIso3
-                    },
-                    FeeSettings = new FeeSettingsModel
-                    {
-                        FeeEnabled = _baseSettings.EnableFees,
-                        TargetClientId = _feeSettings.TargetClientId.WalletApi
-                    }
+                    FeeEnabled = _baseSettings.EnableFees,
+                    TargetClientId = _feeSettings.TargetClientId.WalletApi
                 }
             };
         }
