@@ -12,6 +12,9 @@
     <NoWarn>1701;1702;1705;1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Controllers\DictionaryController.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="4.6.2" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.2" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="7.5.2" />
@@ -81,5 +84,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Controllers\DictionaryController.cs" />
   </ItemGroup>
 </Project>
