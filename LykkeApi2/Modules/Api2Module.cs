@@ -28,6 +28,8 @@ using LkeServices.PaymentSystem;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Kyc.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
@@ -61,6 +63,9 @@ namespace LykkeApi2.Modules
             builder.RegisterType<HealthService>()
                 .As<IHealthService>()
                 .SingleInstance();
+            builder.RegisterType<ClientAccountLogic>()
+                .AsSelf()
+                .SingleInstance();
 
             builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
@@ -71,17 +76,15 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 
             builder.RegisterRateCalculatorClient(_settings.CurrentValue.Services.RateCalculatorServiceApiUrl, _log);
-
             builder.RegisterBalancesClient(_settings.CurrentValue.Services.BalancesServiceUrl, _log);
 
+            builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
+            builder.RegisterInstance(_log).As<ILog>().SingleInstance();
             builder.RegisterInstance(new DeploymentSettings());
-
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
-
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
-
-            builder.RegisterType<ClientAccountLogic>().AsSelf().SingleInstance();
 
             _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
             {
@@ -94,11 +97,10 @@ namespace LykkeApi2.Modules
             });
 
             builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
-
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
-
             builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
-
+            //TODO change to v2
+            builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
             builder.RegisterType<PaymentSystemFacade>().As<IPaymentSystemFacade>();
