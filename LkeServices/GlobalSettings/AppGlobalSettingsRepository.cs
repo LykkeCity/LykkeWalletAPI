@@ -7,7 +7,6 @@ namespace LkeServices.GlobalSettings
     public class AppGlobalSettingsRepository : IAppGlobalSettingsRepository
     {
         public string GeneratePartitionKey() => "Setup";
-
         public string GenerateRowKey() => "AppSettings";
 
         private readonly INoSQLTableStorage<AppGlobalSettingsEntity> _tableStorage;
