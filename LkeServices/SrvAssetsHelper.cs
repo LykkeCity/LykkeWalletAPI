@@ -31,7 +31,6 @@ namespace LkeServices
         public async Task<Asset[]> GetAssetsForClient(string clientId, bool isIosDevice, string partnerId = null)
         {
             var result = await _cachedAssetsDictionary.Values();
-                
             result = result.Where(x => !x.IsDisabled);
 
             if (partnerId != null)

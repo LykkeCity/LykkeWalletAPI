@@ -17,7 +17,6 @@ namespace LkeServices.PaymentSystem
         private readonly FxpaygateSettings _fxpaygateSettings;
         private readonly CreditVouchersSettings _creditVouchersSettings;
 
-        //TODO set to private
         private class PaymentSystemSelectionResult
         {
             public CashInPaymentSystem PaymentSystem { get; set; }

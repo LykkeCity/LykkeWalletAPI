@@ -119,7 +119,6 @@ namespace LykkeApi2.Modules
                         (await ctx.Resolve<IAssetsService>().AssetGetAllAsync()).ToDictionary(itm => itm.Id));
             }).SingleInstance();
 
-
             builder.Register(x =>
             {
                 var assetsService = x.Resolve<IComponentContext>().Resolve<IAssetsService>();
@@ -166,8 +165,6 @@ namespace LykkeApi2.Modules
                 .As<IOrderBooksService>()
                 .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
                 .SingleInstance();
-
-
         }
 
         private static void BindRepositories(ContainerBuilder builder, IReloadingManager<BaseSettings> settings,
