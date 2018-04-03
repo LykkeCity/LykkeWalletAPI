@@ -174,8 +174,8 @@ namespace LykkeApi2.Controllers
                 LastName = personalData?.LastName,
                 Country = country,
                 Phone = personalData?.ContactPhone,
-                KycStatus = await _kycStatusService.GetKycStatusAsync(clientId);
-        });
+                KycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId)
+            });
         }
 
         [Authorize]
