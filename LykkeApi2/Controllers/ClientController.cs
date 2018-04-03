@@ -17,6 +17,7 @@ using Lykke.Service.PersonalData.Contract.Models;
 using LykkeApi2.Infrastructure.Extensions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
 
 namespace LykkeApi2.Controllers
 {
@@ -31,6 +32,7 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
         private readonly IPersonalDataService _personalDataService;
         private readonly IClientAccountClient _clientAccountService;
+        private readonly IKycStatusService _kycStatusService;
 
         public ClientController(
             ILog log,
@@ -38,7 +40,8 @@ namespace LykkeApi2.Controllers
             ClientAccountLogic clientAccountLogic,
             IRequestContext requestContext,
             IPersonalDataService personalDataService,
-            IClientAccountClient clientAccountService)
+            IClientAccountClient clientAccountService, 
+            IKycStatusService kycStatusService)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
@@ -46,6 +49,7 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
             _clientAccountService = clientAccountService;
+            _kycStatusService = kycStatusService;
         }
 
         /// <summary>
@@ -169,8 +173,9 @@ namespace LykkeApi2.Controllers
                 FirstName = personalData?.FirstName,
                 LastName = personalData?.LastName,
                 Country = country,
-                Phone = personalData?.ContactPhone
-            });
+                Phone = personalData?.ContactPhone,
+                KycStatus = await _kycStatusService.GetKycStatusAsync(clientId);
+        });
         }
 
         [Authorize]

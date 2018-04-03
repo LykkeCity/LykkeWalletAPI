@@ -1,4 +1,6 @@
-﻿namespace LykkeApi2.Models.ClientAccountModels
+﻿using Lykke.Service.Kyc.Abstractions.Domain.Verification;
+
+namespace LykkeApi2.Models.ClientAccountModels
 {
     public class UserInfoResponseModel
     {
@@ -7,5 +9,6 @@
         public string LastName { get; set; }
         public string Country { get; set; }
         public string Phone { get; set; }
+        public KycStatus KycStatus { get; set; }
     }
 }
