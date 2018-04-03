@@ -94,13 +94,14 @@ namespace LykkeApi2.Modules
             builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
-            builder.RegisterType<PaymentSystemFacade>().As<IPaymentSystemFacade>();
+            builder.RegisterType<PaymentSystemService>().As<IPaymentSystemService>();
+            builder.RegisterType<SettingsService>().As<ISettingsService>();
             builder.RegisterType<LimitationsServiceClient>().As<ILimitationsServiceClient>();
             builder.RegisterType<DisableOnMaintenanceFilter>();
             builder.RegisterType<CachedAssetsDictionary>();
 
             RegisterDictionaryEntities(builder);
-            BindServices(builder, _settings, _log);
+            BindServices(builder, _settings);
             BindRepositories(builder, _settings, _log);
             BindMicroservices(builder, _settings);
             builder.Populate(_services);
@@ -148,7 +149,7 @@ namespace LykkeApi2.Modules
             }).SingleInstance();
         }
 
-        private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings, ILog log)
+        private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings)
         {
             var redis = new RedisCache(new RedisCacheOptions
             {

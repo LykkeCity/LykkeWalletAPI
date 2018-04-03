@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Core.Exchange;
 using Core.GlobalSettings;
+using Core.Services;
 using LkeServices;
 using Lykke.Service.ClientAccount.Client;
 using LykkeApi2.Infrastructure;
@@ -17,24 +18,21 @@ namespace LykkeApi2.Controllers
     [LowerVersion(Devices = "android", LowerVersion = 961)]
     public class AppSettingController : Controller
     {
-        private readonly IExchangeSettingsRepository _exchangeSettingsRepository;
         private readonly IRequestContext _requestContext;
         private readonly SrvAssetsHelper _srvAssetsHelper;
-        private readonly IAppGlobalSettingsRepository _appGlobalSettingsRepository;
         private readonly IClientAccountClient _clientAccountClient;
+        private readonly ISettingsService _settingsService;
 
         public AppSettingController(
             IRequestContext requestContext,
             SrvAssetsHelper srvAssetsHelper,
-            IExchangeSettingsRepository exchangeSettingsRepository,
-            IAppGlobalSettingsRepository appGlobalSettingsRepository,
-            IClientAccountClient clientAccountClient)
+            IClientAccountClient clientAccountClient, 
+            ISettingsService settingsService)
         {
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _srvAssetsHelper = srvAssetsHelper;
-            _exchangeSettingsRepository = exchangeSettingsRepository;
-            _appGlobalSettingsRepository = appGlobalSettingsRepository;
             _clientAccountClient = clientAccountClient;
+            _settingsService = settingsService;
         }
 
         [HttpGet]
@@ -44,9 +42,11 @@ namespace LykkeApi2.Controllers
             var clientId = _requestContext.ClientId;
             var partnerId = _requestContext.PartnerId;
 
-            var settings = await _exchangeSettingsRepository.GetOrDefaultAsync(clientId);
+            var settings = await _settingsService.GetExchangeSettingsAsync(clientId);
+
             var assetId = await _srvAssetsHelper.GetBaseAssetIdForClient(clientId, isIosDevice, partnerId);
-            var clientAppSettings = await _appGlobalSettingsRepository.GetFromDbOrDefault();
+
+            var clientAppSettings = await _settingsService.GetAppGlobalSettingsSettingsAsync();
             var refundSettings = await _clientAccountClient.GetRefundAddressAsync(clientId);
 
             return Ok(settings.ConvertToAppSettingsModel(assetId, clientAppSettings, refundSettings));

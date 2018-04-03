@@ -21,33 +21,6 @@ namespace AzureRepositories.PaymentSystem
         public string OtherData { get; set; }
         public double FeeAmount { get; set; }
         public string MeTransactionId { get; set; }
-
-        public static PaymentTransaction Create(string id,
-            CashInPaymentSystem paymentSystem,
-            string clientId,
-            double amount,
-            double feeAmount,
-            string assetId,
-            string walletId,
-            string assetToDeposit = null,
-            string info = "",
-            PaymentStatus status = PaymentStatus.Created)
-        {
-            return new PaymentTransaction
-            {
-                Id = id,
-                PaymentSystem = paymentSystem,
-                ClientId = clientId,
-                Amount = amount,
-                AssetId = assetId,
-                WalletId = walletId,
-                Created = DateTime.UtcNow,
-                Status = status,
-                Info = info,
-                DepositedAssetId = assetToDeposit ?? assetId,
-                FeeAmount = feeAmount
-            };
-        }
     }
 
     public static class PaymentTransactionExt

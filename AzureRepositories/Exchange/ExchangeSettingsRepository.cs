@@ -18,7 +18,7 @@ namespace AzureRepositories.Exchange
             _defaultExchangeSettings = defaultExchangeSettings;
         }
 
-        public async Task<IExchangeSettings> GetOrDefaultAsync(string clientId)
+        public async Task<IExchangeSettings> GetFromDbOrDefaultAsync(string clientId)
         {
             return await GetAsync(clientId) ?? _defaultExchangeSettings;
         }

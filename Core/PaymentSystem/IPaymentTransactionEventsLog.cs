@@ -5,7 +5,6 @@ namespace Core.PaymentSystem
 {
     public interface IPaymentTransactionEventsLogRepository
     {
-        Task WriteAsync(IPaymentTransactionEventLog newEvent);
-        Task<IEnumerable<IPaymentTransactionEventLog>> GetAsync(string id);
+        Task InsertAsync(IPaymentTransactionEventLog newEvent);
     }
 }

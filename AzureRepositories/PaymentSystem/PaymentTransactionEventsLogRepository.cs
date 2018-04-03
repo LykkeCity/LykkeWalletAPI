@@ -14,16 +14,10 @@ namespace AzureRepositories.PaymentSystem
             _tableStorage = tableStorage;
         }
 
-        public async Task WriteAsync(IPaymentTransactionEventLog newEvent)
+        public async Task InsertAsync(IPaymentTransactionEventLog newEvent)
         {
             var newEntity = PaymentTransactionEventLogEntity.Create(newEvent);
             await _tableStorage.InsertAndGenerateRowKeyAsDateTimeAsync(newEntity, newEntity.DateTime);
-        }
-
-        public async Task<IEnumerable<IPaymentTransactionEventLog>> GetAsync(string id)
-        {
-            var partitionKey = PaymentTransactionEventLogEntity.GeneratePartitionKey(id);
-            return await _tableStorage.GetDataAsync(partitionKey);
         }
     }
 }

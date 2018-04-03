@@ -20,7 +20,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureRepositories", "AzureRepositories\AzureRepositories.csproj", "{549CBC49-8A0F-49F5-BD90-E5995F15B75F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzureRepositories", "AzureRepositories\AzureRepositories.csproj", "{549CBC49-8A0F-49F5-BD90-E5995F15B75F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Repositories", "3. Repositories", "{506EB49D-3AF1-4405-B5DC-E92FEB7C9083}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,7 +58,7 @@ Global
 		{B6ADDBDB-541F-49C5-B96E-3C0968E9D4B4} = {7E25EA3D-F2C3-466A-8300-49CA73CB4432}
 		{EEC9EE2E-28A2-434F-8D37-A87F241367D8} = {F92247DB-2265-43BB-9F04-BD94A4C8EF06}
 		{F013FA52-4048-463C-A931-20C386ECCFA5} = {7E25EA3D-F2C3-466A-8300-49CA73CB4432}
-		{549CBC49-8A0F-49F5-BD90-E5995F15B75F} = {7E25EA3D-F2C3-466A-8300-49CA73CB4432}
+		{549CBC49-8A0F-49F5-BD90-E5995F15B75F} = {506EB49D-3AF1-4405-B5DC-E92FEB7C9083}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1385F3E1-C385-4E6D-8CBB-C867C7802C6F}
