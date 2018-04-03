@@ -22,7 +22,7 @@ namespace LkeServices.PaymentSystem
             _tableStorageIndices = tableStorageIndices;
         }
 
-        public async Task CreateAsync(IPaymentTransaction src)
+        public async Task InsertAsync(IPaymentTransaction src)
         {
             var commonEntity = PaymentTransactionEntity.Create(src);
             commonEntity.PartitionKey = PaymentTransactionEntity.IndexCommon.GeneratePartitionKey();

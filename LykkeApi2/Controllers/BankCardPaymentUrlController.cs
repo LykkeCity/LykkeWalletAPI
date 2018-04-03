@@ -6,6 +6,7 @@ using Common.Log;
 using Core.Constants;
 using Core.Identity;
 using Core.PaymentSystem;
+using Core.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.PersonalData.Contract;
@@ -26,11 +27,9 @@ namespace LykkeApi2.Controllers
     [Route("api/[controller]")]
     public class BankCardPaymentUrlController : Controller
     {
-        private readonly IPaymentSystemFacade _paymentSystemFacade;
-        private readonly IPaymentTransactionsRepository _paymentTransactionsRepository;
+        private readonly IPaymentSystemService _paymentSystemService;
         private readonly ILog _log;
         private readonly IIdentityRepository _identityGenerator;
-        private readonly IPaymentTransactionEventsLogRepository _paymentTransactionEventsLog;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly IPersonalDataService _personalDataService;
         private readonly IAssetsService _assetsService;
@@ -38,22 +37,18 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
 
         public BankCardPaymentUrlController(
-            IPaymentSystemFacade paymentSystemFacade,
-            IPaymentTransactionsRepository paymentTransactionsRepository,
+            IPaymentSystemService paymentSystemService,
             ILog log,
             IIdentityRepository identityGenerator,
-            IPaymentTransactionEventsLogRepository paymentTransactionEventsLog,
             ILimitationsServiceClient limitationsServiceClient,
             IPersonalDataService personalDataService,
             IAssetsService assetsService,
             IFeeCalculatorClient feeCalculatorClient,
             IRequestContext requestContext)
         {
-            _paymentSystemFacade = paymentSystemFacade;
-            _paymentTransactionsRepository = paymentTransactionsRepository;
+            _paymentSystemService = paymentSystemService;
             _log = log;
             _identityGenerator = identityGenerator;
-            _paymentTransactionEventsLog = paymentTransactionEventsLog;
             _personalDataService = personalDataService;
             _limitationsServiceClient = limitationsServiceClient;
             _assetsService = assetsService;
@@ -69,7 +64,7 @@ namespace LykkeApi2.Controllers
 
             try
             {
-                var lastOrder = await _paymentTransactionsRepository.GetLastByDate(clientId);
+                var lastOrder = await _paymentSystemService.GetLastPaymentTransactionByDate(clientId);
                 var personalData = await _personalDataService.GetAsync(clientId);
 
                 BankCardPaymentUrlRequestModel result;
@@ -147,7 +142,7 @@ namespace LykkeApi2.Controllers
                 var feeAmount = Math.Round(input.Amount * bankCardsFee.Percentage, 15);
                 var feeAmountTruncated = feeAmount.TruncateDecimalPlaces(asset.Accuracy, true);
 
-                var paymentTransaction = PaymentTransaction.Create(
+                var paymentTransaction = (PaymentTransaction)_paymentSystemService.CreatePaymentTransaction(
                     transactionId,
                     paymentSystem,
                     clientId,
@@ -158,7 +153,7 @@ namespace LykkeApi2.Controllers
                     assetToDeposit: input.AssetId,
                     info: info);
 
-                var urlData = await _paymentSystemFacade.GetUrlDataAsync(
+                var urlData = await _paymentSystemService.GetUrlDataAsync(
                     paymentSystem.ToString(),
                     transactionId,
                     clientId,
@@ -179,9 +174,9 @@ namespace LykkeApi2.Controllers
 
                 paymentTransaction.PaymentSystem = urlData.PaymentSystem;
 
-                await _paymentTransactionsRepository.CreateAsync(paymentTransaction);
-                await _paymentTransactionEventsLog.WriteAsync(PaymentTransactionEventLog.Create(transactionId, "", "Registered", clientId));
-                await _paymentTransactionEventsLog.WriteAsync(PaymentTransactionEventLog.Create(transactionId, urlData.PaymentUrl, "Payment Url has created", clientId));
+                await _paymentSystemService.InsertPaymentTransactionAsync(paymentTransaction);
+                await _paymentSystemService.InsertPaymentTransactionEventLogAsync(_paymentSystemService.CreatePaymentTransactionEventLog(transactionId, "", "Registered", clientId));
+                await _paymentSystemService.InsertPaymentTransactionEventLogAsync(_paymentSystemService.CreatePaymentTransactionEventLog(transactionId, urlData.PaymentUrl, "Payment Url has created", clientId));
 
                 // mode=iframe is for Mobile version 
                 if (!string.IsNullOrWhiteSpace(urlData.PaymentUrl))
@@ -198,8 +193,8 @@ namespace LykkeApi2.Controllers
             }
             catch (Exception e)
             {
-                await _paymentTransactionEventsLog.WriteAsync(
-                    PaymentTransactionEventLog.Create(transactionId, e.Message, "Payment Url creation fail", clientId));
+                await _paymentSystemService.InsertPaymentTransactionEventLogAsync(
+                    _paymentSystemService.CreatePaymentTransactionEventLog(transactionId, e.Message, "Payment Url creation fail", clientId));
 
                 await _log.WriteErrorAsync("BankCardPaymentUrlController", "Post", input.ToJson(), e);
                 return StatusCode(
