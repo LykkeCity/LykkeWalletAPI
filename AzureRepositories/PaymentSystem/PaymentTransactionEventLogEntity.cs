@@ -6,7 +6,6 @@ namespace AzureRepositories.PaymentSystem
 {
     public class PaymentTransactionEventLogEntity : TableEntity, IPaymentTransactionEventLog
     {
-      
         public DateTime DateTime { get; set; }
         public string TechData { get; set; }
         public string Message { get; set; }

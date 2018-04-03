@@ -9,7 +9,7 @@ namespace AzureRepositories.PaymentSystem
         public static readonly Dictionary<CashInPaymentSystem, Type> PsAndOtherInfoLinks = new Dictionary<CashInPaymentSystem, Type>
         {
             [CashInPaymentSystem.CreditVoucher] = typeof(OtherPaymentInfo),
-            [CashInPaymentSystem.Fxpaygate] = typeof(OtherPaymentInfo),
+            [CashInPaymentSystem.Fxpaygate] = typeof(OtherPaymentInfo)
         };
     }
 }
