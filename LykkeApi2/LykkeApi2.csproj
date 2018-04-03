@@ -26,7 +26,7 @@
     <PackageReference Include="Lykke.Common" Version="6.1.1" />
     <PackageReference Include="Lykke.Cqrs" Version="2.1.1" />
     <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.6" />
-    <PackageReference Include="Lykke.Logs" Version="3.6.0" />
+    <PackageReference Include="Lykke.Logs" Version="3.6.2" />
     <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.15" />
     <PackageReference Include="Lykke.Service.FeeCalculator.Client" Version="1.7.0" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
