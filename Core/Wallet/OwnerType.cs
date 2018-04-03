@@ -4,6 +4,6 @@
     {
         Spot = 1,
         Mt_LYKKEVU = 2,
-        Mt_LYKKECY =3
+        Mt_LYKKECY = 3
     }
 }

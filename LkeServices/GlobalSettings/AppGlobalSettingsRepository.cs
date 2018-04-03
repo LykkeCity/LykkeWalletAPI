@@ -11,7 +11,6 @@ namespace LkeServices.GlobalSettings
 
         private readonly INoSQLTableStorage<AppGlobalSettingsEntity> _tableStorage;
         private readonly IAppGlobalSettings _defaultAppGlobalSettings;
-       
 
         public AppGlobalSettingsRepository(INoSQLTableStorage<AppGlobalSettingsEntity> tableStorage, 
             IAppGlobalSettings defaultAppGlobalSettings)

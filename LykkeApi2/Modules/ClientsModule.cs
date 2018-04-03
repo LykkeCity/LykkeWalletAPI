@@ -67,8 +67,6 @@ namespace LykkeApi2.Modules
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
 
-               
-
             builder.RegisterOperationsHistoryClient(_apiSettings.CurrentValue.OperationsHistoryServiceClient, _log);
 
             builder.RegisterInstance(
