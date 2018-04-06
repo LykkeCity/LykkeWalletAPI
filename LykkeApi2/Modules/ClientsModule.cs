@@ -23,6 +23,7 @@ using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
+using Lykke.Service.Session.Client;
 using LykkeApi2.Settings;
 
 namespace LykkeApi2.Modules
@@ -44,8 +45,6 @@ namespace LykkeApi2.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterType<PhoneSignFilter>();
-
             builder.RegisterLykkeServiceClient(_serviceSettings.CurrentValue.ClientAccountServiceUrl);
             builder.RegisterHftInternalServiceClient(_serviceSettings.CurrentValue.HftInternalServiceUrl, _log);
 
@@ -76,6 +75,7 @@ namespace LykkeApi2.Modules
             builder.RegisterOperationsRepositoryClients(_serviceSettings.CurrentValue.OperationsRepositoryClient, _log);            
             builder.RegisterAffiliateClient(_serviceSettings.CurrentValue.AffiliateServiceClient.ServiceUrl, _log);
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
+
             builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
             
 
