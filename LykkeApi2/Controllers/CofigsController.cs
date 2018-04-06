@@ -11,9 +11,9 @@ namespace LykkeApi2.Controllers
     {
         private readonly CreditVouchersSettings _creditVouchersSettings;
 
-        public ConfigsController(CreditVouchersSettings creditVouchersSettings)
+        public ConfigsController(PaymentSystemsSettings paymentSystemsSettings)
         {
-            _creditVouchersSettings = creditVouchersSettings;
+            _creditVouchersSettings = paymentSystemsSettings.CreditVouchers;
         }
 
         [HttpGet]
