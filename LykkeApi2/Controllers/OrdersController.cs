@@ -162,7 +162,7 @@ namespace LykkeApi2.Controllers
 
             var command = new CreateMarketOrderCommand
             {
-                ConfirmationRequired = !sessionIsPromoted,
+                ConfirmationRequired = _baseSettings.EnableSessionValidation && !sessionIsPromoted,
                 AssetId = request.AssetId,
                 AssetPair = new AssetPairModel
                 {
