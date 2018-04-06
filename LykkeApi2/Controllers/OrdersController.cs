@@ -223,7 +223,7 @@ namespace LykkeApi2.Controllers
 
             var command = new CreateLimitOrderCommand
             {
-                ConfirmationRequired = !sessionIsPromoted,
+                ConfirmationRequired = _baseSettings.EnableSessionValidation && !sessionIsPromoted,
                 AssetPair = new AssetPairModel
                 {
                     Id = request.AssetPairId,
