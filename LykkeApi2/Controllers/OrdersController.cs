@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Identity;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -12,6 +13,8 @@ using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Contracts;
 using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using Lykke.Service.PersonalData.Contract;
+using Lykke.Service.Session.Client;
+using Lykke.Service.Session.Contracts;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Orders;
 using LykkeApi2.Settings;
@@ -28,6 +31,8 @@ namespace LykkeApi2.Controllers
     public class OrdersController : Controller
     {
         private readonly IRequestContext _requestContext;
+        private readonly ILykkePrincipal _lykkePrincipal;
+        private readonly IClientSessionsClient _clientSessionsClient;
         private readonly IPersonalDataService _personalDataService;
         private readonly IKycStatusService _kycStatusService;
         private readonly IClientAccountClient _clientAccountClient;
@@ -40,7 +45,10 @@ namespace LykkeApi2.Controllers
         private readonly IcoSettings _icoSettings;
         private readonly GlobalSettings _globalSettings;
 
-        public OrdersController(IRequestContext requestContext,
+        public OrdersController(
+            IRequestContext requestContext,
+            ILykkePrincipal lykkePrincipal,
+            IClientSessionsClient clientSessionsClient,
             IPersonalDataService personalDataService,
             IKycStatusService kycStatusService,
             IClientAccountClient clientAccountClient,
@@ -54,6 +62,8 @@ namespace LykkeApi2.Controllers
             GlobalSettings globalSettings)
         {
             _requestContext = requestContext;
+            _lykkePrincipal = lykkePrincipal;
+            _clientSessionsClient = clientSessionsClient;
             _personalDataService = personalDataService;
             _kycStatusService = kycStatusService;
             _clientAccountClient = clientAccountClient;
@@ -117,8 +127,8 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> PlaceMarketOrder([FromBody] MarketOrderRequest request)
         {
-            var id = Guid.NewGuid();
-            
+            var id = Guid.NewGuid();           
+
             var asset = await _assetsServiceWithCache.TryGetAssetAsync(request.AssetId);
             var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);            
 
@@ -142,11 +152,14 @@ namespace LykkeApi2.Controllers
                 return BadRequest();
             }
 
+            var sessionIsPromoted = await _clientSessionsClient.ValidateAsync(_lykkePrincipal.GetToken(), id.ToString(), RequestType.Orders);
+           
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
-            
+
             var command = new CreateMarketOrderCommand
             {
+                ConfirmationRequired = !sessionIsPromoted,
                 AssetId = request.AssetId,
                 AssetPair = new AssetPairModel
                 {
@@ -157,7 +170,9 @@ namespace LykkeApi2.Controllers
                     MinInvertedVolume = pair.MinInvertedVolume
                 },
                 Volume = Math.Abs(request.Volume),
-                OrderAction = request.OrderAction == Models.Orders.OrderAction.Buy ? Lykke.Service.Operations.Contracts.OrderAction.Buy : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+                OrderAction = request.OrderAction == Models.Orders.OrderAction.Buy
+                    ? Lykke.Service.Operations.Contracts.OrderAction.Buy
+                    : Lykke.Service.Operations.Contracts.OrderAction.Sell,
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
@@ -170,13 +185,13 @@ namespace LykkeApi2.Controllers
             {
                 if (e.Response.StatusCode == HttpStatusCode.BadRequest)
                     return BadRequest(JObject.Parse(e.Response.Content));
-                
+
                 throw;
-            }            
-            
+            }
+        
             return Created(Url.Action("Get", "Operations", new { id }), id);
         }
-
+        
         [HttpPost("limit")]
         [SwaggerOperation("PlaceLimitOrder")]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
@@ -200,9 +215,12 @@ namespace LykkeApi2.Controllers
             
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
-            
+
+            var sessionIsPromoted = await _clientSessionsClient.ValidateAsync(_lykkePrincipal.GetToken(), id.ToString(), RequestType.Orders);
+
             var command = new CreateLimitOrderCommand
             {
+                ConfirmationRequired = !sessionIsPromoted,
                 AssetPair = new AssetPairModel
                 {
                     Id = request.AssetPairId,
