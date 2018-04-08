@@ -186,4 +186,7 @@
   <data name="OperationsDetailInfoNotFound" xml:space="preserve">
     <value>Operataion Details Not Found</value>
   </data>
+  <data name="PasswordNotComplex" xml:space="preserve">
+    <value>Password must be at least {0} chars, contain digits, upper/lower case chars and special chars</value>
+  </data>
 </root>
