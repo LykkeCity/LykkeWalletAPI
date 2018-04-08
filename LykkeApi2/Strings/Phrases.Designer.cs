@@ -259,6 +259,15 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Password must be at least {0} chars, contain digits, upper/lower case chars and special chars.
+        /// </summary>
+        public static string PasswordNotComplex {
+            get {
+                return ResourceManager.GetString("PasswordNotComplex", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to We are experiencing technical problems. Please try again..
         /// </summary>
         public static string TechnicalProblems {
