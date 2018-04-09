@@ -22,7 +22,7 @@ namespace Core.Constants
 
         public const int TotalLykkeAmount = 1250000000;
 
-        public const int MinPwdLength = 8;
+        public const int MinPwdLength = 6;
         public const int MaxPwdLength = 100;
 
         public const int DefaultRefundTimeoutDays = 30;
