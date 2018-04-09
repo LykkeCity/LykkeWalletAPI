@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Contracts;
@@ -6,6 +7,8 @@ using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Operations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Rest;
+using OperationModel = Lykke.Service.Operations.Contracts.OperationModel;
 
 namespace LykkeApi2.Controllers
 {
@@ -31,7 +34,19 @@ namespace LykkeApi2.Controllers
         [Route("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
-            var operation = await _operationsClient.Get(id);
+            OperationModel operation = null;
+
+            try
+            {
+                operation = await _operationsClient.Get(id);
+            }
+            catch (HttpOperationException e)
+            {
+                if (e.Response.StatusCode == HttpStatusCode.NotFound)
+                    return NotFound();
+                
+                throw;
+            }            
 
             if (operation == null)
                 return NotFound();
