@@ -13,7 +13,7 @@ namespace LykkeApi2.Models.Auth
 
             RuleFor(m => m.Password)
                 .NotEmpty()
-                .Length(LykkeConstants.MinPwdLength, LykkeConstants.MaxPwdLength);
+                .Length(LykkeConstants.MinLoginPwdLength, LykkeConstants.MaxPwdLength);
         }   
     }
 }
