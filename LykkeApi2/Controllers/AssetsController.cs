@@ -4,6 +4,7 @@ using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
+using Common;
 using Common.Log;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.Assets.Client;
@@ -18,14 +19,20 @@ namespace LykkeApi2.Controllers
     public class AssetsController : Controller
     {
         private readonly IAssetsService _assetsService;
+        private readonly CachedDataDictionary<string, Asset> _assetsCache;
         private readonly IClientAccountSettingsClient _clientAccountSettingsClient;
         private readonly IRequestContext _requestContext;
         private readonly ILog _log;
 
-        public AssetsController(IAssetsService assetsService, IClientAccountSettingsClient clientAccountSettingsClient, IRequestContext requestContext,
+        public AssetsController(
+            IAssetsService assetsService,
+            CachedDataDictionary<string, Asset> assetsCache,
+            IClientAccountSettingsClient clientAccountSettingsClient,
+            IRequestContext requestContext,
             ILog log)
         {
             _assetsService = assetsService;
+            _assetsCache = assetsCache;
             _clientAccountSettingsClient = clientAccountSettingsClient;
             _requestContext = requestContext;
             _log = log;
@@ -274,11 +281,26 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAvailableAssets()
         {
-            var assetsIds = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
-            if (assetsIds == null)
-                return NotFound();
+            var allTradableNondisabledAssets = (await _assetsCache.Values()).Where(x => !x.IsDisabled && x.IsTradable);
             
-            return Ok(AssetIdsResponse.Create(assetsIds));
+            var currentPartnersTradableNondisabledAssets = allTradableNondisabledAssets.Where(x =>
+            {
+                if (x.NotLykkeAsset)
+                {
+                    return _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId);
+                }
+                else
+                {
+                    return _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId);
+                }
+            });
+            
+            var assetsAvailableToUser = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
+            
+            return Ok(
+                AssetIdsResponse.Create(
+                    assetsAvailableToUser
+                        .Where(x => currentPartnersTradableNondisabledAssets.Any(y => y.Id == x))));
         }
     }
 }
