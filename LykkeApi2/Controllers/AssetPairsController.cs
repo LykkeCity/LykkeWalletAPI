@@ -49,47 +49,44 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
             var assetPairs = (await _assetPairs.Values()).Where(s => !s.IsDisabled);
             return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(assetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
         }
-        
+
         /// <summary>
         ///     Get available asset pairs.
         /// </summary>
         /// <returns></returns>
         [Authorize]
         [HttpGet("available")]
-        [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailable()
         {
             var allNondisabledAssetPairs = (await _assetPairs.Values()).Where(s => !s.IsDisabled);
-            
+
             var allTradableNondisabledAssets = (await _assetsCache.Values()).Where(x => !x.IsDisabled && x.IsTradable);
 
-            var currentPartnersTradableNondisabledAssets = allTradableNondisabledAssets.Where(x =>
+            var currentPartnersTradableNondisabledAssets = new HashSet<string>(allTradableNondisabledAssets.Where(x =>
             {
                 if (x.NotLykkeAsset)
                 {
                     return _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId);
                 }
-                else
-                {
-                    return _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId);
-                }
-            });
+                return _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId);
+            }).Select(x => x.Id));
 
-            var assetsAvailableToUser = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
+            var assetsAvailableToUser = new HashSet<string>(await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true));
 
             var availableAssetPairs =
                 allNondisabledAssetPairs.Where(x =>
                     assetsAvailableToUser.Contains(x.BaseAssetId) &&
                     assetsAvailableToUser.Contains(x.QuotingAssetId) &&
-                    currentPartnersTradableNondisabledAssets.Any(y => y.Id == x.BaseAssetId) &&
-                    currentPartnersTradableNondisabledAssets.Any(y => y.Id == x.QuotingAssetId));
-            
+                    currentPartnersTradableNondisabledAssets.Contains(x.BaseAssetId) &&
+                    currentPartnersTradableNondisabledAssets.Contains(x.QuotingAssetId));
+
             return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(availableAssetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
         }
 
@@ -99,14 +96,14 @@ namespace LykkeApi2.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetPairById(string id)
         {
             var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == id);
             if (assetPair == null)
                 return NotFound($"AssetPair {id} does not exist");
-            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(new List<AssetPairModel> {assetPair.ConvertToApiModel()}));
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(new List<AssetPairModel> { assetPair.ConvertToApiModel() }));
         }
 
         /// <summary>
@@ -114,7 +111,7 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("rates")]
-        [ProducesResponseType(typeof(AssetPairRatesResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetPairRatesResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetPairRates()
         {
             var assetPairs = await _assetsService.AssetPairGetAllAsync();
@@ -138,8 +135,8 @@ namespace LykkeApi2.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpGet("rates/{assetPairId}")]
-        [ProducesResponseType(typeof(AssetPairRatesResponseModel), (int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(AssetPairRatesResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetPairRatesById([FromRoute] AssetPairRequestModel request)
         {
             var asset = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == request.AssetPairId);
@@ -153,7 +150,7 @@ namespace LykkeApi2.Controllers
             if (feedData == null)
                 return NotFound($"No data exist for {request.AssetPairId}");
 
-            return Ok(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel> {feedData.ConvertToApiModel()}));
+            return Ok(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel> { feedData.ConvertToApiModel() }));
         }
     }
 }
