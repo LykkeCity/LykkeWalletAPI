@@ -14,16 +14,10 @@ namespace Core.Services
             string walletId,
             string isoCountryCode,
             string otherInfoJson);
-
         Task InsertPaymentTransactionAsync(IPaymentTransaction src);
-
         Task<IPaymentTransaction> GetLastPaymentTransactionByDate(string clientId);
-
         Task InsertPaymentTransactionEventLogAsync(IPaymentTransactionEventLog newEvent);
-
-        IPaymentTransactionEventLog CreatePaymentTransactionEventLog(string transactionId, string techData,
-            string message, string who);
-
+        IPaymentTransactionEventLog CreatePaymentTransactionEventLog(string transactionId, string techData, string message, string who);
         IPaymentTransaction CreatePaymentTransaction(string id,
             CashInPaymentSystem paymentSystem,
             string clientId,
