@@ -7,8 +7,6 @@ namespace LykkeApi2.Models.Settings
         public int RateRefreshPeriod { get; set; }
         public string BaseAssetId { get; set; }
         public bool SignOrder { get; set; }
-        public string DepositUrl { get; set; }
-        public bool DebugMode { get; set; }
         public RefundAddressSettingsModel RefundSettings { get; set; }
         public double MarketOrderPriceDeviation { get; set; }
     }

@@ -24,20 +24,38 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(string assetId = null)
         {
-            var fee = new ApiFeeSettingsModel
+            if (string.IsNullOrEmpty(assetId))
             {
-                BankCardsFeeSizePercentage = (await _feeCalculatorClient.GetBankCardFees()).Percentage,
-                CashOut = (await _feeCalculatorClient.GetCashoutFeesAsync()).Select(cashoutFee =>
-                    new CashoutFee
-                    {
-                        AssetId = cashoutFee.AssetId,
-                        Size = cashoutFee.Size,
-                        Type = cashoutFee.Type
-                    }).ToList()
-            };
-            return Ok(fee);
+                var fee = new ApiFeeSettingsModel
+                {
+                    BankCardsFeeSizePercentage = (await _feeCalculatorClient.GetBankCardFees()).Percentage,
+                    CashOut = (await _feeCalculatorClient.GetCashoutFeesAsync()).Select(cashoutFee =>
+                        new CashoutFee
+                        {
+                            AssetId = cashoutFee.AssetId,
+                            Size = cashoutFee.Size,
+                            Type = cashoutFee.Type
+                        }).ToList()
+                };
+                return Ok(fee);
+            }
+            else
+            {
+                var fee = new ApiFeeSettingsModel
+                {
+                    BankCardsFeeSizePercentage = (await _feeCalculatorClient.GetBankCardFees()).Percentage,
+                    CashOut = (await _feeCalculatorClient.GetCashoutFeesAsync(assetId)).Select(cashoutFee =>
+                        new CashoutFee
+                        {
+                            AssetId = cashoutFee.AssetId,
+                            Size = cashoutFee.Size,
+                            Type = cashoutFee.Type
+                        }).ToList()
+                };
+                return Ok(fee);
+            }
         }
     }
 }
