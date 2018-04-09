@@ -120,8 +120,6 @@ namespace LykkeApi2.Models
                 RateRefreshPeriod = 5000,
                 BaseAssetId = assetId,
                 SignOrder = exchange.SignOrder,
-                DepositUrl = appGlobalSettings.DepositUrl,
-                DebugMode = appGlobalSettings.DebugMode,
                 RefundSettings = refundSettings.ConvertToApiModel(),
                 MarketOrderPriceDeviation = appGlobalSettings.MarketOrderPriceDeviation,
             };
