@@ -26,18 +26,13 @@ namespace LykkeApi2.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(string assetId = null)
         {
+            var cashout = string.IsNullOrEmpty(assetId)
+                ? await _feeCalculatorClient.GetCashoutFeesAsync()
+                : await _feeCalculatorClient.GetCashoutFeesAsync(assetId);
             var fee = new ApiFeeSettingsModel
             {
                 BankCardsFeeSizePercentage = (await _feeCalculatorClient.GetBankCardFees()).Percentage,
-                CashOut = string.IsNullOrEmpty(assetId)
-                    ? (await _feeCalculatorClient.GetCashoutFeesAsync()).Select(cashoutFee =>
-                        new CashoutFee
-                        {
-                            AssetId = cashoutFee.AssetId,
-                            Size = cashoutFee.Size,
-                            Type = cashoutFee.Type
-                        }).ToList()
-                    : (await _feeCalculatorClient.GetCashoutFeesAsync(assetId)).Select(cashoutFee =>
+                CashOut = cashout.Select(cashoutFee =>
                         new CashoutFee
                         {
                             AssetId = cashoutFee.AssetId,
