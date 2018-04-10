@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -283,24 +284,22 @@ namespace LykkeApi2.Controllers
         {
             var allTradableNondisabledAssets = (await _assetsCache.Values()).Where(x => !x.IsDisabled && x.IsTradable);
             
-            var currentPartnersTradableNondisabledAssets = allTradableNondisabledAssets.Where(x =>
+            var currentPartnersTradableNondisabledAssets = new HashSet<string>(allTradableNondisabledAssets.Where(x =>
             {
                 if (x.NotLykkeAsset)
                 {
                     return _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId);
                 }
-                else
-                {
-                    return _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId);
-                }
-            });
+                
+                return _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId);
+            }).Select(x => x.Id));
             
             var assetsAvailableToUser = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
             
             return Ok(
                 AssetIdsResponse.Create(
                     assetsAvailableToUser
-                        .Where(x => currentPartnersTradableNondisabledAssets.Any(y => y.Id == x))));
+                        .Where(x => currentPartnersTradableNondisabledAssets.Contains(x))));
         }
     }
 }
