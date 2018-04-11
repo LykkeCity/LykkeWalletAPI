@@ -43,17 +43,11 @@ namespace LykkeApi2.Models.ValidationModels.RegistrationValidations
                 .WithMessage(string.Format(Phrases.MinLength, LykkeConstants.MinPwdLength));
             RuleFor(reg => reg.Password).MaximumLength(LykkeConstants.MaxPwdLength)
                 .WithMessage(string.Format(Phrases.MaxLength, LykkeConstants.MaxPwdLength));
-            RuleFor(reg => reg.Password).Must(IsPasswordComplex).WithMessage(string.Format(Phrases.PasswordNotComplex, LykkeConstants.MinPwdLength));
             #endregion
 
             #region Hint
             RuleFor(reg => reg.Hint).ValidHintValue().WithMessage(Phrases.InvalidValue);
             #endregion
-        }
-        
-        private bool IsPasswordComplex(AccountRegistrationModel instance, string value)
-        {
-            return instance.Password.IsPasswordComplex(LykkeConstants.MinPwdLength);
         }
     }
 }
