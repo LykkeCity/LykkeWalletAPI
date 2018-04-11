@@ -152,14 +152,14 @@ namespace LykkeApi2.Controllers
                 return BadRequest();
             }
 
-            var sessionIsPromoted = await _clientSessionsClient.ValidateAsync(_lykkePrincipal.GetToken(), id.ToString(), RequestType.Orders);
+            //var sessionIsPromoted = await _clientSessionsClient.ValidateAsync(_lykkePrincipal.GetToken(), id.ToString(), RequestType.Orders);
            
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
             var command = new CreateMarketOrderCommand
             {
-                ConfirmationRequired = !sessionIsPromoted,
+                ConfirmationRequired = false,
                 AssetId = request.AssetId,
                 AssetPair = new AssetPairModel
                 {
@@ -216,11 +216,11 @@ namespace LykkeApi2.Controllers
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
-            var sessionIsPromoted = await _clientSessionsClient.ValidateAsync(_lykkePrincipal.GetToken(), id.ToString(), RequestType.Orders);
+            //var sessionIsPromoted = await _clientSessionsClient.ValidateAsync(_lykkePrincipal.GetToken(), id.ToString(), RequestType.Orders);
 
             var command = new CreateLimitOrderCommand
             {
-                ConfirmationRequired = !sessionIsPromoted,
+                ConfirmationRequired = false,
                 AssetPair = new AssetPairModel
                 {
                     Id = request.AssetPairId,
