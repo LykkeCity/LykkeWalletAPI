@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using Common.Log;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Strings;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
+using Core.Identity;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;
@@ -19,6 +21,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models;
+using Lykke.Service.Session.Client;
 
 namespace LykkeApi2.Controllers
 {
@@ -29,6 +32,8 @@ namespace LykkeApi2.Controllers
     {
         private readonly ILog _log;
         private readonly ILykkeRegistrationClient _lykkeRegistrationClient;
+        private readonly ILykkePrincipal _lykkePrincipal;
+        private readonly IClientSessionsClient _clientSessionsClient;
         private readonly ClientAccountLogic _clientAccountLogic;
         private readonly IRequestContext _requestContext;
         private readonly IPersonalDataService _personalDataService;
@@ -36,6 +41,8 @@ namespace LykkeApi2.Controllers
 
         public ClientController(
             ILog log,
+            ILykkePrincipal lykkePrincipal,
+            IClientSessionsClient clientSessionsClient,
             ILykkeRegistrationClient lykkeRegistrationClient,
             ClientAccountLogic clientAccountLogic,
             IRequestContext requestContext,
@@ -44,6 +51,8 @@ namespace LykkeApi2.Controllers
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
+            _lykkePrincipal = lykkePrincipal;
+            _clientSessionsClient = clientSessionsClient;
             _clientAccountLogic = clientAccountLogic;
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
@@ -140,6 +149,19 @@ namespace LykkeApi2.Controllers
         }
 
         [Authorize]
+        [HttpPatch("session")]
+
+        public async Task<IActionResult> Trading([FromBody]TradingModel request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState.GetErrorMessage());
+
+            await _clientSessionsClient.ExtendTradingSession(_lykkePrincipal.GetToken(), request.Ttl);
+
+            return Ok();
+        }
+
+        [Authorize]
         [HttpGet("userInfo")]
         [SwaggerOperation("UserInfo")]
         [ProducesResponseType(typeof(UserInfoResponseModel), (int) HttpStatusCode.OK)]
@@ -173,14 +195,21 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("Features")]
         [ProducesResponseType(typeof(FeaturesResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Features()
+        public async Task<FeaturesResponseModel> Features()
         {
             var features = await _clientAccountService.GetFeaturesAsync(_requestContext.ClientId);
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
 
-            return Ok(new FeaturesResponseModel
+            return new FeaturesResponseModel
             {
-                AffiliateEnabled = features.AffiliateEnabled
-            });
-        }
+                AffiliateEnabled = features.AffiliateEnabled,
+                TradingSession = tradingSession
+            };
+        }               
+    }
+
+    public class TradingModel
+    {
+        public TimeSpan Ttl { get; set; }
     }
 }
