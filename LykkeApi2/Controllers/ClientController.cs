@@ -22,6 +22,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Session.Client;
+using LykkeApi2.Models.Client;
 
 namespace LykkeApi2.Controllers
 {
@@ -149,9 +150,22 @@ namespace LykkeApi2.Controllers
         }
 
         [Authorize]
+        [HttpPost("session")]
+
+        public async Task<IActionResult> CreateTradingSession([FromBody]TradingModel request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState.GetErrorMessage());
+
+            await _clientSessionsClient.CreateTradingSession(_lykkePrincipal.GetToken(), request.Ttl);
+
+            return Ok();
+        }
+
+        [Authorize]
         [HttpPatch("session")]
 
-        public async Task<IActionResult> Trading([FromBody]TradingModel request)
+        public async Task<IActionResult> ExtendTradingSession([FromBody]TradingModel request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.GetErrorMessage());
@@ -206,10 +220,5 @@ namespace LykkeApi2.Controllers
                 TradingSession = tradingSession
             };
         }               
-    }
-
-    public class TradingModel
-    {
-        public TimeSpan Ttl { get; set; }
     }
 }
