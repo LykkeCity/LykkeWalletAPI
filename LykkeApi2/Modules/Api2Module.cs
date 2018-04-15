@@ -92,16 +92,19 @@ namespace LykkeApi2.Modules
                 var ctx = c.Resolve<IComponentContext>();
                 return new CachedDataDictionary<string, Asset>(
                     async () =>
-                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync()).ToDictionary(itm => itm.Id));
+                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync())
+                        .ToDictionary(itm => itm.Id),
+                    60);
             }).SingleInstance();
-            
+
             builder.Register(c =>
             {
                 var ctx = c.Resolve<IComponentContext>();
                 return new CachedDataDictionary<string, AssetPair>(
                     async () =>
                         (await ctx.Resolve<IAssetsService>().AssetPairGetAllAsync())
-                        .ToDictionary(itm => itm.Id));
+                        .ToDictionary(itm => itm.Id),
+                    60);
             }).SingleInstance();
         }
 
