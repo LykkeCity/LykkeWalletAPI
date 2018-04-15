@@ -87,11 +87,8 @@ namespace LykkeApi2.Models
                 Accuracy = src.Accuracy,
                 BaseAssetId = src.BaseAssetId,
                 InvertedAccuracy = src.InvertedAccuracy,
-                IsDisabled = src.IsDisabled,
                 Name = src.Name,
-                QuotingAssetId = src.QuotingAssetId,
-                Source = src.Source,
-                Source2 = src.Source2,
+                QuotingAssetId = src.QuotingAssetId
             };
         }
 

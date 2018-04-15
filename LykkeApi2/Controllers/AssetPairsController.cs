@@ -24,7 +24,6 @@ namespace LykkeApi2.Controllers
         private readonly CachedDataDictionary<string, AssetPair> _assetPairs;
         private readonly CachedDataDictionary<string, Asset> _assetsCache;
         private readonly IAssetsService _assetsService;
-        private readonly ILog _log;
         private readonly ILykkeMarketProfileServiceAPI _marketProfileService;
         private readonly IRequestContext _requestContext;
 
@@ -33,31 +32,31 @@ namespace LykkeApi2.Controllers
             CachedDataDictionary<string, Asset> assetsCache,
             IAssetsService assetsService,
             ILykkeMarketProfileServiceAPI marketProfile,
-            ILog log,
             IRequestContext requestContext)
         {
             _assetPairs = assetPairs;
             _assetsCache = assetsCache;
             _assetsService = assetsService;
             _marketProfileService = marketProfile;
-            _log = log;
             _requestContext = requestContext;
         }
 
         /// <summary>
-        ///     Get asset pairs.
+        /// Get asset pairs.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
-            var assetPairs = (await _assetPairs.Values()).Where(s => !s.IsDisabled);
-            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(assetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
+            var allAsetPairs = await _assetPairs.Values();
+            var nonDisabledAassetPairs = allAsetPairs.Where(s => !s.IsDisabled);
+            
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(nonDisabledAassetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
         }
 
         /// <summary>
-        ///     Get available asset pairs.
+        /// Get available asset pairs.
         /// </summary>
         /// <returns></returns>
         [Authorize]
@@ -91,46 +90,60 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
-        ///     Get asset pair by id.
+        /// Get asset pair by id.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAssetPairById(string id)
         {
-            var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == id);
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest();
+            
+            var allAssetPairs = await _assetPairs.Values();
+            var assetPair = allAssetPairs.Where(x => !x.IsDisabled).FirstOrDefault(x => x.Id == id);
+            
             if (assetPair == null)
-                return NotFound($"AssetPair {id} does not exist");
+                return NotFound();
+            
             return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(new List<AssetPairModel> { assetPair.ConvertToApiModel() }));
         }
 
         /// <summary>
-        ///     Get asset pair rates.
+        /// Get asset pair rates.
         /// </summary>
         /// <returns></returns>
         [HttpGet("rates")]
         [ProducesResponseType(typeof(AssetPairRatesResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetPairRates()
         {
-            var assetPairs = await _assetsService.AssetPairGetAllAsync();
-            //var assetPairs = await _assetsService.GetAssetsPairsForClient(new Lykke.Service.Assets.Client.Models.GetAssetPairsForClientRequestModel
-            //{
-            //    ClientId = _requestContext.ClientId,
-            //    IsIosDevice = _requestContext.IsIosDevice,
-            //    PartnerId = _requestContext.PartnerId
-            //});
+            var allAssetPairs = await _assetPairs.Values();
+            var allNondisabledAssetPairs = allAssetPairs.Where(x => !x.IsDisabled);
 
-            var assetPairsDict = assetPairs.ToDictionary(itm => itm.Id);
+            var allAssets = await _assetsCache.Values();
+            var allTradableNondisabledAssets =
+                new HashSet<string>(
+                    allAssets
+                    .Where(x => !x.IsDisabled && x.IsTradable)
+                    .Select(x => x.Id));
+
+            var assetPairsDict = allNondisabledAssetPairs.Where(x =>
+                allTradableNondisabledAssets.Contains(x.BaseAssetId) &&
+                allTradableNondisabledAssets.Contains(x.QuotingAssetId))
+                .ToDictionary(x => x.Id);
+            
             var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
 
             marketProfile = marketProfile.Where(itm => assetPairsDict.ContainsKey(itm.AssetPair)).ToList();
+            
             return Ok(AssetPairRatesResponseModel.Create(marketProfile.Select(m => m.ConvertToApiModel()).ToArray()));
         }
 
         /// <summary>
-        ///     Get asset pair rates by id.
+        /// Get asset pair rates by id.
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -142,13 +155,13 @@ namespace LykkeApi2.Controllers
             var asset = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == request.AssetPairId);
 
             if (asset == null)
-                return NotFound($"AssetPair {request.AssetPairId} does not exist");
+                return NotFound();
 
             var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
             var feedData = marketProfile.FirstOrDefault(itm => itm.AssetPair == request.AssetPairId);
 
             if (feedData == null)
-                return NotFound($"No data exist for {request.AssetPairId}");
+                return NotFound();
 
             return Ok(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel> { feedData.ConvertToApiModel() }));
         }
