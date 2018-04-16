@@ -75,14 +75,9 @@ namespace LykkeApi2.Controllers
 
             var allTradableNondisabledAssets = (await _assetsCache.Values()).Where(x => !x.IsDisabled && x.IsTradable);
 
-            var currentPartnersTradableNondisabledAssets = new HashSet<string>(allTradableNondisabledAssets.Where(x =>
-            {
-                if (x.NotLykkeAsset)
-                {
-                    return _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId);
-                }
-                return _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId);
-            }).Select(x => x.Id));
+            var currentPartnersTradableNondisabledAssets = new HashSet<string>(allTradableNondisabledAssets.Where(x => x.NotLykkeAsset
+                ? _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId)
+                : _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId)).Select(x => x.Id));
 
             var assetsAvailableToUser = new HashSet<string>(await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true));
 
