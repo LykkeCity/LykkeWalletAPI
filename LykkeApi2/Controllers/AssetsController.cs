@@ -293,13 +293,16 @@ namespace LykkeApi2.Controllers
                 return NotFound();
             }
             
-            var assetsAvailableToUser = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
-
             var partnerEligible = asset.NotLykkeAsset
-                ? (_requestContext.PartnerId != null && asset.PartnerIds.Contains(_requestContext.PartnerId))
-                : (_requestContext.PartnerId == null || asset.PartnerIds.Contains(_requestContext.PartnerId));
+                ? _requestContext.PartnerId != null && asset.PartnerIds.Contains(_requestContext.PartnerId)
+                : _requestContext.PartnerId == null || asset.PartnerIds.Contains(_requestContext.PartnerId);
+
+            if (!partnerEligible || !asset.IsTradable)
+                return BadRequest();
             
-            if (!asset.IsBase || assetsAvailableToUser.All(x => x != asset.Id) && !partnerEligible)
+            var assetsAvailableToUser = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
+            
+            if (!asset.IsBase || assetsAvailableToUser.All(x => x != asset.Id))
                 return BadRequest();
 
             await _clientAccountSettingsClient.SetBaseAssetAsync(_requestContext.ClientId, model.BaseAsssetId);
@@ -318,15 +321,9 @@ namespace LykkeApi2.Controllers
         {
             var allTradableNondisabledAssets = (await _assetsCache.Values()).Where(x => !x.IsDisabled && x.IsTradable);
             
-            var currentPartnersTradableNondisabledAssets = new HashSet<string>(allTradableNondisabledAssets.Where(x =>
-            {
-                if (x.NotLykkeAsset)
-                {
-                    return _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId);
-                }
-                
-                return _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId);
-            }).Select(x => x.Id));
+            var currentPartnersTradableNondisabledAssets = new HashSet<string>(allTradableNondisabledAssets.Where(x => x.NotLykkeAsset
+                ? _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId)
+                : _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId)).Select(x => x.Id));
             
             var assetsAvailableToUser = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
             
