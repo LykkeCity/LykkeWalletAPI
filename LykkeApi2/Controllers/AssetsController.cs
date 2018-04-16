@@ -105,8 +105,6 @@ namespace LykkeApi2.Controllers
             }
             
             var keyValues = await _assetsService.AssetAttributeGetAllForAssetAsync(assetId);
-            if (keyValues == null)
-                return NotFound();
             
             return Ok(keyValues.ConvertToApiModel());
         }
@@ -145,17 +143,18 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("description")]
-        [ProducesResponseType(typeof(AssetDescriptionsResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetDescriptionsModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetDescriptions()
         {
             var res = await _assetsService.AssetExtendedInfoGetAllAsync();
 
             var allAssets = await _assetsCache.Values();
+            var assetsDict = allAssets.ToDictionary(x => x.Id, x => x.IsDisabled);
 
-            var nondisabledAssets = res.Where(x => !allAssets.First(y => y.Id == x.Id).IsDisabled).ToArray();
+            var nondisabledAssets = res.Where(x => assetsDict.ContainsKey(x.Id) && !assetsDict[x.Id]);
             
-            return Ok(AssetDescriptionsResponseModel.Create(
-                nondisabledAssets.Select(ConvertToAssetDescription).ToArray()));
+            return Ok(AssetDescriptionsModel.Create(
+                nondisabledAssets.Select(x => x.ConvertToApiModel()).ToArray()));
         }
 
         /// <summary>
@@ -185,7 +184,7 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrEmpty(extendedInfo.Id))
                 extendedInfo.Id = assetId;
 
-            return Ok(ConvertToAssetDescription(extendedInfo));
+            return Ok(extendedInfo.ConvertToApiModel());
         }
 
         /// <summary>
@@ -197,7 +196,8 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> GetAssetCategories()
         {
             var res = await _assetsService.AssetCategoryGetAllAsync();
-            return Ok(GetAssetCategoriesResponseModel.Create(res.Select(itm => itm.ConvertToApiModel()).ToArray()));
+            
+            return Ok(GetAssetCategoriesResponseModel.Create(res.Select(x => x.ConvertToApiModel()).ToArray()));
         }
 
         /// <summary>
@@ -229,13 +229,35 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(AssetExtendedResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetsExtended()
         {
-            var res = await _assetsService.AssetExtendedInfoGetAllAsync();
-            
             var allAssets = await _assetsCache.Values();
+            var descriptionsTask = _assetsService.AssetExtendedInfoGetAllAsync();
+            var categoriesTask = _assetsService.AssetCategoryGetAllAsync();
+            var keyValuesTask = _assetsService.AssetAttributeGetAllAsync();
+            var defaultDescriptionTask = _assetsService.AssetExtendedInfoGetDefaultAsync();
 
-            var nondisabledAssets = res.Where(x => !allAssets.First(y => y.Id == x.Id).IsDisabled);
+            await Task.WhenAll(descriptionsTask, categoriesTask, keyValuesTask, defaultDescriptionTask);
+
+            var descriptions = descriptionsTask.Result;
+            var categories = categoriesTask.Result;
+            var keyValues = keyValuesTask.Result;
+            var defaultDescription = defaultDescriptionTask.Result;
             
-            var assetsExtended = nondisabledAssets.Select(s => s.ConvertTpApiModel());
+            var assetsExtended = allAssets.Where(x => !x.IsDisabled).Select(
+                x =>
+                {
+                    var asset = allAssets.FirstOrDefault(y => y.Id == x.Id);
+                    
+                    var description = descriptions.FirstOrDefault(y => y.Id == asset.Id) ?? defaultDescription;
+                    
+                    if (string.IsNullOrEmpty(description.Id))
+                        description.Id = asset.Id;
+                    
+                    return ConversionExtensions.CreateAssetExtended(
+                        asset,
+                        descriptions.FirstOrDefault(y => y.Id == asset.Id) ?? defaultDescription,
+                        categories.FirstOrDefault(y => y.Id == asset.CategoryId),
+                        keyValues.FirstOrDefault(y => y.AssetId == asset.Id));
+                });
             return Ok(AssetExtendedResponseModel.Create(assetsExtended.ToArray()));
         }
 
@@ -245,7 +267,7 @@ namespace LykkeApi2.Controllers
         /// <param name="assetId"></param>
         /// <returns></returns>
         [HttpGet("{assetId}/extended")]
-        [ProducesResponseType(typeof(AssetExtendedResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetExtendedModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAssetsExtended(string assetId)
@@ -259,12 +281,20 @@ namespace LykkeApi2.Controllers
             {
                 return NotFound();
             }
+
+            var keyValues = await _assetsService.AssetAttributeGetAllForAssetAsync(assetId);
             
-            var res = await _assetsService.AssetExtendedInfoGetAsync(assetId);
-            if (res == null)
-                return NotFound();
+            var description =  await _assetsService.AssetExtendedInfoGetAsync(assetId) ??
+                               await _assetsService.AssetExtendedInfoGetDefaultAsync();
             
-            return Ok(AssetExtendedResponseModel.Create(new[] { res.ConvertTpApiModel() }));
+            if (string.IsNullOrEmpty(description.Id))
+                description.Id = assetId;
+            
+            return Ok(ConversionExtensions.CreateAssetExtended(
+                asset,
+                description,
+                asset.CategoryId != null ? await _assetsService.AssetCategoryGetAsync(asset.CategoryId) : null,
+                keyValues));
         }
 
         [Authorize]
@@ -272,7 +302,14 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(BaseAssetClientModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetBaseAsset()
         {
-            return Ok(await _clientAccountSettingsClient.GetBaseAssetAsync(_requestContext.ClientId));
+            var ba = await _clientAccountSettingsClient.GetBaseAssetAsync(_requestContext.ClientId);
+
+            var baseAssetModel = new BaseAssetModel
+            {
+                BaseAssetId = ba.BaseAssetId
+            };
+            
+            return Ok(baseAssetModel);
         }
 
         [Authorize]
@@ -332,22 +369,6 @@ namespace LykkeApi2.Controllers
                     assetsAvailableToUser
                         .Where(x => currentPartnersTradableNondisabledAssets.Contains(x))
                         .ToArray()));
-        }
-        
-        private static AssetDescriptionModel ConvertToAssetDescription(AssetExtendedInfo extendedInfo)
-        {
-            return new AssetDescriptionModel
-            {
-                Id = extendedInfo.Id,
-                AssetClass = extendedInfo.AssetClass,
-                Description = extendedInfo.Description,
-                IssuerName = null,
-                MarketCapitalization = extendedInfo.MarketCapitalization,
-                NumberOfCoins = extendedInfo.NumberOfCoins,
-                PopIndex = extendedInfo.PopIndex,
-                AssetDescriptionUrl = extendedInfo.AssetDescriptionUrl,
-                FullName = extendedInfo.FullName
-            };
         }
     }
 }

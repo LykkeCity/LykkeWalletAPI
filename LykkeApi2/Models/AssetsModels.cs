@@ -6,9 +6,9 @@ namespace LykkeApi2.Models
 {
     public class GetAssetCategoriesResponseModel
     {
-        public ApiAssetCategoryModel[] AssetCategories { get; set; }
+        public AssetCategoryModel[] AssetCategories { get; set; }
 
-        public static GetAssetCategoriesResponseModel Create(ApiAssetCategoryModel[] assetCategories)
+        public static GetAssetCategoriesResponseModel Create(AssetCategoryModel[] assetCategories)
         {
             return new GetAssetCategoriesResponseModel
             {
@@ -46,9 +46,9 @@ namespace LykkeApi2.Models
 
     public class AssetExtendedResponseModel
     {
-        public IEnumerable<AssetExtended> Assets { get; set; }
+        public IEnumerable<AssetExtendedModel> Assets { get; set; }
 
-        public static AssetExtendedResponseModel Create(IEnumerable<AssetExtended> assets)
+        public static AssetExtendedResponseModel Create(IEnumerable<AssetExtendedModel> assets)
         {
             return new AssetExtendedResponseModel
             {
@@ -57,16 +57,16 @@ namespace LykkeApi2.Models
         }
     }
 
-    public class AssetExtended
+    public class AssetExtendedModel
     {
         public ApiAssetModel Asset { get; set; }
         public AssetDescriptionModel Description { get; set; }
-        public ApiAssetCategoryModel Category { get; set; }
+        public AssetCategoryModel Category { get; set; }
         public IEnumerable<IAssetAttributesKeyValue> Attributes { get; set; }
 
-        public static AssetExtended Create(ApiAssetModel asset, AssetDescriptionModel description, ApiAssetCategoryModel category, IEnumerable<IAssetAttributesKeyValue> attributes)
+        public static AssetExtendedModel Create(ApiAssetModel asset, AssetDescriptionModel description, AssetCategoryModel category, List<IAssetAttributesKeyValue> attributes)
         {
-            return new AssetExtended
+            return new AssetExtendedModel
             {
                 Asset = asset,
                 Description = description,
@@ -94,21 +94,17 @@ namespace LykkeApi2.Models
         public string Value { get; set; }
     }
 
-    public class AssetDescriptionsResponseModel
+    public class AssetDescriptionsModel
     {
         public IEnumerable<AssetDescriptionModel> Descriptions { get; set; }
-        public static AssetDescriptionsResponseModel Create(IEnumerable<AssetDescriptionModel> descriptions)
+        
+        public static AssetDescriptionsModel Create(IEnumerable<AssetDescriptionModel> descriptions)
         {
-            return new AssetDescriptionsResponseModel
+            return new AssetDescriptionsModel
             {
                 Descriptions = descriptions
             };
         }
-    }
-
-    public class GetAssetDescriptionsRequestModel
-    {
-        public string[] Ids { get; set; }
     }
 
     public class BaseAssetModel
