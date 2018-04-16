@@ -30,9 +30,9 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static ApiAssetCategoryModel ConvertToApiModel(this AssetCategory src)
+        public static AssetCategoryModel ConvertToApiModel(this AssetCategory src)
         {
-            return new ApiAssetCategoryModel
+            return new AssetCategoryModel
             {
                 Id = src.Id,
                 Name = src.Name,
@@ -46,7 +46,10 @@ namespace LykkeApi2.Models
         {
             return new AssetAttributesModel
             {
-                Attrbuttes = src.Attributes.Select(ConvertToApiModel).ToArray()
+                Attrbuttes =
+                    src != null
+                        ? (src.Attributes?.Select(ConvertToApiModel).ToArray() ?? new KeyValue[0])
+                        : new KeyValue[0]
             };
 
         }
@@ -57,25 +60,35 @@ namespace LykkeApi2.Models
 
         }
 
-        public static AssetExtended ConvertTpApiModel(this AssetExtendedInfo src)
+        public static AssetExtendedModel CreateAssetExtended(
+            Asset asset,
+            AssetExtendedInfo assetExtendedInfo,
+            AssetCategory assetCategory,
+            AssetAttributes attributesKeyValues)
         {
-            var asset = new ApiAssetModel {Id = src.Id, Name = src.FullName};
-            var description = new AssetDescriptionModel
+            return new AssetExtendedModel
             {
-                Id = src.Id,
-                Description = src.Description,
-                AssetClass = src.AssetClass,
-                FullName = src.FullName
+                Asset = asset?.ConvertToApiModel(),
+                Description = assetExtendedInfo?.ConvertToApiModel(),
+                Category = assetCategory?.ConvertToApiModel(),
+                Attributes =
+                    attributesKeyValues?.Attributes.Select(x => new KeyValue { Key = x.Key, Value = x.Value}) ?? new List<KeyValue>()
             };
-            var category = new ApiAssetCategoryModel();
-            var attributes = new List<IAssetAttributesKeyValue>();
-
-            return new AssetExtended
+        }
+        
+        public static AssetDescriptionModel ConvertToApiModel(this AssetExtendedInfo extendedInfo)
+        {
+            return new AssetDescriptionModel
             {
-                Asset = asset,
-                Description = description,
-                Category = category,
-                Attributes = attributes
+                Id = extendedInfo.Id,
+                AssetClass = extendedInfo.AssetClass,
+                Description = extendedInfo.Description,
+                IssuerName = null,
+                MarketCapitalization = extendedInfo.MarketCapitalization,
+                NumberOfCoins = extendedInfo.NumberOfCoins,
+                PopIndex = extendedInfo.PopIndex,
+                AssetDescriptionUrl = extendedInfo.AssetDescriptionUrl,
+                FullName = extendedInfo.FullName
             };
         }
 

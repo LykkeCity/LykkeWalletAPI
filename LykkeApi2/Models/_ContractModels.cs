@@ -30,7 +30,7 @@
         public string FullName { get; set; }
     }
 
-    public class ApiAssetCategoryModel
+    public class AssetCategoryModel
     {
         public string Id { get; set; }
         public string Name { get; set; }
