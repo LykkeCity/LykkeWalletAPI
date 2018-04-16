@@ -152,10 +152,10 @@ namespace LykkeApi2.Controllers
 
             var allAssets = await _assetsCache.Values();
 
-            var nondisabledAssets = res.Where(x => !allAssets.First(y => y.Id == x.Id).IsDisabled);
+            var nondisabledAssets = res.Where(x => !allAssets.First(y => y.Id == x.Id).IsDisabled).ToArray();
             
             return Ok(AssetDescriptionsResponseModel.Create(
-                nondisabledAssets.Select(ConvertToAssetDescription)));
+                nondisabledAssets.Select(ConvertToAssetDescription).ToArray()));
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace LykkeApi2.Controllers
             var nondisabledAssets = res.Where(x => !allAssets.First(y => y.Id == x.Id).IsDisabled);
             
             var assetsExtended = nondisabledAssets.Select(s => s.ConvertTpApiModel());
-            return Ok(AssetExtendedResponseModel.Create(assetsExtended));
+            return Ok(AssetExtendedResponseModel.Create(assetsExtended.ToArray()));
         }
 
         /// <summary>
@@ -287,12 +287,19 @@ namespace LykkeApi2.Controllers
 
             var assets = await _assetsCache.Values();
             var asset = assets.FirstOrDefault(x => x.Id == model.BaseAsssetId);
+            
             if (asset == null || asset.IsDisabled)
             {
                 return NotFound();
             }
+            
+            var assetsAvailableToUser = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
 
-            if (!asset.IsBase)
+            var partnerEligible = asset.NotLykkeAsset
+                ? (_requestContext.PartnerId != null && asset.PartnerIds.Contains(_requestContext.PartnerId))
+                : (_requestContext.PartnerId == null || asset.PartnerIds.Contains(_requestContext.PartnerId));
+            
+            if (!asset.IsBase || assetsAvailableToUser.All(x => x != asset.Id) && !partnerEligible)
                 return BadRequest();
 
             await _clientAccountSettingsClient.SetBaseAssetAsync(_requestContext.ClientId, model.BaseAsssetId);
@@ -326,7 +333,8 @@ namespace LykkeApi2.Controllers
             return Ok(
                 AssetIdsResponse.Create(
                     assetsAvailableToUser
-                        .Where(x => currentPartnersTradableNondisabledAssets.Contains(x))));
+                        .Where(x => currentPartnersTradableNondisabledAssets.Contains(x))
+                        .ToArray()));
         }
         
         private static AssetDescriptionModel ConvertToAssetDescription(AssetExtendedInfo extendedInfo)
