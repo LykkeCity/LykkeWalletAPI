@@ -59,7 +59,7 @@ namespace LykkeApi2.Controllers
                 x => nondisabledAssets.Contains(x.BaseAssetId) &&
                      nondisabledAssets.Contains(x.QuotingAssetId));
             
-            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(validAssetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(validAssetPairs.Select(itm => itm.ToApiModel()).ToArray()));
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace LykkeApi2.Controllers
                     currentPartnersTradableNondisabledAssets.Contains(x.BaseAssetId) &&
                     currentPartnersTradableNondisabledAssets.Contains(x.QuotingAssetId));
 
-            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(availableAssetPairs.Select(itm => itm.ConvertToApiModel()).ToArray()));
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(availableAssetPairs.Select(x => x.ToApiModel()).ToArray()));
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace LykkeApi2.Controllers
                 !nondisabledAssets.Contains(assetPair.QuotingAssetId))
                 return NotFound();
             
-            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(new List<AssetPairModel> { assetPair.ConvertToApiModel() }));
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(new List<AssetPairModel> { assetPair.ToApiModel() }));
         }
 
         /// <summary>
@@ -145,10 +145,9 @@ namespace LykkeApi2.Controllers
                 .ToDictionary(x => x.Id);
             
             var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
-
-            marketProfile = marketProfile.Where(itm => assetPairsDict.ContainsKey(itm.AssetPair)).ToList();
+            var relevantMarketProfile = marketProfile.Where(itm => assetPairsDict.ContainsKey(itm.AssetPair));
             
-            return Ok(AssetPairRatesResponseModel.Create(marketProfile.Select(m => m.ConvertToApiModel()).ToArray()));
+            return Ok(AssetPairRatesResponseModel.Create(relevantMarketProfile.Select(x => x.ToApiModel()).ToArray()));
         }
 
         /// <summary>
@@ -188,7 +187,7 @@ namespace LykkeApi2.Controllers
             if (feedData == null)
                 return NotFound();
 
-            return Ok(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel> { feedData.ConvertToApiModel() }));
+            return Ok(AssetPairRatesResponseModel.Create(new List<AssetPairRateModel> { feedData.ToApiModel() }));
         }
     }
 }
