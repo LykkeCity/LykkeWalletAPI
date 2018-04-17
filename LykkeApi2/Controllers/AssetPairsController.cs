@@ -59,7 +59,8 @@ namespace LykkeApi2.Controllers
                 x => nondisabledAssets.Contains(x.BaseAssetId) &&
                      nondisabledAssets.Contains(x.QuotingAssetId));
             
-            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(validAssetPairs.Select(itm => itm.ToApiModel()).ToArray()));
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(
+                validAssetPairs.Select(itm => itm.ToApiModel()).OrderBy(x => x.Id).ToArray()));
         }
 
         /// <summary>
@@ -88,7 +89,8 @@ namespace LykkeApi2.Controllers
                     currentPartnersTradableNondisabledAssets.Contains(x.BaseAssetId) &&
                     currentPartnersTradableNondisabledAssets.Contains(x.QuotingAssetId));
 
-            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(availableAssetPairs.Select(x => x.ToApiModel()).ToArray()));
+            return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(
+                availableAssetPairs.Select(x => x.ToApiModel()).OrderBy(x => x.Id).ToArray()));
         }
 
         /// <summary>
@@ -147,7 +149,8 @@ namespace LykkeApi2.Controllers
             var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
             var relevantMarketProfile = marketProfile.Where(itm => assetPairsDict.ContainsKey(itm.AssetPair));
             
-            return Ok(AssetPairRatesResponseModel.Create(relevantMarketProfile.Select(x => x.ToApiModel()).ToArray()));
+            return Ok(AssetPairRatesResponseModel.Create(
+                relevantMarketProfile.Select(x => x.ToApiModel()).OrderBy(x => x.AssetPair).ToArray()));
         }
 
         /// <summary>
