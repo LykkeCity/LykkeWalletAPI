@@ -151,7 +151,7 @@ namespace LykkeApi2.Controllers
             var nondisabledAssets = res.Where(x => assetsIsDisabledDict.ContainsKey(x.Id) && !assetsIsDisabledDict[x.Id]);
             
             return Ok(AssetDescriptionsModel.Create(
-                nondisabledAssets.Select(x => x.ToApiModel()).ToArray()));
+                nondisabledAssets.Select(x => x.ToApiModel()).OrderBy(x => x.Id).ToArray()));
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace LykkeApi2.Controllers
         {
             var categories = await _assetsService.AssetCategoryGetAllAsync();
             
-            return Ok(AssetCategoriesModel.Create(categories.Select(x => x.ToApiModel()).ToArray()));
+            return Ok(AssetCategoriesModel.Create(categories.Select(x => x.ToApiModel()).OrderBy(x => x.Id).ToArray()));
         }
 
         /// <summary>
@@ -289,6 +289,7 @@ namespace LykkeApi2.Controllers
                 AssetIdsModel.Create(
                     assetsAvailableToUser
                         .Where(x => currentPartnersTradableNondisabledAssets.Contains(x))
+                        .OrderBy(x => x)
                         .ToArray()));
         }
     }

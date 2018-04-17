@@ -45,7 +45,7 @@ namespace LykkeApi2.Models
             {
                 Attrbuttes =
                     src != null
-                        ? (src.Attributes?.Select(ToApiModel).ToArray() ?? new KeyValue[0])
+                        ? (src.Attributes?.Select(ToApiModel).OrderBy(x => x.Key).ToArray() ?? new KeyValue[0])
                         : new KeyValue[0]
             };
         }
