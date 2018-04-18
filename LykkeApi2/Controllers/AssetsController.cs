@@ -44,7 +44,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(AssetsModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
-            var allAssets = await _assetsService.AssetGetAllAsync();
+            var allAssets = await _assetsCache.Values();
             
             return Ok(
                 AssetsModel.Create(
