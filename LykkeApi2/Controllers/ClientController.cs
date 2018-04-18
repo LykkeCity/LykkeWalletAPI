@@ -157,7 +157,7 @@ namespace LykkeApi2.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.GetErrorMessage());
 
-            await _clientSessionsClient.CreateTradingSession(_lykkePrincipal.GetToken(), request.Ttl);
+            await _clientSessionsClient.CreateTradingSession(_lykkePrincipal.GetToken(), TimeSpan.FromMilliseconds(request.Ttl));
 
             return Ok();
         }
@@ -170,7 +170,7 @@ namespace LykkeApi2.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.GetErrorMessage());
 
-            await _clientSessionsClient.ExtendTradingSession(_lykkePrincipal.GetToken(), request.Ttl);
+            await _clientSessionsClient.ExtendTradingSession(_lykkePrincipal.GetToken(), TimeSpan.FromMilliseconds(request.Ttl));
 
             return Ok();
         }
