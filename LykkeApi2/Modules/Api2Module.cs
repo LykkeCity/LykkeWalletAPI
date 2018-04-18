@@ -96,7 +96,7 @@ namespace LykkeApi2.Modules
                 var ctx = c.Resolve<IComponentContext>();
                 return new CachedDataDictionary<string, Asset>(
                     async () =>
-                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync())
+                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync(true))
                         .ToDictionary(itm => itm.Id),
                     60);
             }).SingleInstance();
