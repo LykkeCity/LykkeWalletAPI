@@ -6,6 +6,6 @@ namespace LykkeApi2.Models.Client
     public class TradingModel
     {
         [Required]
-        public TimeSpan Ttl { get; set; }
+        public int Ttl { get; set; }
     }
 }
