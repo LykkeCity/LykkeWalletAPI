@@ -10,6 +10,6 @@ namespace LykkeApi2.Models.ClientAccountModels
     {
         public bool AffiliateEnabled { get; set; }
 
-        public TradingSessionModel TradingSession { get; set; }
+        public TradingSessionResponseModel TradingSession { get; set; }
     }
 }

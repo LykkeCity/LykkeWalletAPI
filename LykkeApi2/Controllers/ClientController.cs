@@ -217,7 +217,11 @@ namespace LykkeApi2.Controllers
             return new FeaturesResponseModel
             {
                 AffiliateEnabled = features.AffiliateEnabled,
-                TradingSession = tradingSession
+                TradingSession = new TradingSessionResponseModel
+                {
+                    Confirmed = tradingSession?.Confirmed,
+                    Ttl = tradingSession?.Ttl?.TotalMilliseconds
+                }
             };
         }               
     }
