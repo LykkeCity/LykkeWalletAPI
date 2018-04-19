@@ -23,82 +23,89 @@ namespace LykkeApi2.Controllers
         private readonly CachedDataDictionary<string, Asset> _assetsCache;
         private readonly IClientAccountSettingsClient _clientAccountSettingsClient;
         private readonly IRequestContext _requestContext;
-        private readonly ILog _log;
 
         public AssetsController(
             IAssetsService assetsService,
             CachedDataDictionary<string, Asset> assetsCache,
             IClientAccountSettingsClient clientAccountSettingsClient,
-            IRequestContext requestContext,
-            ILog log)
+            IRequestContext requestContext)
         {
             _assetsService = assetsService;
             _assetsCache = assetsCache;
             _clientAccountSettingsClient = clientAccountSettingsClient;
             _requestContext = requestContext;
-            _log = log;
         }
 
         /// <summary>
-        ///     Get assets.
+        /// Get assets.
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [ProducesResponseType(typeof(GetBaseAssetsRespModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetsModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
-            var allAssets = await _assetsService.AssetGetAllAsync();
+            var allAssets = await _assetsCache.Values();
             
             return Ok(
-                GetBaseAssetsRespModel.Create(
+                AssetsModel.Create(
                     allAssets
                         .Where(x => !x.IsDisabled)
-                        .Select(x => x.ConvertToApiModel())
+                        .Select(x => x.ToApiModel())
                         .OrderBy(x => x.DisplayId == null)
                         .ThenBy(x => x.DisplayId)
                         .ToArray()));
         }
 
         /// <summary>
-        ///     Get asset by id.
+        /// Get asset by id.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(GetClientBaseAssetRespModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetRespModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Get(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
                 return BadRequest();
 
-            var asset = await _assetsService.AssetGetAsync(id);
-            if (asset == null)
+            var asset = await _assetsCache.GetItemAsync(id);
+            if (asset == null || asset.IsDisabled)
             {
                 return NotFound();
             }
-            return Ok(GetClientBaseAssetRespModel.Create(asset.ConvertToApiModel()));
+            
+            return Ok(AssetRespModel.Create(asset.ToApiModel()));
         }
 
         /// <summary>
-        ///     Get asset attributes.
+        /// Get asset attributes.
         /// </summary>
         /// <param name="assetId"></param>
         /// <returns></returns>
         [HttpGet("{assetId}/attributes")]
         [ProducesResponseType(typeof(AssetAttributesModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAssetAttributes(string assetId)
         {
-            var keyValues = await _assetsService.AssetAttributeGetAllForAssetAsync(assetId);
-            if (keyValues == null)
+            if (string.IsNullOrWhiteSpace(assetId))
+                return BadRequest();
+            
+            var asset = await _assetsCache.GetItemAsync(assetId);
+            if (asset == null || asset.IsDisabled)
+            {
                 return NotFound();
-            return Ok(keyValues.ConvertToApiModel());
+            }
+            
+            var keyValues = await _assetsService.AssetAttributeGetAllForAssetAsync(assetId);
+            
+            return Ok(keyValues.ToApiModel());
         }
 
         /// <summary>
-        ///     Get asset attributes by key.
+        /// Get asset attributes by key.
         /// </summary>
         /// <param name="assetId"></param>
         /// <param name="key"></param>
@@ -106,140 +113,120 @@ namespace LykkeApi2.Controllers
         [HttpGet("{assetId}/attributes/{key}")]
         [ProducesResponseType(typeof(KeyValue), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAssetAttributeByKey(string assetId, string key)
         {
+            if (string.IsNullOrWhiteSpace(assetId) || string.IsNullOrWhiteSpace(key))
+                return BadRequest();
+            
+            var asset = await _assetsCache.GetItemAsync(assetId);
+            if (asset == null || asset.IsDisabled)
+            {
+                return NotFound();
+            }
+            
             var keyValues = await _assetsService.AssetAttributeGetAsync(assetId, key);
             if (keyValues == null)
                 return NotFound();
 
-            return Ok(keyValues.ConvertToApiModel());
+            return Ok(keyValues.ToApiModel());
         }
 
         /// <summary>
-        ///     Get asset descriptions.
+        /// Get asset descriptions.
         /// </summary>
         /// <returns></returns>
         [HttpGet("description")]
-        [ProducesResponseType(typeof(AssetDescriptionsResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetDescriptionsModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetDescriptions()
         {
             var res = await _assetsService.AssetExtendedInfoGetAllAsync();
-            return Ok(AssetDescriptionsResponseModel.Create(res.Select(ConvertToAssetDescription).ToList()));
+
+            var allAssets = await _assetsCache.Values();
+            var assetsIsDisabledDict = allAssets.ToDictionary(x => x.Id, x => x.IsDisabled);
+
+            var nondisabledAssets = res.Where(x => assetsIsDisabledDict.ContainsKey(x.Id) && !assetsIsDisabledDict[x.Id]);
+            
+            return Ok(AssetDescriptionsModel.Create(
+                nondisabledAssets.Select(x => x.ToApiModel()).OrderBy(x => x.Id).ToArray()));
         }
 
         /// <summary>
-        ///     Get asset description.
+        /// Get asset description.
         /// </summary>
         /// <param name="assetId"></param>
         /// <returns></returns>
         [HttpGet("{assetId}/description")]
         [ProducesResponseType(typeof(AssetDescriptionModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetAssetDescription(string assetId)
         {
+            if (string.IsNullOrWhiteSpace(assetId))
+                return BadRequest();
+            
+            var asset = await _assetsCache.GetItemAsync(assetId);
+            if (asset == null || asset.IsDisabled)
+            {
+                return NotFound();
+            }
+            
             var extendedInfo = await _assetsService.AssetExtendedInfoGetAsync(assetId) ??
                                await _assetsService.AssetExtendedInfoGetDefaultAsync();
+            
             if (string.IsNullOrEmpty(extendedInfo.Id))
                 extendedInfo.Id = assetId;
 
-            return Ok(ConvertToAssetDescription(extendedInfo));
-        }
-
-        private static AssetDescriptionModel ConvertToAssetDescription(AssetExtendedInfo extendedInfo)
-        {
-            return new AssetDescriptionModel
-            {
-                Id = extendedInfo.Id,
-                AssetClass = extendedInfo.AssetClass,
-                Description = extendedInfo.Description,
-                IssuerName = null,
-                MarketCapitalization = extendedInfo.MarketCapitalization,
-                NumberOfCoins = extendedInfo.NumberOfCoins,
-                PopIndex = extendedInfo.PopIndex,
-                AssetDescriptionUrl = extendedInfo.AssetDescriptionUrl,
-                FullName = extendedInfo.FullName
-            };
+            return Ok(extendedInfo.ToApiModel());
         }
 
         /// <summary>
-        ///     Get asset categories.
+        /// Get asset categories.
         /// </summary>
         /// <returns></returns>
         [HttpGet("categories")]
-        [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetCategoriesModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetCategories()
         {
-            var res = await _assetsService.AssetCategoryGetAllAsync();
-            return Ok(GetAssetCategoriesResponseModel.Create(res.Select(itm => itm.ConvertToApiModel()).ToArray()));
+            var categories = await _assetsService.AssetCategoryGetAllAsync();
+            
+            return Ok(AssetCategoriesModel.Create(categories.Select(x => x.ToApiModel()).OrderBy(x => x.Id).ToArray()));
         }
 
         /// <summary>
-        ///     Get asset category.
+        /// Get asset category.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet("categories/{id}")]
-        [ProducesResponseType(typeof(GetAssetCategoriesResponseModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(AssetCategoriesModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAssetCategory(string id)
         {
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrWhiteSpace(id))
                 return BadRequest();
 
             var res = await _assetsService.AssetCategoryGetAsync(id);
             if (res == null)
                 return NotFound();
 
-            return Ok(GetAssetCategoriesResponseModel.Create(new[] { res.ConvertToApiModel() }));
-        }
-
-        /// <summary>
-        ///     Get extended assets.
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet("extended")]
-        [ProducesResponseType(typeof(AssetExtendedResponseModel), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetAssetsExtended()
-        {
-            var res = await _assetsService.AssetExtendedInfoGetAllAsync();
-            var assetsExtended = res.Select(s => s.ConvertTpApiModel()).ToList();
-            return Ok(AssetExtendedResponseModel.Create(assetsExtended));
-        }
-
-        /// <summary>
-        ///     Get extended asset.
-        /// </summary>
-        /// <param name="assetId"></param>
-        /// <returns></returns>
-        [HttpGet("{assetId}/extended")]
-        [ProducesResponseType(typeof(AssetExtendedResponseModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> GetAssetsExtended(string assetId)
-        {
-            var res = await _assetsService.AssetExtendedInfoGetAsync(assetId);
-            if (res == null)
-                return NotFound();
-            return Ok(AssetExtendedResponseModel.Create(new[] { res.ConvertTpApiModel() }));
+            return Ok(AssetCategoriesModel.Create(new[] { res.ToApiModel() }));
         }
 
         [Authorize]
         [HttpGet("baseAsset")]
         [ProducesResponseType(typeof(BaseAssetClientModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetBaseAsset()
         {
-            BaseAssetClientModel response;
-            try
-            {
-                response = await _clientAccountSettingsClient.GetBaseAssetAsync(_requestContext.ClientId);
-            }
-            catch (Exception e)
-            {
-                await _log.WriteFatalErrorAsync(nameof(AssetsController), nameof(GetBaseAsset), e);
-                return BadRequest(new { message = e.Message });
-            }
+            var baResp = await _clientAccountSettingsClient.GetBaseAssetAsync(_requestContext.ClientId);
 
-            return Ok(response);
+            var baseAssetModel = new BaseAssetModel
+            {
+                BaseAssetId = baResp.BaseAssetId
+            };
+            
+            return Ok(baseAssetModel);
         }
 
         [Authorize]
@@ -247,59 +234,57 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int) HttpStatusCode.OK)]
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
-        [ProducesResponseType((int) HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SetBaseAsset([FromBody] BaseAssetUpdateModel model)
         {
-            try
+            if (string.IsNullOrWhiteSpace(model.BaseAsssetId))
+                return BadRequest();
+
+            var asset = await _assetsCache.GetItemAsync(model.BaseAsssetId);
+            if (asset == null || asset.IsDisabled)
             {
-                var assetResponse = await _assetsService.AssetGetWithHttpMessagesAsync(model.BaseAsssetId);
-                var asset = assetResponse?.Body as Asset;
-
-                if (asset == null)
-                    return NotFound();
-
-                if (!asset.IsBase)
-                    return BadRequest(new {message = "Asset can't be set as base"});
-
-                await _clientAccountSettingsClient.SetBaseAssetAsync(_requestContext.ClientId, model.BaseAsssetId);
+                return NotFound();
             }
-            catch (Exception e)
-            {
-                await _log.WriteFatalErrorAsync(nameof(AssetsController), nameof(SetBaseAsset), e);
-                return StatusCode((int) HttpStatusCode.InternalServerError);
-            }
+            
+            var partnerEligible = asset.NotLykkeAsset
+                ? _requestContext.PartnerId != null && asset.PartnerIds.Contains(_requestContext.PartnerId)
+                : _requestContext.PartnerId == null || asset.PartnerIds.Contains(_requestContext.PartnerId);
+
+            if (!asset.IsBase || !partnerEligible || !asset.IsTradable)
+                return BadRequest();
+            
+            var assetsAvailableToUser = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
+            
+            if (assetsAvailableToUser.All(x => x != asset.Id))
+                return BadRequest();
+
+            await _clientAccountSettingsClient.SetBaseAssetAsync(_requestContext.ClientId, model.BaseAsssetId);
 
             return Ok();
         }
         
         /// <summary>
-        ///     Get assets available for the user based on regulations.
+        /// Get assets available for the user based on regulations.
         /// </summary>
         /// <returns></returns>
         [Authorize]
         [HttpGet("available")]
-        [ProducesResponseType(typeof(AssetIdsResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(AssetIdsModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailableAssets()
         {
             var allTradableNondisabledAssets = (await _assetsCache.Values()).Where(x => !x.IsDisabled && x.IsTradable);
             
-            var currentPartnersTradableNondisabledAssets = new HashSet<string>(allTradableNondisabledAssets.Where(x =>
-            {
-                if (x.NotLykkeAsset)
-                {
-                    return _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId);
-                }
-                
-                return _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId);
-            }).Select(x => x.Id));
+            var currentPartnersTradableNondisabledAssets = new HashSet<string>(allTradableNondisabledAssets.Where(x => x.NotLykkeAsset
+                ? _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId)
+                : _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId)).Select(x => x.Id));
             
             var assetsAvailableToUser = await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true);
             
             return Ok(
-                AssetIdsResponse.Create(
+                AssetIdsModel.Create(
                     assetsAvailableToUser
-                        .Where(x => currentPartnersTradableNondisabledAssets.Contains(x))));
+                        .Where(x => currentPartnersTradableNondisabledAssets.Contains(x))
+                        .OrderBy(x => x)
+                        .ToArray()));
         }
     }
 }

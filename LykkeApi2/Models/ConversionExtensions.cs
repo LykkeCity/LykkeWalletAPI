@@ -10,76 +10,63 @@ namespace LykkeApi2.Models
     {
         private static string DateTimeFormat = "yyyy-MM-dd HH:mm:ss.fff";
 
-        public static ApiAssetModel ConvertToApiModel(this Asset src)
+        public static AssetModel ToApiModel(this Asset src)
         {
-            return new ApiAssetModel
+            return new AssetModel
             {
                 Id = src.Id,
                 Name = src.Name,
                 DisplayId = src.DisplayId,
                 Accuracy = src.Accuracy,
-                HideWithdraw = src.HideWithdraw,
-                HideDeposit = src.HideDeposit,
                 KycNeeded = src.KycNeeded,
                 BankCardsDepositEnabled = src.BankCardsDepositEnabled,
                 SwiftDepositEnabled = src.SwiftDepositEnabled,
                 BlockchainDepositEnabled = src.BlockchainDepositEnabled,
                 CategoryId = src.CategoryId,
+                CanBeBase = src.IsBase,
                 IsBase = src.IsBase,
                 IconUrl = src.IconUrl
             };
         }
 
-        public static ApiAssetCategoryModel ConvertToApiModel(this AssetCategory src)
+        public static AssetCategoryModel ToApiModel(this AssetCategory src)
         {
-            return new ApiAssetCategoryModel
+            return new AssetCategoryModel
             {
                 Id = src.Id,
                 Name = src.Name,
-                IosIconUrl = src.IosIconUrl,
-                AndroidIconUrl = src.AndroidIconUrl,
                 SortOrder = src.SortOrder
             };
         }
 
-        public static AssetAttributesModel ConvertToApiModel(this AssetAttributes src)
+        public static AssetAttributesModel ToApiModel(this AssetAttributes src)
         {
             return new AssetAttributesModel
             {
-                Attrbuttes = src.Attributes.Select(ConvertToApiModel).ToArray()
+                Attrbuttes = src?.Attributes?.Select(ToApiModel).OrderBy(x => x.Key).ToArray() ?? new KeyValue[0]
             };
-
         }
 
-        public static IAssetAttributesKeyValue ConvertToApiModel(this AssetAttribute src)
+        public static IAssetAttributesKeyValue ToApiModel(this AssetAttribute src)
         {
             return new KeyValue {Key = src.Key, Value = src.Value};
-
         }
-
-        public static AssetExtended ConvertTpApiModel(this AssetExtendedInfo src)
+        
+        public static AssetDescriptionModel ToApiModel(this AssetExtendedInfo extendedInfo)
         {
-            var asset = new ApiAssetModel {Id = src.Id, Name = src.FullName};
-            var description = new AssetDescriptionModel
+            return new AssetDescriptionModel
             {
-                Id = src.Id,
-                Description = src.Description,
-                AssetClass = src.AssetClass,
-                FullName = src.FullName
-            };
-            var category = new ApiAssetCategoryModel();
-            var attributes = new List<IAssetAttributesKeyValue>();
-
-            return new AssetExtended
-            {
-                Asset = asset,
-                Description = description,
-                Category = category,
-                Attributes = attributes
+                Id = extendedInfo.Id,
+                AssetClass = extendedInfo.AssetClass,
+                Description = extendedInfo.Description,
+                IssuerName = null,
+                NumberOfCoins = extendedInfo.NumberOfCoins,
+                AssetDescriptionUrl = extendedInfo.AssetDescriptionUrl,
+                FullName = extendedInfo.FullName
             };
         }
 
-        public static AssetPairModel ConvertToApiModel(this AssetPair src)
+        public static AssetPairModel ToApiModel(this AssetPair src)
         {
             return new AssetPairModel
             {
@@ -87,15 +74,12 @@ namespace LykkeApi2.Models
                 Accuracy = src.Accuracy,
                 BaseAssetId = src.BaseAssetId,
                 InvertedAccuracy = src.InvertedAccuracy,
-                IsDisabled = src.IsDisabled,
                 Name = src.Name,
-                QuotingAssetId = src.QuotingAssetId,
-                Source = src.Source,
-                Source2 = src.Source2,
+                QuotingAssetId = src.QuotingAssetId
             };
         }
 
-        public static AssetPairRateModel ConvertToApiModel(
+        public static AssetPairRateModel ToApiModel(
             this Lykke.MarketProfileService.Client.Models.AssetPairModel src)
         {
             return new AssetPairRateModel
