@@ -43,10 +43,7 @@ namespace LykkeApi2.Models
         {
             return new AssetAttributesModel
             {
-                Attrbuttes =
-                    src != null
-                        ? (src.Attributes?.Select(ToApiModel).OrderBy(x => x.Key).ToArray() ?? new KeyValue[0])
-                        : new KeyValue[0]
+                Attrbuttes = src?.Attributes?.Select(ToApiModel).OrderBy(x => x.Key).ToArray() ?? new KeyValue[0]
             };
         }
 
