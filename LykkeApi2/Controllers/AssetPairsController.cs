@@ -106,11 +106,9 @@ namespace LykkeApi2.Controllers
         {
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest();
-            
-            var allAssetPairs = await _assetPairsCache.Values();
-            var assetPair = allAssetPairs.Where(x => !x.IsDisabled).FirstOrDefault(x => x.Id == id);
-            
-            if (assetPair == null)
+
+            var assetPair = await _assetPairsCache.GetItemAsync(id);
+            if (assetPair == null || assetPair.IsDisabled)
                 return NotFound();
 
             var allAssets = await _assetsCache.Values();
@@ -167,8 +165,7 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(request.AssetPairId))
                 return BadRequest();
             
-            var allAssetPairs = await _assetPairsCache.Values();
-            var assetPair = allAssetPairs.FirstOrDefault(x => x.Id == request.AssetPairId);
+            var assetPair = await _assetPairsCache.GetItemAsync(request.AssetPairId);
 
             if (assetPair == null || assetPair.IsDisabled)
                 return NotFound();
