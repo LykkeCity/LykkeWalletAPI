@@ -70,8 +70,7 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest();
 
-            var assets = await _assetsCache.Values();
-            var asset = assets.FirstOrDefault(x => x.Id == id);
+            var asset = await _assetsCache.GetItemAsync(id);
             if (asset == null || asset.IsDisabled)
             {
                 return NotFound();
@@ -94,8 +93,7 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(assetId))
                 return BadRequest();
             
-            var assets = await _assetsCache.Values();
-            var asset = assets.FirstOrDefault(x => x.Id == assetId);
+            var asset = await _assetsCache.GetItemAsync(assetId);
             if (asset == null || asset.IsDisabled)
             {
                 return NotFound();
@@ -121,8 +119,7 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(assetId) || string.IsNullOrWhiteSpace(key))
                 return BadRequest();
             
-            var assets = await _assetsCache.Values();
-            var asset = assets.FirstOrDefault(x => x.Id == assetId);
+            var asset = await _assetsCache.GetItemAsync(assetId);
             if (asset == null || asset.IsDisabled)
             {
                 return NotFound();
@@ -168,8 +165,7 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(assetId))
                 return BadRequest();
             
-            var assets = await _assetsCache.Values();
-            var asset = assets.FirstOrDefault(x => x.Id == assetId);
+            var asset = await _assetsCache.GetItemAsync(assetId);
             if (asset == null || asset.IsDisabled)
             {
                 return NotFound();
@@ -243,9 +239,7 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(model.BaseAsssetId))
                 return BadRequest();
 
-            var assets = await _assetsCache.Values();
-            var asset = assets.FirstOrDefault(x => x.Id == model.BaseAsssetId);
-            
+            var asset = await _assetsCache.GetItemAsync(model.BaseAsssetId);
             if (asset == null || asset.IsDisabled)
             {
                 return NotFound();
