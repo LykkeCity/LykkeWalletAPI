@@ -21,6 +21,7 @@ using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
+using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
 
 namespace LykkeApi2.Modules
@@ -84,6 +85,8 @@ namespace LykkeApi2.Modules
             builder.RegisterAffiliateClient(_serviceSettings.CurrentValue.AffiliateServiceClient.ServiceUrl, _log);
 
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
+
+            builder.RegisterPaymentSystemClient(_apiSettings.CurrentValue.PaymentSystemServiceClient.ServiceUrl, _log);
             
             builder.Populate(_services);
         }

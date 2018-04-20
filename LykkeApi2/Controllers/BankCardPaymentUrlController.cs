@@ -1,24 +1,26 @@
 ﻿using System;
 using System.Net;
 using System.Threading.Tasks;
-using AzureRepositories.PaymentSystem;
 using Common;
 using Common.Log;
 using Core.Constants;
 using Core.Identity;
-using Core.PaymentSystem;
-using Core.Services;
+using Lykke.Contracts.Payments;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.Limitations.Client;
+using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Contract;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
-using LykkeApi2.Models.IsAlive;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using CashInPaymentSystem = Lykke.Service.PaymentSystem.Client.AutorestClient.Models.CashInPaymentSystem;
+using ErrorResponse = LykkeApi2.Models.ErrorResponse;
+using IsAliveResponse = LykkeApi2.Models.IsAlive.IsAliveResponse;
+using PaymentStatus = Lykke.Service.PaymentSystem.Client.AutorestClient.Models.PaymentStatus;
 
 namespace LykkeApi2.Controllers
 {
@@ -28,7 +30,7 @@ namespace LykkeApi2.Controllers
     [Route("api/[controller]")]
     public class BankCardPaymentUrlController : Controller
     {
-        private readonly IPaymentSystemService _paymentSystemService;
+        private readonly IPaymentSystemClient _paymentSystemService;
         private readonly ILog _log;
         private readonly IIdentityRepository _identityGenerator;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
@@ -38,7 +40,7 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
 
         public BankCardPaymentUrlController(
-            IPaymentSystemService paymentSystemService,
+            IPaymentSystemClient paymentSystemService,
             ILog log,
             IIdentityRepository identityGenerator,
             ILimitationsServiceClient limitationsServiceClient,
@@ -65,7 +67,7 @@ namespace LykkeApi2.Controllers
 
             try
             {
-                var lastOrder = await _paymentSystemService.GetLastPaymentTransactionByDate(clientId);
+                var lastOrder = await _paymentSystemService.GetLastByDateAsync(clientId);
                 var personalData = await _personalDataService.GetAsync(clientId);
 
                 BankCardPaymentUrlRequestModel result;
@@ -115,7 +117,7 @@ namespace LykkeApi2.Controllers
             var checkResult = await _limitationsServiceClient.CheckAsync(clientId, input.AssetId, input.Amount, CurrencyOperationType.CardCashIn);
 
             if (!checkResult.IsValid)
-                return StatusCode( (int)ErrorCodeType.LimitationCheckFailed, checkResult.FailMessage);
+                return StatusCode((int)ErrorCodeType.LimitationCheckFailed, checkResult.FailMessage);
 
             var transactionId = (await _identityGenerator.GenerateNewIdAsync()).ToString();
 
@@ -143,17 +145,6 @@ namespace LykkeApi2.Controllers
                 var feeAmount = Math.Round(input.Amount * bankCardsFee.Percentage, 15);
                 var feeAmountTruncated = feeAmount.TruncateDecimalPlaces(asset.Accuracy, true);
 
-                var paymentTransaction = (PaymentTransaction)_paymentSystemService.CreatePaymentTransaction(
-                    transactionId,
-                    paymentSystem,
-                    clientId,
-                    input.Amount,
-                    feeAmountTruncated,
-                    input.AssetId,
-                    input.WalletId,
-                    input.AssetId,
-                    info);
-
                 var urlData = await _paymentSystemService.GetUrlDataAsync(
                     paymentSystem.ToString(),
                     transactionId,
@@ -164,6 +155,12 @@ namespace LykkeApi2.Controllers
                     input.GetCountryIso3Code(),
                     info);
 
+                await _paymentSystemService.InsertPaymentTransactionEventLogAsync(
+                    transactionId,
+                    urlData.PaymentUrl,
+                    "Payment Url has created",
+                    clientId);
+
                 if (!string.IsNullOrEmpty(urlData.ErrorMessage))
                 {
                     await _log.WriteWarningAsync(
@@ -173,11 +170,24 @@ namespace LykkeApi2.Controllers
                         ErrorResponse.Create(Phrases.OperationProhibited));
                 }
 
-                paymentTransaction.PaymentSystem = urlData.PaymentSystem;
+                await _paymentSystemService.InsertPaymentTransactionAsync(
+                    input.Amount,
+                    PaymentStatus.Created,
+                    paymentSystem,
+                    feeAmountTruncated,
+                    transactionId,
+                    clientId,
+                    input.AssetId,
+                    input.AssetId,
+                    input.WalletId,
+                    info
+                );
 
-                await _paymentSystemService.InsertPaymentTransactionAsync(paymentTransaction);
-                await _paymentSystemService.InsertPaymentTransactionEventLogAsync(_paymentSystemService.CreatePaymentTransactionEventLog(transactionId, "", "Registered", clientId));
-                await _paymentSystemService.InsertPaymentTransactionEventLogAsync(_paymentSystemService.CreatePaymentTransactionEventLog(transactionId, urlData.PaymentUrl, "Payment Url has created", clientId));
+                await _paymentSystemService.InsertPaymentTransactionEventLogAsync(
+                    transactionId,
+                    string.Empty,
+                    "Registered",
+                    clientId);
 
                 // mode=iframe is for Mobile version 
                 if (!string.IsNullOrWhiteSpace(urlData.PaymentUrl))
@@ -195,7 +205,10 @@ namespace LykkeApi2.Controllers
             catch (Exception e)
             {
                 await _paymentSystemService.InsertPaymentTransactionEventLogAsync(
-                    _paymentSystemService.CreatePaymentTransactionEventLog(transactionId, e.Message, "Payment Url creation fail", clientId));
+                    transactionId,
+                    e.Message,
+                    "Payment Url creation fail",
+                    clientId);
 
                 await _log.WriteErrorAsync("BankCardPaymentUrlController", "Post", input.ToJson(), e);
                 return StatusCode(

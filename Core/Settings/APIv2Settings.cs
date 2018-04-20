@@ -5,6 +5,7 @@ using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
+using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
 
 namespace Core.Settings
@@ -20,6 +21,7 @@ namespace Core.Settings
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
         public FeeSettings FeeSettings { set; get; }
         public AssetDisclaimersServiceClientSettings AssetDisclaimersServiceClient { get; set; }
+        public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }
     }
 
     public class SlackNotificationsSettings
@@ -66,14 +68,20 @@ namespace Core.Settings
         public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
         public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
         public KycServiceClientSettings KycServiceClient { get; set; }
+
     }
-    
+
     public class MatchingEngineSettings
     {
         public IpEndpointSettings IpEndpoint { get; set; }
     }
     
     public class FeeCalculatorSettings
+    {
+        public string ServiceUrl { get; set; }
+    }    
+
+    public class PaymentSystemSettings
     {
         public string ServiceUrl { get; set; }
     }
