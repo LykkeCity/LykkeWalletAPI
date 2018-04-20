@@ -1,9 +1,11 @@
 ﻿using System;
-using AzureRepositories.PaymentSystem;
 using Common;
-using Core.PaymentSystem;
+using Lykke.Contracts.Payments;
+using Lykke.Service.PaymentSystem.Client;
+using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using Lykke.Service.PersonalData.Contract.Models;
 using Newtonsoft.Json;
+using CashInPaymentSystem = Lykke.Service.PaymentSystem.Client.AutorestClient.Models.CashInPaymentSystem;
 
 namespace LykkeApi2.Models
 {
@@ -41,7 +43,7 @@ namespace LykkeApi2.Models
             }
         }
 
-        public static BankCardPaymentUrlRequestModel Create(IPaymentTransaction pt, IPersonalData personalData)
+        public static BankCardPaymentUrlRequestModel Create(PaymentTransactionResponse pt, IPersonalData personalData)
         {
             if (pt.PaymentSystem != CashInPaymentSystem.CreditVoucher
                 && pt.PaymentSystem != CashInPaymentSystem.Fxpaygate)
@@ -63,7 +65,7 @@ namespace LykkeApi2.Models
                 Zip = info.Zip
             };
         }
-
+        
         public static BankCardPaymentUrlRequestModel Create(IPersonalData personalData)
         {
             return new BankCardPaymentUrlRequestModel

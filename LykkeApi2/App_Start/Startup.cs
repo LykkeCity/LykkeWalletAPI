@@ -135,14 +135,15 @@ namespace LykkeApi2
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
                 });
 
+                app.UseDefaultFiles();
+                app.UseStaticFiles();
+
                 app.UseSwagger();
                 app.UseSwaggerUI(o =>
                 {
                     o.RoutePrefix = "swagger/ui";
                     o.SwaggerEndpoint($"/swagger/{ApiVersion}/swagger.json", ApiVersion);
                 });
-
-                app.UseStaticFiles();
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());

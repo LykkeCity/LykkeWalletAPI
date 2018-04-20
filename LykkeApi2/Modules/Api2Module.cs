@@ -4,7 +4,6 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AzureRepositories.Exchange;
 using AzureRepositories.GlobalSettings;
-using AzureRepositories.PaymentSystem;
 using AzureStorage;
 using AzureStorage.Tables;
 using AzureStorage.Tables.Templates.Index;
@@ -18,13 +17,11 @@ using Core.Enumerators;
 using Core.Exchange;
 using Core.GlobalSettings;
 using Core.Identity;
-using Core.PaymentSystem;
 using Core.Services;
 using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Countries;
 using LkeServices.Identity;
-using LkeServices.PaymentSystem;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
@@ -103,7 +100,6 @@ namespace LykkeApi2.Modules
             builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
-            builder.RegisterType<PaymentSystemService>().As<IPaymentSystemService>();
             builder.RegisterType<SettingsService>().As<ISettingsService>();
             builder.RegisterType<LimitationsServiceClient>().As<ILimitationsServiceClient>();
             builder.RegisterType<DisableOnMaintenanceFilter>();
@@ -191,11 +187,6 @@ namespace LykkeApi2.Modules
                 .As(typeof(INoSQLTableStorage<AppGlobalSettingsEntity>));
 
             builder.Register(y =>
-                    AzureTableStorage<PaymentTransactionEntity>.Create(
-                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "PaymentTransactions", log))
-                .As(typeof(INoSQLTableStorage<PaymentTransactionEntity>));
-
-            builder.Register(y =>
                     AzureTableStorage<AzureMultiIndex>.Create(
                         settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "PaymentTransactions", log))
                 .As(typeof(INoSQLTableStorage<AzureMultiIndex>));
@@ -210,18 +201,11 @@ namespace LykkeApi2.Modules
                         settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "Setup", log))
                 .As(typeof(INoSQLTableStorage<IdentityEntity>));
 
-            builder.Register(y =>
-                    AzureTableStorage<PaymentTransactionEventLogEntity>.Create(
-                        settings.ConnectionString(x => x.Db.LogsConnString), "PaymentsLog", log))
-                .As(typeof(INoSQLTableStorage<PaymentTransactionEventLogEntity>));
-
             builder.RegisterInstance(settings.CurrentValue.PaymentSystems);
 
             builder.RegisterType<AppGlobalSettingsRepository>().As<IAppGlobalSettingsRepository>();
             builder.RegisterType<ExchangeSettingsRepository>().As<IExchangeSettingsRepository>();
-            builder.RegisterType<PaymentTransactionsRepository>().As<IPaymentTransactionsRepository>();
             builder.RegisterType<IdentityRepository>().As<IIdentityRepository>();
-            builder.RegisterType<PaymentTransactionEventsLogRepository>().As<IPaymentTransactionEventsLogRepository>();
         }
 
         private static void BindMicroservices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings)
