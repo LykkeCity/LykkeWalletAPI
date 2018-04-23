@@ -49,6 +49,7 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.KycServiceClient).SingleInstance();
 
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 

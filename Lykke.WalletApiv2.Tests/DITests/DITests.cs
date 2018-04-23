@@ -1,11 +1,11 @@
 using Autofac;
 using Common.Log;
-using Core.Settings;
 using LykkeApi2.Controllers;
 using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
+using Core.Settings;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
@@ -38,7 +38,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 },
                 OperationsHistoryServiceClient = new OperationsHistoryServiceClientSettings{ServiceUrl = MockUrl},
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},
-                PersonalDataServiceSettings = new PersonalDataServiceSettings{ServiceUri = MockUrl},
+                PersonalDataServiceSettings = new PersonalDataServiceClientSettings{ServiceUri = MockUrl},
                 MatchingEngineClient = new MatchingEngineSettings{IpEndpoint = new IpEndpointSettings{Host = "127.0.0.1", Port = 80}}
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));

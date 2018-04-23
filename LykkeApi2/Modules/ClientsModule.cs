@@ -1,7 +1,6 @@
 ﻿using System;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Core.Settings;
 using Lykke.MarketProfileService.Client;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.Operations.Client;
@@ -13,12 +12,15 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Common.Log;
+using Core.Settings;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Kyc.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -77,7 +79,8 @@ namespace LykkeApi2.Modules
             builder.RegisterAffiliateClient(_serviceSettings.CurrentValue.AffiliateServiceClient.ServiceUrl, _log);
 
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
-            
+            builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
+
             builder.Populate(_services);
         }
     }
