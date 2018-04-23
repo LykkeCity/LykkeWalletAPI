@@ -77,7 +77,6 @@ namespace LykkeApi2.Modules
             builder.RegisterAffiliateClient(_serviceSettings.CurrentValue.AffiliateServiceClient.ServiceUrl, _log);
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
             builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
-            
             builder.Populate(_services);
         }
     }
