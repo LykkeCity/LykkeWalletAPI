@@ -22,6 +22,7 @@ using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Session.Client;
 using LykkeApi2.Models.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
 
 namespace LykkeApi2.Controllers
 {
@@ -35,6 +36,7 @@ namespace LykkeApi2.Controllers
         private readonly ILykkePrincipal _lykkePrincipal;
         private readonly IClientSessionsClient _clientSessionsClient;
         private readonly ClientAccountLogic _clientAccountLogic;
+        private readonly IKycStatusService _kycStatusService;
         private readonly IRequestContext _requestContext;
         private readonly IPersonalDataService _personalDataService;
         private readonly IClientAccountClient _clientAccountService;
@@ -44,9 +46,10 @@ namespace LykkeApi2.Controllers
             ILykkePrincipal lykkePrincipal,
             IClientSessionsClient clientSessionsClient,
             ILykkeRegistrationClient lykkeRegistrationClient,
-            ClientAccountLogic clientAccountLogic,
+            ClientAccountLogic clientAccountLogic,            
             IRequestContext requestContext,
             IPersonalDataService personalDataService,
+            IKycStatusService kycStatusService,
             IClientAccountClient clientAccountService)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
@@ -54,6 +57,7 @@ namespace LykkeApi2.Controllers
             _lykkePrincipal = lykkePrincipal;
             _clientSessionsClient = clientSessionsClient;
             _clientAccountLogic = clientAccountLogic;
+            _kycStatusService = kycStatusService;
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
             _clientAccountService = clientAccountService;
@@ -199,7 +203,8 @@ namespace LykkeApi2.Controllers
             {
                 Email = personalData?.Email,
                 FirstName = personalData?.FirstName,
-                LastName = personalData?.LastName
+                LastName = personalData?.LastName,
+                KycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId)
             });
         }
 

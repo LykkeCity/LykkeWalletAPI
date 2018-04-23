@@ -89,7 +89,7 @@ namespace LykkeApi2.Settings
     {
         public IpEndpointSettings IpEndpoint { get; set; }
     }
-    
+
     public class FeeCalculatorSettings
     {
         public string ServiceUrl { get; set; }
@@ -99,7 +99,7 @@ namespace LykkeApi2.Settings
     {
         public TargetClientIdFeeSettings TargetClientId { get; set; }
     }
-    
+
     public class TargetClientIdFeeSettings
     {
         public string WalletApi { get; set; }
