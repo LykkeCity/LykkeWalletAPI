@@ -150,16 +150,16 @@ namespace LykkeApi2.Controllers
             if (request.AssetId != pair.BaseAssetId && request.AssetId != pair.QuotingAssetId)
             {
                 return BadRequest();
-            }
+            }            
 
-            //var sessionIsPromoted = await _clientSessionsClient.ValidateAsync(_lykkePrincipal.GetToken(), id.ToString(), RequestType.Orders);
-           
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+
             var command = new CreateMarketOrderCommand
             {
-                ConfirmationRequired = false,
+                ConfirmationRequired = _baseSettings.EnableSessionValidation && (!tradingSession?.Confirmed ?? false),
                 AssetId = request.AssetId,
                 AssetPair = new AssetPairModel
                 {

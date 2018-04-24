@@ -53,7 +53,8 @@ namespace LykkeApi2.Settings
         
         public CacheSettings CacheSettings { get; set; }
 
-        public bool EnableFees { get; set; }        
+        public bool EnableFees { get; set; }
+        public bool EnableSessionValidation { get; set; }
     }
 
     public class IcoSettings
