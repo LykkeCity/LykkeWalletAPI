@@ -110,6 +110,14 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> CancelLimitOrder(string orderId)
         {
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+
+            var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
+            if (confirmationRequired)
+            {
+                return BadRequest("Session confirmation is required");
+            }
+
             var clientId = _requestContext.ClientId;
 
             var activeOrders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
@@ -160,9 +168,14 @@ namespace LykkeApi2.Controllers
 
             var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
 
-            var command = new CreateMarketOrderCommand
+            var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
+            if (confirmationRequired)
             {
-                ConfirmationRequired = _baseSettings.EnableSessionValidation && (!tradingSession?.Confirmed ?? false),
+                return BadRequest("Session confirmation is required");
+            }
+
+            var command = new CreateMarketOrderCommand
+            {                
                 AssetId = request.AssetId,
                 AssetPair = new AssetPairModel
                 {
@@ -219,11 +232,15 @@ namespace LykkeApi2.Controllers
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
-            //var sessionIsPromoted = await _clientSessionsClient.ValidateAsync(_lykkePrincipal.GetToken(), id.ToString(), RequestType.Orders);
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+            var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
+            if (confirmationRequired)
+            {
+                return BadRequest("Session confirmation is required");
+            }
 
             var command = new CreateLimitOrderCommand
-            {
-                ConfirmationRequired = false,
+            {                
                 AssetPair = new AssetPairModel
                 {
                     Id = request.AssetPairId,
