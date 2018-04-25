@@ -15,6 +15,7 @@
         public string CategoryId { get; set; }
         public bool IsBase { get; set; }
         public string IconUrl { get; set; }
+        public bool OtherDepositOptionsEnabled { get; set; }
     }
 
     public class AssetDescriptionModel

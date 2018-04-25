@@ -30,7 +30,8 @@ namespace LykkeApi2.Models
                 BlockchainDepositEnabled = src.BlockchainDepositEnabled,
                 CategoryId = src.CategoryId,
                 IsBase = src.IsBase,
-                IconUrl = src.IconUrl
+                IconUrl = src.IconUrl,
+                OtherDepositOptionsEnabled = src.OtherDepositOptionsEnabled
             };
         }
 
