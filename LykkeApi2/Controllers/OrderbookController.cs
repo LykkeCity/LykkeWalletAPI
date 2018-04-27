@@ -13,37 +13,46 @@ namespace LykkeApi2.Controllers
     [Route("api/[controller]")]
     public class OrderbookController : Controller
     {
-        private readonly CachedDataDictionary<string, AssetPair> _assetPairs;
+        private readonly CachedDataDictionary<string, AssetPair> _assetPairsCache;
+        private readonly CachedDataDictionary<string, Asset> _assetsCache;
         private readonly IOrderBooksService _orderBooksService;
 
         public OrderbookController(
-            CachedDataDictionary<string, AssetPair> assetPairs,
+            CachedDataDictionary<string, AssetPair> assetPairsCache,
+            CachedDataDictionary<string, Asset> assetsCache,
             IOrderBooksService orderBooksService
             )
         {
-            _assetPairs = assetPairs;
+            _assetPairsCache = assetPairsCache;
+            _assetsCache = assetsCache;
             _orderBooksService = orderBooksService;
         }
+        
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<OrderBookModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get(string assetPairId = null)
         {
-            assetPairId = string.IsNullOrEmpty(assetPairId)
-                ? null
-                : assetPairId.ToUpper();
+            if (string.IsNullOrWhiteSpace(assetPairId))
+                return BadRequest();
 
-            AssetPair pair = null;
+            var assetPair = await _assetPairsCache.GetItemAsync(assetPairId);
+                    
+            if (assetPair == null || assetPair.IsDisabled)
+                return NotFound();
 
-            if (!string.IsNullOrEmpty(assetPairId))
-                pair = await _assetPairs.GetItemAsync(assetPairId);
+            var baseAsset = await _assetsCache.GetItemAsync(assetPair.BaseAssetId);
+            var quotingAsset = await _assetsCache.GetItemAsync(assetPair.QuotingAssetId);
 
-            if (!string.IsNullOrEmpty(assetPairId) && pair == null)
-                return NotFound($"Asset pair {assetPairId} not found");
+            if (baseAsset == null || baseAsset.IsDisabled ||
+                quotingAsset == null || quotingAsset.IsDisabled)
+                return NotFound();
 
-            IEnumerable<IOrderBook> result = string.IsNullOrEmpty(assetPairId) 
-                ? await _orderBooksService.GetAllAsync()
-                : await _orderBooksService.GetAsync(assetPairId);
+            if (!baseAsset.IsTradable || !quotingAsset.IsTradable)
+                return BadRequest();
+
+            var result = await _orderBooksService.GetAsync(assetPairId);
 
             return Ok(result.ToApiModel());
         }
