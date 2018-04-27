@@ -201,8 +201,6 @@ namespace LykkeApi2.Modules
                         settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "Setup", log))
                 .As(typeof(INoSQLTableStorage<IdentityEntity>));
 
-            builder.RegisterInstance(settings.CurrentValue.PaymentSystems);
-
             builder.RegisterType<AppGlobalSettingsRepository>().As<IAppGlobalSettingsRepository>();
             builder.RegisterType<ExchangeSettingsRepository>().As<IExchangeSettingsRepository>();
             builder.RegisterType<IdentityRepository>().As<IIdentityRepository>();

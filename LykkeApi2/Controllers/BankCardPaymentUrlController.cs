@@ -109,11 +109,20 @@ namespace LykkeApi2.Controllers
             var phoneNumberE164 = input.Phone.PreparePhoneNum().ToE164Number();
             var pd = await _personalDataService.GetAsync(clientId);
 
-            if (string.IsNullOrWhiteSpace(pd.PaymentSystem) || !Enum.TryParse(pd.PaymentSystem, out CashInPaymentSystem paymentSystem))
-                paymentSystem = CashInPaymentSystem.Unknown;
+            CashInPaymentSystem paymentSystem;
 
-            if (input.DepositOptionEnum == DepositOption.Other)
-                paymentSystem = CashInPaymentSystem.CreditVoucher; // https://lykkex.atlassian.net/browse/LWDEV-4665
+            switch (input.DepositOptionEnum)
+            {
+                case DepositOption.BankCard:
+                    paymentSystem = CashInPaymentSystem.Fxpaygate;
+                    break;
+                case DepositOption.Other:
+                    paymentSystem = CashInPaymentSystem.CreditVoucher;
+                    break;
+                default:
+                    paymentSystem = CashInPaymentSystem.Unknown;
+                    break;
+            }
 
             var checkResult = await _limitationsServiceClient.CheckAsync(clientId, input.AssetId, input.Amount, CurrencyOperationType.CardCashIn);
 
@@ -147,7 +156,7 @@ namespace LykkeApi2.Controllers
                 var feeAmountTruncated = feeAmount.TruncateDecimalPlaces(asset.Accuracy, true);
 
                 var urlData = await _paymentSystemService.GetUrlDataAsync(
-                    paymentSystem.ToString(),
+                    input.DepositOption,
                     transactionId,
                     clientId,
                     input.Amount + feeAmountTruncated,
