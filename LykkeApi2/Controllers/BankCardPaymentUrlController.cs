@@ -155,7 +155,7 @@ namespace LykkeApi2.Controllers
                 var feeAmountTruncated = feeAmount.TruncateDecimalPlaces(asset.Accuracy, true);
 
                 var urlData = await _paymentSystemService.GetUrlDataAsync(
-                    input.DepositOption,
+                    paymentSystem.ToString(),
                     transactionId,
                     clientId,
                     input.Amount + feeAmountTruncated,
