@@ -18,6 +18,7 @@ using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Lykke.Service.Affiliate.Client;
+using Lykke.Service.Session.Client;
 using Lykke.Service.ClientDictionaries.Client;
 
 namespace LykkeApi2.Modules
@@ -55,9 +56,7 @@ namespace LykkeApi2.Modules
                 .As<ILykkeRegistrationClient>()
                 .WithParameter("serviceUrl", _serviceSettings.CurrentValue.RegistrationUrl);
 
-            builder.RegisterType<ClientSessionsClient>()
-                .As<IClientSessionsClient>()
-                .WithParameter("serviceUrl", _serviceSettings.CurrentValue.SessionUrl);
+            builder.RegisterClientSessionClient(_apiSettings.Nested(s => s.WalletApiv2.Services.SessionUrl).CurrentValue, _log);
             
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));

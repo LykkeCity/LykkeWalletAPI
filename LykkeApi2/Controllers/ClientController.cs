@@ -18,7 +18,7 @@ using Lykke.Service.PersonalData.Contract.Models;
 using LykkeApi2.Infrastructure.Extensions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.Session;
+using Lykke.Service.Session.Client;
 
 namespace LykkeApi2.Controllers
 {
@@ -33,7 +33,7 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
         private readonly IPersonalDataService _personalDataService;
         private readonly IClientAccountClient _clientAccountService;
-        private readonly IClientSessionsClient _sessionsClient;
+        private readonly IClientSessionsClient _clientSessionsClient;
         private readonly ILykkePrincipal _lykkePrincipal;
 
         public ClientController(
@@ -43,7 +43,7 @@ namespace LykkeApi2.Controllers
             IRequestContext requestContext,
             IPersonalDataService personalDataService,
             IClientAccountClient clientAccountService,
-            IClientSessionsClient sessionsClient,
+            IClientSessionsClient clientSessionsClient,
             ILykkePrincipal lykkePrincipal)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
@@ -53,7 +53,7 @@ namespace LykkeApi2.Controllers
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
             _lykkePrincipal = lykkePrincipal ?? throw new ArgumentNullException(nameof(lykkePrincipal));
-            _sessionsClient = sessionsClient ?? throw new ArgumentNullException(nameof(sessionsClient));
+            _clientSessionsClient = clientSessionsClient ?? throw new ArgumentNullException(nameof(clientSessionsClient));
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Auth()
         {
-            await _sessionsClient.DeleteSessionIfExistsAsync(_lykkePrincipal.GetToken());
+            await _clientSessionsClient.DeleteSessionIfExistsAsync(_lykkePrincipal.GetToken());
             
             return Ok();
         }
