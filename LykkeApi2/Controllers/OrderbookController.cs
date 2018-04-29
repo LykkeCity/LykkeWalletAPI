@@ -13,18 +13,14 @@ namespace LykkeApi2.Controllers
     [Route("api/[controller]")]
     public class OrderbookController : Controller
     {
-        private readonly CachedDataDictionary<string, AssetPair> _assetPairsCache;
-        private readonly CachedDataDictionary<string, Asset> _assetsCache;
+        private readonly IAssetsHelper _assetsHelper;
         private readonly IOrderBooksService _orderBooksService;
 
         public OrderbookController(
-            CachedDataDictionary<string, AssetPair> assetPairsCache,
-            CachedDataDictionary<string, Asset> assetsCache,
-            IOrderBooksService orderBooksService
-            )
+            IAssetsHelper assetsHelper,
+            IOrderBooksService orderBooksService)
         {
-            _assetPairsCache = assetPairsCache;
-            _assetsCache = assetsCache;
+            _assetsHelper = assetsHelper;
             _orderBooksService = orderBooksService;
         }
         
@@ -37,13 +33,13 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(assetPairId))
                 return BadRequest();
 
-            var assetPair = await _assetPairsCache.GetItemAsync(assetPairId);
+            var assetPair = await _assetsHelper.GetAssetPairAsync(assetPairId);
                     
             if (assetPair == null || assetPair.IsDisabled)
                 return NotFound();
 
-            var baseAsset = await _assetsCache.GetItemAsync(assetPair.BaseAssetId);
-            var quotingAsset = await _assetsCache.GetItemAsync(assetPair.QuotingAssetId);
+            var baseAsset = await _assetsHelper.GetAssetAsync(assetPair.BaseAssetId);
+            var quotingAsset = await _assetsHelper.GetAssetAsync(assetPair.QuotingAssetId);
 
             if (baseAsset == null || baseAsset.IsDisabled ||
                 quotingAsset == null || quotingAsset.IsDisabled)
