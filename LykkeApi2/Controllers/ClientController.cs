@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
+using Core.Identity;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;
@@ -15,10 +16,9 @@ using Microsoft.AspNetCore.Authorization;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.PersonalData.Contract.Models;
 using LykkeApi2.Infrastructure.Extensions;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.Models;
+using Lykke.Service.Session;
 
 namespace LykkeApi2.Controllers
 {
@@ -33,6 +33,8 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
         private readonly IPersonalDataService _personalDataService;
         private readonly IClientAccountClient _clientAccountService;
+        private readonly IClientSessionsClient _sessionsClient;
+        private readonly ILykkePrincipal _lykkePrincipal;
 
         public ClientController(
             ILog log,
@@ -40,14 +42,18 @@ namespace LykkeApi2.Controllers
             ClientAccountLogic clientAccountLogic,
             IRequestContext requestContext,
             IPersonalDataService personalDataService,
-            IClientAccountClient clientAccountService)
+            IClientAccountClient clientAccountService,
+            IClientSessionsClient sessionsClient,
+            ILykkePrincipal lykkePrincipal)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
             _clientAccountLogic = clientAccountLogic;
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
-            _clientAccountService = clientAccountService;
+            _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
+            _lykkePrincipal = lykkePrincipal ?? throw new ArgumentNullException(nameof(lykkePrincipal));
+            _sessionsClient = sessionsClient ?? throw new ArgumentNullException(nameof(sessionsClient));
         }
 
         /// <summary>
@@ -137,6 +143,18 @@ namespace LykkeApi2.Controllers
                 AccessToken = authResult?.Token,
                 NotificationsId = authResult?.NotificationsId
             });
+        }
+        
+        [Authorize]
+        [HttpPost("logout")]
+        [SwaggerOperation("LogOut")]
+        [ProducesResponseType((int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Auth()
+        {
+            await _sessionsClient.DeleteSessionIfExistsAsync(_lykkePrincipal.GetToken());
+            
+            return Ok();
         }
 
         [Authorize]
