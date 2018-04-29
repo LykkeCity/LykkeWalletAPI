@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Services;
 using LkeServices;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -18,18 +19,15 @@ namespace LykkeApi2.Controllers
     public class WatchlistsController : Controller
     {
         private readonly IRequestContext _requestContext;
-        private readonly IAssetsService _assetsService;
-        private readonly SrvAssetsHelper _srvAssetsHelper;
+        private readonly IAssetsHelper _assetsHelper;
 
         public WatchlistsController(
             IRequestContext requestContext,
-            IAssetsService assetsService,
-            SrvAssetsHelper srvAssetsHelper
+            IAssetsHelper assetsHelper
         )
         {
             _requestContext = requestContext;
-            _assetsService = assetsService;
-            _srvAssetsHelper = srvAssetsHelper;
+            _assetsHelper = assetsHelper;
         }
 
         [HttpGet]
@@ -42,40 +40,34 @@ namespace LykkeApi2.Controllers
 
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(WatchList), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get(string id)
         {
-            try
-            {
-                WatchList watchList = await GetWatchList(id);
-                
-                if (watchList == null)
-                    return NotFound("Watch-list not found!");
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest();
 
-                return Ok(watchList);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var watchList = await GetWatchList(id);
+
+            if (watchList == null)
+                return NotFound();
+
+            return Ok(watchList);
         }
 
         [HttpPost]
         [ProducesResponseType(typeof(WatchList), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] WatchListCreateModel model)
         {
-            if (!await IsValidAsync(model.AssetIds))
-                return BadRequest("Wrong assets in 'AssetIds' list");
-            
-            if (string.IsNullOrEmpty(model.Name))
-                return BadRequest("Name can't be empty");
+            if (!await IsValidAsync(model.AssetIds) ||
+                string.IsNullOrEmpty(model.Name))
+                return BadRequest();
 
             var watchlists = await GetAllWatchlists();
 
             if (watchlists.Any(item => item.Name == model.Name))
-                return BadRequest($"Watch-list with name '{model.Name}' already exists");
+                return BadRequest();
 
             var watchList = new WatchList
             {
@@ -85,84 +77,67 @@ namespace LykkeApi2.Controllers
                 AssetIds = model.AssetIds.ToList()
             };
 
-            var result = await _assetsService.WatchListAddCustomAsync(watchList, _requestContext.ClientId);
+            var result = await _assetsHelper.AddCustomWatchListAsync(_requestContext.ClientId, watchList);
+
             return Ok(result);
         }
 
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(WatchList), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Update(string id, [FromBody] WatchListUpdateModel model)
         {
-            try
+            var watchList = await GetWatchList(id);
+
+            if (watchList == null)
+                return NotFound();
+
+            if (watchList.ReadOnlyProperty ||
+                !await IsValidAsync(model.AssetIds) ||
+                string.IsNullOrEmpty(model.Name))
+                return BadRequest();
+
+            var watchlists = await GetAllWatchlists();
+
+            if (watchlists.Any(item => item.Name == model.Name && item.Id != watchList.Id))
+                return BadRequest();
+
+            var newWatchList = new WatchList
             {
-                WatchList watchList = await GetWatchList(id);
-                
-                if (watchList == null)
-                    return NotFound("Watch-list not found!");
-                
-                if (watchList.ReadOnlyProperty)
-                    return BadRequest("This watch-list is read only!");
+                Id = id,
+                Name = model.Name,
+                Order = model.Order,
+                AssetIds = model.AssetIds.ToList()
+            };
 
-                if (!await IsValidAsync(model.AssetIds))
-                    return BadRequest("Wrong assets in 'AssetIds' list");
+            await _assetsHelper.UpdateCustomWatchListAsync(_requestContext.ClientId, watchList);
 
-                if (string.IsNullOrEmpty(model.Name))
-                    return BadRequest("Name can't be empty");
-
-                var watchlists = await GetAllWatchlists();
-
-                if (watchlists.Any(item => item.Name == model.Name && item.Id != watchList.Id))
-                    return BadRequest($"Watch-list with name '{model.Name}' already exists");
-
-                var newWatchList = new WatchList
-                {
-                    Id = id,
-                    Name = model.Name,
-                    Order = model.Order,
-                    AssetIds = model.AssetIds.ToList()
-                };
-
-                await _assetsService.WatchListUpdateCustomAsync(newWatchList, _requestContext.ClientId);
-
-                return Ok(newWatchList);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(newWatchList);
         }
 
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Delete(string id)
         {
-            try
-            {
-                WatchList watchList = await GetWatchList(id);
-                
-                if (watchList == null)
-                    return NotFound("Watch-list not found!");
-                
-                if (watchList.ReadOnlyProperty)
-                    return BadRequest("This watch-list is read only!");
+            var watchList = await GetWatchList(id);
 
-                await _assetsService.WatchListCustomRemoveAsync(id, _requestContext.ClientId);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            if (watchList == null)
+                return NotFound();
+
+            if (watchList.ReadOnlyProperty)
+                return BadRequest();
+
+            await _assetsHelper.RemoveCustomWatchListAsync(_requestContext.ClientId, id);
+            return Ok();
         }
 
         private async Task<WatchList> GetWatchList(string id)
         {
-            var result = await _assetsService.WatchListGetCustomAsync(id, _requestContext.ClientId) ?? 
-                         await _assetsService.WatchListGetPredefinedAsync(id);
+            var result = await _assetsHelper.GetCustomWatchListAsync(id, _requestContext.ClientId) ??
+                         await _assetsHelper.GetPredefinedWatchListAsync(id);
 
             if (result == null)
             {
@@ -170,7 +145,7 @@ namespace LykkeApi2.Controllers
             }
 
             var watchList = await FilterAssetsAsync(result);
-            
+
             if (watchList == null)
             {
                 throw new Exception("Assets in the watch-list are not accessable!");
@@ -183,7 +158,7 @@ namespace LykkeApi2.Controllers
         {
             var availableAssetIds = await GetAvailableAssetIdsAsync();
 
-            return (await _assetsService.WatchListGetAllAsync(_requestContext.ClientId))
+            return (await _assetsHelper.GetAllCustomWatchListsForClient(_requestContext.ClientId))
                 .Select(x => FilterAssets(x, availableAssetIds))
                 .Where(x => x != null);
         }
@@ -233,11 +208,11 @@ namespace LykkeApi2.Controllers
 
         private async Task<List<string>> GetAvailableAssetIdsAsync()
         {
-            return (await _srvAssetsHelper
-                    .GetAssetsPairsForClient(_requestContext.ClientId, _requestContext.IsIosDevice,
-                        _requestContext.PartnerId, true))
-                .Select(x => x.Id)
-                .ToList();
+            var assets =
+                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId,
+                    true);
+
+            return assets.ToList();
         }
     }
 }

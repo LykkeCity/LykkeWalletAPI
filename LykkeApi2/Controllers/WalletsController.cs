@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
+using Core.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.AutorestClient.Models;
@@ -32,23 +33,20 @@ namespace LykkeApi2.Controllers
         private readonly IBalancesClient _balancesClient;
         private readonly IClientAccountClient _clientAccountService;
         private readonly IHftInternalServiceAPI _hftInternalService;
-        private readonly CachedDataDictionary<string, Asset> _assetsCache;
-        private readonly IAssetsService _assetsService;
+        private readonly IAssetsHelper _assetsHelper;
 
         public WalletsController(
             IRequestContext requestContext,
             IClientAccountClient clientAccountService,
             IBalancesClient balancesClient,
             IHftInternalServiceAPI hftInternalService,
-            CachedDataDictionary<string, Asset> assetsCache,
-            IAssetsService assetsService)
+            IAssetsHelper assetsHelper)
         {
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
             _balancesClient = balancesClient ?? throw new ArgumentNullException(nameof(balancesClient));
             _hftInternalService = hftInternalService ?? throw new ArgumentNullException(nameof(hftInternalService));
-            _assetsCache = assetsCache ?? throw new ArgumentNullException(nameof(assetsCache));
-            _assetsService = assetsService ?? throw new ArgumentNullException(nameof(assetsService));
+            _assetsHelper = assetsHelper ?? throw new ArgumentNullException(nameof(assetsHelper));
         }
 
         /// <summary>
@@ -131,13 +129,7 @@ namespace LykkeApi2.Controllers
             var wallet = await GetClientWallet(id);
             if (wallet == null)
                 return NotFound();
-
-            // todo: always delete wallet through ClientAccountService; HFT internal service should process deleted messages by itself
-            var apiKey = (await _hftInternalService.GetKeysAsync(_requestContext.ClientId))?.FirstOrDefault(x => x.Wallet == id);
-            if (apiKey != null)
-            {
-                await _hftInternalService.DeleteKeyAsync(apiKey.Key);
-            }
+            
             await _clientAccountService.DeleteWalletAsync(id);
             return Ok();
         }
@@ -206,7 +198,7 @@ namespace LykkeApi2.Controllers
             var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
 
-            var availableAssets = await AssetsAvailableToUser(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
             
             foreach (var wallet in wallets)
             {
@@ -236,7 +228,7 @@ namespace LykkeApi2.Controllers
         {
             var clientBalances = await _balancesClient.GetClientBalances(_requestContext.ClientId);
             
-            var availableAssets = await AssetsAvailableToUser(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             return Ok(clientBalances?.Where(x => availableAssets.Contains(x.AssetId)).Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]);
         }
@@ -258,7 +250,7 @@ namespace LykkeApi2.Controllers
 
             var clientBalances = await _balancesClient.GetClientBalances(walletId);
             
-            var availableAssets = await AssetsAvailableToUser(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             return Ok(clientBalances?.Where(x => availableAssets.Contains(x.AssetId)).Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]);
         }
@@ -278,7 +270,7 @@ namespace LykkeApi2.Controllers
             var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
             
-            var availableAssets = await AssetsAvailableToUser(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             if (!availableAssets.Contains(assetId))
                 return NotFound();
@@ -322,7 +314,7 @@ namespace LykkeApi2.Controllers
                     AssetId = assetId
                 });
             
-            var availableAssets = await AssetsAvailableToUser(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             if (!availableAssets.Contains(assetId))
                 return NotFound();
@@ -357,7 +349,7 @@ namespace LykkeApi2.Controllers
                     AssetId = assetId
                 });
             
-            var availableAssets = await AssetsAvailableToUser(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             if (!availableAssets.Contains(assetId))
                 return NotFound();
@@ -368,24 +360,6 @@ namespace LykkeApi2.Controllers
             }
 
             return NotFound();
-        }
-
-        private async Task<HashSet<string>> AssetsAvailableToUser(string clientId,
-            string partnerId)
-        {
-            var allAssets = await _assetsCache.Values();
-            var nonDisabledAssets = allAssets.Where(x => !x.IsDisabled);
-            
-            var assetsAvailableToUser = new HashSet<string>(await _assetsService.ClientGetAssetIdsAsync(clientId, true));
-            
-            var result = new HashSet<string>(nonDisabledAssets.Where(x =>
-                assetsAvailableToUser.Contains(x.Id) && 
-                (x.NotLykkeAsset
-                    ? _requestContext.PartnerId != null && x.PartnerIds.Contains(partnerId)
-                    : _requestContext.PartnerId == null || x.PartnerIds.Contains(partnerId)))
-                .Select(x => x.Id));
-
-            return result;
         }
 
         private async Task<Lykke.Service.ClientAccount.Client.Models.WalletDtoModel> GetClientWallet(string walletId)

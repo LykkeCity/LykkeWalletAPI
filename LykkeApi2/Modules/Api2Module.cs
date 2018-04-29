@@ -79,8 +79,10 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
             
-            builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
-            RegisterDictionaryEntities(builder);            
+            RegisterDictionaryEntities(builder);
+            
+            builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
+            
             BindServices(builder, _settings, _log);
             builder.Populate(_services);
         }
