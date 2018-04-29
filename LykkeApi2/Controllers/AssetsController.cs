@@ -248,7 +248,7 @@ namespace LykkeApi2.Controllers
                 await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId,
                     true);
 
-            if (!asset.IsBase || assetsAvailableToUser.Contains(model.BaseAsssetId))
+            if (!asset.IsBase || !assetsAvailableToUser.Contains(model.BaseAsssetId))
                 return BadRequest();
 
             await _clientAccountSettingsClient.SetBaseAssetAsync(_requestContext.ClientId, model.BaseAsssetId);
