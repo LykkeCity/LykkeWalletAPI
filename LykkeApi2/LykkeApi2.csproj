@@ -87,6 +87,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Domain\Commands\" />
-    <Folder Include="Services" />
   </ItemGroup>
 </Project>

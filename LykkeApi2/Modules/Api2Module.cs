@@ -81,10 +81,11 @@ namespace LykkeApi2.Modules
             builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
 
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
+
+            RegisterDictionaryEntities(builder);
             
-            builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
-            
-            RegisterDictionaryEntities(builder);            
+            builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
+
             BindServices(builder, _settings, _log);
             builder.Populate(_services);
         }

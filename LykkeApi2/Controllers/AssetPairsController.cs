@@ -4,6 +4,8 @@ using System.Net;
 using System.Threading.Tasks;
 using Common;
 using Common.Log;
+using Core.Services;
+using LkeServices;
 using Lykke.MarketProfileService.Client;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -21,23 +23,17 @@ namespace LykkeApi2.Controllers
     [ValidateModel]
     public class AssetPairsController : Controller
     {
-        private readonly CachedDataDictionary<string, AssetPair> _assetPairsCache;
-        private readonly CachedDataDictionary<string, Asset> _assetsCache;
-        private readonly IAssetsService _assetsService;
         private readonly ILykkeMarketProfileServiceAPI _marketProfileService;
+        private readonly IAssetsHelper _assetsHelper;
         private readonly IRequestContext _requestContext;
 
         public AssetPairsController(
-            CachedDataDictionary<string, AssetPair> assetPairsCache,
-            CachedDataDictionary<string, Asset> assetsCache,
-            IAssetsService assetsService,
             ILykkeMarketProfileServiceAPI marketProfile,
+            IAssetsHelper assetsHelper,
             IRequestContext requestContext)
         {
-            _assetPairsCache = assetPairsCache;
-            _assetsCache = assetsCache;
-            _assetsService = assetsService;
             _marketProfileService = marketProfile;
+            _assetsHelper = assetsHelper;
             _requestContext = requestContext;
         }
 
@@ -49,10 +45,10 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Get()
         {
-            var allAsetPairs = await _assetPairsCache.Values();
+            var allAsetPairs = await _assetsHelper.GetAllAssetPairsAsync();
             var nonDisabledAssetPairs = allAsetPairs.Where(s => !s.IsDisabled);
             
-            var allAssets = await _assetsCache.Values();
+            var allAssets = await _assetsHelper.GetAllAssetsAsync();
             var nondisabledAssets = new HashSet<string>(allAssets.Where(x => !x.IsDisabled).Select(x => x.Id));
 
             var validAssetPairs = nonDisabledAssetPairs.Where(
@@ -72,22 +68,14 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailable()
         {
-            var allNondisabledAssetPairs = (await _assetPairsCache.Values()).Where(s => !s.IsDisabled);
+            var allNondisabledAssetPairs = (await _assetsHelper.GetAllAssetPairsAsync()).Where(s => !s.IsDisabled);
 
-            var allTradableNondisabledAssets = (await _assetsCache.Values()).Where(x => !x.IsDisabled && x.IsTradable);
-
-            var currentPartnersTradableNondisabledAssets = new HashSet<string>(allTradableNondisabledAssets.Where(x => x.NotLykkeAsset
-                ? _requestContext.PartnerId != null && x.PartnerIds.Contains(_requestContext.PartnerId)
-                : _requestContext.PartnerId == null || x.PartnerIds.Contains(_requestContext.PartnerId)).Select(x => x.Id));
-
-            var assetsAvailableToUser = new HashSet<string>(await _assetsService.ClientGetAssetIdsAsync(_requestContext.ClientId, true));
+            var assetsAvailableToUser = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             var availableAssetPairs =
                 allNondisabledAssetPairs.Where(x =>
                     assetsAvailableToUser.Contains(x.BaseAssetId) &&
-                    assetsAvailableToUser.Contains(x.QuotingAssetId) &&
-                    currentPartnersTradableNondisabledAssets.Contains(x.BaseAssetId) &&
-                    currentPartnersTradableNondisabledAssets.Contains(x.QuotingAssetId));
+                    assetsAvailableToUser.Contains(x.QuotingAssetId));
 
             return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(
                 availableAssetPairs.Select(x => x.ToApiModel()).OrderBy(x => x.Id).ToArray()));
@@ -107,11 +95,11 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest();
 
-            var assetPair = await _assetPairsCache.GetItemAsync(id);
+            var assetPair = await _assetsHelper.GetAssetPairAsync(id);
             if (assetPair == null || assetPair.IsDisabled)
                 return NotFound();
 
-            var allAssets = await _assetsCache.Values();
+            var allAssets = await _assetsHelper.GetAllAssetsAsync();
             var nondisabledAssets = new HashSet<string>(allAssets.Where(x => !x.IsDisabled).Select(x => x.Id));
 
             if (!nondisabledAssets.Contains(assetPair.BaseAssetId) ||
@@ -129,10 +117,10 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(AssetPairRatesResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetPairRates()
         {
-            var allAssetPairs = await _assetPairsCache.Values();
+            var allAssetPairs = await _assetsHelper.GetAllAssetPairsAsync();
             var allNondisabledAssetPairs = allAssetPairs.Where(x => !x.IsDisabled);
 
-            var allAssets = await _assetsCache.Values();
+            var allAssets = await _assetsHelper.GetAllAssetsAsync();
             var allTradableNondisabledAssets =
                 new HashSet<string>(
                     allAssets
@@ -165,12 +153,12 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(request.AssetPairId))
                 return BadRequest();
             
-            var assetPair = await _assetPairsCache.GetItemAsync(request.AssetPairId);
+            var assetPair = await _assetsHelper.GetAssetPairAsync(request.AssetPairId);
 
             if (assetPair == null || assetPair.IsDisabled)
                 return NotFound();
             
-            var allAssets = await _assetsCache.Values();
+            var allAssets = await _assetsHelper.GetAllAssetsAsync();
             var allTradableNondisabledAssets =
                 new HashSet<string>(
                     allAssets
