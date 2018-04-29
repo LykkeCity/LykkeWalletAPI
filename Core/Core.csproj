@@ -8,6 +8,7 @@
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.1.0" />
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="3.3.1" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.96" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.28" />
   </ItemGroup>
