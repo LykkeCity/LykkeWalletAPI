@@ -19,6 +19,7 @@ using Lykke.Service.PersonalData.Contract.Models;
 using LykkeApi2.Infrastructure.Extensions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Session.Client;
 using LykkeApi2.Models.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
@@ -59,7 +60,7 @@ namespace LykkeApi2.Controllers
             _kycStatusService = kycStatusService;
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
-            _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
+            _clientAccountService = clientAccountService;
         }
 
         /// <summary>
@@ -149,18 +150,6 @@ namespace LykkeApi2.Controllers
                 AccessToken = authResult?.Token,
                 NotificationsId = authResult?.NotificationsId
             });
-        }
-        
-        [Authorize]
-        [HttpPost("logout")]
-        [SwaggerOperation("LogOut")]
-        [ProducesResponseType((int) HttpStatusCode.OK)]
-        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Auth()
-        {
-            await _clientSessionsClient.DeleteSessionIfExistsAsync(_lykkePrincipal.GetToken());
-            
-            return Ok();
         }
 
         [Authorize]
