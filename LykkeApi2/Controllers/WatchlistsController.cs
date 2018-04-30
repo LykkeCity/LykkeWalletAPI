@@ -60,10 +60,10 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] WatchListCreateModel model)
         {
-            if (!await IsValidAsync(model.AssetIds) ||
+            if ((model.AssetPairIds != null ? !await IsValidAsync(model.AssetPairIds) : !await IsValidAsync(model.AssetIds)) || //TODO: remove AssetIds at all
                 string.IsNullOrEmpty(model.Name))
                 return BadRequest();
-
+            
             var watchlists = await GetAllWatchlists();
 
             if (watchlists.Any(item => item.Name == model.Name))
@@ -74,7 +74,7 @@ namespace LykkeApi2.Controllers
                 Id = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Order = model.Order,
-                AssetIds = model.AssetIds.ToList()
+                AssetIds = model.AssetPairIds != null ? model.AssetPairIds.ToList() : model.AssetIds.ToList() //TODO: remove AssetIds at all
             };
 
             var result = await _assetsHelper.AddCustomWatchListAsync(_requestContext.ClientId, watchList);
@@ -94,7 +94,7 @@ namespace LykkeApi2.Controllers
                 return NotFound();
 
             if (watchList.ReadOnlyProperty ||
-                !await IsValidAsync(model.AssetIds) ||
+                (model.AssetPairIds != null ? !await IsValidAsync(model.AssetPairIds) : !await IsValidAsync(model.AssetIds)) || //TODO: remove AssetIds at all
                 string.IsNullOrEmpty(model.Name))
                 return BadRequest();
 
@@ -108,7 +108,7 @@ namespace LykkeApi2.Controllers
                 Id = id,
                 Name = model.Name,
                 Order = model.Order,
-                AssetIds = model.AssetIds.ToList()
+                AssetIds = model.AssetPairIds != null ? model.AssetPairIds.ToList() : model.AssetIds.ToList() //TODO: remove AssetIds at all
             };
 
             await _assetsHelper.UpdateCustomWatchListAsync(_requestContext.ClientId, watchList);
