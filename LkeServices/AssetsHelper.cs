@@ -106,6 +106,20 @@ namespace LkeServices
             return result;
         }
 
+        public async Task<HashSet<string>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId, bool? tradable = default(bool?))
+        {
+            var allNondisabledAssetPairs = (await GetAllAssetPairsAsync()).Where(s => !s.IsDisabled);
+
+            var assetsAvailableToUser = await GetAssetsAvailableToClientAsync(clientId, partnerId, tradable);
+            
+            var availableAssetPairs =
+                allNondisabledAssetPairs.Where(x =>
+                    assetsAvailableToUser.Contains(x.BaseAssetId) &&
+                    assetsAvailableToUser.Contains(x.QuotingAssetId));
+            
+            return new HashSet<string>(availableAssetPairs.Select(x => x.Id));
+        }
+
         public Task<WatchList> AddCustomWatchListAsync(string clientId, WatchList watchList)
         {
             return _assetsService.WatchListAddCustomAsync(watchList, clientId);
