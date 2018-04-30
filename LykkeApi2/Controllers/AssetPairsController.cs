@@ -68,17 +68,16 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(Models.AssetPairsModels.AssetPairResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailable()
         {
-            var allNondisabledAssetPairs = (await _assetsHelper.GetAllAssetPairsAsync()).Where(s => !s.IsDisabled);
-
-            var assetsAvailableToUser = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
-
             var availableAssetPairs =
-                allNondisabledAssetPairs.Where(x =>
-                    assetsAvailableToUser.Contains(x.BaseAssetId) &&
-                    assetsAvailableToUser.Contains(x.QuotingAssetId));
-
+                await _assetsHelper.GetAssetPairsAvailableToClientAsync(_requestContext.ClientId,
+                    _requestContext.PartnerId, true);
+            
             return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(
-                availableAssetPairs.Select(x => x.ToApiModel()).OrderBy(x => x.Id).ToArray()));
+                (await _assetsHelper.GetAllAssetPairsAsync())
+                    .Where(x => availableAssetPairs.Contains(x.Id))
+                    .Select(x => x.ToApiModel())
+                    .OrderBy(x => x.Id)
+                    .ToArray()));
         }
 
         /// <summary>

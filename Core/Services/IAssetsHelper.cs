@@ -19,6 +19,8 @@ namespace Core.Services
         Task<AssetCategory> GetAssetCategoryAsync(string categoryId);
         Task<HashSet<string>> GetAssetsAvailableToClientAsync(string clientId, string partnerId,
             bool? tradable = default(bool?));
+        Task<HashSet<string>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId,
+            bool? tradable = default(bool?));
 
         Task<WatchList> AddCustomWatchListAsync(string clientId, WatchList watchList);
         Task UpdateCustomWatchListAsync(string clientId, WatchList watchList);
