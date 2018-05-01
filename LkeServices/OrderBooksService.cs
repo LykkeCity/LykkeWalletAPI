@@ -5,10 +5,10 @@ using Common;
 using Core.Domain.Orderbook;
 using Core.Services;
 using Lykke.Service.Assets.Client.Models;
-using LykkeApi2.Settings;
+using Core;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace LykkeApi2.Services
+namespace LykkeApi2
 {
     public class OrderBooksService : IOrderBooksService
     {

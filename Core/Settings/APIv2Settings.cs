@@ -6,7 +6,7 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
 
-namespace LykkeApi2.Settings
+namespace Core
 {
     public class APIv2Settings
     {

@@ -20,7 +20,7 @@ using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
-using LykkeApi2.Settings;
+using Core;
 
 namespace LykkeApi2.Modules
 {

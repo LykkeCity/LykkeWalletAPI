@@ -12,7 +12,7 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.SettingsReader.ReloadingManager;
-using LykkeApi2.Settings;
+using Core;
 using Xunit;
 
 namespace Lykke.WalletApiv2.Tests.DITests

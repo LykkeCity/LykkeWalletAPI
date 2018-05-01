@@ -14,7 +14,7 @@ using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using Lykke.Service.PersonalData.Contract;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Orders;
-using LykkeApi2.Settings;
+using Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
