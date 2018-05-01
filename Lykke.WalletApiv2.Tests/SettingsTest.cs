@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using LykkeApi2.Settings;
+using Core;
 using Newtonsoft.Json;
 using Xunit;
 

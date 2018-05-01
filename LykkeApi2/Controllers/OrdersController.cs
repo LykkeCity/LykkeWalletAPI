@@ -19,8 +19,9 @@ using Lykke.Service.Session.Client;
 using Lykke.Service.Session.Contracts;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Orders;
-using LykkeApi2.Settings;
-using Microsoft.AspNetCore.Authorization;
+using LykkeApi2.Infrastructure;
+using LykkeApi2.Models.Orders;
+using Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
@@ -47,7 +48,7 @@ namespace LykkeApi2.Controllers
         private readonly BaseSettings _baseSettings;
         private readonly IcoSettings _icoSettings;
         private readonly GlobalSettings _globalSettings;
-
+        
         public OrdersController(
             IRequestContext requestContext,
             ILykkePrincipal lykkePrincipal,
@@ -141,8 +142,8 @@ namespace LykkeApi2.Controllers
             var id = Guid.NewGuid();           
 
             var asset = await _assetsServiceWithCache.TryGetAssetAsync(request.AssetId);
-            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);            
-
+            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
+            
             if (asset == null)
             {
                 return NotFound($"Asset '{request.AssetId}' not found.");
@@ -192,7 +193,7 @@ namespace LykkeApi2.Controllers
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
-
+            
             try
             {
                 await _operationsClient.PlaceMarketOrder(id, command);
@@ -201,10 +202,9 @@ namespace LykkeApi2.Controllers
             {
                 if (e.Response.StatusCode == HttpStatusCode.BadRequest)
                     return BadRequest(JObject.Parse(e.Response.Content));
-
+                
                 throw;
             }
-        
             return Created(Url.Action("Get", "Operations", new { id }), id);
         }
         
@@ -216,7 +216,7 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> PlaceLimitOrder([FromBody] LimitOrderRequest request)
         {
             var id = Guid.NewGuid();
-
+            
             var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
 
             if (pair == null)
@@ -240,7 +240,7 @@ namespace LykkeApi2.Controllers
             }
 
             var command = new CreateLimitOrderCommand
-            {                
+            {
                 AssetPair = new AssetPairModel
                 {
                     Id = request.AssetPairId,
