@@ -2,12 +2,11 @@
 {
     public class LimitOrderRequest
     {
-        public string AssetPairId { get; set; }
-        
-        public OrderAction OrderAction { get; set; }
+        public string AssetPairId { get; set; }        
         
         public double Volume { get; set; }
         
-        public double Price { get; set; }
+        public decimal Price { get; set; }
+        public OrderAction OrderAction { get; set; }
     }
 }

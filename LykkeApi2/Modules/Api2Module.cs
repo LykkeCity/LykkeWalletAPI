@@ -9,7 +9,6 @@ using Core.Candles;
 using Core.Enumerators;
 using Core.Identity;
 using Core.Services;
-using Core.Settings;
 using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Identity;
@@ -20,6 +19,7 @@ using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
+using Core;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,6 +49,9 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.IcoSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.GlobalSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.KycServiceClient).SingleInstance();
 
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 

@@ -1,22 +1,34 @@
 ﻿using System.Net;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
+using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
 
-namespace Core.Settings
+namespace Core
 {
     public class APIv2Settings
     {
         public BaseSettings WalletApiv2 { get; set; }
         public SlackNotificationsSettings SlackNotifications { get; set; }
-        public PersonalDataServiceSettings PersonalDataServiceSettings { get; set; }
+        public PersonalDataServiceClientSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public ClientDictionariesServiceClientSettings ClientDictionariesServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
         public FeeSettings FeeSettings { set; get; }
+        public IcoSettings IcoSettings { get; set; }
+
+        public GlobalSettings GlobalSettings { get; set; }
+        public KycServiceClientSettings KycServiceClient { get; set; }
+    }
+
+    public class GlobalSettings
+    {
+        public string[] BlockedAssetPairs { get; set; }
+        public bool BitcoinBlockchainOperationsDisabled { get; set; }
+        public bool BtcOperationsDisabled { get; set; }
     }
 
     public class SlackNotificationsSettings
@@ -41,7 +53,13 @@ namespace Core.Settings
         
         public CacheSettings CacheSettings { get; set; }
 
-        public bool EnableFees { get; set; }
+        public bool EnableFees { get; set; }        
+    }
+
+    public class IcoSettings
+    {
+        public string LKK2YAssetId;
+        public string[] RestrictedCountriesIso3 { get; set; }
     }
 
     public class DbSettings
