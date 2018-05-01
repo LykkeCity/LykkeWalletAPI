@@ -15,11 +15,10 @@ using Microsoft.AspNetCore.Authorization;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.PersonalData.Contract.Models;
 using LykkeApi2.Infrastructure.Extensions;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Kyc.Abstractions.Services;
+using LykkeApi2.Models;
 
 namespace LykkeApi2.Controllers
 {
@@ -169,7 +168,7 @@ namespace LykkeApi2.Controllers
                 Email = personalData?.Email,
                 FirstName = personalData?.FirstName,
                 LastName = personalData?.LastName,
-                KycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId)
+                KycStatus = (await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId)).ToApiModel()
             });
         }
 

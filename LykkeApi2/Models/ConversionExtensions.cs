@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
 
@@ -90,6 +91,22 @@ namespace LykkeApi2.Models
                 BidPrice = src.BidPrice,
                 BidPriceTimestamp = src.BidPriceTimestamp
             };
+        }
+
+        public static KycStatus ToApiModel(this KycStatus status)
+        {
+            switch (status)
+            {
+                case KycStatus.NeedToFillData:
+                    return KycStatus.NeedToFillData;
+                case KycStatus.Ok:
+                case KycStatus.ReviewDone:
+                    return KycStatus.Ok;
+                case KycStatus.RestrictedArea:
+                    return KycStatus.RestrictedArea;
+                default:
+                    return KycStatus.Pending;
+            }
         }
 
     }
