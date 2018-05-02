@@ -23,6 +23,7 @@ using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.Session.Client;
 using Core;
+using Lykke.Service.ExchangeOperations.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -78,7 +79,13 @@ namespace LykkeApi2.Modules
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 
             builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
-
+            
+            builder
+                .RegisterInstance(
+                    new ExchangeOperationsServiceClient(_apiSettings.CurrentValue.ExchangeOperationsServiceClient.ServiceUrl))
+                .As<IExchangeOperationsServiceClient>()
+                .SingleInstance();
+            
             builder.Populate(_services);
         }
     }

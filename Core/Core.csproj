@@ -13,4 +13,9 @@
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.97" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.54" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Lykke.Service.ExchangeOperations.Client, Version=1.1.14.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\.nuget\packages\lykke.service.exchangeoperations.client\1.1.14\lib\netcoreapp2.0\Lykke.Service.ExchangeOperations.Client.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>
