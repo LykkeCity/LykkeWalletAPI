@@ -6,7 +6,7 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
 
-namespace Core
+namespace Core.Settings
 {
     public class APIv2Settings
     {
@@ -53,7 +53,8 @@ namespace Core
         
         public CacheSettings CacheSettings { get; set; }
 
-        public bool EnableFees { get; set; }        
+        public bool EnableFees { get; set; }
+        public bool EnableSessionValidation { get; set; }
     }
 
     public class IcoSettings
@@ -64,7 +65,7 @@ namespace Core
 
     public class DbSettings
     {
-        public string LogsConnString { get; set; }
+        public string LogsConnString { get; set; }               
     }
 
     public class ServiceSettings
@@ -73,12 +74,12 @@ namespace Core
         public string ClientAccountServiceUrl { get; set; }
         public string RegistrationUrl { get; set; }
         public string RateCalculatorServiceApiUrl { get; set; }
-        public string BalancesServiceUrl { get; set; }
+        public string BalancesServiceUrl { get; set; }        
         public string MarketProfileUrl { get; set; }
         public string CandleHistorySpotUrl { get; set; }
         public string CandleHistoryMtUrl { get; set; }
         public string HftInternalServiceUrl { get; set; }
-        public string SessionUrl { get; set; }
+        public string SessionUrl { get; set; }        
         public string OperationsUrl { get; set; }
         public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
         public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
