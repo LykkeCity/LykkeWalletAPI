@@ -3,7 +3,7 @@ using Core.Constants;
 using FluentValidation;
 using Lykke.Service.ClientAccount.Client;
 using LykkeApi2.Models.ClientAccountModels;
-using Core;
+using Core.Settings;
 using LykkeApi2.Strings;
 
 namespace LykkeApi2.Models.ValidationModels.RegistrationValidations

@@ -7,11 +7,11 @@
     <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.6" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
+    <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.173" />
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.1.0" />
     <PackageReference Include="Lykke.Service.Assets.Client" Version="3.3.1" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.96" />
-    <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.52" />
-    <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.167" />
+    <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.54" />
     <PackageReference Include="Lykke.Service.ExchangeOperations.Client" Version="1.1.14" />
   </ItemGroup>
 </Project>

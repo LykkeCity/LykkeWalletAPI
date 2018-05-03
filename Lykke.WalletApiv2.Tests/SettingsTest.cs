@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using Core;
+using Core.Settings;
 using Newtonsoft.Json;
 using Xunit;
 

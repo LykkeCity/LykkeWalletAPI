@@ -10,6 +10,7 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Common.Log;
+using Core.Settings;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.OperationsRepository.Client;
@@ -58,8 +59,8 @@ namespace LykkeApi2.Modules
                 .As<ILykkeRegistrationClient>()
                 .WithParameter("serviceUrl", _serviceSettings.CurrentValue.RegistrationUrl);
 
-            builder.RegisterClientSessionClient(_apiSettings.Nested(s => s.WalletApiv2.Services.SessionUrl).CurrentValue, _log);
-
+            builder.RegisterClientSessionClient(_serviceSettings.CurrentValue.SessionUrl, _log);
+            
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
 
@@ -75,14 +76,15 @@ namespace LykkeApi2.Modules
             builder.RegisterOperationsRepositoryClients(_serviceSettings.CurrentValue.OperationsRepositoryClient, _log);            
             builder.RegisterAffiliateClient(_serviceSettings.CurrentValue.AffiliateServiceClient.ServiceUrl, _log);
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
+
             builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
-            
+
             builder
                 .RegisterInstance(
                     new ExchangeOperationsServiceClient(_apiSettings.CurrentValue.ExchangeOperationsServiceClient.ServiceUrl))
                 .As<IExchangeOperationsServiceClient>()
                 .SingleInstance();
-            
+
             builder.Populate(_services);
         }
     }

@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Common;
-using Lykke.MatchingEngine.Connector.Abstractions.Models;
 using Core.Identity;
+using Core.Settings;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -19,9 +18,6 @@ using Lykke.Service.Session.Client;
 using Lykke.Service.Session.Contracts;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Orders;
-using LykkeApi2.Infrastructure;
-using LykkeApi2.Models.Orders;
-using Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
@@ -48,7 +44,7 @@ namespace LykkeApi2.Controllers
         private readonly BaseSettings _baseSettings;
         private readonly IcoSettings _icoSettings;
         private readonly GlobalSettings _globalSettings;
-        
+
         public OrdersController(
             IRequestContext requestContext,
             ILykkePrincipal lykkePrincipal,
@@ -143,7 +139,7 @@ namespace LykkeApi2.Controllers
 
             var asset = await _assetsServiceWithCache.TryGetAssetAsync(request.AssetId);
             var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
-            
+
             if (asset == null)
             {
                 return NotFound($"Asset '{request.AssetId}' not found.");
@@ -155,10 +151,10 @@ namespace LykkeApi2.Controllers
             }
 
             if (pair.IsDisabled)
-            {                
+            {
                 return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
             }
-            
+
             if (request.AssetId != pair.BaseAssetId && request.AssetId != pair.QuotingAssetId)
             {
                 return BadRequest();
@@ -188,8 +184,8 @@ namespace LykkeApi2.Controllers
                 },
                 Volume = Math.Abs(request.Volume),
                 OrderAction = request.OrderAction == Models.Orders.OrderAction.Buy
-                    ? Lykke.Service.Operations.Contracts.OrderAction.Buy
-                    : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+					 ? Lykke.Service.Operations.Contracts.OrderAction.Buy
+					 : Lykke.Service.Operations.Contracts.OrderAction.Sell,
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
@@ -202,9 +198,10 @@ namespace LykkeApi2.Controllers
             {
                 if (e.Response.StatusCode == HttpStatusCode.BadRequest)
                     return BadRequest(JObject.Parse(e.Response.Content));
-                
+
                 throw;
             }
+
             return Created(Url.Action("Get", "Operations", new { id }), id);
         }
         
@@ -216,7 +213,7 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> PlaceLimitOrder([FromBody] LimitOrderRequest request)
         {
             var id = Guid.NewGuid();
-            
+
             var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
 
             if (pair == null)
@@ -228,7 +225,7 @@ namespace LykkeApi2.Controllers
             {
                 return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
             }
-            
+
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
@@ -255,7 +252,7 @@ namespace LykkeApi2.Controllers
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
-            
+
             try
             {
                 await _operationsClient.PlaceLimitOrder(id, command);
