@@ -152,7 +152,8 @@ namespace LykkeApi2.Controllers
             if (result.IsDuplicate())
                 return Forbid();
             
-            return BadRequest();
+            throw new Exception(
+                $"Transfer of '{id.ToString()}' payment resulted in '{result.Code}' code from ME.");
         }
 
         /// <summary>
