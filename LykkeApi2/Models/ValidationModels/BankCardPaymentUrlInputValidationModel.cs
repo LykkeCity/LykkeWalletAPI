@@ -38,7 +38,6 @@ namespace LykkeApi2.Models.ValidationModels
         private readonly CachedTradableAssetsDictionary _tradableAssetsDictionary;
         private readonly IKycStatusService _kycStatusService;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
-        private readonly IWalletCredentialsService _walletCredentialsService;
         private readonly string _clientId;
         private readonly bool _isIosDevice;
 
@@ -53,9 +52,8 @@ namespace LykkeApi2.Models.ValidationModels
             IBalancesClient balancesClient,
             IAssetsService assetsService,
             CachedTradableAssetsDictionary tradableAssetsDictionary,
-            IKycStatusService kycStatusService, 
-            ILimitationsServiceClient limitationsServiceClient, 
-            IWalletCredentialsService walletCredentialsService)
+            IKycStatusService kycStatusService,
+            ILimitationsServiceClient limitationsServiceClient)
         {
             _cachedAssetsDictionary = cachedAssetsDictionary;
             _assetDisclaimersClient = assetDisclaimersClient;
@@ -66,7 +64,6 @@ namespace LykkeApi2.Models.ValidationModels
             _tradableAssetsDictionary = tradableAssetsDictionary;
             _kycStatusService = kycStatusService;
             _limitationsServiceClient = limitationsServiceClient;
-            _walletCredentialsService = walletCredentialsService;
 
             _clientId = httpContextAccessor.HttpContext.User?.Identity?.Name;
             _paymentLimitsResponse = paymentSystemClient.GetPaymentLimitsAsync().Result;
@@ -146,18 +143,13 @@ namespace LykkeApi2.Models.ValidationModels
 
             RuleFor(reg => reg.WalletId).MustAsync(IsAllowedToCashInViaBankCardAsync)
                 .WithMessage(x => Phrases.OperationProhibited);
-
-            RuleFor(reg => reg.WalletId).MustAsync(IsWalletCredentialsHaveMultiSig)
-                .WithMessage(x => Phrases.TradingWalletDoesNotExist);
-
-
         }
 
         private async Task<bool> IsApprovedDepositDisclaimers(string value, CancellationToken cancellationToken)
         {
             var depositAsset = await _cachedAssetsDictionary.GetItemAsync(value);
 
-            if (!string.IsNullOrEmpty(depositAsset.LykkeEntityId))
+            if (!string.IsNullOrEmpty(depositAsset?.LykkeEntityId))
             {
                 var checkDisclaimerResult =
                     await _assetDisclaimersClient.CheckDepositClientDisclaimerAsync(_clientId, depositAsset.LykkeEntityId);
@@ -210,9 +202,9 @@ namespace LykkeApi2.Models.ValidationModels
 
         private async Task<bool> IsBackupNotRequired(string value, CancellationToken cancellationToken)
         {
-            var backupSettingsTask = _clientAccountService.GetBackupAsync(_clientId);
+            var backupSettings = await _clientAccountService.GetBackupAsync(_clientId);
             var wallets = await _balancesClient.GetClientBalances(_clientId);
-            return wallets.Any(x => x.Balance > 0) && !(await backupSettingsTask).BackupDone;
+            return wallets.All(x => x.Balance <= 0) || backupSettings.BackupDone;
         }
 
         private async Task<bool> IsAllowedToCashInViaBankCardAsync(string value, CancellationToken cancellationToken)
@@ -226,12 +218,12 @@ namespace LykkeApi2.Models.ValidationModels
 
             var userKycStatus = await _kycStatusService.GetKycStatusAsync(_clientId);
 
-            return asset?.KycNeeded == true && !userKycStatus.IsKycOkOrReviewDone();
+            return asset?.KycNeeded != true || userKycStatus.IsKycOkOrReviewDone();
         }
 
         private async Task<bool> IsOtherDepositOptionsEnabled(string value, CancellationToken cancellationToken)
         {
-            return (await _assetsService.AssetGetAsync(value, cancellationToken)).OtherDepositOptionsEnabled;
+            return (await _assetsService.AssetGetAsync(value, cancellationToken))?.OtherDepositOptionsEnabled == true;
         }
 
         private async Task<bool> IsValidLimitation(BankCardPaymentUrlRequestModel model, double value, CancellationToken cancellationToken)
@@ -242,13 +234,6 @@ namespace LykkeApi2.Models.ValidationModels
                 value,
                 CurrencyOperationType.CardCashIn);
             return checkResult.IsValid;
-        }
-
-        private async Task<bool> IsWalletCredentialsHaveMultiSig(string value, CancellationToken cancellationToken)
-        {
-            var credentials = await _walletCredentialsService.GetAsync(_clientId);
-
-            return !string.IsNullOrWhiteSpace(credentials?.MultiSig);
         }
     }
 }

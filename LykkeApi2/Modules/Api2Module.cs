@@ -2,7 +2,6 @@
 using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AzureRepositories.Bitcoin;
 using AzureRepositories.Exchange;
 using AzureRepositories.GlobalSettings;
 using AzureStorage;
@@ -18,13 +17,13 @@ using Core.Enumerators;
 using Core.Exchange;
 using Core.GlobalSettings;
 using Core.Identity;
-using Core.Repositories;
 using Core.Services;
 using Core.Settings;
 using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Countries;
 using LkeServices.Identity;
+using LkeServices.Operations;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
@@ -75,6 +74,7 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
+            builder.RegisterType<SrvDisabledOperations>().SingleInstance();
 
             _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
             {
@@ -97,9 +97,6 @@ namespace LykkeApi2.Modules
             builder.RegisterType<LimitationsServiceClient>().As<ILimitationsServiceClient>();
             builder.RegisterType<DisableOnMaintenanceFilter>();
             builder.RegisterType<CachedAssetsDictionary>();
-
-            builder.RegisterType<WalletCredentialsService>().As<IWalletCredentialsService>();
-
 
             RegisterDictionaryEntities(builder);
             BindServices(builder, _settings);
@@ -193,15 +190,9 @@ namespace LykkeApi2.Modules
                         settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "Setup", log))
                 .As(typeof(INoSQLTableStorage<IdentityEntity>));
 
-            builder.Register(y =>
-                    AzureTableStorage<IdentityEntity>.Create(
-                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "WalletCredentials", log))
-                .As(typeof(INoSQLTableStorage<WalletCredentialsEntity>));
-
             builder.RegisterType<AppGlobalSettingsRepository>().As<IAppGlobalSettingsRepository>();
             builder.RegisterType<ExchangeSettingsRepository>().As<IExchangeSettingsRepository>();
             builder.RegisterType<IdentityRepository>().As<IIdentityRepository>();
-            builder.RegisterType<WalletCredentialsRepository>().As<IWalletCredentialsRepository>();
         }
 
         private static void BindMicroservices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings)
