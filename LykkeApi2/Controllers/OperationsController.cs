@@ -108,9 +108,10 @@ namespace LykkeApi2.Controllers
             
             if (operation.Status != OperationStatus.Created)
             {
-                if(operation.Status == OperationStatus.Completed)
+                if(operation.ClientId.HasValue &&
+                   operation.ClientId.Value.ToString() == _requestContext.ClientId)
                     return Forbid();
-                
+
                 return BadRequest();
             }
             
