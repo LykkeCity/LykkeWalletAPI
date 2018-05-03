@@ -14,12 +14,12 @@ using Core.Countries;
 using Core.Enumerators;
 using Core.Exchange;
 using Core.Identity;
-using Core.Repositories;
 using Core.Services;
 using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Countries;
 using LkeServices.Identity;
+using LkeServices.Operations;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
@@ -77,6 +77,7 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
+            builder.RegisterType<SrvDisabledOperations>().SingleInstance();
 
             _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
             {
@@ -95,9 +96,6 @@ namespace LykkeApi2.Modules
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
             builder.RegisterType<DisableOnMaintenanceFilter>();
             builder.RegisterType<CachedAssetsDictionary>();
-
-            builder.RegisterType<WalletCredentialsService>().As<IWalletCredentialsService>();
-
 
             RegisterDictionaryEntities(builder);
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
