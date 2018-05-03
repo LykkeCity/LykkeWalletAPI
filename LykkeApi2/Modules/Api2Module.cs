@@ -23,6 +23,7 @@ using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Countries;
 using LkeServices.Identity;
+using LkeServices.Operations;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
@@ -73,6 +74,7 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
+            builder.RegisterType<SrvDisabledOperations>().SingleInstance();
 
             _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
             {

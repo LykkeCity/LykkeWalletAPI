@@ -1,13 +1,239 @@
-﻿using FluentValidation;
-using LykkeApi2.Models.ClientAccountModels;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using Common;
+using Core;
+using Core.Services;
+using FluentValidation;
+using LkeServices.Operations;
+using Lykke.Service.AssetDisclaimers.Client;
+using Lykke.Service.Assets.Client;
+using Lykke.Service.Balances.Client;
+using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.Kyc.Abstractions.Domain.Verification;
+using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Limitations.Client;
+using Lykke.Service.PaymentSystem.Client;
+using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
+using Lykke.Service.PersonalData.Contract;
+using Lykke.Service.PersonalData.Contract.Models;
+using LykkeApi2.Infrastructure;
+using LykkeApi2.Infrastructure.Extensions;
+using LykkeApi2.Strings;
+using Microsoft.AspNetCore.Http;
 
 namespace LykkeApi2.Models.ValidationModels
 {
     public class BankCardPaymentUrlInputValidationModel : AbstractValidator<BankCardPaymentUrlRequestModel>
     {
-        public BankCardPaymentUrlInputValidationModel()
+        private readonly CachedAssetsDictionary _cachedAssetsDictionary;
+        private readonly IAssetDisclaimersClient _assetDisclaimersClient;
+        private readonly SrvDisabledOperations _srvDisabledOperations;
+        private readonly PaymentLimitsResponse _paymentLimitsResponse;
+        private readonly IPersonalData _personalData;
+        private readonly IClientAccountClient _clientAccountService;
+        private readonly IBalancesClient _balancesClient;
+        private readonly IAssetsService _assetsService;
+        private readonly CachedTradableAssetsDictionary _tradableAssetsDictionary;
+        private readonly IKycStatusService _kycStatusService;
+        private readonly ILimitationsServiceClient _limitationsServiceClient;
+        private readonly string _clientId;
+        private readonly bool _isIosDevice;
+
+        public BankCardPaymentUrlInputValidationModel(
+            IHttpContextAccessor httpContextAccessor,
+            CachedAssetsDictionary cachedAssetsDictionary,
+            IAssetDisclaimersClient assetDisclaimersClient,
+            SrvDisabledOperations srvDisabledOperations,
+            IPaymentSystemClient paymentSystemClient,
+            IPersonalDataService personalDataService,
+            IClientAccountClient clientAccountService,
+            IBalancesClient balancesClient,
+            IAssetsService assetsService,
+            CachedTradableAssetsDictionary tradableAssetsDictionary,
+            IKycStatusService kycStatusService,
+            ILimitationsServiceClient limitationsServiceClient)
         {
-            //TODO Implement1
+            _cachedAssetsDictionary = cachedAssetsDictionary;
+            _assetDisclaimersClient = assetDisclaimersClient;
+            _srvDisabledOperations = srvDisabledOperations;
+            _clientAccountService = clientAccountService;
+            _balancesClient = balancesClient;
+            _assetsService = assetsService;
+            _tradableAssetsDictionary = tradableAssetsDictionary;
+            _kycStatusService = kycStatusService;
+            _limitationsServiceClient = limitationsServiceClient;
+
+            _clientId = httpContextAccessor.HttpContext.User?.Identity?.Name;
+            _paymentLimitsResponse = paymentSystemClient.GetPaymentLimitsAsync().Result;
+            _personalData = personalDataService.GetAsync(_clientId).Result;
+
+            _isIosDevice = IsIosDevice(httpContextAccessor.HttpContext);
+
+            RegisterRules();
+        }
+        private static bool IsIosDevice(HttpContext context)
+        {
+            var userAgentVariables =
+                UserAgentHelper.ParseUserAgent(context.Request.GetUserAgent().ToLower());
+
+            if (!userAgentVariables.ContainsKey(UserAgentVariablesLowercase.DeviceType))
+            {
+                return false;
+            }
+
+            return userAgentVariables[UserAgentVariablesLowercase.DeviceType] == DeviceTypesLowercase.IPad ||
+                   userAgentVariables[UserAgentVariablesLowercase.DeviceType] == DeviceTypesLowercase.IPhone;
+        }
+
+        private void RegisterRules()
+        {
+            RuleFor(reg => reg.AssetId).MustAsync(IsApprovedDepositDisclaimers).WithMessage(Phrases.PendingDisclaimer);
+            RuleFor(reg => reg.AssetId).MustAsync(IsOperationForAssetEnabled).WithMessage(Phrases.BtcDisabledMsg);
+            RuleFor(reg => reg.AssetId).MustAsync(IsKycNotNeeded).WithMessage(Phrases.KycNeeded);
+            RuleFor(reg => reg.AssetId).MustAsync(IsOtherDepositOptionsEnabled)
+                .WithMessage(x => string.Format(Phrases.OtherDepositOptionsNotAllowFormat, x.AssetId));
+
+            RuleFor(reg => reg.Amount).Must(x => x > 0)
+                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Amount)));
+            RuleFor(reg => reg.Amount).Must(IsMinAmount)
+                .WithMessage(x => string.Format(Phrases.PaymentIsLessThanMinLimit, x.AssetId, _paymentLimitsResponse.CreditVouchersMinValue));
+            RuleFor(reg => reg.Amount).Must(IsMaxAmount).
+                WithMessage(x => string.Format(Phrases.MaxPaymentLimitExceeded, x.AssetId, _paymentLimitsResponse.CreditVouchersMaxValue));
+            RuleFor(reg => reg.Amount).MustAsync(IsValidLimitation).WithMessage(Phrases.OperationProhibited);
+
+            RuleFor(reg => reg.FirstName).Must(x => !string.IsNullOrEmpty(x))
+                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.FirstName)));
+
+            RuleFor(reg => reg.LastName).Must(x => !string.IsNullOrEmpty(x))
+                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.LastName)));
+
+            RuleFor(reg => reg.City).Must(x => !string.IsNullOrEmpty(x))
+                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.City)));
+
+            RuleFor(reg => reg.Zip).Must(x => !string.IsNullOrEmpty(x))
+                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Zip)));
+
+            RuleFor(reg => reg.Address).Must(x => !string.IsNullOrEmpty(x))
+                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Address)));
+
+            RuleFor(reg => reg.Country).Must(x => !string.IsNullOrEmpty(x))
+                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Country)));
+
+            RuleFor(reg => reg.Email).Must(x => !string.IsNullOrEmpty(x))
+                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Email)));
+            RuleFor(reg => reg.Email).EmailAddress().Must(IsValidPartitionOrRowKey)
+                .WithMessage(x => Phrases.InvalidEmailFormat);
+            RuleFor(reg => reg.Email).Must(IsValidPersonalEmail)
+                .WithMessage(x => Phrases.OperationProhibited);
+
+            RuleFor(reg => reg.Phone).Must(x => !string.IsNullOrEmpty(x))
+                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Phone)));
+            RuleFor(reg => reg.Phone).Must(IsValidPhoneNumberE164)
+                .WithMessage(x => Phrases.InvalidNumberFormat);
+            RuleFor(reg => reg.Phone).Must(IsValidPersonalContactPhone)
+                .WithMessage(x => Phrases.OperationProhibited);
+
+            RuleFor(reg => reg.WalletId).MustAsync(IsDepositViaCreditCardNotBlocked)
+                .WithMessage(x => Phrases.OperationProhibited);
+
+            RuleFor(reg => reg.WalletId).MustAsync(IsBackupNotRequired)
+                .WithMessage(x => Phrases.BackupErrorMsg);
+
+            RuleFor(reg => reg.WalletId).MustAsync(IsAllowedToCashInViaBankCardAsync)
+                .WithMessage(x => Phrases.OperationProhibited);
+        }
+
+        private async Task<bool> IsApprovedDepositDisclaimers(string value, CancellationToken cancellationToken)
+        {
+            var depositAsset = await _cachedAssetsDictionary.GetItemAsync(value);
+
+            if (!string.IsNullOrEmpty(depositAsset?.LykkeEntityId))
+            {
+                var checkDisclaimerResult =
+                    await _assetDisclaimersClient.CheckDepositClientDisclaimerAsync(_clientId, depositAsset.LykkeEntityId);
+
+                return !checkDisclaimerResult.RequiresApproval;
+            }
+            return true;
+        }
+
+        private async Task<bool> IsOperationForAssetEnabled(string value, CancellationToken cancellationToken)
+        {
+            return !await _srvDisabledOperations.IsOperationForAssetDisabled(value);
+        }
+
+        private bool IsMinAmount(BankCardPaymentUrlRequestModel model, double value)
+        {
+            return model.DepositOptionEnum != DepositOption.Other || value >= _paymentLimitsResponse.CreditVouchersMinValue;
+        }
+
+        private bool IsMaxAmount(BankCardPaymentUrlRequestModel model, double value)
+        {
+            return model.DepositOptionEnum != DepositOption.Other || value <= _paymentLimitsResponse.CreditVouchersMaxValue;
+        }
+
+        private bool IsValidPartitionOrRowKey(string value)
+        {
+            return !Regex.IsMatch(value, @"[\p{C}|/|\\|#|?]");
+        }
+
+        private bool IsValidPhoneNumberE164(string value)
+        {
+            var phoneNumberE164 = value.PreparePhoneNum().ToE164Number();
+            return phoneNumberE164 != null;
+        }
+
+        private bool IsValidPersonalEmail(string value)
+        {
+            return _personalData.Email == value;
+        }
+
+        private bool IsValidPersonalContactPhone(string value)
+        {
+            return _personalData.ContactPhone == value;
+        }
+
+        private async Task<bool> IsDepositViaCreditCardNotBlocked(string value, CancellationToken cancellationToken)
+        {
+            return !(await _clientAccountService.GetDepositBlockAsync(_clientId)).DepositViaCreditCardBlocked;
+        }
+
+        private async Task<bool> IsBackupNotRequired(string value, CancellationToken cancellationToken)
+        {
+            var backupSettings = await _clientAccountService.GetBackupAsync(_clientId);
+            var wallets = await _balancesClient.GetClientBalances(_clientId);
+            return wallets.All(x => x.Balance <= 0) || backupSettings.BackupDone;
+        }
+
+        private async Task<bool> IsAllowedToCashInViaBankCardAsync(string value, CancellationToken cancellationToken)
+        {
+            return (await _assetsService.ClientIsAllowedToCashInViaBankCardAsync(_clientId, _isIosDevice, cancellationToken)).Value;
+        }
+
+        private async Task<bool> IsKycNotNeeded(string value, CancellationToken cancellationToken)
+        {
+            var asset = await _tradableAssetsDictionary.GetItemAsync(value);
+
+            var userKycStatus = await _kycStatusService.GetKycStatusAsync(_clientId);
+
+            return asset?.KycNeeded != true || userKycStatus.IsKycOkOrReviewDone();
+        }
+
+        private async Task<bool> IsOtherDepositOptionsEnabled(string value, CancellationToken cancellationToken)
+        {
+            return (await _assetsService.AssetGetAsync(value, cancellationToken))?.OtherDepositOptionsEnabled == true;
+        }
+
+        private async Task<bool> IsValidLimitation(BankCardPaymentUrlRequestModel model, double value, CancellationToken cancellationToken)
+        {
+            var checkResult = await _limitationsServiceClient.CheckAsync(
+                _clientId,
+                model.AssetId,
+                value,
+                CurrencyOperationType.CardCashIn);
+            return checkResult.IsValid;
         }
     }
 }
