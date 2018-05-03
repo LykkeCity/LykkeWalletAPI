@@ -8,6 +8,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Common;
 using Core.Identity;
+using Core.Settings;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;
@@ -41,6 +42,7 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
         private readonly IPersonalDataService _personalDataService;
         private readonly IClientAccountClient _clientAccountService;
+        private readonly BaseSettings _baseSettings;
 
         public ClientController(
             ILog log,
@@ -51,7 +53,7 @@ namespace LykkeApi2.Controllers
             IRequestContext requestContext,
             IPersonalDataService personalDataService,
             IKycStatusService kycStatusService,
-            IClientAccountClient clientAccountService)
+            IClientAccountClient clientAccountService, BaseSettings baseSettings)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
@@ -62,6 +64,7 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
             _clientAccountService = clientAccountService;
+            _baseSettings = baseSettings;
         }
 
         /// <summary>
@@ -224,6 +227,7 @@ namespace LykkeApi2.Controllers
                 AffiliateEnabled = features.AffiliateEnabled,
                 TradingSession = new TradingSessionResponseModel
                 {
+                    Enabled = _baseSettings.EnableSessionValidation,
                     Confirmed = tradingSession?.Confirmed,
                     Ttl = tradingSession?.Ttl?.TotalMilliseconds
                 }
