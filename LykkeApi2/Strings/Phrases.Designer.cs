@@ -259,6 +259,150 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sorry, the market order for {0} {1} {2} can not be executed..
+        /// </summary>
+        public static string OrderWasNotPlaced {
+            get {
+                return ResourceManager.GetString("OrderWasNotPlaced", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Asset &apos;{0}&apos; does not allow use DepositOption.Other.
+        /// </summary>
+        public static string OtherDepositOptionsNotAllowFormat {
+            get {
+                return ResourceManager.GetString("OtherDepositOptionsNotAllowFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The order amount should be greater than {0} {1}.
+        /// </summary>
+        public static string PaymentIsLessThanMinLimit {
+            get {
+                return ResourceManager.GetString("PaymentIsLessThanMinLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User has pending disclaimer.
+        /// </summary>
+        public static string PendingDisclaimer {
+            get {
+                return ResourceManager.GetString("PendingDisclaimer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pin should contain digits only.
+        /// </summary>
+        public static string PinShouldContainsDigitsOnly {
+            get {
+                return ResourceManager.GetString("PinShouldContainsDigitsOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ethereum contract is not generated.
+        /// </summary>
+        public static string PleaseCheckDepositScreen {
+            get {
+                return ResourceManager.GetString("PleaseCheckDepositScreen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Point limit is 4000.
+        /// </summary>
+        public static string PointsLimit {
+            get {
+                return ResourceManager.GetString("PointsLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your previous transactions are not settled yet, please try again later.
+        /// </summary>
+        public static string PreviousTransactionsWereNotCompleted {
+            get {
+                return ResourceManager.GetString("PreviousTransactionsWereNotCompleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sorry, your order cannot be set. Price deviation is too high..
+        /// </summary>
+        public static string PriceGapTooHigh {
+            get {
+                return ResourceManager.GetString("PriceGapTooHigh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to We are unable to accept your purchase request at this time. We will notify you when this temporary restriction has been lifted. Thank you for your understanding..
+        /// </summary>
+        public static string ProhibitUserFromUSA {
+            get {
+                return ResourceManager.GetString("ProhibitUserFromUSA", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Record does not exists.
+        /// </summary>
+        public static string RecordNotExists {
+            get {
+                return ResourceManager.GetString("RecordNotExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please try again after {0} second(s).
+        /// </summary>
+        public static string RetryInSeconds {
+            get {
+                return ResourceManager.GetString("RetryInSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The destination address is from the same wallet as the source.
+        /// </summary>
+        public static string SameDestinationAsSource {
+            get {
+                return ResourceManager.GetString("SameDestinationAsSource", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to selling.
+        /// </summary>
+        public static string Selling {
+            get {
+                return ResourceManager.GetString("Selling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Should process existing offchain requests.
+        /// </summary>
+        public static string ShouldProcessExistingOffchainRequests {
+            get {
+                return ResourceManager.GetString("ShouldProcessExistingOffchainRequests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error! Please contact support: support@lykke.com.
+        /// </summary>
+        public static string SubmitCodeLimitExceed {
+            get {
+                return ResourceManager.GetString("SubmitCodeLimitExceed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to We are experiencing technical problems. Please try again..
         /// </summary>
         public static string TechnicalProblems {

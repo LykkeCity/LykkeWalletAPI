@@ -186,4 +186,329 @@
   <data name="OperationsDetailInfoNotFound" xml:space="preserve">
     <value>Operataion Details Not Found</value>
   </data>
+  <data name="AmountShouldBeMoreThanZero" xml:space="preserve">
+    <value>Amount should be more than zero.</value>
+  </data>
+  <data name="AssetShouldBeEqualToBaseAssetFromAssetPair" xml:space="preserve">
+    <value>Asset should be equal to base asset from asset pair</value>
+  </data>
+  <data name="BackupErrorMsg" xml:space="preserve">
+    <value>To ensure the safety of your funds, you must back up your private key before proceeding</value>
+  </data>
+  <data name="BackupWarningMsg" xml:space="preserve">
+    <value>To ensure the safety of your funds, we recommend that you make a backup of your private key</value>
+  </data>
+  <data name="BccLowFee" xml:space="preserve">
+    <value>Fee cannot be less than 0.000027 BCH</value>
+  </data>
+  <data name="BitcoinShouldBeTrusted" xml:space="preserve">
+    <value>Lykke is changing the operating model for BTC/ETH to a centralized mode. Trades are not available.</value>
+  </data>
+  <data name="BtcDisabledMsg" xml:space="preserve">
+    <value>Due to potential upcoming Bitcoin network split exchange services are stopped until 2 August 12:00 GMT. Sorry for the inconveniences.</value>
+  </data>
+  <data name="Buying" xml:space="preserve">
+    <value>buying</value>
+  </data>
+  <data name="CannotBeBase" xml:space="preserve">
+    <value>Asset cannot be base</value>
+  </data>
+  <data name="CashoutIsNotAllowed" xml:space="preserve">
+    <value>Destination contract address spents too much gas. Please try to withdraw to another address.</value>
+  </data>
+  <data name="CashOutLessThanMinAmountFormat" xml:space="preserve">
+    <value>The minimum amount to cash out is {0}</value>
+  </data>
+  <data name="CashOutLessThanMinBtcAmountFormat" xml:space="preserve">
+    <value>The minimum amount of BTC to cash out is {0}</value>
+  </data>
+  <data name="CashOutLimitExceeded" xml:space="preserve">
+    <value>You have exceeded cash out operations limit. Please try again later.</value>
+  </data>
+  <data name="ClientHasNoAssetsEnabled" xml:space="preserve">
+    <value>Client has no assets enabled</value>
+  </data>
+  <data name="ClientWithPhoneRegistered" xml:space="preserve">
+    <value>Client with the same phone number is already registered</value>
+  </data>
+  <data name="CodeDigitsOnly" xml:space="preserve">
+    <value>Code should contain digits only</value>
+  </data>
+  <data name="CodeLength4" xml:space="preserve">
+    <value>Code must contain exactly 4 digits</value>
+  </data>
+  <data name="ColoredAddressExpected" xml:space="preserve">
+    <value>This address is not capable of receiving colored coins. Please provide a valid wallet address for colored coins.</value>
+  </data>
+  <data name="DefaultPrivateWalletName" xml:space="preserve">
+    <value>My Private Wallet</value>
+  </data>
+  <data name="DuplicatedRequest" xml:space="preserve">
+    <value>Duplicated request</value>
+  </data>
+  <data name="ErrorResetMargin" xml:space="preserve">
+    <value>Error reset margin account</value>
+  </data>
+  <data name="ErrorTransferToMargin" xml:space="preserve">
+    <value>Error transfer to margin account</value>
+  </data>
+  <data name="ErrorWithdrawFromMargin" xml:space="preserve">
+    <value>Error withdraw from margin account</value>
+  </data>
+  <data name="ErrorWithdrawFromTrustedWallet" xml:space="preserve">
+    <value>Error withdraw from trusted wallet</value>
+  </data>
+  <data name="EthAddressIsMissing" xml:space="preserve">
+    <value>ETH address does not exist</value>
+  </data>
+  <data name="EthAddressWasNotGenerated" xml:space="preserve">
+    <value>Ethereum address is generating. Please try again later.</value>
+  </data>
+  <data name="EthereumPrivateWalletOtherIssue" xml:space="preserve">
+    <value>The transaction can not be completed. Please try later and contact support if issue occured again.</value>
+  </data>
+  <data name="FeeShouldBeMoreThanZero" xml:space="preserve">
+    <value>Fee should be more than zero.</value>
+  </data>
+  <data name="FieldShouldNotBeEmptyFormat" xml:space="preserve">
+    <value>Field {0} should not be empty</value>
+  </data>
+  <data name="InvalidAsset" xml:space="preserve">
+    <value>Invalid asset.</value>
+  </data>
+  <data name="InvalidContent" xml:space="preserve">
+    <value>Invalid content</value>
+  </data>
+  <data name="InvalidDestinationAddress" xml:space="preserve">
+    <value>Invalid Destination Address. Please try again.</value>
+  </data>
+  <data name="InvalidDocumentType" xml:space="preserve">
+    <value>Invalid document type</value>
+  </data>
+  <data name="InvalidKycStatus" xml:space="preserve">
+    <value>Invalid Kyc status</value>
+  </data>
+  <data name="InvalidMultisig" xml:space="preserve">
+    <value>Invalid multisig</value>
+  </data>
+  <data name="InvalidNumberFormat" xml:space="preserve">
+    <value>Invalid phone number</value>
+  </data>
+  <data name="InvalidPeriod" xml:space="preserve">
+    <value>Invalid period</value>
+  </data>
+  <data name="InvalidPrivateWalletNumber" xml:space="preserve">
+    <value>Invalid Private Wallet number</value>
+  </data>
+  <data name="InvalidQuantaAddress" xml:space="preserve">
+    <value>Address is not registered in QNT</value>
+  </data>
+  <data name="InvalidSourceAddress" xml:space="preserve">
+    <value>Invalid Source Address. Please try again.</value>
+  </data>
+  <data name="InvalidUsernameOrPassword" xml:space="preserve">
+    <value>Invalid username or password</value>
+  </data>
+  <data name="InvalidValueFormat" xml:space="preserve">
+    <value>Invalid {0} value</value>
+  </data>
+  <data name="KycNeeded" xml:space="preserve">
+    <value>KYC needed</value>
+  </data>
+  <data name="LimitOrderCancelled" xml:space="preserve">
+    <value>Limit Order for {0} {1} {2} cancelled
+Price {3} {4}</value>
+  </data>
+  <data name="LimitOrderLeadToNegativeSpread" xml:space="preserve">
+    <value>This order has a negative spread with you orders</value>
+  </data>
+  <data name="LimitOrderRejected" xml:space="preserve">
+    <value>Limit Order for {0} {1} {2} rejected
+Price {3} {4}</value>
+  </data>
+  <data name="LimitOrderStarted" xml:space="preserve">
+    <value>Limit Order for {0} {1} {2} placed
+Price {3} {4}</value>
+  </data>
+  <data name="LiveMarginTradingIsNotAvailable" xml:space="preserve">
+    <value>Live margin trading is not available</value>
+  </data>
+  <data name="LKK2YProhibited" xml:space="preserve">
+    <value>Sorry, LKK2Y operations are restricted in your region</value>
+  </data>
+  <data name="LowTradeVolume" xml:space="preserve">
+    <value>Trade volume is too low. Please, try higher volume.</value>
+  </data>
+  <data name="LykkeIsCentralizedBtc" xml:space="preserve">
+    <value>Lykke Exchange is now switched to a centralized mode. 
+
+By tapping Confirm, you confirm the transfer of your BTC/ETH to Lykke centralized hot-wallet. You will see no difference in the trading process and depositing wallet address, and can continue trading.
+
+By tapping Cancel, your BTC/ETH remain in the previous multi-signature wallet. You can transfer your BTC/ETH from your Lykke trading wallet to any external address. Your Lykke wallet will no longer be usable for trading BTC/ETH.</value>
+  </data>
+  <data name="MarginTermsOfUseAlreadyAgreed" xml:space="preserve">
+    <value>You already agreeed with margin Terms of Use.</value>
+  </data>
+  <data name="MaxMarginTransferLimitExceeded" xml:space="preserve">
+    <value>Margin Trading is in beta testing. The cash-ins are temporarily limited when Total Capital exceeds {0} {1}. Thank you for using Lykke Margin Trading, the limit will be cancelled soon!</value>
+  </data>
+  <data name="MaxPaymentLimitExceeded" xml:space="preserve">
+    <value>The credit card deposit limit is {0} {1}</value>
+  </data>
+  <data name="MinLengthDigits" xml:space="preserve">
+    <value>Minimum length is {0} digits</value>
+  </data>
+  <data name="MinVolumeViolation" xml:space="preserve">
+    <value>The amount should be higher than minimal order size {0} {1}</value>
+  </data>
+  <data name="MissedKeys" xml:space="preserve">
+    <value>MissedKeys</value>
+  </data>
+  <data name="MustNotBeEmptyFormat" xml:space="preserve">
+    <value>{0} must not be empty</value>
+  </data>
+  <data name="NeededAssetIsNotTrusted" xml:space="preserve">
+    <value>Needed asset is not trusted</value>
+  </data>
+  <data name="NeededAssetIsTrusted" xml:space="preserve">
+    <value>Needed Asset Is Trusted</value>
+  </data>
+  <data name="NoData" xml:space="preserve">
+    <value>No data</value>
+  </data>
+  <data name="NoFileOrMoreThanOne" xml:space="preserve">
+    <value>Single file expected</value>
+  </data>
+  <data name="NoSwiftCredentialsForAsset" xml:space="preserve">
+    <value>Swift deposit for asset is currently unavailable</value>
+  </data>
+  <data name="NoSwiftCredentialsForUser" xml:space="preserve">
+    <value>Swift deposit for user is currently unavailable</value>
+  </data>
+  <data name="NotAuthenticated" xml:space="preserve">
+    <value>Not authenticated</value>
+  </data>
+  <data name="NotEnoughFundsMsg" xml:space="preserve">
+    <value>Not enough funds to execute the market order for {0} {1} {2}.</value>
+  </data>
+  <data name="NotEnoughLiquidity" xml:space="preserve">
+    <value>Not enough liquidity</value>
+  </data>
+  <data name="NotSettledTryLater" xml:space="preserve">
+    <value>Previous transaction is not confirmed. Please, try again later.</value>
+  </data>
+  <data name="OffchainError" xml:space="preserve">
+    <value>Runtime error, code: {0} 
+Please try later and contact support if issue occurred again</value>
+  </data>
+  <data name="OffchainReleaseMsg" xml:space="preserve">
+    <value>Trading is not available due to a system maintenance for the offchain settlement deployment.
+We apologies for the inconvenience, and would like to thank you for your understanding.</value>
+  </data>
+  <data name="OffchainReleaseWithHoursMsg" xml:space="preserve">
+    <value>Trading is not available due to a system maintenance for the offchain settlement deployment. Approximately {0} hour(s) left.
+We apologies for the inconvenience, and would like to thank you for your understanding.</value>
+  </data>
+  <data name="OnlyOneSMSPerMinuteAllowed" xml:space="preserve">
+    <value>Only one SMS per minute allowed. Please wait.</value>
+  </data>
+  <data name="OperationCanNotBePerformed" xml:space="preserve">
+    <value>Operation cannot be performed</value>
+  </data>
+  <data name="OperationIsNotSupportedForTheClient" xml:space="preserve">
+    <value>Operation is not supported for the client</value>
+  </data>
+  <data name="OperationProhibited" xml:space="preserve">
+    <value>The operation is prohibited</value>
+  </data>
+  <data name="OrderWasNotPlaced" xml:space="preserve">
+    <value>Sorry, the market order for {0} {1} {2} can not be executed.</value>
+  </data>
+  <data name="PaymentIsLessThanMinLimit" xml:space="preserve">
+    <value>The order amount should be greater than {0} {1}</value>
+  </data>
+  <data name="PendingDisclaimer" xml:space="preserve">
+    <value>User has pending disclaimer</value>
+  </data>
+  <data name="PinShouldContainsDigitsOnly" xml:space="preserve">
+    <value>Pin should contain digits only</value>
+  </data>
+  <data name="PleaseCheckDepositScreen" xml:space="preserve">
+    <value>Ethereum contract is not generated</value>
+  </data>
+  <data name="PointsLimit" xml:space="preserve">
+    <value>Point limit is 4000</value>
+  </data>
+  <data name="PreviousTransactionsWereNotCompleted" xml:space="preserve">
+    <value>Your previous transactions are not settled yet, please try again later</value>
+  </data>
+  <data name="PriceGapTooHigh" xml:space="preserve">
+    <value>Sorry, your order cannot be set. Price deviation is too high.</value>
+  </data>
+  <data name="ProhibitUserFromUSA" xml:space="preserve">
+    <value>We are unable to accept your purchase request at this time. We will notify you when this temporary restriction has been lifted. Thank you for your understanding.</value>
+  </data>
+  <data name="RecordNotExists" xml:space="preserve">
+    <value>Record does not exists</value>
+  </data>
+  <data name="RetryInSeconds" xml:space="preserve">
+    <value>Please try again after {0} second(s)</value>
+  </data>
+  <data name="SameDestinationAsSource" xml:space="preserve">
+    <value>The destination address is from the same wallet as the source</value>
+  </data>
+  <data name="Selling" xml:space="preserve">
+    <value>selling</value>
+  </data>
+  <data name="ShouldProcessExistingOffchainRequests" xml:space="preserve">
+    <value>Should process existing offchain requests</value>
+  </data>
+  <data name="SubmitCodeLimitExceed" xml:space="preserve">
+    <value>Error! Please contact support: support@lykke.com</value>
+  </data>
+  <data name="TradeLessThanMinBtcAmountFormat" xml:space="preserve">
+    <value>The minimum amount of BTC to buy or sell is {0}</value>
+  </data>
+  <data name="TradingWalletDoesNotExist" xml:space="preserve">
+    <value>Trading wallet does not exist</value>
+  </data>
+  <data name="TransferringLessThanAssetAccuracyAllows" xml:space="preserve">
+    <value>Transferring Less Than Asset Accuracy Allows</value>
+  </data>
+  <data name="UseAnotherDestinationAddress" xml:space="preserve">
+    <value>Please, use another destination address</value>
+  </data>
+  <data name="UserAlreadyHasEncodedPrivateKey" xml:space="preserve">
+    <value>User already has encoded PK</value>
+  </data>
+  <data name="UserAlreadyHasKeys" xml:space="preserve">
+    <value>User already has keys</value>
+  </data>
+  <data name="UserDoesNotHaveWallets" xml:space="preserve">
+    <value>User has no wallets</value>
+  </data>
+  <data name="UserHaveNoPwdHint" xml:space="preserve">
+    <value>User did not set his hint</value>
+  </data>
+  <data name="VolumeShouldNotBeZero" xml:space="preserve">
+    <value>Volume should not be zero or less</value>
+  </data>
+  <data name="WeDoNotSupportErc20TradingForNow" xml:space="preserve">
+    <value>Sorry. We don't support the ERC20 tokens trading yet.</value>
+  </data>
+  <data name="WrongAssetForSelectedBlockchain" xml:space="preserve">
+    <value>Wrong Asset For the Selected Blockchain</value>
+  </data>
+  <data name="WrongConfirmationCode" xml:space="preserve">
+    <value>Wrong confirmation code</value>
+  </data>
+  <data name="WrongPassword" xml:space="preserve">
+    <value>Wrong password</value>
+  </data>
+  <data name="WrongPin" xml:space="preserve">
+    <value>Wrong pin</value>
+  </data>
+  <data name="OtherDepositOptionsNotAllowFormat" xml:space="preserve">
+    <value>Asset '{0}' does not allow use DepositOption.Other</value>
+  </data>
 </root>

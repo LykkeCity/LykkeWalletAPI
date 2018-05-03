@@ -14,6 +14,7 @@ using Core.Countries;
 using Core.Enumerators;
 using Core.Exchange;
 using Core.Identity;
+using Core.Repositories;
 using Core.Services;
 using LkeServices;
 using LkeServices.Candles;
@@ -94,6 +95,9 @@ namespace LykkeApi2.Modules
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
             builder.RegisterType<DisableOnMaintenanceFilter>();
             builder.RegisterType<CachedAssetsDictionary>();
+
+            builder.RegisterType<WalletCredentialsService>().As<IWalletCredentialsService>();
+
 
             RegisterDictionaryEntities(builder);
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
