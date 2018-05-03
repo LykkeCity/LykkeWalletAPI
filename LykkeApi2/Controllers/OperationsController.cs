@@ -7,6 +7,7 @@ using Lykke.Service.ExchangeOperations.Client;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Contracts;
 using LykkeApi2.Infrastructure;
+using LykkeApi2.Infrastructure.Extensions;
 using LykkeApi2.Models.Operations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -104,10 +105,15 @@ namespace LykkeApi2.Controllers
 
                 throw;
             }
-
-            if (operation.Status != OperationStatus.Created || !operation.ClientId.HasValue)
+            
+            if (operation.Status != OperationStatus.Created)
+            {
+                if(operation.Status == OperationStatus.Completed)
+                    return Forbid();
+                
                 return BadRequest();
-
+            }
+            
             var payemntContext = operation.ContextJson.DeserializeJson<PaymentContext>();
 
             try
@@ -140,14 +146,12 @@ namespace LykkeApi2.Controllers
                 id.ToString());
 
             if (result.IsOk())
-            {
-                await _operationsClient.Complete(id);
                 return Ok();
-            }
-            else
-            {
-                return BadRequest();
-            }
+
+            if (result.IsDuplicate())
+                return Forbid();
+            
+            return BadRequest();
         }
 
         /// <summary>
