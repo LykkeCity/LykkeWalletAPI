@@ -1,6 +1,7 @@
 using System.Net;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
+using Lykke.Service.ExchangeOperations.Client;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
@@ -15,6 +16,7 @@ namespace Core
         public PersonalDataServiceClientSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public ClientDictionariesServiceClientSettings ClientDictionariesServiceClient { get; set; }
+        public ExchangeOperationsServiceClientSettings ExchangeOperationsServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
         public FeeSettings FeeSettings { set; get; }
