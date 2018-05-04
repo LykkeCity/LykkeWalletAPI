@@ -87,8 +87,6 @@ namespace LykkeApi2.Modules
 
             builder.RegisterPaymentSystemClient(_apiSettings.CurrentValue.PaymentSystemServiceClient.ServiceUrl, _log);
             
-            builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
-
             builder.Populate(_services);
         }
     }
