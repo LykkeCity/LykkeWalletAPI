@@ -1,8 +1,8 @@
 ﻿using System;
 using Common;
 using Lykke.Contracts.Payments;
-using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
+using Lykke.Service.PaymentSystem.Client.Extensions;
 using Lykke.Service.PersonalData.Contract.Models;
 using Newtonsoft.Json;
 using CashInPaymentSystem = Lykke.Service.PaymentSystem.Client.AutorestClient.Models.CashInPaymentSystem;

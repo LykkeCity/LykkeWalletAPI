@@ -22,6 +22,17 @@ namespace Core.Settings
         public FeeSettings FeeSettings { set; get; }
         public AssetDisclaimersServiceClientSettings AssetDisclaimersServiceClient { get; set; }
         public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }
+        public IcoSettings IcoSettings { get; set; }
+
+        public GlobalSettings GlobalSettings { get; set; }
+        public KycServiceClientSettings KycServiceClient { get; set; }
+    }
+
+    public class GlobalSettings
+    {
+        public string[] BlockedAssetPairs { get; set; }
+        public bool BitcoinBlockchainOperationsDisabled { get; set; }
+        public bool BtcOperationsDisabled { get; set; }
     }
 
     public class SlackNotificationsSettings
@@ -42,6 +53,13 @@ namespace Core.Settings
         public DeploymentSettings DeploymentSettings { get; set; }
         public CacheSettings CacheSettings { get; set; }
         public bool EnableFees { get; set; }
+        public bool EnableSessionValidation { get; set; }
+    }
+
+    public class IcoSettings
+    {
+        public string LKK2YAssetId;
+        public string[] RestrictedCountriesIso3 { get; set; }
     }
 
     public class DbSettings

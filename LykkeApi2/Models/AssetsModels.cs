@@ -4,78 +4,44 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LykkeApi2.Models
 {
-    public class GetAssetCategoriesResponseModel
+    public class AssetCategoriesModel
     {
-        public ApiAssetCategoryModel[] AssetCategories { get; set; }
+        public AssetCategoryModel[] AssetCategories { get; set; }
 
-        public static GetAssetCategoriesResponseModel Create(ApiAssetCategoryModel[] assetCategories)
+        public static AssetCategoriesModel Create(AssetCategoryModel[] assetCategories)
         {
-            return new GetAssetCategoriesResponseModel
+            return new AssetCategoriesModel
             {
                 AssetCategories = assetCategories
             };
         }
     }
 
-
-    public class GetBaseAssetsRespModel
+    public class AssetsModel
     {
-        public ApiAssetModel[] Assets { get; set; }
+        public AssetModel[] Assets { get; set; }
 
-        public static GetBaseAssetsRespModel Create(ApiAssetModel[] assets)
+        public static AssetsModel Create(AssetModel[] assets)
         {
-            return new GetBaseAssetsRespModel
+            return new AssetsModel
             {
                 Assets = assets
             };
         }
     }
 
-    public class GetClientBaseAssetRespModel
+    public class AssetRespModel
     {
-        public ApiAssetModel Asset { get; set; }
+        public AssetModel Asset { get; set; }
 
-        public static GetClientBaseAssetRespModel Create(ApiAssetModel asset)
+        public static AssetRespModel Create(AssetModel asset)
         {
-            return new GetClientBaseAssetRespModel
+            return new AssetRespModel
             {
                 Asset = asset
             };
         }
     }
-
-    public class AssetExtendedResponseModel
-    {
-        public IEnumerable<AssetExtended> Assets { get; set; }
-
-        public static AssetExtendedResponseModel Create(IEnumerable<AssetExtended> assets)
-        {
-            return new AssetExtendedResponseModel
-            {
-                Assets = assets
-            };
-        }
-    }
-
-    public class AssetExtended
-    {
-        public ApiAssetModel Asset { get; set; }
-        public AssetDescriptionModel Description { get; set; }
-        public ApiAssetCategoryModel Category { get; set; }
-        public IEnumerable<IAssetAttributesKeyValue> Attributes { get; set; }
-
-        public static AssetExtended Create(ApiAssetModel asset, AssetDescriptionModel description, ApiAssetCategoryModel category, IEnumerable<IAssetAttributesKeyValue> attributes)
-        {
-            return new AssetExtended
-            {
-                Asset = asset,
-                Description = description,
-                Category = category,
-                Attributes = attributes
-            };
-        }
-    }
-
 
     public class AssetAttributesModel
     {
@@ -94,21 +60,17 @@ namespace LykkeApi2.Models
         public string Value { get; set; }
     }
 
-    public class AssetDescriptionsResponseModel
+    public class AssetDescriptionsModel
     {
         public IEnumerable<AssetDescriptionModel> Descriptions { get; set; }
-        public static AssetDescriptionsResponseModel Create(IEnumerable<AssetDescriptionModel> descriptions)
+        
+        public static AssetDescriptionsModel Create(IEnumerable<AssetDescriptionModel> descriptions)
         {
-            return new AssetDescriptionsResponseModel
+            return new AssetDescriptionsModel
             {
                 Descriptions = descriptions
             };
         }
-    }
-
-    public class GetAssetDescriptionsRequestModel
-    {
-        public string[] Ids { get; set; }
     }
 
     public class BaseAssetModel
@@ -122,21 +84,13 @@ namespace LykkeApi2.Models
         public string BaseAsssetId { get; set; }
     }
 
-    public static class AssetExtensions
-    {
-        public static int GetDisplayAccuracy(this Asset asset)
-        {
-            return asset.DisplayAccuracy ?? asset.Accuracy;
-        }
-    }
-
-    public class AssetIdsResponse
+    public class AssetIdsModel
     {
         public IEnumerable<string> AssetIds { get; set; }
 
-        public static AssetIdsResponse Create(IEnumerable<string> assetIds)
+        public static AssetIdsModel Create(IEnumerable<string> assetIds)
         {
-            return new AssetIdsResponse()
+            return new AssetIdsModel()
             {
                 AssetIds = assetIds
             };

@@ -71,16 +71,12 @@ namespace LykkeApi2.Controllers
                 var personalData = await _personalDataService.GetAsync(clientId);
 
                 BankCardPaymentUrlRequestModel result;
-                if (lastOrder != null
-                    && (lastOrder.PaymentSystem == CashInPaymentSystem.CreditVoucher
-                        || lastOrder.PaymentSystem == CashInPaymentSystem.Fxpaygate))
-                {
-                    result = BankCardPaymentUrlRequestModel.Create(lastOrder, personalData);
-                }
-                else
-                {
-                    result = BankCardPaymentUrlRequestModel.Create(personalData);
-                }
+                var b = lastOrder != null
+                        && (lastOrder.PaymentSystem == CashInPaymentSystem.CreditVoucher
+                            || lastOrder.PaymentSystem == CashInPaymentSystem.Fxpaygate);
+                result = b ? 
+                    BankCardPaymentUrlRequestModel.Create(lastOrder, personalData) : 
+                    BankCardPaymentUrlRequestModel.Create(personalData);
 
                 return Ok(result);
             }

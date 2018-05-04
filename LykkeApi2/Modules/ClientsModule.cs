@@ -1,7 +1,6 @@
 ﻿using System;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Core.Settings;
 using Lykke.MarketProfileService.Client;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.Operations.Client;
@@ -13,6 +12,7 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Common.Log;
+using Core.Settings;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.OperationsRepository.Client;
@@ -22,7 +22,9 @@ using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.PaymentSystem.Client;
+using Lykke.Service.Session.Client;
 using Lykke.Service.PersonalData.Settings;
+using Core;
 
 namespace LykkeApi2.Modules
 {
@@ -59,9 +61,7 @@ namespace LykkeApi2.Modules
                 .As<ILykkeRegistrationClient>()
                 .WithParameter("serviceUrl", _serviceSettings.CurrentValue.RegistrationUrl);
 
-            builder.RegisterType<ClientSessionsClient>()
-                .As<IClientSessionsClient>()
-                .WithParameter("serviceUrl", _serviceSettings.CurrentValue.SessionUrl);
+            builder.RegisterClientSessionClient(_serviceSettings.CurrentValue.SessionUrl, _log);
             
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
@@ -78,16 +78,17 @@ namespace LykkeApi2.Modules
             
             builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);
             
-            builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog: null, ignoreErrors: true);
-            
-            builder.RegisterOperationsRepositoryClients(_serviceSettings.CurrentValue.OperationsRepositoryClient, _log);
-            
+            builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog: null, ignoreErrors: true);            
+            builder.RegisterOperationsRepositoryClients(_serviceSettings.CurrentValue.OperationsRepositoryClient, _log);            
             builder.RegisterAffiliateClient(_serviceSettings.CurrentValue.AffiliateServiceClient.ServiceUrl, _log);
+            builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 
             builder.RegisterPaymentSystemClient(_apiSettings.CurrentValue.PaymentSystemServiceClient.ServiceUrl, _log);
             
+            builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
+
             builder.Populate(_services);
         }
     }

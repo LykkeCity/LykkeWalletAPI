@@ -18,7 +18,6 @@ using Core.Exchange;
 using Core.GlobalSettings;
 using Core.Identity;
 using Core.Services;
-using Core.Settings;
 using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Countries;
@@ -33,6 +32,8 @@ using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
+using Core.Settings;
+using LykkeApi2.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
@@ -68,6 +69,10 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.IcoSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.GlobalSettings).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.KycServiceClient).SingleInstance();
+
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
             builder.RegisterInstance(new DeploymentSettings());
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
@@ -110,7 +115,9 @@ namespace LykkeApi2.Modules
                 var ctx = c.Resolve<IComponentContext>();
                 return new CachedDataDictionary<string, Asset>(
                     async () =>
-                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync()).ToDictionary(itm => itm.Id));
+                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync(true))
+                        .ToDictionary(itm => itm.Id),
+                    60);
             }).SingleInstance();
 
             builder.Register(x =>
@@ -129,7 +136,8 @@ namespace LykkeApi2.Modules
                 return new CachedDataDictionary<string, AssetPair>(
                     async () =>
                         (await ctx.Resolve<IAssetsService>().AssetPairGetAllAsync())
-                        .ToDictionary(itm => itm.Id));
+                        .ToDictionary(itm => itm.Id),
+                    60);
             }).SingleInstance();
 
             builder.Register(x =>
