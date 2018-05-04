@@ -88,7 +88,6 @@ namespace LykkeApi2.Modules
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
             builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
             //TODO change to v2
-            builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
             builder.RegisterType<SettingsService>().As<ISettingsService>();
