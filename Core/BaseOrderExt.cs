@@ -1,6 +1,6 @@
 ﻿using Core.Enumerators;
 
-namespace Core.Exchange
+namespace Core
 {
     public static class BaseOrderExt
     {

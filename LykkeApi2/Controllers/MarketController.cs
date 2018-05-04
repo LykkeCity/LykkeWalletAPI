@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Core.Exchange;
+using Core;
 using Lykke.Service.RateCalculator.Client;
 using LykkeApi2.Domain;
 using LykkeApi2.Models;
