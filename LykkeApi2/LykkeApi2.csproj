@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <Version>1.0.0.1</Version>
+    <Version>1.0.0</Version>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\netcoreapp2.0\LykkeApi2.xml</DocumentationFile>
@@ -12,25 +12,27 @@
     <NoWarn>1701;1702;1705;1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Controllers\DictionaryController.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="4.6.2" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.1" />
-    <PackageReference Include="FluentValidation.AspNetCore" Version="7.4.0" />
-
-    <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.3.1" />
-    <PackageReference Include="Lykke.Cqrs" Version="2.1.1" />
-    <PackageReference Include="Lykke.Messaging.RabbitMq" Version="0.1.15" />
-    <PackageReference Include="Lykke.Contracts" Version="1.0.43" />
-    <PackageReference Include="Lykke.MatchingEngineConnector" Version="4.1.0" />
-    <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.6" />
-    <PackageReference Include="Lykke.Service.Assets.Client" Version="3.3.1" />
-    <PackageReference Include="Lykke.AzureStorage" Version="5.0.1" />
-    <PackageReference Include="Lykke.Common" Version="6.4.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.2" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="7.5.2" />
+    <PackageReference Include="Lykke.AzureStorage" Version="8.0.0" />
+    <PackageReference Include="Lykke.Common" Version="6.6.0" />
+    <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.4.0" />
+    <PackageReference Include="Lykke.Contracts" Version="1.0.47" />
+    <PackageReference Include="Lykke.MatchingEngineConnector" Version="3.0.2" />
+    <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.7" />
     <PackageReference Include="Lykke.Logs" Version="3.6.2" />
     <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.15" />
-    <PackageReference Include="Lykke.Service.FeeCalculator.Client" Version="1.7.0" />
+    <PackageReference Include="Lykke.MatchingEngineConnector" Version="4.1.0" />
+    <PackageReference Include="Lykke.Service.AssetDisclaimers.Client" Version="3.0.0" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
-    <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.173" />
+    <PackageReference Include="Lykke.Service.FeeCalculator.Client" Version="2.0.1" />
+    <PackageReference Include="Lykke.Service.Kyc.Abstractions" Version="1.0.177" />
+    <PackageReference Include="Lykke.Service.Limitations.Client" Version="1.1.1.16" />
     <PackageReference Include="Lykke.Service.Operations.Client" Version="2.2.16" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.0.21" />
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.3.0" />
@@ -39,28 +41,32 @@
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.96" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client.Core" Version="1.0.30" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Contract" Version="1.0.13" />
-    <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.54" />
+    <PackageReference Include="Lykke.Service.PaymentSystem.Client" Version="1.0.14" />
+    <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.55" />
     <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.12" />
-    <PackageReference Include="Lykke.Service.Registration" Version="1.1.1" />
-    <PackageReference Include="Lykke.Service.Session.Client" Version="1.18.1" />
-    <PackageReference Include="Lykke.SettingsReader" Version="2.1.0" />
-    <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="2.0.1" />
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.1" />
+    <PackageReference Include="Lykke.Service.Registration" Version="1.2.2" />
+    <PackageReference Include="Lykke.SettingsReader" Version="2.2.0" />
+    <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="2.0.2" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.2.1" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
-    <PackageReference Include="NetJSON" Version="1.2.2" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="1.1.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="1.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.1" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.0.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.3" />
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="3.3.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="2.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="2.3.0" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AzureRepositories\AzureRepositories.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\LkeServices\LkeServices.csproj" />
   </ItemGroup>
@@ -83,6 +89,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Domain\Commands\" />
+    <Folder Include="Services" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Controllers\DictionaryController.cs" />
   </ItemGroup>
 </Project>

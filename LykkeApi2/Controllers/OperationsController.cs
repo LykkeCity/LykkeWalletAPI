@@ -12,7 +12,6 @@ using LykkeApi2.Models.Operations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Rest;
-using Swashbuckle.AspNetCore.Swagger;
 using OperationModel = Lykke.Service.Operations.Contracts.OperationModel;
 
 namespace LykkeApi2.Controllers

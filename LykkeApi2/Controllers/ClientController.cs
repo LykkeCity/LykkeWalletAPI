@@ -20,7 +20,7 @@ using Lykke.Service.PersonalData.Contract.Models;
 using LykkeApi2.Infrastructure.Extensions;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.Models;
+using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Session.Client;
 using LykkeApi2.Models.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
@@ -53,7 +53,8 @@ namespace LykkeApi2.Controllers
             IRequestContext requestContext,
             IPersonalDataService personalDataService,
             IKycStatusService kycStatusService,
-            IClientAccountClient clientAccountService, BaseSettings baseSettings)
+            IClientAccountClient clientAccountService, 
+            BaseSettings baseSettings)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
@@ -64,6 +65,7 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
             _clientAccountService = clientAccountService;
+            _kycStatusService = kycStatusService;
             _baseSettings = baseSettings;
         }
 
@@ -203,12 +205,19 @@ namespace LykkeApi2.Controllers
                 return StatusCode((int) HttpStatusCode.InternalServerError);
             }
 
+            var country = (await _personalDataService.GetAsync(_requestContext.ClientId)).Country;
+
+            if (string.IsNullOrEmpty(country))
+                country = "CHE";
+
             return Ok(new UserInfoResponseModel
             {
                 Email = personalData?.Email,
                 FirstName = personalData?.FirstName,
                 LastName = personalData?.LastName,
-                KycStatus = (await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId)).ToApiModel()
+                Country = country,
+                Phone = personalData?.ContactPhone,
+                KycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId)
             });
         }
 
