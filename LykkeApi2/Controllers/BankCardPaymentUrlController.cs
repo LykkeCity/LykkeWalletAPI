@@ -37,8 +37,8 @@ namespace LykkeApi2.Controllers
         {
             var result = await _paymentSystemService.GetLastByDateAsync(_requestContext.ClientId);
             return Ok(result);
-        }
-
+        }
+
         [HttpPost]
         [SwaggerOperation("Post")]
         [ProducesResponseType(typeof(PaymentUrlDataResponse), (int)HttpStatusCode.OK)]

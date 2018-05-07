@@ -21,6 +21,8 @@ using Lykke.Service.Affiliate.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.PersonalData.Settings;
+using Lykke.Service.HftInternalService.Client;
+using Lykke.Service.Session.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
@@ -28,6 +30,7 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.Service.Session.Client;
 using Core;
+using Lykke.Service.ExchangeOperations.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -89,6 +92,7 @@ namespace LykkeApi2.Modules
             builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
 
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
+            builder.RegisterSettingsClient(_apiSettings.CurrentValue.SettingsServiceClient.ServiceUrl, _log);
 
             builder.RegisterPaymentSystemClient(_apiSettings.CurrentValue.PaymentSystemServiceClient.ServiceUrl, _log);
             

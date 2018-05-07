@@ -2,8 +2,6 @@
 using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AzureRepositories.Exchange;
-using AzureRepositories.GlobalSettings;
 using AzureStorage;
 using AzureStorage.Tables;
 using AzureStorage.Tables.Templates.Index;
@@ -15,7 +13,6 @@ using Core.Candles;
 using Core.Countries;
 using Core.Enumerators;
 using Core.Exchange;
-using Core.GlobalSettings;
 using Core.Identity;
 using Core.Services;
 using LkeServices;
@@ -92,18 +89,17 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
-            builder.RegisterType<SrvAssetsHelper>().AsSelf().SingleInstance();
             //TODO change to v2
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
-            builder.RegisterType<SettingsService>().As<ISettingsService>();
             builder.RegisterType<DisableOnMaintenanceFilter>();
             builder.RegisterType<CachedAssetsDictionary>();
 
             RegisterDictionaryEntities(builder);
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
-            BindServices(builder, _settings, _log);
-            BindRepositories(builder, _settings, _log);
+
+            RegisterDictionaryEntities(builder);
+            BindServices(builder, _settings);
             builder.Populate(_services);
         }
 
@@ -166,27 +162,6 @@ namespace LykkeApi2.Modules
                 .As<IOrderBooksService>()
                 .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
                 .SingleInstance();
-        }
-
-        private static void BindRepositories(ContainerBuilder builder, IReloadingManager<BaseSettings> settings,
-            ILog log)
-        {
-            builder.Register(y => AzureTableStorage<ExchangeSettingsEntity>.Create(
-                    settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "ExchangeSettings", log))
-                .As(typeof(INoSQLTableStorage<ExchangeSettingsEntity>));
-
-            builder.Register(y =>
-                    AzureTableStorage<AppGlobalSettingsEntity>.Create(
-                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "Setup", log))
-                .As(typeof(INoSQLTableStorage<AppGlobalSettingsEntity>));
-
-            builder.Register(y =>
-                    AzureTableStorage<AzureMultiIndex>.Create(
-                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "PaymentTransactions", log))
-                .As(typeof(INoSQLTableStorage<AzureMultiIndex>));
-
-            builder.RegisterType<AppGlobalSettingsRepository>().As<IAppGlobalSettingsRepository>();
-            builder.RegisterType<ExchangeSettingsRepository>().As<IExchangeSettingsRepository>();
         }
     }
 }
