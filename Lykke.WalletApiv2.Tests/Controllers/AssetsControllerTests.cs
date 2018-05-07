@@ -9,33 +9,25 @@ namespace LykkeApi2.Tests.Controllers
     using Common;
     using FakeItEasy;
     using FluentAssertions;
-    using Lykke.MarketProfileService.Client;
     using Lykke.Service.Assets.Client;
     using Lykke.Service.Assets.Client.Models;
+    using Lykke.Service.ClientAccount.Client;
     using LykkeApi2.Controllers;
     using LykkeApi2.Infrastructure;
     using Microsoft.AspNetCore.Mvc;
     using Xbehave;
 
-    public class AssetPairsControllerTests
+    public class AssetsControllerTests
     {
         [Scenario(Skip = "TODO (Rachael) CachedDataDictionary cannot be faked")]
-        public void GetAssetPairs(
-            CachedDataDictionary<string, AssetPair> assetPairsCache,
+        public void GetAssets(
+            IAssetsService assetsService,
             CachedDataDictionary<string, Asset> assetsCache,
             IRequestContext requestContext,
-            AssetPairsController assetPairsController, 
+            AssetsController assetsController, 
             Task<IActionResult> result)
         {
-            "Given an asset pairs cache"
-                .x(() =>
-                {
-                    assetPairsCache = A.Fake<CachedDataDictionary<string, AssetPair>>();
-                    IEnumerable<AssetPair> assetPairs = null;
-                    A.CallTo(() => assetPairsCache.Values()).Returns(Task.FromResult(assetPairs));
-                });
-
-            "And an asset cache"
+            "Given an asset cache"
                 .x(() =>
                 {
                     assetsCache = A.Fake<CachedDataDictionary<string, Asset>>();
@@ -50,29 +42,28 @@ namespace LykkeApi2.Tests.Controllers
                     A.CallTo(() => requestContext.ClientId).Returns("clientId");
                 });
 
-            "And an asset pairs controller"
+            "And an assets controller"
                 .x(() =>
                 {
-                    assetPairsController = new AssetPairsController(
-                        assetPairsCache, 
-                        assetsCache, 
+                    assetsController = new AssetsController(                  
                         A.Fake<IAssetsService>(),
-                        A.Fake<ILykkeMarketProfileServiceAPI>(),
+                        assetsCache,
+                        A.Fake<IClientAccountSettingsClient>(),
                         requestContext);
                 });
 
-            "When I request all asset pairs"
+            "When I request all assets"
                 .x(() =>
                 {
-                    result = assetPairsController.Get();
+                    result = assetsController.Get();
                 });
 
             "Then the result is OK and returns the expected model"
                 .x(() =>
                 {
                     result.Result.Should().BeOfType(typeof(OkObjectResult));
-                    ((OkObjectResult)result.Result).Value.Should().BeOfType(typeof(Models.AssetPairsModels.AssetPairResponseModel));
-                    ((Models.AssetPairsModels.AssetPairResponseModel)((OkObjectResult)result.Result).Value).AssetPairs.Count().Should().Be(0);
+                    ((OkObjectResult)result.Result).Value.Should().BeOfType(typeof(Models.AssetsModel));
+                    ((Models.AssetsModel)((OkObjectResult)result.Result).Value).Assets.Count().Should().Be(0);
                 });
         }
     }
