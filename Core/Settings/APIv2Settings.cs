@@ -8,6 +8,7 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
+using Lykke.Service.Settings.Client;
 
 namespace Core.Settings
 {
@@ -25,9 +26,9 @@ namespace Core.Settings
         public AssetDisclaimersServiceClientSettings AssetDisclaimersServiceClient { get; set; }
         public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }
         public IcoSettings IcoSettings { get; set; }
-
         public GlobalSettings GlobalSettings { get; set; }
         public KycServiceClientSettings KycServiceClient { get; set; }
+        public SettingsServiceClientSettings SettingsServiceClient { get; set; }
     }
 
     public class GlobalSettings
