@@ -953,6 +953,15 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Asset &apos;{0}&apos; does not allow use DepositOption as Other.
+        /// </summary>
+        public static string OtherDepositOptionsNotAllowFormat {
+            get {
+                return ResourceManager.GetString("OtherDepositOptionsNotAllowFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The order amount should be greater than {0} {1}.
         /// </summary>
         public static string PaymentIsLessThanMinLimit {

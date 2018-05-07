@@ -23,7 +23,7 @@ namespace LykkeApi2.Infrastructure
         //TODO: fix
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (_cacheManager.Get(IsOnMaintenanceCacheKey, 1, async () => (await _settingsClient.GetIsOnMaintenanceAsync()).IsOnMaintenance.GetValueOrDefault()).Result)
+            if (_cacheManager.Get(IsOnMaintenanceCacheKey, 1, async () => (await _settingsClient.GetAppGlobalSettingsAsync()).IsOnMaintenance.GetValueOrDefault()).Result)
             {
                 ReturnOnMaintenance(context);
             }
