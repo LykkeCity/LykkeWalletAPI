@@ -25,9 +25,6 @@ using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
-using Lykke.Service.Kyc.Abstractions.Services;
-using Lykke.Service.Kyc.Client;
-using Lykke.Service.Limitations.Client;
 using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
@@ -98,7 +95,6 @@ namespace LykkeApi2.Modules
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
             builder.RegisterType<SettingsService>().As<ISettingsService>();
-            builder.RegisterType<LimitationsServiceClient>().As<ILimitationsServiceClient>();
             builder.RegisterType<DisableOnMaintenanceFilter>();
             builder.RegisterType<CachedAssetsDictionary>();
 
@@ -107,7 +103,6 @@ namespace LykkeApi2.Modules
             RegisterDictionaryEntities(builder);
             BindServices(builder, _settings);
             BindRepositories(builder, _settings, _log);
-            BindMicroservices(builder, _settings);
             builder.Populate(_services);
         }
 
@@ -189,24 +184,8 @@ namespace LykkeApi2.Modules
                         settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "PaymentTransactions", log))
                 .As(typeof(INoSQLTableStorage<AzureMultiIndex>));
 
-            builder.Register(y =>
-                    AzureTableStorage<IdentityEntity>.Create(
-                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "Setup", log))
-                .As(typeof(INoSQLTableStorage<IdentityEntity>));
-
-            builder.Register(y =>
-                    AzureTableStorage<IdentityEntity>.Create(
-                        settings.ConnectionString(x => x.Db.ClientPersonalInfoConnString), "Setup", log))
-                .As(typeof(INoSQLTableStorage<IdentityEntity>));
-
             builder.RegisterType<AppGlobalSettingsRepository>().As<IAppGlobalSettingsRepository>();
             builder.RegisterType<ExchangeSettingsRepository>().As<IExchangeSettingsRepository>();
-            builder.RegisterType<IdentityRepository>().As<IIdentityRepository>();
-        }
-
-        private static void BindMicroservices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings)
-        {
-            builder.RegisterLimitationsServiceClient(settings.CurrentValue.Services.LimitationsServiceUrl);
         }
     }
 }

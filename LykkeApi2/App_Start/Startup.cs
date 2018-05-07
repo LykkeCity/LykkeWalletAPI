@@ -132,7 +132,6 @@ namespace LykkeApi2
                 });
 
                 app.UseDefaultFiles();
-                app.UseStaticFiles();
 
                 app.UseSwagger();
                 app.UseSwaggerUI(o =>
