@@ -78,7 +78,6 @@ namespace LykkeApi2
                 var appSettings = Configuration.LoadSettings<APIv2Settings>();
                 Log = CreateLogWithSlack(services, appSettings);
                 builder.Populate(services);
-                builder.RegisterModule(new DefaultValueModule());
                 builder.RegisterModule(new Api2Module(appSettings, Log));
                 builder.RegisterModule(new ClientsModule(appSettings, Log));
                 builder.RegisterModule(new AspNetCoreModule());

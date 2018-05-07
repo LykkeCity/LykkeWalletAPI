@@ -1,5 +1,5 @@
 ﻿using Common.Cache;
-using Core.GlobalSettings;
+using Lykke.Service.Settings.Client;
 using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -11,19 +11,19 @@ namespace LykkeApi2.Infrastructure
         public const string IsOnMaintenanceCacheKey = "globalsetting-is-on-maintenance";
 
         private readonly ICacheManager _cacheManager;
-        private readonly IAppGlobalSettingsRepository _appGlobalSettings;
+        private readonly ISettingsClient _settingsClient;
                          
-        public DisableOnMaintenanceFilter(ICacheManager cacheManager, 
-            IAppGlobalSettingsRepository appGlobalSettings)
+        public DisableOnMaintenanceFilter(ICacheManager cacheManager,
+            ISettingsClient appGlobalSettings)
         {
             _cacheManager = cacheManager;
-            _appGlobalSettings = appGlobalSettings;
+            _settingsClient = appGlobalSettings;
         }
 
         //TODO: fix
         public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (_cacheManager.Get(IsOnMaintenanceCacheKey, 1, async () => (await _appGlobalSettings.GetFromDbOrDefault()).IsOnMaintenance).Result)
+            if (_cacheManager.Get(IsOnMaintenanceCacheKey, 1, async () => (await _settingsClient.GetIsOnMaintenanceAsync()).IsOnMaintenance.GetValueOrDefault()).Result)
             {
                 ReturnOnMaintenance(context);
             }

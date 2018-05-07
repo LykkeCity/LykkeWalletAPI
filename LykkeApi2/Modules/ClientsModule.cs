@@ -18,16 +18,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.HftInternalService.Client;
 using Lykke.Service.Session.Client;
-using LykkeApi2.Infrastructure;
-using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.PaymentSystem.Client;
-using Lykke.Service.Session.Client;
-using Lykke.Service.PersonalData.Settings;
-using Core;
 using Lykke.Service.ExchangeOperations.Client;
+using Lykke.Service.Settings.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -84,6 +80,7 @@ namespace LykkeApi2.Modules
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
+            builder.RegisterSettingsClient(_apiSettings.CurrentValue.SettingsServiceClient.ServiceUrl, _log);
 
             builder
                 .RegisterInstance(
