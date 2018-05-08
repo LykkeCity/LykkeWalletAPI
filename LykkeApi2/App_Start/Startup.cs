@@ -120,6 +120,9 @@ namespace LykkeApi2
                 }
 
                 app.UseAuthentication();
+
+                app.UseMiddleware<ClientBansMiddleware>();
+                
                 app.UseMvc(routes =>
                 {
                     routes.MapRoute(
@@ -140,8 +143,6 @@ namespace LykkeApi2
                 });
 
                 app.UseStaticFiles();
-
-                app.UseMiddleware<ClientBansMiddleware>();
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());
