@@ -295,6 +295,15 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Asset &apos;{0}&apos; does not allow use DepositOption as &apos;{1}&apos;.
+        /// </summary>
+        public static string DepositOptionsNotAllowFormat {
+            get {
+                return ResourceManager.GetString("DepositOptionsNotAllowFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Duplicated request.
         /// </summary>
         public static string DuplicatedRequest {
@@ -949,15 +958,6 @@ namespace LykkeApi2.Strings {
         public static string OrderWasNotPlaced {
             get {
                 return ResourceManager.GetString("OrderWasNotPlaced", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Asset &apos;{0}&apos; does not allow use DepositOption as Other.
-        /// </summary>
-        public static string OtherDepositOptionsNotAllowFormat {
-            get {
-                return ResourceManager.GetString("OtherDepositOptionsNotAllowFormat", resourceCulture);
             }
         }
         
