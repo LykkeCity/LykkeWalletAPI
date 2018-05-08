@@ -56,7 +56,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(WatchList), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(WatchListModel), (int) HttpStatusCode.OK)]
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] WatchListCreateModel model)
         {
@@ -79,7 +79,7 @@ namespace LykkeApi2.Controllers
 
             var result = await _assetsHelper.AddCustomWatchListAsync(_requestContext.ClientId, watchList);
 
-            return Ok(result);
+            return Ok(result.ToApiModel());
         }
 
         [HttpPut("{id}")]
@@ -111,7 +111,7 @@ namespace LykkeApi2.Controllers
                 AssetIds = model.AssetPairIds != null ? model.AssetPairIds.ToList() : model.AssetIds.ToList() //TODO: remove AssetIds at all
             };
 
-            await _assetsHelper.UpdateCustomWatchListAsync(_requestContext.ClientId, watchList);
+            await _assetsHelper.UpdateCustomWatchListAsync(_requestContext.ClientId, newWatchList);
 
             return Ok(newWatchList.ToApiModel());
         }
