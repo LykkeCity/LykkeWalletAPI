@@ -508,7 +508,7 @@ We apologies for the inconvenience, and would like to thank you for your underst
   <data name="WrongPin" xml:space="preserve">
     <value>Wrong pin</value>
   </data>
-  <data name="OtherDepositOptionsNotAllowFormat" xml:space="preserve">
-    <value>Asset '{0}' does not allow use DepositOption.Other</value>
+  <data name="DepositOptionsNotAllowFormat" xml:space="preserve">
+    <value>Asset '{0}' does not allow use DepositOption as '{1}'</value>
   </data>
 </root>

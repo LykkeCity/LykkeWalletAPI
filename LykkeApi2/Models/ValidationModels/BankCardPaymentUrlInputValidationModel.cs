@@ -93,7 +93,9 @@ namespace LykkeApi2.Models.ValidationModels
             RuleFor(reg => reg.AssetId).MustAsync(IsOperationForAssetEnabled).WithMessage(Phrases.BtcDisabledMsg);
             RuleFor(reg => reg.AssetId).MustAsync(IsKycNotNeeded).WithMessage(Phrases.KycNeeded);
             RuleFor(reg => reg.AssetId).MustAsync(IsOtherDepositOptionsEnabled)
-                .WithMessage(x => string.Format(Phrases.OtherDepositOptionsNotAllowFormat, x.AssetId));
+                .WithMessage(x => string.Format(Phrases.DepositOptionsNotAllowFormat, x.AssetId, x.DepositOption));
+            RuleFor(reg => reg.AssetId).MustAsync(IsBankCardDepositOptionsEnabled)
+                .WithMessage(x => string.Format(Phrases.DepositOptionsNotAllowFormat, x.AssetId, x.DepositOption));
 
             RuleFor(reg => reg.Amount).Must(x => x > 0)
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Amount)));
@@ -221,9 +223,16 @@ namespace LykkeApi2.Models.ValidationModels
             return asset?.KycNeeded != true || userKycStatus.IsKycOkOrReviewDone();
         }
 
-        private async Task<bool> IsOtherDepositOptionsEnabled(string value, CancellationToken cancellationToken)
+        private async Task<bool> IsOtherDepositOptionsEnabled(BankCardPaymentUrlRequestModel model, string value, CancellationToken cancellationToken)
         {
-            return (await _assetsService.AssetGetAsync(value, cancellationToken))?.OtherDepositOptionsEnabled == true;
+            return model.DepositOptionEnum != DepositOption.Other ||
+                   (await _assetsService.AssetGetAsync(value, cancellationToken))?.OtherDepositOptionsEnabled == true;
+        }
+
+        private async Task<bool> IsBankCardDepositOptionsEnabled(BankCardPaymentUrlRequestModel model, string value, CancellationToken cancellationToken)
+        {
+            return model.DepositOptionEnum != DepositOption.BankCard ||
+                   (await _assetsService.AssetGetAsync(value, cancellationToken))?.BankCardsDepositEnabled == true;
         }
 
         private async Task<bool> IsValidLimitation(BankCardPaymentUrlRequestModel model, double value, CancellationToken cancellationToken)
