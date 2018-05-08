@@ -136,7 +136,7 @@ namespace LykkeApi2.Controllers
 
         private async Task<WatchList> GetWatchList(string id)
         {
-            var result = await _assetsHelper.GetCustomWatchListAsync(id, _requestContext.ClientId) ??
+            var result = await _assetsHelper.GetCustomWatchListAsync(_requestContext.ClientId, id) ??
                          await _assetsHelper.GetPredefinedWatchListAsync(id);
 
             if (result == null)
