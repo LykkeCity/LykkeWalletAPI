@@ -9,5 +9,7 @@ namespace LykkeApi2.Models.Watchlists
         public int Order { get; set; }
 
         public IEnumerable<string> AssetIds { get; set; }
+
+        public IEnumerable<string> AssetPairIds { get; set; }
     }
 }

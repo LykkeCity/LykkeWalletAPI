@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Services;
 using LkeServices;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -18,18 +19,15 @@ namespace LykkeApi2.Controllers
     public class WatchlistsController : Controller
     {
         private readonly IRequestContext _requestContext;
-        private readonly IAssetsService _assetsService;
-        private readonly SrvAssetsHelper _srvAssetsHelper;
+        private readonly IAssetsHelper _assetsHelper;
 
         public WatchlistsController(
             IRequestContext requestContext,
-            IAssetsService assetsService,
-            SrvAssetsHelper srvAssetsHelper
+            IAssetsHelper assetsHelper
         )
         {
             _requestContext = requestContext;
-            _assetsService = assetsService;
-            _srvAssetsHelper = srvAssetsHelper;
+            _assetsHelper = assetsHelper;
         }
 
         [HttpGet]
@@ -37,140 +35,117 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> GetWatchlists()
         {
             var watchlists = await GetAllWatchlists();
-            return Ok(watchlists);
+            return Ok(watchlists.Select(x => x.ToApiModel()));
         }
 
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(WatchList), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(WatchListModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Get(string id)
         {
-            try
-            {
-                WatchList watchList = await GetWatchList(id);
-                
-                if (watchList == null)
-                    return NotFound("Watch-list not found!");
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest();
 
-                return Ok(watchList);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var watchList = await GetWatchList(id);
+
+            if (watchList == null)
+                return NotFound();
+
+            return Ok(watchList.ToApiModel());
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(WatchList), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(WatchListModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] WatchListCreateModel model)
         {
-            if (!await IsValidAsync(model.AssetIds))
-                return BadRequest("Wrong assets in 'AssetIds' list");
+            if ((model.AssetPairIds != null ? !await IsValidAsync(model.AssetPairIds) : !await IsValidAsync(model.AssetIds)) || //TODO: remove AssetIds at all
+                string.IsNullOrEmpty(model.Name))
+                return BadRequest();
             
-            if (string.IsNullOrEmpty(model.Name))
-                return BadRequest("Name can't be empty");
-
             var watchlists = await GetAllWatchlists();
 
             if (watchlists.Any(item => item.Name == model.Name))
-                return BadRequest($"Watch-list with name '{model.Name}' already exists");
+                return BadRequest();
 
             var watchList = new WatchList
             {
                 Id = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Order = model.Order,
-                AssetIds = model.AssetIds.ToList()
+                AssetIds = model.AssetPairIds != null ? model.AssetPairIds.ToList() : model.AssetIds.ToList() //TODO: remove AssetIds at all
             };
 
-            var result = await _assetsService.WatchListAddCustomAsync(watchList, _requestContext.ClientId);
-            return Ok(result);
+            var result = await _assetsHelper.AddCustomWatchListAsync(_requestContext.ClientId, watchList);
+
+            return Ok(result.ToApiModel());
         }
 
         [HttpPut("{id}")]
-        [ProducesResponseType(typeof(WatchList), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(WatchListModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Update(string id, [FromBody] WatchListUpdateModel model)
         {
-            try
+            var watchList = await GetWatchList(id);
+
+            if (watchList == null)
+                return NotFound();
+
+            if (watchList.ReadOnlyProperty ||
+                (model.AssetPairIds != null ? !await IsValidAsync(model.AssetPairIds) : !await IsValidAsync(model.AssetIds)) || //TODO: remove AssetIds at all
+                string.IsNullOrEmpty(model.Name))
+                return BadRequest();
+
+            var watchlists = await GetAllWatchlists();
+
+            if (watchlists.Any(item => item.Name == model.Name && item.Id != watchList.Id))
+                return BadRequest();
+
+            var newWatchList = new WatchList
             {
-                WatchList watchList = await GetWatchList(id);
-                
-                if (watchList == null)
-                    return NotFound("Watch-list not found!");
-                
-                if (watchList.ReadOnlyProperty)
-                    return BadRequest("This watch-list is read only!");
+                Id = id,
+                Name = model.Name,
+                Order = model.Order,
+                AssetIds = model.AssetPairIds != null ? model.AssetPairIds.ToList() : model.AssetIds.ToList() //TODO: remove AssetIds at all
+            };
 
-                if (!await IsValidAsync(model.AssetIds))
-                    return BadRequest("Wrong assets in 'AssetIds' list");
+            await _assetsHelper.UpdateCustomWatchListAsync(_requestContext.ClientId, newWatchList);
 
-                if (string.IsNullOrEmpty(model.Name))
-                    return BadRequest("Name can't be empty");
-
-                var watchlists = await GetAllWatchlists();
-
-                if (watchlists.Any(item => item.Name == model.Name && item.Id != watchList.Id))
-                    return BadRequest($"Watch-list with name '{model.Name}' already exists");
-
-                var newWatchList = new WatchList
-                {
-                    Id = id,
-                    Name = model.Name,
-                    Order = model.Order,
-                    AssetIds = model.AssetIds.ToList()
-                };
-
-                await _assetsService.WatchListUpdateCustomAsync(newWatchList, _requestContext.ClientId);
-
-                return Ok(newWatchList);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            return Ok(newWatchList.ToApiModel());
         }
 
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Delete(string id)
         {
-            try
-            {
-                WatchList watchList = await GetWatchList(id);
-                
-                if (watchList == null)
-                    return NotFound("Watch-list not found!");
-                
-                if (watchList.ReadOnlyProperty)
-                    return BadRequest("This watch-list is read only!");
+            var watchList = await GetWatchList(id);
 
-                await _assetsService.WatchListCustomRemoveAsync(id, _requestContext.ClientId);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            if (watchList == null)
+                return NotFound();
+
+            if (watchList.ReadOnlyProperty)
+                return BadRequest();
+
+            await _assetsHelper.RemoveCustomWatchListAsync(_requestContext.ClientId, id);
+            return Ok();
         }
 
         private async Task<WatchList> GetWatchList(string id)
         {
-            var result = await _assetsService.WatchListGetCustomAsync(id, _requestContext.ClientId) ?? 
-                         await _assetsService.WatchListGetPredefinedAsync(id);
+            var result = await _assetsHelper.GetCustomWatchListAsync(_requestContext.ClientId, id) ??
+                         await _assetsHelper.GetPredefinedWatchListAsync(id);
 
             if (result == null)
             {
                 return null;
             }
 
-            var watchList = await FilterAssetsAsync(result);
-            
+            var watchList = await FilterAssetPairsAsync(result);
+
             if (watchList == null)
             {
                 throw new Exception("Assets in the watch-list are not accessable!");
@@ -181,47 +156,47 @@ namespace LykkeApi2.Controllers
 
         private async Task<IEnumerable<WatchList>> GetAllWatchlists()
         {
-            var availableAssetIds = await GetAvailableAssetIdsAsync();
+            var availableAssetPairIds = await GetAvailableAssetPairIdsAsync();
 
-            return (await _assetsService.WatchListGetAllAsync(_requestContext.ClientId))
-                .Select(x => FilterAssets(x, availableAssetIds))
+            return (await _assetsHelper.GetAllCustomWatchListsForClient(_requestContext.ClientId))
+                .Select(x => FilterAssetsPairs(x, availableAssetPairIds))
                 .Where(x => x != null);
         }
 
-        private async Task<bool> IsValidAsync(IEnumerable<string> assetIds, List<string> availableAssetIds = null)
+        private async Task<bool> IsValidAsync(IEnumerable<string> assetIds, List<string> availableAssetPairIds = null)
         {
             var assets = assetIds.ToArray();
 
             if (!assets.Any() || assets.Any(string.IsNullOrEmpty))
                 return false;
 
-            availableAssetIds = availableAssetIds ?? await GetAvailableAssetIdsAsync();
+            availableAssetPairIds = availableAssetPairIds ?? await GetAvailableAssetPairIdsAsync();
 
             return assets.Where(x => !string.IsNullOrEmpty(x))
-                .All(id => availableAssetIds.Contains(id));
+                .All(id => availableAssetPairIds.Contains(id));
         }
 
-        private WatchList FilterAssets(WatchList watchList, List<string> availableAssetIds = null)
+        private WatchList FilterAssetsPairs(WatchList watchList, List<string> availableAssetPairIds = null)
         {
-            return FilterAssetsAsync(watchList, availableAssetIds).GetAwaiter().GetResult();
+            return FilterAssetPairsAsync(watchList, availableAssetPairIds).GetAwaiter().GetResult();
         }
 
-        private async Task<WatchList> FilterAssetsAsync(WatchList watchList, List<string> availableAssetIds = null)
+        private async Task<WatchList> FilterAssetPairsAsync(WatchList watchList, List<string> availableAssetPairIds = null)
         {
-            availableAssetIds = availableAssetIds ?? await GetAvailableAssetIdsAsync();
+            availableAssetPairIds = availableAssetPairIds ?? await GetAvailableAssetPairIdsAsync();
 
-            var filteredAssetIds = watchList.AssetIds
-                .Where(x => availableAssetIds.Contains(x))
+            var filteredAssetPairIds = watchList.AssetIds
+                .Where(x => availableAssetPairIds.Contains(x))
                 .ToList();
 
-            if (!filteredAssetIds.Any())
+            if (!filteredAssetPairIds.Any())
             {
                 return null;
             }
 
             var result = new WatchList
             {
-                AssetIds = filteredAssetIds,
+                AssetIds = filteredAssetPairIds,
                 Id = watchList.Id,
                 Name = watchList.Name,
                 Order = watchList.Order,
@@ -231,13 +206,13 @@ namespace LykkeApi2.Controllers
             return result;
         }
 
-        private async Task<List<string>> GetAvailableAssetIdsAsync()
+        private async Task<List<string>> GetAvailableAssetPairIdsAsync()
         {
-            return (await _srvAssetsHelper
-                    .GetAssetsPairsForClient(_requestContext.ClientId, _requestContext.IsIosDevice,
-                        _requestContext.PartnerId, true))
-                .Select(x => x.Id)
-                .ToList();
+            var assetPairIds =
+                await _assetsHelper.GetAssetPairsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId,
+                    true);
+
+            return assetPairIds.ToList();
         }
     }
 }
