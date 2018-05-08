@@ -15,6 +15,7 @@ using LykkeApi2.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Core.Settings;
+using LykkeApi2.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -100,6 +101,8 @@ namespace LykkeApi2
             {
                 app.UseLykkeMiddleware(ComponentName, ex => new { Message = "Technical problem" });
 
+                app.UseMiddleware<ClientBansMiddleware>();
+
                 app.UseCors(builder =>
                 {
                     builder.AllowAnyOrigin();
@@ -139,6 +142,8 @@ namespace LykkeApi2
                 });
 
                 app.UseStaticFiles();
+
+                app.UseMiddleware<ClientBansMiddleware>();
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());
