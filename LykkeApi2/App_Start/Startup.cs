@@ -101,8 +101,6 @@ namespace LykkeApi2
             {
                 app.UseLykkeMiddleware(ComponentName, ex => new { Message = "Technical problem" });
 
-                app.UseMiddleware<ClientBansMiddleware>();
-
                 app.UseCors(builder =>
                 {
                     builder.AllowAnyOrigin();
