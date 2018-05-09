@@ -157,6 +157,20 @@ namespace LykkeApi2.Controllers
         }
 
         [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> LogOut()
+        {
+            var token = _lykkePrincipal.GetToken();
+            
+            var session = await _clientSessionsClient.GetAsync(token);
+            
+            if (session != null)
+                await _clientSessionsClient.DeleteSessionIfExistsAsync(session.SessionToken);
+            
+            return Ok();
+        }
+
+        [Authorize]
         [HttpPost("session")]
 
         public async Task<IActionResult> CreateTradingSession([FromBody]TradingModel request)
