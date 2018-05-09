@@ -21,17 +21,14 @@ namespace LykkeApi2.Controllers
     {
         private readonly ILykkeMarketProfileServiceAPI _marketProfileService;
         private readonly ICandlesHistoryServiceProvider _candlesHistoryProvider;
-        private readonly ILog _log;
 
         #region Initialization
 
         public MarketsController(ILykkeMarketProfileServiceAPI marketProfileService,
-            ICandlesHistoryServiceProvider candlesHistoryProvider,
-            ILog log)
+            ICandlesHistoryServiceProvider candlesHistoryProvider)
         {
             _marketProfileService = marketProfileService ?? throw new ArgumentNullException(nameof(marketProfileService));
             _candlesHistoryProvider = candlesHistoryProvider ?? throw new ArgumentNullException(nameof(candlesHistoryProvider));
-            _log = log?.CreateComponentScope(nameof(MarketsController)) ?? throw new ArgumentNullException(nameof(log));
         }
 
         #endregion
@@ -42,21 +39,13 @@ namespace LykkeApi2.Controllers
         /// Get actual market state for all registered asset pairs.
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MarketSlice[]), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(MarketSlice[]), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Get()
         {
-            try
-            {
-                var result = await GetSpotMarketSnapshotAsync();
+            var result = await GetSpotMarketSnapshotAsync();
 
-                return Ok(result);
-            }
-            catch (Exception e)
-            {
-                await _log.WriteErrorAsync(nameof(Get), "AllPairs", e);
-                return BadRequest(e.Message);
-            }
+            return Ok(result);
         }
 
         /// <summary>
@@ -64,24 +53,21 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <param name="assetPairId">The target asset pair ID.</param>
         [HttpGet("{assetPairId}")]
-        [ProducesResponseType(typeof(MarketSlice), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(MarketSlice), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Get(string assetPairId)
         {
             if (string.IsNullOrWhiteSpace(assetPairId))
                 return BadRequest("Please, specify the target asset pair id.");
 
-            try
-            {
-                var result = await GetSpotMarketSnapshotAsync(assetPairId);
+            var result = await GetSpotMarketSnapshotAsync(assetPairId);
 
-                return Ok(result.Single());
-            }
-            catch (Exception e)
-            {
-                await _log.WriteErrorAsync(nameof(Get), assetPairId, e);
-                return BadRequest(e.Message);
-            }
+            var marketState = result.FirstOrDefault();
+
+            if (marketState == null)
+                return BadRequest("Market state is missing for given asset pair.");
+
+            return Ok(marketState);
         }
 
         #endregion
@@ -112,9 +98,9 @@ namespace LykkeApi2.Controllers
             foreach (var todayCandle in todayCandles)
             {
                 var candleValue = todayCandle.Value;
-                var priceChange24 = 
+                var priceChange24 =
                     candleValue.Close > 0
-                    ? (decimal) ((candleValue.Close - candleValue.Open) / candleValue.Open)
+                    ? (decimal)((candleValue.Close - candleValue.Open) / candleValue.Open)
                     : 0;
 
                 if (result.TryGetValue(todayCandle.Key, out var existingAssetRecord))
@@ -128,13 +114,13 @@ namespace LykkeApi2.Controllers
                     result[todayCandle.Key] = new MarketSlice
                     {
                         AssetPair = todayCandle.Key,
-                        Volume24H = (decimal) candleValue.TradingVolume,
+                        Volume24H = (decimal)candleValue.TradingVolume,
                         PriceChange24H = priceChange24,
-                        LastPrice = (decimal) candleValue.Close
+                        LastPrice = (decimal)candleValue.Close
                     };
                 }
             }
-            
+
             return result.Values.ToList();
         }
 
