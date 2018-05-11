@@ -15,6 +15,7 @@ using LykkeApi2.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Core.Settings;
+using LykkeApi2.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -119,6 +120,9 @@ namespace LykkeApi2
                 }
 
                 app.UseAuthentication();
+
+                app.UseMiddleware<ClientBansMiddleware>();
+                
                 app.UseMvc(routes =>
                 {
                     routes.MapRoute(
