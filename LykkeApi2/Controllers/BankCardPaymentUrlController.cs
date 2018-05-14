@@ -12,7 +12,6 @@ namespace LykkeApi2.Controllers
 {
     [Produces("application/json")]
     [Authorize]
-    [ServiceFilter(typeof(DisableOnMaintenanceFilter))]
     [Route("api/[controller]")]
     public class BankCardPaymentUrlController : Controller
     {

@@ -45,7 +45,6 @@
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.55" />
     <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.12" />
     <PackageReference Include="Lykke.Service.Registration" Version="1.2.2" />
-    <PackageReference Include="Lykke.Service.Settings.Client" Version="1.0.3" />
     <PackageReference Include="Lykke.SettingsReader" Version="2.2.0" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="2.0.4" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.2.1" />
