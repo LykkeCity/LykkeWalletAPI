@@ -10,7 +10,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 namespace LykkeApi2.Controllers
 {
     [Produces("application/json")]
-    [ServiceFilter(typeof(DisableOnMaintenanceFilter))]
+    [Authorize]
     [Route("api/[controller]")]
     public class BankCardPaymentUrlController : Controller
     {
