@@ -4,6 +4,7 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -12,6 +13,7 @@ namespace LykkeApi2.Controllers
     [Produces("application/json")]
     [Authorize]
     [Route("api/[controller]")]
+    [Authorize]
     public class BankCardPaymentUrlController : Controller
     {
         private readonly IPaymentSystemClient _paymentSystemService;
