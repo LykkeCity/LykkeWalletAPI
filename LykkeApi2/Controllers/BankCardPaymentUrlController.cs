@@ -4,15 +4,12 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 
 namespace LykkeApi2.Controllers
 {
     [Produces("application/json")]
-    [Authorize]
     [ServiceFilter(typeof(DisableOnMaintenanceFilter))]
     [Route("api/[controller]")]
     public class BankCardPaymentUrlController : Controller
@@ -28,6 +25,10 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext;
         }
 
+        /// <summary>
+        /// Get last PaymentTransaction
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [SwaggerOperation("Get")]
         [ProducesResponseType(typeof(PaymentTransactionResponse), (int)HttpStatusCode.OK)]
@@ -38,10 +39,14 @@ namespace LykkeApi2.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get Url for PaymentSystem
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns>Returns with Url for PaymentSystem</returns>
         [HttpPost]
         [SwaggerOperation("Post")]
         [ProducesResponseType(typeof(PaymentUrlDataResponse), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Post([FromBody]BankCardPaymentUrlRequestModel input)
         {
             var result = await _paymentSystemService.GetUrlDataAsync(
