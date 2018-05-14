@@ -95,7 +95,6 @@ namespace LykkeApi2.Modules
             builder.RegisterAffiliateClient(_settings.AffiliateServiceClient.ServiceUrl, _log);
 
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
-            builder.RegisterSettingsClient(_apiSettings.CurrentValue.SettingsServiceClient.ServiceUrl, _log);
 
             builder
                 .RegisterInstance(

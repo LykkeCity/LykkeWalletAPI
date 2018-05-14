@@ -4,9 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common;
 using Core;
-using Core.Services;
 using FluentValidation;
-using LkeServices.Operations;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Balances.Client;
@@ -29,7 +27,6 @@ namespace LykkeApi2.Models.ValidationModels
     {
         private readonly CachedAssetsDictionary _cachedAssetsDictionary;
         private readonly IAssetDisclaimersClient _assetDisclaimersClient;
-        private readonly SrvDisabledOperations _srvDisabledOperations;
         private readonly PaymentLimitsResponse _paymentLimitsResponse;
         private readonly IPersonalData _personalData;
         private readonly IClientAccountClient _clientAccountService;
@@ -45,7 +42,6 @@ namespace LykkeApi2.Models.ValidationModels
             IHttpContextAccessor httpContextAccessor,
             CachedAssetsDictionary cachedAssetsDictionary,
             IAssetDisclaimersClient assetDisclaimersClient,
-            SrvDisabledOperations srvDisabledOperations,
             IPaymentSystemClient paymentSystemClient,
             IPersonalDataService personalDataService,
             IClientAccountClient clientAccountService,
@@ -57,7 +53,6 @@ namespace LykkeApi2.Models.ValidationModels
         {
             _cachedAssetsDictionary = cachedAssetsDictionary;
             _assetDisclaimersClient = assetDisclaimersClient;
-            _srvDisabledOperations = srvDisabledOperations;
             _clientAccountService = clientAccountService;
             _balancesClient = balancesClient;
             _assetsService = assetsService;
@@ -90,7 +85,6 @@ namespace LykkeApi2.Models.ValidationModels
         private void RegisterRules()
         {
             RuleFor(reg => reg.AssetId).MustAsync(IsApprovedDepositDisclaimers).WithMessage(Phrases.PendingDisclaimer);
-            RuleFor(reg => reg.AssetId).MustAsync(IsOperationForAssetEnabled).WithMessage(Phrases.BtcDisabledMsg);
             RuleFor(reg => reg.AssetId).MustAsync(IsKycNotNeeded).WithMessage(Phrases.KycNeeded);
             RuleFor(reg => reg.AssetId).MustAsync(IsOtherDepositOptionsEnabled)
                 .WithMessage(x => string.Format(Phrases.DepositOptionsNotAllowFormat, x.AssetId, x.DepositOption));
@@ -159,11 +153,6 @@ namespace LykkeApi2.Models.ValidationModels
                 return !checkDisclaimerResult.RequiresApproval;
             }
             return true;
-        }
-
-        private async Task<bool> IsOperationForAssetEnabled(string value, CancellationToken cancellationToken)
-        {
-            return !await _srvDisabledOperations.IsOperationForAssetDisabled(value);
         }
 
         private bool IsMinAmount(BankCardPaymentUrlRequestModel model, double value)

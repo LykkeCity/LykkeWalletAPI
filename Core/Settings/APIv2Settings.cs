@@ -28,7 +28,6 @@ namespace Core.Settings
         public IcoSettings IcoSettings { get; set; }
         public GlobalSettings GlobalSettings { get; set; }
         public KycServiceClientSettings KycServiceClient { get; set; }
-        public SettingsServiceClientSettings SettingsServiceClient { get; set; }
     }
 
     public class GlobalSettings
