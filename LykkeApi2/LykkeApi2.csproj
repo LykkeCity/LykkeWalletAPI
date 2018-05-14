@@ -41,7 +41,7 @@
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.96" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client.Core" Version="1.0.30" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Contract" Version="1.0.13" />
-    <PackageReference Include="Lykke.Service.PaymentSystem.Client" Version="1.0.14" />
+    <PackageReference Include="Lykke.Service.PaymentSystem.Client" Version="1.0.19" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.55" />
     <PackageReference Include="Lykke.Service.RateCalculator.Client" Version="1.0.12" />
     <PackageReference Include="Lykke.Service.Registration" Version="1.2.2" />
