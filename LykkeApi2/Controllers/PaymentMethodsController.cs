@@ -4,6 +4,7 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ValidationModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -11,6 +12,7 @@ namespace LykkeApi2.Controllers
 {
     [Route("api/[controller]")]
     [ValidateModel]
+    [Authorize]
     public class PaymentMethodsController : Controller
     {
         private readonly IPaymentSystemClient _paymentSystemClient;

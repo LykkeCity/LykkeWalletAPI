@@ -13,6 +13,7 @@ namespace LykkeApi2.Controllers
     [Produces("application/json")]
     [Authorize]
     [Route("api/[controller]")]
+    [Authorize]
     public class BankCardPaymentUrlController : Controller
     {
         private readonly IPaymentSystemClient _paymentSystemService;
