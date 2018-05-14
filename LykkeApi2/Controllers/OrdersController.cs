@@ -273,6 +273,7 @@ namespace LykkeApi2.Controllers
             return new AssetModel
             {
                 Id = asset.Id,
+                DisplayId = asset.DisplayId ?? asset.Id,
                 IsTradable = asset.IsTradable,
                 IsTrusted = asset.IsTrusted,
                 Accuracy = asset.Accuracy,
