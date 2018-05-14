@@ -19,7 +19,6 @@ using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Countries;
 using LkeServices.Identity;
-using LkeServices.Operations;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
@@ -76,8 +75,6 @@ namespace LykkeApi2.Modules
 			
             _services.AddSingleton<ClientAccountLogic>();
             
-            builder.RegisterType<SrvDisabledOperations>().SingleInstance();
-
             _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
             {
                 var provider = new CandlesHistoryServiceProvider();
@@ -93,7 +90,6 @@ namespace LykkeApi2.Modules
             //TODO change to v2
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
-            builder.RegisterType<DisableOnMaintenanceFilter>();
             builder.RegisterType<CachedAssetsDictionary>();
 
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
