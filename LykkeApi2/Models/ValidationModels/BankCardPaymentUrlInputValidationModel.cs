@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,6 +38,7 @@ namespace LykkeApi2.Models.ValidationModels
         private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly string _clientId;
         private readonly bool _isIosDevice;
+        private readonly PaymentMethodsResponse _paymentMethods;
 
         public BankCardPaymentUrlInputValidationModel(
             IHttpContextAccessor httpContextAccessor,
@@ -61,10 +63,12 @@ namespace LykkeApi2.Models.ValidationModels
             _limitationsServiceClient = limitationsServiceClient;
 
             _clientId = httpContextAccessor.HttpContext.User?.Identity?.Name;
-            _paymentLimitsResponse = paymentSystemClient.GetPaymentLimitsAsync().Result;
-            _personalData = personalDataService.GetAsync(_clientId).Result;
+            _paymentLimitsResponse = paymentSystemClient.GetPaymentLimitsAsync().GetAwaiter().GetResult();
+            _personalData = personalDataService.GetAsync(_clientId).GetAwaiter().GetResult();
 
             _isIosDevice = IsIosDevice(httpContextAccessor.HttpContext);
+            _paymentMethods = paymentSystemClient.GetPaymentMethodsAsync(_clientId).GetAwaiter().GetResult();
+
 
             RegisterRules();
         }
@@ -86,9 +90,9 @@ namespace LykkeApi2.Models.ValidationModels
         {
             RuleFor(reg => reg.AssetId).MustAsync(IsApprovedDepositDisclaimers).WithMessage(Phrases.PendingDisclaimer);
             RuleFor(reg => reg.AssetId).MustAsync(IsKycNotNeeded).WithMessage(Phrases.KycNeeded);
-            RuleFor(reg => reg.AssetId).MustAsync(IsOtherDepositOptionsEnabled)
+            RuleFor(reg => reg.AssetId).Must(IsOtherDepositOptionsEnabled)
                 .WithMessage(x => string.Format(Phrases.DepositOptionsNotAllowFormat, x.AssetId, x.DepositOption));
-            RuleFor(reg => reg.AssetId).MustAsync(IsBankCardDepositOptionsEnabled)
+            RuleFor(reg => reg.AssetId).Must(IsBankCardDepositOptionsEnabled)
                 .WithMessage(x => string.Format(Phrases.DepositOptionsNotAllowFormat, x.AssetId, x.DepositOption));
 
             RuleFor(reg => reg.Amount).Must(x => x > 0)
@@ -212,19 +216,22 @@ namespace LykkeApi2.Models.ValidationModels
             return asset?.KycNeeded != true || userKycStatus.IsKycOkOrReviewDone();
         }
 
-        private async Task<bool> IsOtherDepositOptionsEnabled(BankCardPaymentUrlRequestModel model, string value, CancellationToken cancellationToken)
+        private bool IsOtherDepositOptionsEnabled(BankCardPaymentUrlRequestModel model, string value)
         {
+            var paymentMethod = _paymentMethods.PaymentMethods.FirstOrDefault(x => x.Name.Equals(CashInPaymentSystem.CreditVoucher.ToString(), StringComparison.InvariantCultureIgnoreCase));
             return model.DepositOptionEnum != DepositOption.Other ||
-                   (await _assetsService.AssetGetAsync(value, cancellationToken))?.OtherDepositOptionsEnabled == true;
+                   paymentMethod != null && paymentMethod.Available && paymentMethod.Assets.Contains(value);
         }
 
-        private async Task<bool> IsBankCardDepositOptionsEnabled(BankCardPaymentUrlRequestModel model, string value, CancellationToken cancellationToken)
+        private bool IsBankCardDepositOptionsEnabled(BankCardPaymentUrlRequestModel model, string value)
         {
+            var paymentMethod = _paymentMethods.PaymentMethods.FirstOrDefault(x => x.Name.Equals(CashInPaymentSystem.Fxpaygate.ToString(), StringComparison.InvariantCultureIgnoreCase));
             return model.DepositOptionEnum != DepositOption.BankCard ||
-                   (await _assetsService.AssetGetAsync(value, cancellationToken))?.BankCardsDepositEnabled == true;
+                   paymentMethod != null && paymentMethod.Available && paymentMethod.Assets.Contains(value);
         }
 
-        private async Task<bool> IsValidLimitation(BankCardPaymentUrlRequestModel model, double value, CancellationToken cancellationToken)
+        private async Task<bool> IsValidLimitation(BankCardPaymentUrlRequestModel model, double value,
+            CancellationToken cancellationToken)
         {
             var checkResult = await _limitationsServiceClient.CheckAsync(
                 _clientId,
