@@ -245,7 +245,7 @@ namespace LykkeApi2.Controllers
 
             var today = DateTime.UtcNow.Date;
             var dateFromInclusive = today.AddYears(-1);
-            var dateToExclusive = today.AddDays(1);
+            var dateToExclusive = today.AddMonths(1);
 
             if (!string.IsNullOrWhiteSpace(assetPairId))
             {
