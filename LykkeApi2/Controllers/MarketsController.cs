@@ -82,9 +82,11 @@ namespace LykkeApi2.Controllers
         {
             var marketProfiles = await GetMarketProfilesAsync(assetPairId);
             var todayCandles = await GetTodaySpotCandlesAsync(assetPairId); // May have (and usually does) a different count of returned records than from market profile query.
+            var lastMonthCandles = await GetLastSpotCandlesAsync(assetPairId); // The last of existing month candle(s) is(are) taken, if any.
 
             var result = new Dictionary<string, MarketSlice>();
 
+            // AssetPair & Bid & Ask
             foreach (var marketProfile in marketProfiles)
             {
                 result[marketProfile.AssetPair] = new MarketSlice
@@ -95,11 +97,12 @@ namespace LykkeApi2.Controllers
                 };
             }
 
+            // Volume24 & PriceChange24
             foreach (var todayCandle in todayCandles)
             {
                 var candleValue = todayCandle.Value;
                 var priceChange24 =
-                    candleValue.Close > 0
+                    candleValue.Open > 0
                     ? (decimal)((candleValue.Close - candleValue.Open) / candleValue.Open)
                     : 0;
 
@@ -107,7 +110,6 @@ namespace LykkeApi2.Controllers
                 {
                     existingAssetRecord.Volume24H = (decimal)candleValue.TradingVolume;
                     existingAssetRecord.PriceChange24H = priceChange24;
-                    existingAssetRecord.LastPrice = (decimal)candleValue.Close;
                 }
                 else
                 {
@@ -116,9 +118,23 @@ namespace LykkeApi2.Controllers
                         AssetPair = todayCandle.Key,
                         Volume24H = (decimal)candleValue.TradingVolume,
                         PriceChange24H = priceChange24,
-                        LastPrice = (decimal)candleValue.Close
                     };
                 }
+            }
+
+            // LastPrice
+            foreach (var monthCandle in lastMonthCandles)
+            {
+                var candleValue = monthCandle.Value;
+
+                if (result.TryGetValue(monthCandle.Key, out var existingAssetRecord))
+                    existingAssetRecord.LastPrice = (decimal)candleValue.Close;
+                else
+                    result[monthCandle.Key] = new MarketSlice
+                    {
+                        AssetPair = monthCandle.Key,
+                        LastPrice = (decimal)candleValue.Close
+                    };
             }
 
             return result.Values.ToList();
@@ -212,6 +228,69 @@ namespace LykkeApi2.Controllers
             }
 
             return todayCandles;
+        }
+
+        /// <summary>
+        /// Gets (a set of) month candle(s) of type Trades and Spot market. The search depth is 12 months.
+        /// </summary>
+        /// <param name="assetPairId">The target asset pair ID. If not specified (is null or empty string), there will be gathered the info about all the registered asset pairs.</param>
+        /// <returns>A dictionary where the Key is the asset pair ID and the Value contains the last of existing month Spot candle for the asset pair for the last year.</returns>
+        /// <remarks>When there is no a month Spot Trade candle for some asset pair, it will not be presented in the resulting dictionary. Thus, if assetPairId parameter is specified
+        /// but there is no a suitable candle for it, the method will return an empty dictionary.</remarks>
+        private async Task<Dictionary<string, Candle>> GetLastSpotCandlesAsync(string assetPairId = null)
+        {
+            var historyService = _candlesHistoryProvider.Get(MarketType.Spot);
+
+            var monthCandles = new Dictionary<string, Candle>();
+
+            var today = DateTime.UtcNow.Date;
+            var dateFromInclusive = today.AddYears(-1);
+            var dateToExclusive = today.AddDays(1);
+
+            if (!string.IsNullOrWhiteSpace(assetPairId))
+            {
+                var monthCandleHistory = await historyService.TryGetCandlesHistoryAsync(assetPairId,
+                    CandlePriceType.Trades, CandleTimeInterval.Month, dateFromInclusive, dateToExclusive);
+
+                if (monthCandleHistory?.History == null ||
+                    !monthCandleHistory.History.Any())
+                    return monthCandles;
+
+                monthCandles.Add(
+                    assetPairId,
+                    monthCandleHistory
+                        .History
+                        .Last()
+                    );
+            }
+            else
+            {
+                var assetPairs = await historyService.GetAvailableAssetPairsAsync();
+                var monthCandleHistoryForPairs = await historyService.GetCandlesHistoryBatchAsync(assetPairs,
+                    CandlePriceType.Trades, CandleTimeInterval.Month, dateFromInclusive, dateToExclusive);
+
+                if (monthCandleHistoryForPairs == null) // Some technical issue has happened without an exception.
+                    throw new InvalidOperationException("Could not obtain month Spot trade candles at all.");
+
+                if (!monthCandleHistoryForPairs.Any())
+                    return monthCandles;
+
+                foreach (var historyForPair in monthCandleHistoryForPairs)
+                {
+                    if (historyForPair.Value?.History == null ||
+                        !historyForPair.Value.History.Any())
+                        continue;
+
+                    monthCandles.Add(
+                        historyForPair.Key,
+                        historyForPair.Value
+                            .History
+                            .Last()
+                        );
+                }
+            }
+
+            return monthCandles;
         }
 
         #endregion
