@@ -39,6 +39,7 @@ namespace LykkeApi2.Models.ValidationModels
         private readonly string _clientId;
         private readonly bool _isIosDevice;
         private readonly PaymentMethodsResponse _paymentMethods;
+        private string _errorMessage;
 
         public BankCardPaymentUrlInputValidationModel(
             IHttpContextAccessor httpContextAccessor,
@@ -69,7 +70,7 @@ namespace LykkeApi2.Models.ValidationModels
             _isIosDevice = IsIosDevice(httpContextAccessor.HttpContext);
             _paymentMethods = paymentSystemClient.GetPaymentMethodsAsync(_clientId).GetAwaiter().GetResult();
 
-
+            _errorMessage = string.Empty;
             RegisterRules();
         }
         private static bool IsIosDevice(HttpContext context)
@@ -101,7 +102,7 @@ namespace LykkeApi2.Models.ValidationModels
                 .WithMessage(x => string.Format(Phrases.PaymentIsLessThanMinLimit, x.AssetId, _paymentLimitsResponse.CreditVouchersMinValue));
             RuleFor(reg => reg.Amount).Must(IsMaxAmount).
                 WithMessage(x => string.Format(Phrases.MaxPaymentLimitExceeded, x.AssetId, _paymentLimitsResponse.CreditVouchersMaxValue));
-            RuleFor(reg => reg.Amount).MustAsync(IsValidLimitation).WithMessage(Phrases.OperationProhibited);
+            RuleFor(reg => reg.Amount).MustAsync(IsValidLimitation).WithMessage(_errorMessage);
 
             RuleFor(reg => reg.FirstName).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.FirstName)));
@@ -238,6 +239,7 @@ namespace LykkeApi2.Models.ValidationModels
                 model.AssetId,
                 value,
                 CurrencyOperationType.CardCashIn);
+            _errorMessage = checkResult.FailMessage;
             return checkResult.IsValid;
         }
     }
