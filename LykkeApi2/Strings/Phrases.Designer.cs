@@ -574,6 +574,15 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Limit is exceeded.
+        /// </summary>
+        public static string LimitIsExceeded {
+            get {
+                return ResourceManager.GetString("LimitIsExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Limit Order for {0} {1} {2} cancelled
         ///Price {3} {4}.
         /// </summary>
