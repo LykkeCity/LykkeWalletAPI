@@ -101,7 +101,7 @@ namespace LykkeApi2.Models.ValidationModels
                 .WithMessage(x => string.Format(Phrases.PaymentIsLessThanMinLimit, x.AssetId, _paymentLimitsResponse.CreditVouchersMinValue));
             RuleFor(reg => reg.Amount).Must(IsMaxAmount).
                 WithMessage(x => string.Format(Phrases.MaxPaymentLimitExceeded, x.AssetId, _paymentLimitsResponse.CreditVouchersMaxValue));
-            RuleFor(reg => reg.Amount).MustAsync(IsValidLimitation).WithMessage(Phrases.OperationProhibited);
+            RuleFor(reg => reg.Amount).MustAsync(IsValidLimitation).WithMessage(_errorMessage);
 
             RuleFor(reg => reg.FirstName).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.FirstName)));
@@ -238,6 +238,7 @@ namespace LykkeApi2.Models.ValidationModels
                 model.AssetId,
                 value,
                 CurrencyOperationType.CardCashIn);
+            _errorMessage = checkResult.FailMessage;
             return checkResult.IsValid;
         }
     }
