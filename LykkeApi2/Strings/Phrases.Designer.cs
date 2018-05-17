@@ -196,6 +196,121 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid {0} value.
+        /// </summary>
+        public static string InvalidValueFormat {
+            get {
+                return ResourceManager.GetString("InvalidValueFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to KYC needed.
+        /// </summary>
+        public static string KycNeeded {
+            get {
+                return ResourceManager.GetString("KycNeeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Limit is exceeded.
+        /// </summary>
+        public static string LimitIsExceeded {
+            get {
+                return ResourceManager.GetString("LimitIsExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Limit Order for {0} {1} {2} cancelled
+        ///Price {3} {4}.
+        /// </summary>
+        public static string LimitOrderCancelled {
+            get {
+                return ResourceManager.GetString("LimitOrderCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This order has a negative spread with you orders.
+        /// </summary>
+        public static string LimitOrderLeadToNegativeSpread {
+            get {
+                return ResourceManager.GetString("LimitOrderLeadToNegativeSpread", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Limit Order for {0} {1} {2} rejected
+        ///Price {3} {4}.
+        /// </summary>
+        public static string LimitOrderRejected {
+            get {
+                return ResourceManager.GetString("LimitOrderRejected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Limit Order for {0} {1} {2} placed
+        ///Price {3} {4}.
+        /// </summary>
+        public static string LimitOrderStarted {
+            get {
+                return ResourceManager.GetString("LimitOrderStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Live margin trading is not available.
+        /// </summary>
+        public static string LiveMarginTradingIsNotAvailable {
+            get {
+                return ResourceManager.GetString("LiveMarginTradingIsNotAvailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sorry, LKK2Y operations are restricted in your region.
+        /// </summary>
+        public static string LKK2YProhibited {
+            get {
+                return ResourceManager.GetString("LKK2YProhibited", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trade volume is too low. Please, try higher volume..
+        /// </summary>
+        public static string LowTradeVolume {
+            get {
+                return ResourceManager.GetString("LowTradeVolume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lykke Exchange is now switched to a centralized mode. 
+        ///
+        ///By tapping Confirm, you confirm the transfer of your BTC/ETH to Lykke centralized hot-wallet. You will see no difference in the trading process and depositing wallet address, and can continue trading.
+        ///
+        ///By tapping Cancel, your BTC/ETH remain in the previous multi-signature wallet. You can transfer your BTC/ETH from your Lykke trading wallet to any external address. Your Lykke wallet will no longer be usable for trading BTC/ETH..
+        /// </summary>
+        public static string LykkeIsCentralizedBtc {
+            get {
+                return ResourceManager.GetString("LykkeIsCentralizedBtc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You already agreeed with margin Terms of Use..
+        /// </summary>
+        public static string MarginTermsOfUseAlreadyAgreed {
+            get {
+                return ResourceManager.GetString("MarginTermsOfUseAlreadyAgreed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Maximum length is {0}.
         /// </summary>
         public static string MaxLength {

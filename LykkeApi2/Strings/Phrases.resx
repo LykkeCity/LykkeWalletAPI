@@ -511,4 +511,7 @@ We apologies for the inconvenience, and would like to thank you for your underst
   <data name="DepositOptionsNotAllowFormat" xml:space="preserve">
     <value>Asset '{0}' does not allow use DepositOption as '{1}'</value>
   </data>
+  <data name="LimitIsExceeded" xml:space="preserve">
+    <value>Limit is exceeded</value>
+  </data>
 </root>
