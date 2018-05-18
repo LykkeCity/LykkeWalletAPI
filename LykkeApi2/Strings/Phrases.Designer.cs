@@ -160,6 +160,24 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Field {0} should not be empty.
+        /// </summary>
+        public static string FieldShouldNotBeEmptyFormat {
+            get {
+                return ResourceManager.GetString("FieldShouldNotBeEmptyFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The Full Name must be less than {0}.
+        /// </summary>
+        public static string FullNameLengthFormat {
+            get {
+                return ResourceManager.GetString("FullNameLengthFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid address.
         /// </summary>
         public static string InvalidAddress {
@@ -370,6 +388,90 @@ namespace LykkeApi2.Strings {
         public static string NotEnoughFunds {
             get {
                 return ResourceManager.GetString("NotEnoughFunds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not enough funds to execute the market order for {0} {1} {2}..
+        /// </summary>
+        public static string NotEnoughFundsMsg {
+            get {
+                return ResourceManager.GetString("NotEnoughFundsMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not enough liquidity.
+        /// </summary>
+        public static string NotEnoughLiquidity {
+            get {
+                return ResourceManager.GetString("NotEnoughLiquidity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} doesn&apos;t match the value in the personal data.
+        /// </summary>
+        public static string NotMatchWithPersonalData {
+            get {
+                return ResourceManager.GetString("NotMatchWithPersonalData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Previous transaction is not confirmed. Please, try again later..
+        /// </summary>
+        public static string NotSettledTryLater {
+            get {
+                return ResourceManager.GetString("NotSettledTryLater", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Runtime error, code: {0} 
+        ///Please try later and contact support if issue occurred again.
+        /// </summary>
+        public static string OffchainError {
+            get {
+                return ResourceManager.GetString("OffchainError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trading is not available due to a system maintenance for the offchain settlement deployment.
+        ///We apologies for the inconvenience, and would like to thank you for your understanding..
+        /// </summary>
+        public static string OffchainReleaseMsg {
+            get {
+                return ResourceManager.GetString("OffchainReleaseMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trading is not available due to a system maintenance for the offchain settlement deployment. Approximately {0} hour(s) left.
+        ///We apologies for the inconvenience, and would like to thank you for your understanding..
+        /// </summary>
+        public static string OffchainReleaseWithHoursMsg {
+            get {
+                return ResourceManager.GetString("OffchainReleaseWithHoursMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only one SMS per minute allowed. Please wait..
+        /// </summary>
+        public static string OnlyOneSMSPerMinuteAllowed {
+            get {
+                return ResourceManager.GetString("OnlyOneSMSPerMinuteAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Operation cannot be performed.
+        /// </summary>
+        public static string OperationCanNotBePerformed {
+            get {
+                return ResourceManager.GetString("OperationCanNotBePerformed", resourceCulture);
             }
         }
         
