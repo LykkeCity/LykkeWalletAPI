@@ -412,6 +412,15 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Full Name must be less than {0}.
+        /// </summary>
+        public static string FullNameLengthFormat {
+            get {
+                return ResourceManager.GetString("FullNameLengthFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid address.
         /// </summary>
         public static string InvalidAddress {
@@ -865,6 +874,15 @@ namespace LykkeApi2.Strings {
         public static string NotEnoughLiquidity {
             get {
                 return ResourceManager.GetString("NotEnoughLiquidity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} doesn&apos;t match the value in the personal data.
+        /// </summary>
+        public static string NotMatchWithPersonalData {
+            get {
+                return ResourceManager.GetString("NotMatchWithPersonalData", resourceCulture);
             }
         }
         

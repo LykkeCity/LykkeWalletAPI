@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Common;
 using Core;
+using Core.Constants;
 using FluentValidation;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.Assets.Client;
@@ -39,7 +40,6 @@ namespace LykkeApi2.Models.ValidationModels
         private readonly string _clientId;
         private readonly bool _isIosDevice;
         private readonly PaymentMethodsResponse _paymentMethods;
-        private string _errorMessage;
 
         public BankCardPaymentUrlInputValidationModel(
             IHttpContextAccessor httpContextAccessor,
@@ -70,7 +70,6 @@ namespace LykkeApi2.Models.ValidationModels
             _isIosDevice = IsIosDevice(httpContextAccessor.HttpContext);
             _paymentMethods = paymentSystemClient.GetPaymentMethodsAsync(_clientId).GetAwaiter().GetResult();
 
-            _errorMessage = string.Empty;
             RegisterRules();
         }
         private static bool IsIosDevice(HttpContext context)
@@ -99,42 +98,52 @@ namespace LykkeApi2.Models.ValidationModels
             RuleFor(reg => reg.Amount).Must(x => x > 0)
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Amount)));
             RuleFor(reg => reg.Amount).Must(IsMinAmount)
-                .WithMessage(x => string.Format(Phrases.PaymentIsLessThanMinLimit, x.AssetId, _paymentLimitsResponse.CreditVouchersMinValue));
+                .WithMessage(x => string.Format(Phrases.PaymentIsLessThanMinLimit, x.AssetId, GetLimitMinAmount(x.DepositOptionEnum)));
             RuleFor(reg => reg.Amount).Must(IsMaxAmount).
-                WithMessage(x => string.Format(Phrases.MaxPaymentLimitExceeded, x.AssetId, _paymentLimitsResponse.CreditVouchersMaxValue));
+                WithMessage(x => string.Format(Phrases.MaxPaymentLimitExceeded, x.AssetId, GetLimitMaxAmount(x.DepositOptionEnum)));
             RuleFor(reg => reg.Amount).MustAsync(IsValidLimitation).WithMessage(Phrases.LimitIsExceeded);
 
             RuleFor(reg => reg.FirstName).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.FirstName)));
+            RuleFor(reg => reg.FirstName).Must((x, y) => x.FirstName.Length + x.LastName.Length < LykkeConstants.MaxFullNameLength)
+                .WithMessage(x => string.Format(Phrases.FullNameLengthFormat, LykkeConstants.MaxFullNameLength));
 
             RuleFor(reg => reg.LastName).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.LastName)));
 
             RuleFor(reg => reg.City).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.City)));
+            RuleFor(reg => reg.City).MaximumLength(LykkeConstants.MaxCityLength)
+                .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxCityLength));
 
             RuleFor(reg => reg.Zip).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Zip)));
+            RuleFor(reg => reg.Zip).MaximumLength(LykkeConstants.MaxZipLength)
+                .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxZipLength));
 
             RuleFor(reg => reg.Address).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Address)));
+            RuleFor(reg => reg.Address).MaximumLength(LykkeConstants.MaxAddressLength)
+                .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxAddressLength));
 
             RuleFor(reg => reg.Country).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Country)));
 
             RuleFor(reg => reg.Email).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Email)));
+            RuleFor(reg => reg.Email).MaximumLength(LykkeConstants.MaxEmailLength)
+                .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxEmailLength));
             RuleFor(reg => reg.Email).EmailAddress().Must(IsValidPartitionOrRowKey)
                 .WithMessage(x => Phrases.InvalidEmailFormat);
             RuleFor(reg => reg.Email).Must(IsValidPersonalEmail)
-                .WithMessage(x => Phrases.OperationProhibited);
+                .WithMessage(x => string.Format(Phrases.NotMatchWithPersonalData, nameof(x.Email)));
 
             RuleFor(reg => reg.Phone).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Phone)));
             RuleFor(reg => reg.Phone).Must(IsValidPhoneNumberE164)
                 .WithMessage(x => Phrases.InvalidNumberFormat);
             RuleFor(reg => reg.Phone).Must(IsValidPersonalContactPhone)
-                .WithMessage(x => Phrases.OperationProhibited);
+                .WithMessage(x => string.Format(Phrases.NotMatchWithPersonalData, nameof(x.Phone)));
 
             RuleFor(reg => reg.WalletId).MustAsync(IsDepositViaCreditCardNotBlocked)
                 .WithMessage(x => Phrases.OperationProhibited);
@@ -162,12 +171,32 @@ namespace LykkeApi2.Models.ValidationModels
 
         private bool IsMinAmount(BankCardPaymentUrlRequestModel model, double value)
         {
-            return model.DepositOptionEnum != DepositOption.Other || value >= _paymentLimitsResponse.CreditVouchersMinValue;
+            return value >= GetLimitMaxAmount(model.DepositOptionEnum);
         }
 
         private bool IsMaxAmount(BankCardPaymentUrlRequestModel model, double value)
         {
-            return model.DepositOptionEnum != DepositOption.Other || value <= _paymentLimitsResponse.CreditVouchersMaxValue;
+            return value <= GetLimitMinAmount(model.DepositOptionEnum);
+        }
+
+        private double GetLimitMinAmount(DepositOption depositOption)
+        {
+            switch (depositOption)
+            {
+                case DepositOption.Other: return _paymentLimitsResponse.CreditVouchersMinValue;
+                case DepositOption.BankCard: return _paymentLimitsResponse.FxpaygateMinValue;
+            }
+            return 0;
+        }
+
+        private double GetLimitMaxAmount(DepositOption depositOption)
+        {
+            switch (depositOption)
+            {
+                case DepositOption.Other: return _paymentLimitsResponse.CreditVouchersMaxValue;
+                case DepositOption.BankCard: return _paymentLimitsResponse.FxpaygateMaxValue;
+            }
+            return double.MaxValue;
         }
 
         private bool IsValidPartitionOrRowKey(string value)
@@ -178,7 +207,7 @@ namespace LykkeApi2.Models.ValidationModels
         private bool IsValidPhoneNumberE164(string value)
         {
             var phoneNumberE164 = value.PreparePhoneNum().ToE164Number();
-            return phoneNumberE164 != null;
+            return phoneNumberE164 != null && value.Length <= LykkeConstants.MaxPhoneLength;
         }
 
         private bool IsValidPersonalEmail(string value)
