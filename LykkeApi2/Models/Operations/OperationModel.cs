@@ -1,7 +1,7 @@
 ﻿using System;
-using Lykke.Service.Operations.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Lykke.Service.Operations.Contracts;
 
 namespace LykkeApi2.Models.Operations
 {

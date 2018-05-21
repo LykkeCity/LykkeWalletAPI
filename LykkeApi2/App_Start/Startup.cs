@@ -78,19 +78,18 @@ namespace LykkeApi2
                 var builder = new ContainerBuilder();
                 var appSettings = Configuration.LoadSettings<APIv2Settings>();
                 Log = CreateLogWithSlack(services, appSettings);
-                //call this before registering modules (because of IDistributedCache registration)
                 builder.Populate(services);
                 builder.RegisterModule(new Api2Module(appSettings, Log));
                 builder.RegisterModule(new ClientsModule(appSettings, Log));
                 builder.RegisterModule(new AspNetCoreModule());
-                
+
                 ApplicationContainer = builder.Build();
 
                 return new AutofacServiceProvider(ApplicationContainer);
             }
             catch (Exception ex)
             {
-                Log?.WriteFatalErrorAsync(nameof(Startup), nameof(ConfigureServices), "", ex).Wait();
+                Log?.WriteFatalError(nameof(Startup), nameof(ConfigureServices), ex);
                 throw;
             }
         }
@@ -135,6 +134,8 @@ namespace LykkeApi2
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
                 });
 
+                app.UseDefaultFiles();
+
                 app.UseSwagger();
                 app.UseSwaggerUI(o =>
                 {
@@ -142,14 +143,12 @@ namespace LykkeApi2
                     o.SwaggerEndpoint($"/swagger/{ApiVersion}/swagger.json", ApiVersion);
                 });
 
-                app.UseStaticFiles();
-
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());
             }
             catch (Exception ex)
             {
-                Log?.WriteFatalErrorAsync(nameof(Startup), nameof(Configure), "", ex).Wait();
+                Log?.WriteFatalError(nameof(Startup), nameof(Configure), ex);
                 throw;
             }
         }
@@ -160,11 +159,11 @@ namespace LykkeApi2
             {
                 // NOTE: Service not yet receive and process requests here
 
-                await Log.WriteMonitorAsync("", "", "Started");
+                Log.WriteMonitor("", "", "Started");
             }
             catch (Exception ex)
             {
-                await Log.WriteFatalErrorAsync(nameof(Startup), nameof(StartApplication), "", ex);
+                Log.WriteFatalError(nameof(Startup), nameof(StartApplication), ex);
                 throw;
             }
         }
@@ -177,7 +176,7 @@ namespace LykkeApi2
 
                 if (Log != null)
                 {
-                    await Log.WriteMonitorAsync("", "", "Terminating");
+                    Log.WriteMonitor("", "", "Terminating");
                 }
 
                 ApplicationContainer.Dispose();
@@ -186,7 +185,7 @@ namespace LykkeApi2
             {
                 if (Log != null)
                 {
-                    await Log.WriteFatalErrorAsync(nameof(Startup), nameof(CleanUp), "", ex);
+                    Log.WriteFatalError(nameof(Startup), nameof(CleanUp), ex);
                     (Log as IDisposable)?.Dispose();
                 }
                 throw;
