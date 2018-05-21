@@ -100,7 +100,7 @@ namespace LykkeApi2.Models.ValidationModels
             RuleFor(reg => reg.Amount).Must(IsMinAmount)
                 .WithMessage(x => string.Format(Phrases.PaymentIsLessThanMinLimit, x.AssetId, GetLimitMinAmount(x.DepositOptionEnum)));
             RuleFor(reg => reg.Amount).Must(IsMaxAmount).
-                WithMessage(x => string.Format(Phrases.MaxPaymentLimitExceeded, x.AssetId, GetLimitMaxAmount(x.DepositOptionEnum)));
+                WithMessage(x => string.Format(Phrases.PaymentIsMoreThanMaxLimit, x.AssetId, GetLimitMaxAmount(x.DepositOptionEnum)));
             RuleFor(reg => reg.Amount).MustAsync(IsValidLimitation).WithMessage(Phrases.LimitIsExceeded);
 
             RuleFor(reg => reg.FirstName).Must(x => !string.IsNullOrEmpty(x))
@@ -171,12 +171,12 @@ namespace LykkeApi2.Models.ValidationModels
 
         private bool IsMinAmount(BankCardPaymentUrlRequestModel model, double value)
         {
-            return value >= GetLimitMaxAmount(model.DepositOptionEnum);
+            return value >= GetLimitMinAmount(model.DepositOptionEnum);
         }
 
         private bool IsMaxAmount(BankCardPaymentUrlRequestModel model, double value)
         {
-            return value <= GetLimitMinAmount(model.DepositOptionEnum);
+            return value <= GetLimitMaxAmount(model.DepositOptionEnum);
         }
 
         private double GetLimitMinAmount(DepositOption depositOption)
