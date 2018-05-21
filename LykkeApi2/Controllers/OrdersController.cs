@@ -121,7 +121,7 @@ namespace LykkeApi2.Controllers
 
             if (activeOrders.All(x => x.Id != orderId))
                 return NotFound();
-            
+			
             await _limitOrdersRepository.CancelByIdAsync(orderId);
             await _matchingEngineClient.CancelLimitOrderAsync(orderId);
             
@@ -129,16 +129,16 @@ namespace LykkeApi2.Controllers
         }
         
         [HttpPost("market")]
-        [SwaggerOperation("PlaceMarketOrder")]
+        [SwaggerOperation("PlaceMarketOrder")]        
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> PlaceMarketOrder([FromBody] MarketOrderRequest request)
         {
-            var id = Guid.NewGuid();
+            var id = Guid.NewGuid();           
 
             var asset = await _assetsServiceWithCache.TryGetAssetAsync(request.AssetId);
-            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);            
+            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
 
             if (asset == null)
             {
@@ -158,7 +158,7 @@ namespace LykkeApi2.Controllers
             if (request.AssetId != pair.BaseAssetId && request.AssetId != pair.QuotingAssetId)
             {
                 return BadRequest();
-            }
+            }            
 
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
@@ -172,7 +172,7 @@ namespace LykkeApi2.Controllers
             }
 
             var command = new CreateMarketOrderCommand
-            {
+            {                
                 AssetId = request.AssetId,
                 AssetPair = new AssetPairModel
                 {
@@ -189,7 +189,7 @@ namespace LykkeApi2.Controllers
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
-
+            
             try
             {
                 await _operationsClient.PlaceMarketOrder(id, command);
@@ -204,7 +204,7 @@ namespace LykkeApi2.Controllers
 
             return Created(Url.Action("Get", "Operations", new { id }), id);
         }
-
+        
         [HttpPost("limit")]
         [SwaggerOperation("PlaceLimitOrder")]
         [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]

@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Common.Log;
 using Core.Constants;
 using Lykke.Service.Affiliate.Client;
-using Lykke.Service.Affiliate.Contracts;
 using Lykke.Service.RateCalculator.Client;
 using Lykke.Service.RateCalculator.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Affiliate;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Rest;
 
 namespace LykkeApi2.Controllers
 {
