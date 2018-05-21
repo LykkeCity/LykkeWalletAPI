@@ -520,4 +520,7 @@ We apologies for the inconvenience, and would like to thank you for your underst
   <data name="NotMatchWithPersonalData" xml:space="preserve">
     <value>{0} doesn't match the value in the personal data</value>
   </data>
+  <data name="PaymentIsMoreThanMaxLimit" xml:space="preserve">
+    <value>The order amount should be less than {0} {1}</value>
+  </data>
 </root>

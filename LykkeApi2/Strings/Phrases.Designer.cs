@@ -512,6 +512,15 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The order amount should be less than {0} {1}.
+        /// </summary>
+        public static string PaymentIsMoreThanMaxLimit {
+            get {
+                return ResourceManager.GetString("PaymentIsMoreThanMaxLimit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to User has pending disclaimer.
         /// </summary>
         public static string PendingDisclaimer {
