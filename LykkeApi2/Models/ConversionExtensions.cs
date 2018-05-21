@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core.Exchange;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
+using LykkeApi2.Models.Settings;
 
 namespace LykkeApi2.Models
 {
