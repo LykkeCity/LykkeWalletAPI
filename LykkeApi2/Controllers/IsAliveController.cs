@@ -30,12 +30,12 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
         public IActionResult Get()
         {
-            var healthViloationMessage = _healthService.GetHealthViolationMessage();
-            if (healthViloationMessage != null)
+            var healthViolationMessage = _healthService.GetHealthViolationMessage();
+            if (healthViolationMessage != null)
             {
                 return StatusCode(
                     (int)HttpStatusCode.InternalServerError,
-                    ErrorResponse.Create($"Service is unhealthy: {healthViloationMessage}"));
+                    ErrorResponse.Create($"Service is unhealthy: {healthViolationMessage}"));
             }
 
             // NOTE: Feel free to extend IsAliveResponse, to display job-specific indicators
