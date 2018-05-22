@@ -172,7 +172,6 @@ namespace LykkeApi2.Controllers
 
         [Authorize]
         [HttpPost("session")]
-
         public async Task<IActionResult> CreateTradingSession([FromBody]TradingModel request)
         {
             if (!ModelState.IsValid)
@@ -185,7 +184,6 @@ namespace LykkeApi2.Controllers
 
         [Authorize]
         [HttpPatch("session")]
-
         public async Task<IActionResult> ExtendTradingSession([FromBody]TradingModel request)
         {
             if (!ModelState.IsValid)
