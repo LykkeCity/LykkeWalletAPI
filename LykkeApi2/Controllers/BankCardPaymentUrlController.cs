@@ -13,7 +13,6 @@ namespace LykkeApi2.Controllers
     [Produces("application/json")]
     [Authorize]
     [Route("api/[controller]")]
-    [Authorize]
     public class BankCardPaymentUrlController : Controller
     {
         private readonly IPaymentSystemClient _paymentSystemService;
@@ -34,7 +33,6 @@ namespace LykkeApi2.Controllers
         [HttpGet]
         [SwaggerOperation("Get")]
         [ProducesResponseType(typeof(PaymentTransactionResponse), (int)HttpStatusCode.OK)]
-
         public async Task<IActionResult> Get()
         {
             var result = await _paymentSystemService.GetLastByDateAsync(_requestContext.ClientId);
