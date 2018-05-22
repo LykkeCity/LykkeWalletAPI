@@ -70,7 +70,7 @@ namespace LykkeApi2.Controllers
                     return NotFound("Asset pair not found");
 
                 var candleHistoryService = _candlesServiceProvider.Get(request.Type);
-
+                
                 var candles = await candleHistoryService.GetCandlesHistoryAsync(
                     request.AssetPairId,
                     request.PriceType,

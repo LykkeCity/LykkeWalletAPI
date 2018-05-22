@@ -7,6 +7,7 @@ using Moq;
 using System.Linq;
 using Core.Settings;
 using Lykke.Service.Affiliate.Client;
+using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
@@ -39,11 +40,11 @@ namespace Lykke.WalletApiv2.Tests.DITests
                     Services = new ServiceSettings
                     {
                         OperationsRepositoryClient = new OperationsRepositoryServiceClientSettings{ServiceUrl = MockUrl, RequestTimeout = 300},
-                        AffiliateServiceClient = new AffiliateServiceClientSettings { ServiceUrl = MockUrl }
+                        AffiliateServiceClient = new AffiliateServiceClientSettings{ServiceUrl = MockUrl}
                     },
                     DeploymentSettings = new DeploymentSettings(),
                     CacheSettings = new CacheSettings(),                    
-                },                
+                },
                 ClientDictionariesServiceClient = new ClientDictionariesServiceClientSettings() { ServiceUrl = MockUrl },
                 OperationsHistoryServiceClient = new OperationsHistoryServiceClientSettings{ServiceUrl = MockUrl},
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},
@@ -72,7 +73,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
             controllersToTest.ForEach(controller =>
             {
                 //Act-Assert - ok if no exception
-                this._container.Resolve(controller);
+                _container.Resolve(controller);
             });
         }
     }

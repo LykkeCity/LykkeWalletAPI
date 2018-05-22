@@ -14,6 +14,8 @@ namespace LykkeApi2.Infrastructure
         string PartnerId { get; }
         bool IsIosDevice { get; }
         double? Version { get; }
+
+        HttpContext HttpContext { get; }
     }
 
     public class RequestContext : IRequestContext
@@ -94,5 +96,11 @@ namespace LykkeApi2.Infrastructure
                 return null;
             }
         }
+
+        public HttpContext HttpContext
+        {
+            get { return _httpContext; }
+        }
+
     }
 }
