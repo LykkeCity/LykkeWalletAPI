@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AlreadyExists" xml:space="preserve">
-    <value>Record already existsRecord already exists</value>
+    <value>Record already exists</value>
   </data>
   <data name="AndroidUpdateNeededMsg" xml:space="preserve">
     <value>Sorry, your app version is not supported anymore. Please update your app from Google Play and continue enjoying the service.</value>

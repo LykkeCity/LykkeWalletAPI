@@ -5,7 +5,6 @@ using Lykke.MarketProfileService.Client;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Registration;
-using Lykke.Service.Session;
 using Lykke.SettingsReader;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.OperationsHistory.Client;
@@ -22,10 +21,9 @@ using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.PaymentSystem.Client;
-using Lykke.Service.PersonalData.Settings;
 using Lykke.Service.Session.Client;
-using Core;
-using Lykke.Service.ExchangeOperations.Client;
+using Lykke.Service.AssetDisclaimers.Client;
+using Lykke.Service.Limitations.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -84,15 +82,12 @@ namespace LykkeApi2.Modules
             builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);
 
             builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog: null, ignoreErrors: true);
-            builder.RegisterOperationsRepositoryClients(_apiSettings.CurrentValue.WalletApiv2.Services.OperationsRepositoryClient, _log);
-            builder.RegisterAffiliateClient(_apiSettings.CurrentValue.WalletApiv2.Services.AffiliateServiceClient.ServiceUrl, _log);
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 
             builder.RegisterOperationsRepositoryClients(_settings.OperationsRepositoryClient, _log);
 
             builder.RegisterAffiliateClient(_settings.AffiliateServiceClient.ServiceUrl, _log);
 
-            builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 
             builder.RegisterPaymentSystemClient(_apiSettings.CurrentValue.PaymentSystemServiceClient.ServiceUrl, _log);
 
@@ -102,33 +97,3 @@ namespace LykkeApi2.Modules
         }
     }
 }
-
-using Lykke.Service.Kyc.Abstractions.Services;
-using Lykke.Service.Kyc.Client;
-using Lykke.Service.PersonalData.Settings;
-using Lykke.Service.HftInternalService.Client;
-using Lykke.Service.Session.Client;
-using Lykke.Service.AssetDisclaimers.Client;
-            builder.RegisterClientSessionClient(_serviceSettings.CurrentValue.SessionUrl, _log);
-            
-            
-            builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);
-            
-            builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog: null, ignoreErrors: true);            
-            builder.RegisterOperationsRepositoryClients(_serviceSettings.CurrentValue.OperationsRepositoryClient, _log);            
-            builder.RegisterAffiliateClient(_serviceSettings.CurrentValue.AffiliateServiceClient.ServiceUrl, _log);
-            builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
-            builder.RegisterType<KycStatusServiceClient>().As<IKycStatusService>().SingleInstance();
-
-            builder.RegisterClientSessionClient(_apiSettings.CurrentValue.WalletApiv2.Services.SessionUrl, _log);
-
-            
-            
-            builder.RegisterOperationsRepositoryClients(_apiSettings.CurrentValue.WalletApiv2.Services.OperationsRepositoryClient, _log);
-            builder.RegisterAffiliateClient(_apiSettings.CurrentValue.WalletApiv2.Services.AffiliateServiceClient.ServiceUrl, _log);
-            builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
-            builder.RegisterOperationsRepositoryClients(_settings.OperationsRepositoryClient, _log);
-
-            builder.RegisterAffiliateClient(_settings.AffiliateServiceClient.ServiceUrl, _log);
-
-            builder.RegisterLimitationsServiceClient(_apiSettings.CurrentValue.WalletApiv2.Services.LimitationsServiceUrl);

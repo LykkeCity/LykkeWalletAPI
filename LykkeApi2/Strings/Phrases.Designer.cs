@@ -61,11 +61,20 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Record already existsRecord already exists.
+        ///   Looks up a localized string similar to Record already exists.
         /// </summary>
         public static string AlreadyExists {
             get {
                 return ResourceManager.GetString("AlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Amount should be more than zero..
+        /// </summary>
+        public static string AmountShouldBeMoreThanZero {
+            get {
+                return ResourceManager.GetString("AmountShouldBeMoreThanZero", resourceCulture);
             }
         }
         
@@ -97,6 +106,114 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Asset should be equal to base asset from asset pair.
+        /// </summary>
+        public static string AssetShouldBeEqualToBaseAssetFromAssetPair {
+            get {
+                return ResourceManager.GetString("AssetShouldBeEqualToBaseAssetFromAssetPair", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To ensure the safety of your funds, you must back up your private key before proceeding.
+        /// </summary>
+        public static string BackupErrorMsg {
+            get {
+                return ResourceManager.GetString("BackupErrorMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To ensure the safety of your funds, we recommend that you make a backup of your private key.
+        /// </summary>
+        public static string BackupWarningMsg {
+            get {
+                return ResourceManager.GetString("BackupWarningMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fee cannot be less than 0.000027 BCH.
+        /// </summary>
+        public static string BccLowFee {
+            get {
+                return ResourceManager.GetString("BccLowFee", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Lykke is changing the operating model for BTC/ETH to a centralized mode. Trades are not available..
+        /// </summary>
+        public static string BitcoinShouldBeTrusted {
+            get {
+                return ResourceManager.GetString("BitcoinShouldBeTrusted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Due to potential upcoming Bitcoin network split exchange services are stopped until 2 August 12:00 GMT. Sorry for the inconveniences..
+        /// </summary>
+        public static string BtcDisabledMsg {
+            get {
+                return ResourceManager.GetString("BtcDisabledMsg", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to buying.
+        /// </summary>
+        public static string Buying {
+            get {
+                return ResourceManager.GetString("Buying", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Asset cannot be base.
+        /// </summary>
+        public static string CannotBeBase {
+            get {
+                return ResourceManager.GetString("CannotBeBase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Destination contract address spents too much gas. Please try to withdraw to another address..
+        /// </summary>
+        public static string CashoutIsNotAllowed {
+            get {
+                return ResourceManager.GetString("CashoutIsNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The minimum amount to cash out is {0}.
+        /// </summary>
+        public static string CashOutLessThanMinAmountFormat {
+            get {
+                return ResourceManager.GetString("CashOutLessThanMinAmountFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The minimum amount of BTC to cash out is {0}.
+        /// </summary>
+        public static string CashOutLessThanMinBtcAmountFormat {
+            get {
+                return ResourceManager.GetString("CashOutLessThanMinBtcAmountFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have exceeded cash out operations limit. Please try again later..
+        /// </summary>
+        public static string CashOutLimitExceeded {
+            get {
+                return ResourceManager.GetString("CashOutLimitExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Client Balance Not Found.
         /// </summary>
         public static string ClientBalanceNotFound {
@@ -106,11 +223,65 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Client has no assets enabled.
+        /// </summary>
+        public static string ClientHasNoAssetsEnabled {
+            get {
+                return ResourceManager.GetString("ClientHasNoAssetsEnabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Client with the same email is already registered.
         /// </summary>
         public static string ClientWithEmailIsRegistered {
             get {
                 return ResourceManager.GetString("ClientWithEmailIsRegistered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client with the same phone number is already registered.
+        /// </summary>
+        public static string ClientWithPhoneRegistered {
+            get {
+                return ResourceManager.GetString("ClientWithPhoneRegistered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Code should contain digits only.
+        /// </summary>
+        public static string CodeDigitsOnly {
+            get {
+                return ResourceManager.GetString("CodeDigitsOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Code must contain exactly 4 digits.
+        /// </summary>
+        public static string CodeLength4 {
+            get {
+                return ResourceManager.GetString("CodeLength4", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This address is not capable of receiving colored coins. Please provide a valid wallet address for colored coins..
+        /// </summary>
+        public static string ColoredAddressExpected {
+            get {
+                return ResourceManager.GetString("ColoredAddressExpected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to My Private Wallet.
+        /// </summary>
+        public static string DefaultPrivateWalletName {
+            get {
+                return ResourceManager.GetString("DefaultPrivateWalletName", resourceCulture);
             }
         }
         
@@ -151,6 +322,78 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error reset margin account.
+        /// </summary>
+        public static string ErrorResetMargin {
+            get {
+                return ResourceManager.GetString("ErrorResetMargin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error transfer to margin account.
+        /// </summary>
+        public static string ErrorTransferToMargin {
+            get {
+                return ResourceManager.GetString("ErrorTransferToMargin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error withdraw from margin account.
+        /// </summary>
+        public static string ErrorWithdrawFromMargin {
+            get {
+                return ResourceManager.GetString("ErrorWithdrawFromMargin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Error withdraw from trusted wallet.
+        /// </summary>
+        public static string ErrorWithdrawFromTrustedWallet {
+            get {
+                return ResourceManager.GetString("ErrorWithdrawFromTrustedWallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ETH address does not exist.
+        /// </summary>
+        public static string EthAddressIsMissing {
+            get {
+                return ResourceManager.GetString("EthAddressIsMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ethereum address is generating. Please try again later..
+        /// </summary>
+        public static string EthAddressWasNotGenerated {
+            get {
+                return ResourceManager.GetString("EthAddressWasNotGenerated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The transaction can not be completed. Please try later and contact support if issue occured again..
+        /// </summary>
+        public static string EthereumPrivateWalletOtherIssue {
+            get {
+                return ResourceManager.GetString("EthereumPrivateWalletOtherIssue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Fee should be more than zero..
+        /// </summary>
+        public static string FeeShouldBeMoreThanZero {
+            get {
+                return ResourceManager.GetString("FeeShouldBeMoreThanZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Field should not be empty.
         /// </summary>
         public static string FieldShouldNotBeEmpty {
@@ -187,6 +430,42 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid asset..
+        /// </summary>
+        public static string InvalidAsset {
+            get {
+                return ResourceManager.GetString("InvalidAsset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid content.
+        /// </summary>
+        public static string InvalidContent {
+            get {
+                return ResourceManager.GetString("InvalidContent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Destination Address. Please try again..
+        /// </summary>
+        public static string InvalidDestinationAddress {
+            get {
+                return ResourceManager.GetString("InvalidDestinationAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid document type.
+        /// </summary>
+        public static string InvalidDocumentType {
+            get {
+                return ResourceManager.GetString("InvalidDocumentType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid email format.
         /// </summary>
         public static string InvalidEmailFormat {
@@ -196,11 +475,83 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid Kyc status.
+        /// </summary>
+        public static string InvalidKycStatus {
+            get {
+                return ResourceManager.GetString("InvalidKycStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid multisig.
+        /// </summary>
+        public static string InvalidMultisig {
+            get {
+                return ResourceManager.GetString("InvalidMultisig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid phone number.
+        /// </summary>
+        public static string InvalidNumberFormat {
+            get {
+                return ResourceManager.GetString("InvalidNumberFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid period.
+        /// </summary>
+        public static string InvalidPeriod {
+            get {
+                return ResourceManager.GetString("InvalidPeriod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Private Wallet number.
+        /// </summary>
+        public static string InvalidPrivateWalletNumber {
+            get {
+                return ResourceManager.GetString("InvalidPrivateWalletNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {PropertyName} is not valid.
         /// </summary>
         public static string InvalidPropertyValue {
             get {
                 return ResourceManager.GetString("InvalidPropertyValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Address is not registered in QNT.
+        /// </summary>
+        public static string InvalidQuantaAddress {
+            get {
+                return ResourceManager.GetString("InvalidQuantaAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid Source Address. Please try again..
+        /// </summary>
+        public static string InvalidSourceAddress {
+            get {
+                return ResourceManager.GetString("InvalidSourceAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid username or password.
+        /// </summary>
+        public static string InvalidUsernameOrPassword {
+            get {
+                return ResourceManager.GetString("InvalidUsernameOrPassword", resourceCulture);
             }
         }
         
@@ -338,11 +689,101 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Margin Trading is in beta testing. The cash-ins are temporarily limited when Total Capital exceeds {0} {1}. Thank you for using Lykke Margin Trading, the limit will be cancelled soon!.
+        /// </summary>
+        public static string MaxMarginTransferLimitExceeded {
+            get {
+                return ResourceManager.GetString("MaxMarginTransferLimitExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The credit card deposit limit is {0} {1}.
+        /// </summary>
+        public static string MaxPaymentLimitExceeded {
+            get {
+                return ResourceManager.GetString("MaxPaymentLimitExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Minimum length is {0}.
         /// </summary>
         public static string MinLength {
             get {
                 return ResourceManager.GetString("MinLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Minimum length is {0} digits.
+        /// </summary>
+        public static string MinLengthDigits {
+            get {
+                return ResourceManager.GetString("MinLengthDigits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The amount should be higher than minimal order size {0} {1}.
+        /// </summary>
+        public static string MinVolumeViolation {
+            get {
+                return ResourceManager.GetString("MinVolumeViolation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MissedKeys.
+        /// </summary>
+        public static string MissedKeys {
+            get {
+                return ResourceManager.GetString("MissedKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} must not be empty.
+        /// </summary>
+        public static string MustNotBeEmptyFormat {
+            get {
+                return ResourceManager.GetString("MustNotBeEmptyFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Needed asset is not trusted.
+        /// </summary>
+        public static string NeededAssetIsNotTrusted {
+            get {
+                return ResourceManager.GetString("NeededAssetIsNotTrusted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Needed Asset Is Trusted.
+        /// </summary>
+        public static string NeededAssetIsTrusted {
+            get {
+                return ResourceManager.GetString("NeededAssetIsTrusted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No data.
+        /// </summary>
+        public static string NoData {
+            get {
+                return ResourceManager.GetString("NoData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Single file expected.
+        /// </summary>
+        public static string NoFileOrMoreThanOne {
+            get {
+                return ResourceManager.GetString("NoFileOrMoreThanOne", resourceCulture);
             }
         }
         
@@ -370,6 +811,33 @@ namespace LykkeApi2.Strings {
         public static string NoLimitTradesHistory {
             get {
                 return ResourceManager.GetString("NoLimitTradesHistory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Swift deposit for asset is currently unavailable.
+        /// </summary>
+        public static string NoSwiftCredentialsForAsset {
+            get {
+                return ResourceManager.GetString("NoSwiftCredentialsForAsset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Swift deposit for user is currently unavailable.
+        /// </summary>
+        public static string NoSwiftCredentialsForUser {
+            get {
+                return ResourceManager.GetString("NoSwiftCredentialsForUser", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Not authenticated.
+        /// </summary>
+        public static string NotAuthenticated {
+            get {
+                return ResourceManager.GetString("NotAuthenticated", resourceCulture);
             }
         }
         
@@ -481,6 +949,24 @@ namespace LykkeApi2.Strings {
         public static string OperationDisabled {
             get {
                 return ResourceManager.GetString("OperationDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Operation is not supported for the client.
+        /// </summary>
+        public static string OperationIsNotSupportedForTheClient {
+            get {
+                return ResourceManager.GetString("OperationIsNotSupportedForTheClient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operation is prohibited.
+        /// </summary>
+        public static string OperationProhibited {
+            get {
+                return ResourceManager.GetString("OperationProhibited", resourceCulture);
             }
         }
         
@@ -643,6 +1129,132 @@ namespace LykkeApi2.Strings {
         public static string TechnicalProblems {
             get {
                 return ResourceManager.GetString("TechnicalProblems", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The minimum amount of BTC to buy or sell is {0}.
+        /// </summary>
+        public static string TradeLessThanMinBtcAmountFormat {
+            get {
+                return ResourceManager.GetString("TradeLessThanMinBtcAmountFormat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trading wallet does not exist.
+        /// </summary>
+        public static string TradingWalletDoesNotExist {
+            get {
+                return ResourceManager.GetString("TradingWalletDoesNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Transferring Less Than Asset Accuracy Allows.
+        /// </summary>
+        public static string TransferringLessThanAssetAccuracyAllows {
+            get {
+                return ResourceManager.GetString("TransferringLessThanAssetAccuracyAllows", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please, use another destination address.
+        /// </summary>
+        public static string UseAnotherDestinationAddress {
+            get {
+                return ResourceManager.GetString("UseAnotherDestinationAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User already has encoded PK.
+        /// </summary>
+        public static string UserAlreadyHasEncodedPrivateKey {
+            get {
+                return ResourceManager.GetString("UserAlreadyHasEncodedPrivateKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User already has keys.
+        /// </summary>
+        public static string UserAlreadyHasKeys {
+            get {
+                return ResourceManager.GetString("UserAlreadyHasKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User has no wallets.
+        /// </summary>
+        public static string UserDoesNotHaveWallets {
+            get {
+                return ResourceManager.GetString("UserDoesNotHaveWallets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to User did not set his hint.
+        /// </summary>
+        public static string UserHaveNoPwdHint {
+            get {
+                return ResourceManager.GetString("UserHaveNoPwdHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Volume should not be zero or less.
+        /// </summary>
+        public static string VolumeShouldNotBeZero {
+            get {
+                return ResourceManager.GetString("VolumeShouldNotBeZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sorry. We don&apos;t support the ERC20 tokens trading yet..
+        /// </summary>
+        public static string WeDoNotSupportErc20TradingForNow {
+            get {
+                return ResourceManager.GetString("WeDoNotSupportErc20TradingForNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong Asset For the Selected Blockchain.
+        /// </summary>
+        public static string WrongAssetForSelectedBlockchain {
+            get {
+                return ResourceManager.GetString("WrongAssetForSelectedBlockchain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong confirmation code.
+        /// </summary>
+        public static string WrongConfirmationCode {
+            get {
+                return ResourceManager.GetString("WrongConfirmationCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong password.
+        /// </summary>
+        public static string WrongPassword {
+            get {
+                return ResourceManager.GetString("WrongPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong pin.
+        /// </summary>
+        public static string WrongPin {
+            get {
+                return ResourceManager.GetString("WrongPin", resourceCulture);
             }
         }
     }

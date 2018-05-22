@@ -3,12 +3,10 @@ using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Client;
-using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
-using Lykke.Service.Settings.Client;
 
 namespace Core.Settings
 {
@@ -25,6 +23,8 @@ namespace Core.Settings
         public IcoSettings IcoSettings { get; set; }
         public GlobalSettings GlobalSettings { get; set; }
         public KycServiceClientSettings KycServiceClient { get; set; }
+        public AssetDisclaimersServiceClientSettings AssetDisclaimersServiceClient { get; set; }
+        public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }
     }
 
     public class GlobalSettings
@@ -84,7 +84,6 @@ namespace Core.Settings
         public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
         public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
         public KycServiceClientSettings KycServiceClient { get; set; }
-
     }
 
     public class MatchingEngineSettings
@@ -151,6 +150,3 @@ namespace Core.Settings
     }
 }
 
-using Lykke.Service.AssetDisclaimers.Client;
-        public AssetDisclaimersServiceClientSettings AssetDisclaimersServiceClient { get; set; }
-        public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }

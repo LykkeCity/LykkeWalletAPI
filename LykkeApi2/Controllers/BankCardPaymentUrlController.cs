@@ -70,6 +70,3 @@ namespace LykkeApi2.Controllers
         }
     }
 }
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-    [Authorize]
