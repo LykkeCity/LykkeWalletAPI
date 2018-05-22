@@ -1,5 +1,4 @@
-﻿using Core.Constants;
-using FluentValidation;
+﻿using FluentValidation;
 
 namespace LykkeApi2.Models.Auth
 {
@@ -10,10 +9,6 @@ namespace LykkeApi2.Models.Auth
             RuleFor(m => m.Email)
                 .NotEmpty()
                 .EmailAddress();
-
-            RuleFor(m => m.Password)
-                .NotEmpty()
-                .Length(LykkeConstants.MinPwdLength, LykkeConstants.MaxPwdLength);
         }   
     }
 }
