@@ -19,4 +19,7 @@
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.55" />
     <PackageReference Include="Lykke.Service.ExchangeOperations.Client" Version="1.1.14" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Wallet\" />
+  </ItemGroup>
 </Project>

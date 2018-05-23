@@ -2,6 +2,7 @@
 using LykkeApi2.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
 {
@@ -18,13 +19,10 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
-        public ResponseModel<CountriesResponseModel> GetCountryPhoneCodes()
+        [SwaggerOperation("GetCountryPhoneCodes")]
+        public IActionResult GetCountryPhoneCodes()
         {
-            return ResponseModel<CountriesResponseModel>
-                .CreateOk(new CountriesResponseModel
-                {
-                    CountriesList = _countryPhoneCodeService.GetCountries()
-                });
+            return Ok(new CountriesResponseModel { CountriesList = _countryPhoneCodeService.GetCountries() });
         }
     }
 }
