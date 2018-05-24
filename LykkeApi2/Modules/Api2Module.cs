@@ -94,9 +94,7 @@ namespace LykkeApi2.Modules
             //TODO change to v2
             builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
-            builder.RegisterType<CachedAssetsDictionary>();
 
-            RegisterDictionaryEntities(builder);
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
 
             RegisterDictionaryEntities(builder);
@@ -116,16 +114,6 @@ namespace LykkeApi2.Modules
                     60);
             }).SingleInstance();
 
-            builder.Register(x =>
-            {
-                var assetsService = x.Resolve<IComponentContext>().Resolve<IAssetsService>();
-
-                return new CachedAssetsDictionary
-                (
-                    async () => (await assetsService.AssetGetAllAsync(includeNonTradable: true)).ToDictionary(itm => itm.Id)
-                );
-            }).SingleInstance();
-
             builder.Register(c =>
             {
                 var ctx = c.Resolve<IComponentContext>();
@@ -134,18 +122,6 @@ namespace LykkeApi2.Modules
                         (await ctx.Resolve<IAssetsService>().AssetPairGetAllAsync())
                         .ToDictionary(itm => itm.Id),
                     60);
-            }).SingleInstance();
-
-            builder.Register(x =>
-            {
-                var ctx = x.Resolve<IComponentContext>();
-
-                return new CachedTradableAssetsDictionary
-                (
-                    async () =>
-                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync())
-                        .ToDictionary(itm => itm.Id)
-                );
             }).SingleInstance();
         }
 

@@ -4,8 +4,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Common;
-using Core;
 using Core.Constants;
+using Core.Services;
 using FluentValidation;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.Assets.Client;
@@ -27,14 +27,13 @@ namespace LykkeApi2.Models.ValidationModels
 {
     public class BankCardPaymentUrlInputValidationModel : AbstractValidator<BankCardPaymentUrlRequestModel>
     {
-        private readonly CachedAssetsDictionary _cachedAssetsDictionary;
+        private readonly IAssetsHelper _assetsHelper;
         private readonly IAssetDisclaimersClient _assetDisclaimersClient;
         private readonly PaymentLimitsResponse _paymentLimitsResponse;
         private readonly IPersonalData _personalData;
         private readonly IClientAccountClient _clientAccountService;
         private readonly IBalancesClient _balancesClient;
         private readonly IAssetsService _assetsService;
-        private readonly CachedTradableAssetsDictionary _tradableAssetsDictionary;
         private readonly IKycStatusService _kycStatusService;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly string _clientId;
@@ -43,23 +42,21 @@ namespace LykkeApi2.Models.ValidationModels
 
         public BankCardPaymentUrlInputValidationModel(
             IHttpContextAccessor httpContextAccessor,
-            CachedAssetsDictionary cachedAssetsDictionary,
+            IAssetsHelper assetHelper,
             IAssetDisclaimersClient assetDisclaimersClient,
             IPaymentSystemClient paymentSystemClient,
             IPersonalDataService personalDataService,
             IClientAccountClient clientAccountService,
             IBalancesClient balancesClient,
             IAssetsService assetsService,
-            CachedTradableAssetsDictionary tradableAssetsDictionary,
             IKycStatusService kycStatusService,
             ILimitationsServiceClient limitationsServiceClient)
         {
-            _cachedAssetsDictionary = cachedAssetsDictionary;
+            _assetsHelper = assetHelper;
             _assetDisclaimersClient = assetDisclaimersClient;
             _clientAccountService = clientAccountService;
             _balancesClient = balancesClient;
             _assetsService = assetsService;
-            _tradableAssetsDictionary = tradableAssetsDictionary;
             _kycStatusService = kycStatusService;
             _limitationsServiceClient = limitationsServiceClient;
 
@@ -157,7 +154,7 @@ namespace LykkeApi2.Models.ValidationModels
 
         private async Task<bool> IsApprovedDepositDisclaimers(string value, CancellationToken cancellationToken)
         {
-            var depositAsset = await _cachedAssetsDictionary.GetItemAsync(value);
+            var depositAsset = await _assetsHelper.GetAssetAsync(value);
 
             if (!string.IsNullOrEmpty(depositAsset?.LykkeEntityId))
             {
@@ -239,7 +236,7 @@ namespace LykkeApi2.Models.ValidationModels
 
         private async Task<bool> IsKycNotNeeded(string value, CancellationToken cancellationToken)
         {
-            var asset = await _tradableAssetsDictionary.GetItemAsync(value);
+            var asset = await _assetsHelper.GetAssetAsync(value);
 
             var userKycStatus = await _kycStatusService.GetKycStatusAsync(_clientId);
 
