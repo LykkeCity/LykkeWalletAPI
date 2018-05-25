@@ -12,6 +12,6 @@
     <PackageReference Include="Lykke.Service.Assets.Client" Version="3.3.1" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.97" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.54" />
-    <PackageReference Include="Lykke.Service.ExchangeOperations.Client" Version="1.1.14" />
+    <PackageReference Include="Lykke.Service.ExchangeOperations.Client" Version="1.1.17" />
   </ItemGroup>
 </Project>
