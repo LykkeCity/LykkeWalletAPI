@@ -120,7 +120,7 @@ namespace LykkeApi2.Controllers
             try
             {
                 var setOperationClientId =
-                    await _operationsClient.SetPaymentClientId(id, new SetPaymenClientIdCommand
+                    await _operationsClient.SetPaymentClientId(id, new SetPaymentClientIdCommand
                     {
                         ClientId = Guid.Parse(_requestContext.ClientId)
                     });
@@ -142,7 +142,6 @@ namespace LykkeApi2.Controllers
                 (double) payemntContext.Amount,
                 payemntContext.AssetId,
                 "Common",
-                null,
                 null,
                 null,
                 id.ToString());
