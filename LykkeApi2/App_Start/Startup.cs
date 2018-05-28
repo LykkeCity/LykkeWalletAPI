@@ -78,12 +78,11 @@ namespace LykkeApi2
                 var builder = new ContainerBuilder();
                 var appSettings = Configuration.LoadSettings<APIv2Settings>();
                 Log = CreateLogWithSlack(services, appSettings);
-                //call this before registering modules (because of IDistributedCache registration)
                 builder.Populate(services);
                 builder.RegisterModule(new Api2Module(appSettings, Log));
                 builder.RegisterModule(new ClientsModule(appSettings, Log));
                 builder.RegisterModule(new AspNetCoreModule());
-                
+
                 ApplicationContainer = builder.Build();
 
                 return new AutofacServiceProvider(ApplicationContainer);
@@ -135,14 +134,14 @@ namespace LykkeApi2
                     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
                 });
 
+                app.UseDefaultFiles();
+
                 app.UseSwagger();
                 app.UseSwaggerUI(o =>
                 {
                     o.RoutePrefix = "swagger/ui";
                     o.SwaggerEndpoint($"/swagger/{ApiVersion}/swagger.json", ApiVersion);
                 });
-
-                app.UseStaticFiles();
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());
