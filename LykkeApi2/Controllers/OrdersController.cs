@@ -122,7 +122,7 @@ namespace LykkeApi2.Controllers
             if (activeOrders.All(x => x.Id != orderId))
                 return NotFound();
             
-            await _limitOrdersRepository.CancelByIdAsync(orderId);
+            await _limitOrdersRepository.CancelByIdAsync(clientId, orderId);
             await _matchingEngineClient.CancelLimitOrderAsync(orderId);
             
             return Ok();
