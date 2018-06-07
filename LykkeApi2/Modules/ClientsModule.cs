@@ -66,9 +66,11 @@ namespace LykkeApi2.Modules
 
             builder.RegisterOperationsHistoryClient(_apiSettings.CurrentValue.OperationsHistoryServiceClient, _log);
             
-            _services.RegisterAssetsClient(AssetServiceSettings.Create(
-                new Uri(_serviceSettings.CurrentValue.AssetsServiceUrl),
-                TimeSpan.FromMinutes(1)));
+            _services.RegisterAssetsClient(
+                AssetServiceSettings.Create(
+                    new Uri(_serviceSettings.CurrentValue.AssetsServiceUrl),
+                    TimeSpan.FromMinutes(1)),
+                _log);
             
             builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);
             
