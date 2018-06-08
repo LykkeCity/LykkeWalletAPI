@@ -68,7 +68,7 @@ namespace LykkeApi2.Modules
             builder.RegisterOperationsHistoryClient(_apiSettings.CurrentValue.OperationsHistoryServiceClient, _log);
 
             builder.RegisterInstance(
-                new KycStatusServiceClient(_apiSettings.CurrentValue.WalletApiv2.Services.KycServiceClient, _log))
+                new KycStatusServiceClient(_apiSettings.CurrentValue.KycServiceClient, _log))
                 .As<IKycStatusService>().SingleInstance();
 
             builder.RegisterInstance<IAssetDisclaimersClient>(
@@ -92,7 +92,7 @@ namespace LykkeApi2.Modules
 
             builder.RegisterPaymentSystemClient(_apiSettings.CurrentValue.PaymentSystemServiceClient.ServiceUrl, _log);
 
-            builder.RegisterLimitationsServiceClient(_apiSettings.CurrentValue.WalletApiv2.Services.LimitationsServiceUrl);
+            builder.RegisterLimitationsServiceClient(_apiSettings.CurrentValue.LimitationServiceClient.ServiceUrl);
 
             builder.Populate(_services);
         }
