@@ -23,44 +23,44 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext;
             _clientDictionariesClient = clientDictionariesClient;
         }
-        
+
         [HttpGet("{key}")]
-        [ProducesResponseType(typeof(DataModel), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(DataModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetKey(string key)
         {
             if (!IsValidKey(key))
                 return BadRequest();
-            
+
             var response = await _clientDictionariesClient.GetAsync(_requestContext.ClientId, key);
 
-            return response.Error == null ? Ok(new DataModel { Data = response.Data}) : Error(response.Error);
+            return response.Error == null ? Ok(new DataModel { Data = response.Data }) : Error(response.Error);
         }
-        
+
         [HttpPost("{key}")]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> SetKey(string key, [FromBody] DataModel request)
         {
             if (!IsValidKey(key) || !IsValidPayload(request?.Data))
                 return BadRequest();
-            
+
             var response = await _clientDictionariesClient.SetAsync(_requestContext.ClientId, key, request.Data);
 
             return response.Error == null ? Ok() : Error(response.Error);
         }
 
         [HttpDelete("{key}")]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> DeleteKey(string key)
         {
             if (!IsValidKey(key))
                 return BadRequest();
-            
+
             var response = await _clientDictionariesClient.DeleteAsync(_requestContext.ClientId, key);
 
             return response.Error == null ? Ok() : Error(response.Error);

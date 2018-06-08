@@ -2,15 +2,22 @@
 using System.Linq;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using AzureStorage;
 using AzureStorage.Tables;
+using AzureStorage.Tables.Templates.Index;
 using Common;
+using Common.Cache;
 using Common.Log;
+using Core;
 using Core.Candles;
+using Core.Countries;
 using Core.Enumerators;
+using Core.Exchange;
 using Core.Identity;
 using Core.Services;
 using LkeServices;
 using LkeServices.Candles;
+using LkeServices.Countries;
 using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -47,6 +54,9 @@ namespace LykkeApi2.Modules
             builder.RegisterType<HealthService>()
                 .As<IHealthService>()
                 .SingleInstance();
+            builder.RegisterType<ClientAccountLogic>()
+                .AsSelf()
+                .SingleInstance();
 
             builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
@@ -57,17 +67,17 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 
             builder.RegisterRateCalculatorClient(_settings.CurrentValue.Services.RateCalculatorServiceApiUrl, _log);
-
             builder.RegisterBalancesClient(_settings.CurrentValue.Services.BalancesServiceUrl, _log);
-            
+
+            builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
+            builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
+            builder.RegisterInstance(_log).As<ILog>().SingleInstance();
             builder.RegisterInstance(new DeploymentSettings());
-
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
-
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
-
-            builder.RegisterType<ClientAccountLogic>().AsSelf().SingleInstance();
+			
+            _services.AddSingleton<ClientAccountLogic>();
             
             _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
             {
@@ -78,16 +88,17 @@ namespace LykkeApi2.Modules
 
                 return provider;
             });
-            
-            builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
 
+            builder.RegisterType<RequestContext>().As<IRequestContext>().InstancePerLifetimeScope();
             builder.RegisterType<LykkePrincipal>().As<ILykkePrincipal>().InstancePerLifetimeScope();
-            
-            RegisterDictionaryEntities(builder);
-            
+            //TODO change to v2
+            builder.RegisterType<MemoryCacheManager>().As<ICacheManager>();
+            builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
+
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
-            
-            BindServices(builder, _settings, _log);
+
+            RegisterDictionaryEntities(builder);
+            BindServices(builder, _settings);
             builder.Populate(_services);
         }
 
@@ -114,7 +125,7 @@ namespace LykkeApi2.Modules
             }).SingleInstance();
         }
 
-        private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings, ILog log)
+        private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings)
         {
             var redis = new RedisCache(new RedisCacheOptions
             {
@@ -128,6 +139,6 @@ namespace LykkeApi2.Modules
                 .As<IOrderBooksService>()
                 .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
                 .SingleInstance();
-        }       
+        }
     }
 }

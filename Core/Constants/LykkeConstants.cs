@@ -25,6 +25,13 @@ namespace Core.Constants
         public const int MinPwdLength = 6;
         public const int MaxPwdLength = 100;
 
+        public const int MaxAddressLength = 255;
+        public const int MaxFullNameLength = 50;
+        public const int MaxZipLength = 10;
+        public const int MaxCityLength = 50;
+        public const int MaxPhoneLength = 20;
+        public const int MaxEmailLength = 50;
+
         public const int DefaultRefundTimeoutDays = 30;
 
         public static readonly TimeSpan SessionLifetime = TimeSpan.FromDays(3);

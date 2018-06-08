@@ -201,11 +201,17 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UserInfo()
         {
-            IPersonalData personalData;
-
             try
             {
-                personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+                var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+
+                return Ok(new UserInfoResponseModel
+                {
+                    Email = personalData?.Email,
+                    FirstName = personalData?.FirstName,
+                    LastName = personalData?.LastName,
+                    KycStatus = (await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId)).ToApiModel()
+                });
             }
             catch (Exception e)
             {
@@ -214,14 +220,6 @@ namespace LykkeApi2.Controllers
 
                 return StatusCode((int) HttpStatusCode.InternalServerError);
             }
-
-            return Ok(new UserInfoResponseModel
-            {
-                Email = personalData?.Email,
-                FirstName = personalData?.FirstName,
-                LastName = personalData?.LastName,
-                KycStatus = (await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId)).ToApiModel()
-            });
         }
 
         [Authorize]
