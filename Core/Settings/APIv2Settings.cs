@@ -23,8 +23,14 @@ namespace Core.Settings
         public IcoSettings IcoSettings { get; set; }
         public GlobalSettings GlobalSettings { get; set; }
         public KycServiceClientSettings KycServiceClient { get; set; }
+        public LimitationServiceSettings LimitationServiceClient { get; set; }
         public AssetDisclaimersServiceClientSettings AssetDisclaimersServiceClient { get; set; }
         public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }
+    }
+
+    public class LimitationServiceSettings
+    {
+        public string ServiceUrl { get; set; }
     }
 
     public class GlobalSettings
@@ -71,7 +77,6 @@ namespace Core.Settings
     {
         public string AssetsServiceUrl { get; set; }
         public string ClientAccountServiceUrl { get; set; }
-        public string LimitationsServiceUrl { get; set; }
         public string RegistrationUrl { get; set; }
         public string RateCalculatorServiceApiUrl { get; set; }
         public string BalancesServiceUrl { get; set; }
@@ -83,7 +88,6 @@ namespace Core.Settings
         public string OperationsUrl { get; set; }
         public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
         public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
-        public KycServiceClientSettings KycServiceClient { get; set; }
     }
 
     public class MatchingEngineSettings
