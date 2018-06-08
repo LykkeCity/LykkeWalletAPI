@@ -38,7 +38,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get history by client identifier
         /// </summary>
-        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
+        /// <param name="operationType">The types of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
         /// <param name="assetId">Asset identifier</param>
         /// <param name="assetPairId">Asset pair identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
@@ -49,7 +49,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
-            [FromQuery] HistoryOperationType? operationType,
+            [FromQuery] HistoryOperationType[] operationType,
             [FromQuery] string assetId,
             [FromQuery] string assetPairId,
             [FromQuery] int take,
@@ -84,7 +84,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
-            [FromQuery] HistoryOperationType? operationType,
+            [FromQuery] HistoryOperationType[] operationType,
             [FromQuery] string assetId,
             [FromQuery] string assetPairId,
             [FromQuery] int take,
