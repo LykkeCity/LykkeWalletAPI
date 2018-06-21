@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Services;
+using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
@@ -20,15 +23,24 @@ namespace LykkeApi2.Controllers
     {
         private readonly IPaymentSystemClient _paymentSystemService;
         private readonly IFeeCalculatorClient _feeCalculatorClient;
+        private readonly IBlockchainWalletsClient _blockchainWalletsClient;
+        private readonly IAssetsHelper _assetsHelper;
         private readonly IRequestContext _requestContext;
+
+        private readonly string[] _firstGenerationBlochainAssets =
+            {"BTC", "SLR", "ETH"};
 
         public DepositsController(
             IPaymentSystemClient paymentSystemService,
             IFeeCalculatorClient feeCalculatorClient,
+            IAssetsHelper assetsHelper,
+            IBlockchainWalletsClient blockchainWalletsClient,
             IRequestContext requestContext)
         {
             _paymentSystemService = paymentSystemService;
             _feeCalculatorClient = feeCalculatorClient;
+            _assetsHelper = assetsHelper;
+            _blockchainWalletsClient = blockchainWalletsClient;
             _requestContext = requestContext;
         }
 
@@ -99,6 +111,48 @@ namespace LykkeApi2.Controllers
             };
 
             return Ok(resp);
+        }
+
+        [HttpGet]
+        [Route("crypto/{assetId}/address")]
+        [ProducesResponseType(typeof(CryptoDepositAddressRespModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetCryptosDepositAddresses([FromRoute] string assetId)
+        {
+            
+            var asset = await _assetsHelper.GetAssetAsync(assetId);
+
+            if (asset == null || asset.IsDisabled)
+                return NotFound();
+
+            var isFirstGeneration = _firstGenerationBlochainAssets.Contains(assetId);
+            
+            if (!isFirstGeneration &&
+                    (string.IsNullOrEmpty(asset.BlockchainIntegrationLayerId) ||
+                     string.IsNullOrEmpty(asset.BlockchainIntegrationLayerAssetId)))
+                return BadRequest();
+
+            var depositInfo =
+                isFirstGeneration
+                    ? await _blockchainWalletsClient.TryGetAddressAsync(
+                        "first-generation-blockchain",
+                        assetId,
+                        Guid.Parse(_requestContext.ClientId))
+                    : await _blockchainWalletsClient.TryGetAddressAsync(
+                        asset.BlockchainIntegrationLayerId,
+                        asset.BlockchainIntegrationLayerAssetId,
+                        Guid.Parse(_requestContext.ClientId));
+
+            if (depositInfo == null)
+                return NotFound();
+
+            return Ok(new CryptoDepositAddressRespModel
+                {
+                    Address = depositInfo.Address,
+                    AddressExtension = depositInfo.AddressExtension,
+                    BaseAddress = depositInfo.BaseAddress
+                });
         }
     }
 }

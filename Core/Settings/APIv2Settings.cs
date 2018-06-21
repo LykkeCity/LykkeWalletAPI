@@ -17,6 +17,7 @@ namespace Core.Settings
         public SlackNotificationsSettings SlackNotifications { get; set; }
         public PersonalDataServiceClientSettings PersonalDataServiceSettings { get; set; }
         public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
+        public BlockchainWalletsServiceClientSettings BlockchainWalletsServiceClient { get; set; }
         public ClientDictionariesServiceClientSettings ClientDictionariesServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }
         public FeeCalculatorSettings FeeCalculatorServiceClient { set; get; }
@@ -31,6 +32,11 @@ namespace Core.Settings
     }
 
     public class LimitationServiceSettings
+    {
+        public string ServiceUrl { get; set; }
+    }
+
+    public class BlockchainWalletsServiceClientSettings
     {
         public string ServiceUrl { get; set; }
     }
