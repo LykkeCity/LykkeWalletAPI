@@ -69,8 +69,8 @@ namespace LykkeApi2.Controllers
         [HttpPost]
         [Route("fxpaygate")]
         [SwaggerOperation("Post")]
-        [ProducesResponseType(typeof(PaymentUrlDataResponse), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> PostFxPaygate([FromBody]FxPaygatePaymentUrlRequestModel input)
+        [ProducesResponseType(typeof(FxPaygatePaymentUrlResponseModel), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> PostFxPaygate([FromBody] FxPaygatePaymentUrlRequestModel input)
         {
             var result = await _paymentSystemService.GetUrlDataAsync(
                 _requestContext.ClientId,
@@ -89,7 +89,15 @@ namespace LykkeApi2.Controllers
                 input.OkUrl,
                 input.FailUrl);
 
-            return Ok(result);
+            var resp = new FxPaygatePaymentUrlResponseModel
+            {
+                Url = result.Url,
+                CancelUrl = input.CancelUrl,
+                FailUrl = result.FailUrl,
+                OkUrl = result.OkUrl
+            };
+
+            return Ok(resp);
         }
     }
 }
