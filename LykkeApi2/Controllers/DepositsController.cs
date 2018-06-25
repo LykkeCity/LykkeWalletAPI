@@ -4,6 +4,8 @@ using System.Net;
 using System.Threading.Tasks;
 using Core.Services;
 using Lykke.Service.BlockchainWallets.Client;
+using Lykke.Service.ClientDialogs.Client;
+using Lykke.Service.ClientDialogs.Client.Models;
 using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
@@ -25,6 +27,7 @@ namespace LykkeApi2.Controllers
         private readonly IFeeCalculatorClient _feeCalculatorClient;
         private readonly IBlockchainWalletsClient _blockchainWalletsClient;
         private readonly IAssetsHelper _assetsHelper;
+        private readonly IClientDialogsClient _clientDialogsClient;
         private readonly IRequestContext _requestContext;
 
         private readonly string[] _firstGenerationBlochainAssets =
@@ -120,11 +123,15 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetCryptosDepositAddresses([FromRoute] string assetId)
         {
-            
             var asset = await _assetsHelper.GetAssetAsync(assetId);
 
             if (asset == null || asset.IsDisabled)
                 return NotFound();
+
+            var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
+            
+            if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
+                return StatusCode(412);
 
             var isFirstGeneration = _firstGenerationBlochainAssets.Contains(assetId);
             

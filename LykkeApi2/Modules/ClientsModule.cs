@@ -25,6 +25,7 @@ using Lykke.Service.Session.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.BlockchainWallets.Client;
+using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.Limitations.Client;
 
 namespace LykkeApi2.Modules
@@ -101,6 +102,8 @@ namespace LykkeApi2.Modules
             builder.Register(ctx => new BlockchainWalletsClient(_apiSettings.CurrentValue.BlockchainWalletsServiceClient.ServiceUrl, _log))
                 .As<IBlockchainWalletsClient>()
                 .SingleInstance();
+            
+            builder.RegisterClientDialogsClient(_apiSettings.CurrentValue.ClientDialogsServiceClient);
 
             builder.Populate(_services);
         }
