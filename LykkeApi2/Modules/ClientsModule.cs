@@ -23,6 +23,7 @@ using Lykke.Service.Kyc.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.Session.Client;
 using Lykke.Service.AssetDisclaimers.Client;
+using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.Limitations.Client;
 
 namespace LykkeApi2.Modules
@@ -93,6 +94,8 @@ namespace LykkeApi2.Modules
             builder.RegisterPaymentSystemClient(_apiSettings.CurrentValue.PaymentSystemServiceClient.ServiceUrl, _log);
 
             builder.RegisterLimitationsServiceClient(_apiSettings.CurrentValue.LimitationServiceClient.ServiceUrl);
+            
+            builder.RegisterClientDialogsClient(_apiSettings.CurrentValue.ClientDialogsServiceClient);
 
             builder.Populate(_services);
         }
