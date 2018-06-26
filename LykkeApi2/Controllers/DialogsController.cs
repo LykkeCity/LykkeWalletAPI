@@ -27,7 +27,7 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext;
         }
         
-        [HttpGet("pending")]
+        [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<ClientDialogResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAllPendingDialogs()
         {
@@ -36,7 +36,7 @@ namespace LykkeApi2.Controllers
             return Ok(pendingDialogs.Select(x => x.ToApiModel()));
         }
 
-        [HttpPost("pending/{dialogId}/action/{actionId}")]
+        [HttpPost("{dialogId}/actions/{actionId}")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> SubmitPendingDialog([FromRoute]string dialogId, [FromRoute]string actionId)
