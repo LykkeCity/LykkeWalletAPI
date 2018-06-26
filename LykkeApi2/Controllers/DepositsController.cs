@@ -125,11 +125,8 @@ namespace LykkeApi2.Controllers
         {
             var asset = await _assetsHelper.GetAssetAsync(assetId);
 
-            if (asset == null || asset.IsDisabled)
+            if (asset == null || asset.IsDisabled || !asset.BlockchainDepositEnabled)
                 return NotFound();
-
-            if (!asset.BlockchainDepositEnabled)
-                return BadRequest();
 
             var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
             
