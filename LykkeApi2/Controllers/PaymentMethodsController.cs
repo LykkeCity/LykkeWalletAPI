@@ -1,5 +1,8 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using Core.Services;
+using Lykke.Service.Assets.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
@@ -17,11 +20,16 @@ namespace LykkeApi2.Controllers
     {
         private readonly IPaymentSystemClient _paymentSystemClient;
         private readonly IRequestContext _requestContext;
+        private readonly IAssetsHelper _assetsHelper;
 
-        public PaymentMethodsController(IPaymentSystemClient paymentSystemClient, IRequestContext requestContext)
+        public PaymentMethodsController(
+            IPaymentSystemClient paymentSystemClient,
+            IRequestContext requestContext,
+            IAssetsHelper assetsHelper)
         {
             _paymentSystemClient = paymentSystemClient;
             _requestContext = requestContext;
+            _assetsHelper = assetsHelper;
         }
 
         /// <summary>
@@ -35,6 +43,19 @@ namespace LykkeApi2.Controllers
         {
             var clientId = _requestContext.ClientId;
             var result = await _paymentSystemClient.GetPaymentMethodsAsync(clientId);
+            
+            var cryptos = new PaymentMethod
+            {
+                Name = "Cryptos",
+                Available = true,
+                Assets = (await _assetsHelper.GetAllAssetsAsync())
+                    .Where(x => x.BlockchainDepositEnabled)
+                    .Select(x => x.Id)
+                    .ToList()
+            };
+            
+            result.PaymentMethods.Add(cryptos);
+            
             return Ok(result);
         }
     }
