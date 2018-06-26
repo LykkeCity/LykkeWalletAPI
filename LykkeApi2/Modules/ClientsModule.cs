@@ -28,6 +28,7 @@ using Lykke.Service.History.Client;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.SwiftCredentials.Client;
+using Lykke.Service.PersonalData;
 
 namespace LykkeApi2.Modules
 {
@@ -66,9 +67,8 @@ namespace LykkeApi2.Modules
 
             builder.RegisterClientSessionClient(_apiSettings.CurrentValue.WalletApiv2.Services.SessionUrl, _log);
 
-            builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
-                .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
-            
+            builder.RegisterPersonalDataClientAccountRecoveryClient(_apiSettings.CurrentValue.PersonalDataServiceSettings.ServiceUri, _log);
+
             builder.RegisterInstance(
                 new KycStatusServiceClient(_apiSettings.CurrentValue.KycServiceClient, _log))
                 .As<IKycStatusService>().SingleInstance();

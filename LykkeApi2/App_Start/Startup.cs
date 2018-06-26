@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -20,9 +21,11 @@ using Lykke.Common;
 using LykkeApi2.Infrastructure.LykkeApiError;
 using LykkeApi2.Middleware;
 using LykkeApi2.Middleware.LykkeApiError;
+using LykkeApi2.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -104,8 +107,10 @@ namespace LykkeApi2
                 builder.RegisterModule(new Api2Module(appSettings, Log));
                 builder.RegisterModule(new CqrsModule(appSettings.CurrentValue, Log));
                 builder.RegisterModule(new ClientsModule(appSettings, Log));
+                builder.RegisterModule(new RecoveryModule(appSettings, Log));
                 builder.RegisterModule(new AspNetCoreModule());
                 builder.RegisterModule(new RepositoriesModule(appSettings.Nested(x => x.WalletApiv2.Db), Log));
+                builder.RegisterModule(new AutomapperModule());
 
                 ApplicationContainer = builder.Build();
 

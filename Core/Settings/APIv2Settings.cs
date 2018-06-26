@@ -1,8 +1,10 @@
 ﻿using System.Net;
+using Core.Constants;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
 using Lykke.Service.ClientDialogs.Client;
+using Lykke.Service.ClientAccountRecovery.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Kyc.Client;
@@ -34,6 +36,9 @@ namespace Core.Settings
         public SwiftCredentialsServiceClientSettings SwiftCredentialsServiceClient { set; get; }
         public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { set; get; }
         public SagasRabbitMq SagasRabbitMq { set; get; }
+        public ClientAccountRecoveryServiceClientSettings ClientRecoveryServiceClient { set; get; }
+        [Optional]
+        public ClientAccountRecoverySettings ClientAccountRecoverySettings { set; get; }
     }
 
     public class OAuthSettings
@@ -189,6 +194,12 @@ namespace Core.Settings
         {
             return string.Format(settings.OrderBooksCacheKeyPattern, assetPairId, isBuy);
         }
+    }
+
+    public class ClientAccountRecoverySettings
+    {
+        [Optional]
+        public int? SelfieImageMaxSizeMBytes { get; set; }
     }
 }
 

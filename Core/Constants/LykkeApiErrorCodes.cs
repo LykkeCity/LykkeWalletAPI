@@ -65,7 +65,6 @@ namespace Core.Constants
             /// </summary>
             public static readonly ILykkeApiErrorCode DepositLimitReached =
                 new LykkeApiErrorCode(nameof(DepositLimitReached), "The deposit limit is reached.");
-
             /// <summary>
             ///     The deposit limit is reached.
             /// </summary>
@@ -77,6 +76,32 @@ namespace Core.Constants
             /// </summary>
             public static readonly ILykkeApiErrorCode TwoFactorRequired =
                 new LykkeApiErrorCode(nameof(InconsistentState), "The action requires 2fa enabled.");
+
+            ///     Recovery completion process failed because of invalid data.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode RecoveryCompleteFailedInvalidData =
+                new LykkeApiErrorCode(nameof(RecoveryCompleteFailedInvalidData),
+                    "Can not complete the recovery, invalid data was passed.");
+
+            /// <summary>
+            ///     Recovery start process is forbidden because recovery attempt limit reached.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode RecoveryStartAttemptLimitReached =
+                new LykkeApiErrorCode(nameof(RecoveryStartAttemptLimitReached),
+                    "Can not start a new recovery process, because recovery attempt limit is reached.");
+
+            /// <summary>
+            ///     User tried to upload invalid image file during selfie verification challenge.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode RecoveryUploadInvalidSelfieFile =
+                new LykkeApiErrorCode(nameof(RecoveryUploadInvalidSelfieFile), "Invalid image file.");
+
+            /// <summary>
+            ///     Invalid value was submitted to challenge.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode RecoverySubmitChallengeInvalidValue =
+                new LykkeApiErrorCode(nameof(RecoverySubmitChallengeInvalidValue),
+                    "An invalid value was submitted to the challenge.");
         }
 
         /// <summary>
