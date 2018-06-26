@@ -512,7 +512,7 @@ We apologies for the inconvenience, and would like to thank you for your underst
     <value>Asset '{0}' does not allow use DepositOption as '{1}'</value>
   </data>
   <data name="LimitIsExceeded" xml:space="preserve">
-    <value>Operation is not allowed because of the Limitations</value>
+    <value>Credit card deposit limits reached. Read More</value>
   </data>
   <data name="FullNameLengthFormat" xml:space="preserve">
     <value>The Full Name must be less than {0}</value>
