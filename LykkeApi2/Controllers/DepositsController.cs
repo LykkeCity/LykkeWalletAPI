@@ -87,12 +87,13 @@ namespace LykkeApi2.Controllers
                 input.Phone,
                 DepositOption.BankCard,
                 input.OkUrl,
-                input.FailUrl);
+                input.FailUrl,
+                input.CancelUrl);
 
             var resp = new FxPaygatePaymentUrlResponseModel
             {
                 Url = result.Url,
-                CancelUrl = input.CancelUrl,
+                CancelUrl = result.CancelUrl,
                 FailUrl = result.FailUrl,
                 OkUrl = result.OkUrl
             };
