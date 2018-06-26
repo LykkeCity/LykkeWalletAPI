@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LykkeApi2.Controllers
 {
     [Route("api/market")]
+    [ApiController]
     public class MarketController : Controller
     {
         private readonly IRateCalculatorClient _rateCalculator;

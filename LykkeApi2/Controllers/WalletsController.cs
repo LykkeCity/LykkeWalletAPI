@@ -25,6 +25,7 @@ namespace LykkeApi2.Controllers
 {
     [Authorize]
     [Route("api/wallets")]
+    [ApiController]
     public class WalletsController : Controller
     {
         private string TradingWalletType => Lykke.Service.ClientAccount.Client.AutorestClient.Models.WalletType.Trading.ToString();

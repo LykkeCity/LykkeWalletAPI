@@ -15,9 +15,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
 {
-    [Route("api/[controller]")]
-    [ValidateModel]
     [Authorize]
+    [Route("api/[controller]")]
+    [ApiController]
     public class PaymentMethodsController : Controller
     {
         private readonly IPaymentSystemClient _paymentSystemClient;
