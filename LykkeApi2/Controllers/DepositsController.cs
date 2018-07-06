@@ -30,9 +30,6 @@ namespace LykkeApi2.Controllers
         private readonly IClientDialogsClient _clientDialogsClient;
         private readonly IRequestContext _requestContext;
 
-        private readonly string[] _firstGenerationBlochainAssets =
-            {"BTC", "SLR", "ETH"};
-
         public DepositsController(
             IPaymentSystemClient paymentSystemService,
             IFeeCalculatorClient feeCalculatorClient,
@@ -127,18 +124,19 @@ namespace LykkeApi2.Controllers
 
             if (asset == null || asset.IsDisabled || !asset.BlockchainDepositEnabled)
                 return NotFound();
+            
+            var assetsAvailableToClient =
+                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+
+            if (!assetsAvailableToClient.Contains(assetId))
+                return BadRequest();
 
             var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
             
             if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
                 return StatusCode(412);
 
-            var isFirstGeneration = _firstGenerationBlochainAssets.Contains(assetId);
-            
-            if (!isFirstGeneration &&
-                    (string.IsNullOrEmpty(asset.BlockchainIntegrationLayerId) ||
-                     string.IsNullOrEmpty(asset.BlockchainIntegrationLayerAssetId)))
-                return BadRequest();
+            var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
 
             var depositInfo =
                 isFirstGeneration

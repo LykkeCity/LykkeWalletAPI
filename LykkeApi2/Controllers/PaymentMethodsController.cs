@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Core.Services;
 using Lykke.Service.Assets.Client;
+using Lykke.Service.OperationsRepository.AutorestClient.Models;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
@@ -42,6 +44,7 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> Get()
         {
             var clientId = _requestContext.ClientId;
+            var partnerId = _requestContext.PartnerId;
             var result = await _paymentSystemClient.GetPaymentMethodsAsync(clientId);
             
             var cryptos = new PaymentMethod
@@ -55,6 +58,27 @@ namespace LykkeApi2.Controllers
             };
             
             result.PaymentMethods.Add(cryptos);
+
+            var assetsAvailableToClient =
+                await _assetsHelper.GetAssetsAvailableToClientAsync(clientId, partnerId);
+            
+            var model = new PaymentMethodsResponse
+            {
+                PaymentMethods = new List<PaymentMethod>()
+            };
+
+            foreach (var method in result.PaymentMethods)
+            {
+                var availableToClient = method.Assets.Where(assetsAvailableToClient.Contains);
+                
+                if(availableToClient.Any())
+                    model.PaymentMethods.Add(new PaymentMethod
+                    {
+                        Assets = availableToClient.ToList(),
+                        Available = method.Available,
+                        Name = method.Name
+                    });
+            }
             
             return Ok(result);
         }
