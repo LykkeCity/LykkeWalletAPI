@@ -7,6 +7,7 @@
     <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.7" />
     <PackageReference Include="Lykke.Service.AssetDisclaimers.Client" Version="3.0.0" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
+    <PackageReference Include="Lykke.Service.ClientDialogs.Client" Version="1.0.0" />
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.220" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.1.1" />
