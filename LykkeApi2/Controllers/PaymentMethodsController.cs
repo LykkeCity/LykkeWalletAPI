@@ -80,7 +80,7 @@ namespace LykkeApi2.Controllers
                     });
             }
             
-            return Ok(result);
+            return Ok(model);
         }
     }
 }
