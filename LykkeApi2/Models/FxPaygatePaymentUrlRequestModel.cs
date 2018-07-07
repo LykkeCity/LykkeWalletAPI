@@ -25,5 +25,7 @@ namespace LykkeApi2.Models
         public string OkUrl { get; set; }
         [CanBeNull]
         public string FailUrl { get; set; }
+        [CanBeNull]
+        public string CancelUrl { get; set; }
     }
 }
