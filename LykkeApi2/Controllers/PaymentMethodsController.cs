@@ -60,7 +60,7 @@ namespace LykkeApi2.Controllers
             result.PaymentMethods.Add(cryptos);
 
             var assetsAvailableToClient =
-                await _assetsHelper.GetAssetsAvailableToClientAsync(clientId, partnerId);
+                await _assetsHelper.GetAssetsAvailableToClientAsync(clientId, partnerId, true);
             
             var model = new PaymentMethodsResponse
             {

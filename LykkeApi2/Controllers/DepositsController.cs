@@ -126,7 +126,7 @@ namespace LykkeApi2.Controllers
                 return NotFound();
             
             var assetsAvailableToClient =
-                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             if (!assetsAvailableToClient.Contains(assetId))
                 return BadRequest();
