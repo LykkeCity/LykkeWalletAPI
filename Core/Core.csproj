@@ -18,6 +18,5 @@
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.79" />
     <PackageReference Include="Lykke.Service.PaymentSystem.Client" Version="1.0.22" />
     <PackageReference Include="Lykke.Service.ExchangeOperations.Client" Version="1.1.20" />
-    <PackageReference Include="Lykke.Service.ClientDialogs.Client" Version="0.0.14" />
   </ItemGroup>
 </Project>
