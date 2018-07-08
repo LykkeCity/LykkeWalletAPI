@@ -102,8 +102,6 @@ namespace LykkeApi2.Modules
             builder.Register(ctx => new BlockchainWalletsClient(_apiSettings.CurrentValue.BlockchainWalletsServiceClient.ServiceUrl, _log))
                 .As<IBlockchainWalletsClient>()
                 .SingleInstance();
-            
-            builder.RegisterClientDialogsClient(_apiSettings.CurrentValue.ClientDialogsServiceClient);
 
             builder.Populate(_services);
         }
