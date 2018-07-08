@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
+using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
@@ -26,6 +27,7 @@ namespace Core.Settings
         public LimitationServiceSettings LimitationServiceClient { get; set; }
         public AssetDisclaimersServiceClientSettings AssetDisclaimersServiceClient { get; set; }
         public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }
+        public ClientDialogsServiceClientSettings ClientDialogsServiceClient { set; get; }
     }
 
     public class LimitationServiceSettings
