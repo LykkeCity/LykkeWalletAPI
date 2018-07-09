@@ -22,7 +22,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using OrderAction = Lykke.MatchingEngine.Connector.Abstractions.Models.OrderAction;
+using OrderAction = LykkeApi2.Models.Orders.OrderAction;
 
 namespace LykkeApi2.Controllers
 {

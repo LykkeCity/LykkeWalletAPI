@@ -1,5 +1,10 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
+using Core.Services;
+using Lykke.Service.Assets.Client;
+using Lykke.Service.OperationsRepository.AutorestClient.Models;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
@@ -17,11 +22,16 @@ namespace LykkeApi2.Controllers
     {
         private readonly IPaymentSystemClient _paymentSystemClient;
         private readonly IRequestContext _requestContext;
+        private readonly IAssetsHelper _assetsHelper;
 
-        public PaymentMethodsController(IPaymentSystemClient paymentSystemClient, IRequestContext requestContext)
+        public PaymentMethodsController(
+            IPaymentSystemClient paymentSystemClient,
+            IRequestContext requestContext,
+            IAssetsHelper assetsHelper)
         {
             _paymentSystemClient = paymentSystemClient;
             _requestContext = requestContext;
+            _assetsHelper = assetsHelper;
         }
 
         /// <summary>
@@ -34,8 +44,43 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> Get()
         {
             var clientId = _requestContext.ClientId;
+            var partnerId = _requestContext.PartnerId;
             var result = await _paymentSystemClient.GetPaymentMethodsAsync(clientId);
-            return Ok(result);
+            
+            var cryptos = new PaymentMethod
+            {
+                Name = "Cryptos",
+                Available = true,
+                Assets = (await _assetsHelper.GetAllAssetsAsync())
+                    .Where(x => x.BlockchainDepositEnabled)
+                    .Select(x => x.Id)
+                    .ToList()
+            };
+            
+            result.PaymentMethods.Add(cryptos);
+
+            var assetsAvailableToClient =
+                await _assetsHelper.GetAssetsAvailableToClientAsync(clientId, partnerId, true);
+            
+            var model = new PaymentMethodsResponse
+            {
+                PaymentMethods = new List<PaymentMethod>()
+            };
+
+            foreach (var method in result.PaymentMethods)
+            {
+                var availableToClient = method.Assets.Where(assetsAvailableToClient.Contains);
+                
+                if(availableToClient.Any())
+                    model.PaymentMethods.Add(new PaymentMethod
+                    {
+                        Assets = availableToClient.ToList(),
+                        Available = method.Available,
+                        Name = method.Name
+                    });
+            }
+            
+            return Ok(model);
         }
     }
 }
