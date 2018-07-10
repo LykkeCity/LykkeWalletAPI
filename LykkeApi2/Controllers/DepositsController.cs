@@ -35,12 +35,14 @@ namespace LykkeApi2.Controllers
             IFeeCalculatorClient feeCalculatorClient,
             IAssetsHelper assetsHelper,
             IBlockchainWalletsClient blockchainWalletsClient,
+            IClientDialogsClient clientDialogsClient,
             IRequestContext requestContext)
         {
             _paymentSystemService = paymentSystemService;
             _feeCalculatorClient = feeCalculatorClient;
             _assetsHelper = assetsHelper;
             _blockchainWalletsClient = blockchainWalletsClient;
+            _clientDialogsClient = clientDialogsClient;
             _requestContext = requestContext;
         }
 
