@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Exceptions;
 using Core.Services;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.ClientDialogs.Client;
@@ -125,18 +126,18 @@ namespace LykkeApi2.Controllers
             var asset = await _assetsHelper.GetAssetAsync(assetId);
 
             if (asset == null || asset.IsDisabled || !asset.BlockchainDepositEnabled)
-                return NotFound();
+                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
             
             var assetsAvailableToClient =
                 await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             if (!assetsAvailableToClient.Contains(assetId))
-                return BadRequest();
+                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
 
             var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
             
             if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
-                return StatusCode(412);
+                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.PendingDialogs);
 
             var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
 
@@ -152,7 +153,7 @@ namespace LykkeApi2.Controllers
                         Guid.Parse(_requestContext.ClientId));
 
             if (depositInfo == null)
-                return NotFound();
+                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AddressNotGenerated);
 
             return Ok(new CryptoDepositAddressRespModel
                 {

@@ -35,7 +35,11 @@ namespace LykkeApi2.Middleware
         {
             ctx.Response.ContentType = "application/json";
             ctx.Response.StatusCode = (int)ex.StatusCode;
-            await ctx.Response.WriteAsync(JsonConvert.SerializeObject(new {message = ex.ClientMessage}));
+            await ctx.Response.WriteAsync(JsonConvert.SerializeObject(new
+            {
+                error = ex.ExceptionType.ToString(), 
+                message = ClientException.GetTextForException(ex.ExceptionType)
+            }));
         }
     }
 }

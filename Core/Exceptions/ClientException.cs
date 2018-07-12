@@ -6,32 +6,37 @@ namespace Core.Exceptions
     public class ClientException : Exception
     {
         public HttpStatusCode StatusCode { get; }
-        public string ClientMessage { get; }
-
-        public ClientException(string message) : this(HttpStatusCode.BadRequest, message)
-        {
-            
-        }
-
-        public ClientException(HttpStatusCode status) : this(status, GetDefaultTextForStatus(status))
-        {
-            
-        }
-
-        public ClientException(HttpStatusCode code, string message)
+        public ExceptionType ExceptionType { get; }
+        
+        public ClientException(HttpStatusCode code, ExceptionType message)
         {
             StatusCode = code;
-            ClientMessage = message;
+            ExceptionType = message;
         }
 
-        private static string GetDefaultTextForStatus(HttpStatusCode status)
+        public static string GetTextForException(ExceptionType exceptionType)
         {
-            switch (status)
+            switch (exceptionType)
             {
-                    case HttpStatusCode.NotFound: return "Resource not found";
-                    case HttpStatusCode.BadRequest: return "Client generated bad request";
-                    default: return "Something went wrong";
+                case ExceptionType.AssetNotFound:
+                    return "Asset not found";
+                case ExceptionType.AssetUnavailable:
+                    return "Asset unavailable";
+                case ExceptionType.PendingDialogs:
+                    return "Pending dialogs";
+                case ExceptionType.AddressNotGenerated:
+                    return "Address not generated";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(exceptionType), exceptionType, null);
             }
         }
+    }
+
+    public enum ExceptionType
+    {
+        AssetNotFound,
+        AssetUnavailable,
+        PendingDialogs,
+        AddressNotGenerated
     }
 }
