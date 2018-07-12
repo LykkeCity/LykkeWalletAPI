@@ -98,8 +98,15 @@ namespace LykkeApi2
         {
             try
             {
-                app.UseLykkeMiddleware(ComponentName, ex => new { Message = "Technical problem" });
+                app.UseLykkeMiddleware(ComponentName, ex => new { message = "Technical problem" });
 
+                if (env.IsDevelopment())
+                {
+                    app.UseDeveloperExceptionPage();
+                }
+                
+                app.UseMiddleware<ClientExceptionMiddleware>();
+                
                 app.UseCors(builder =>
                 {
                     builder.AllowAnyOrigin();
@@ -112,11 +119,6 @@ namespace LykkeApi2
 
                     return next(context);
                 });
-
-                if (env.IsDevelopment())
-                {
-                    app.UseDeveloperExceptionPage();
-                }
 
                 app.UseAuthentication();
 
