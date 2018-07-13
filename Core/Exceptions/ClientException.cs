@@ -13,6 +13,10 @@ namespace Core.Exceptions
             StatusCode = code;
             ExceptionType = message;
         }
+        
+        public ClientException(ExceptionType message) : this(HttpStatusCode.BadRequest, message)
+        {
+        }
 
         public static string GetTextForException(ExceptionType exceptionType)
         {

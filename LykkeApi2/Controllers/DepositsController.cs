@@ -132,12 +132,12 @@ namespace LykkeApi2.Controllers
                 await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             if (!assetsAvailableToClient.Contains(assetId))
-                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
+                throw new ClientException(ExceptionType.AssetUnavailable);
 
             var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
             
             if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
-                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.PendingDialogs);
+                throw new ClientException(ExceptionType.PendingDialogs);
 
             var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
 
@@ -153,7 +153,7 @@ namespace LykkeApi2.Controllers
                         Guid.Parse(_requestContext.ClientId));
 
             if (depositInfo == null)
-                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AddressNotGenerated);
+                throw new ClientException(ExceptionType.AddressNotGenerated);
 
             return Ok(new CryptoDepositAddressRespModel
                 {
