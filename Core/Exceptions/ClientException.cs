@@ -8,13 +8,13 @@ namespace Core.Exceptions
         public HttpStatusCode StatusCode { get; }
         public ExceptionType ExceptionType { get; }
         
-        public ClientException(HttpStatusCode code, ExceptionType message)
+        public ClientException(HttpStatusCode code, ExceptionType exceptionType)
         {
             StatusCode = code;
-            ExceptionType = message;
+            ExceptionType = exceptionType;
         }
         
-        public ClientException(ExceptionType message) : this(HttpStatusCode.BadRequest, message)
+        public ClientException(ExceptionType exceptionType) : this(HttpStatusCode.BadRequest, exceptionType)
         {
         }
 
