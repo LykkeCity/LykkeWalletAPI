@@ -57,7 +57,15 @@ namespace LykkeApi2.Controllers
                     .ToList()
             };
             
+            var swift = new PaymentMethod
+            {
+                Name = "Swift",
+                Available = true,
+                Assets = new[] { "GBP", "EUR", "USD"}
+            };
+            
             result.PaymentMethods.Add(cryptos);
+            result.PaymentMethods.Add(swift);
 
             var assetsAvailableToClient =
                 await _assetsHelper.GetAssetsAvailableToClientAsync(clientId, partnerId, true);

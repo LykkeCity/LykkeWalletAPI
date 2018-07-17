@@ -117,6 +117,23 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
+        [Route("swift/{assetId}/requisites")]
+        [ProducesResponseType(typeof(SwiftRequisitesRespModel), (int)HttpStatusCode.OK)]
+        public IActionResult GetSwiftRequisites([FromRoute] string assetId)
+        {
+            return Ok(new SwiftRequisitesRespModel
+            {
+                AccontName = string.Empty,
+                AccountNumber = string.Empty,
+                BankAddress = string.Empty,
+                Bic = string.Empty,
+                CompanyAddress = string.Empty,
+                CorrespondentAccount = string.Empty,
+                PurposeOfPayment = string.Empty
+            });
+        }
+
+        [HttpGet]
         [Route("crypto/{assetId}/address")]
         [ProducesResponseType(typeof(CryptoDepositAddressRespModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
