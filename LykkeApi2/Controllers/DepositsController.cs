@@ -135,6 +135,14 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(SwiftRequisitesRespModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetSwiftRequisites([FromRoute] string assetId)
         {
+            var asset = await _assetsHelper.GetAssetAsync(assetId);
+            
+            if(asset == null)
+                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
+            
+            if(!asset.SwiftDepositEnabled)
+                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
+            
             var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             if (status != KycStatus.Ok)
@@ -149,8 +157,7 @@ namespace LykkeApi2.Controllers
             
             var creds = await _swiftCredentialsClient.GetAsync(personalData.SpotRegulator, assetId);
             
-            var asset = await _assetsHelper.GetAssetAsync(assetId);
-            var assetTitle = asset?.DisplayId ?? assetId;
+            var assetTitle = asset.DisplayId ?? assetId;
 
             var clientIdentity = personalData.Email != null ? personalData.Email.Replace("@", ".") : "{1}";
             var purposeOfPayment = string.Format(creds.PurposeOfPayment, assetTitle, clientIdentity);

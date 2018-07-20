@@ -61,7 +61,10 @@ namespace LykkeApi2.Controllers
             {
                 Name = "Swift",
                 Available = true,
-                Assets = new[] { "GBP", "EUR", "USD"}
+                Assets = (await _assetsHelper.GetAllAssetsAsync())
+                    .Where(x => x.SwiftDepositEnabled)
+                    .Select(x => x.Id)
+                    .ToList()
             };
             
             result.PaymentMethods.Add(cryptos);
