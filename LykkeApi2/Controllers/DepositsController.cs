@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization.Formatters;
 using System.Threading.Tasks;
 using Core.Exceptions;
 using Core.Services;
@@ -8,8 +9,12 @@ using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.ClientDialogs.Client.Models;
 using Lykke.Service.FeeCalculator.Client;
+using Lykke.Service.Kyc.Abstractions.Domain.Verification;
+using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
+using Lykke.Service.PersonalData.Contract;
+using Lykke.Service.SwiftCredentials.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
 using LykkeApi2.Models.Fees;
@@ -29,6 +34,9 @@ namespace LykkeApi2.Controllers
         private readonly IBlockchainWalletsClient _blockchainWalletsClient;
         private readonly IAssetsHelper _assetsHelper;
         private readonly IClientDialogsClient _clientDialogsClient;
+        private readonly ISwiftCredentialsClient _swiftCredentialsClient;
+        private readonly IKycStatusService _kycStatusService;
+        private readonly IPersonalDataService _personalDataService;
         private readonly IRequestContext _requestContext;
 
         public DepositsController(
@@ -37,6 +45,9 @@ namespace LykkeApi2.Controllers
             IAssetsHelper assetsHelper,
             IBlockchainWalletsClient blockchainWalletsClient,
             IClientDialogsClient clientDialogsClient,
+            ISwiftCredentialsClient swiftCredentialsClient,
+            IKycStatusService kycStatusService,
+            IPersonalDataService personalDataService,
             IRequestContext requestContext)
         {
             _paymentSystemService = paymentSystemService;
@@ -44,6 +55,9 @@ namespace LykkeApi2.Controllers
             _assetsHelper = assetsHelper;
             _blockchainWalletsClient = blockchainWalletsClient;
             _clientDialogsClient = clientDialogsClient;
+            _swiftCredentialsClient = swiftCredentialsClient;
+            _kycStatusService = kycStatusService;
+            _personalDataService = personalDataService;
             _requestContext = requestContext;
         }
 
@@ -119,17 +133,43 @@ namespace LykkeApi2.Controllers
         [HttpGet]
         [Route("swift/{assetId}/requisites")]
         [ProducesResponseType(typeof(SwiftRequisitesRespModel), (int)HttpStatusCode.OK)]
-        public IActionResult GetSwiftRequisites([FromRoute] string assetId)
+        public async Task<IActionResult> GetSwiftRequisites([FromRoute] string assetId)
         {
+            var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
+            if (status != KycStatus.Ok)
+                throw new ClientException(ExceptionType.KycRequired);
+            
+            var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
+            
+            if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
+                throw new ClientException(ExceptionType.PendingDialogs);
+            
+            var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+            
+            var creds = await _swiftCredentialsClient.GetAsync(personalData.SpotRegulator, assetId);
+            
+            var asset = await _assetsHelper.GetAssetAsync(assetId);
+            var assetTitle = asset?.DisplayId ?? assetId;
+
+            var clientIdentity = personalData.Email != null ? personalData.Email.Replace("@", ".") : "{1}";
+            var purposeOfPayment = string.Format(creds.PurposeOfPayment, assetTitle, clientIdentity);
+
+            if (!purposeOfPayment.Contains(assetId) && !purposeOfPayment.Contains(assetTitle))
+                purposeOfPayment += assetTitle;
+
+            if (!purposeOfPayment.Contains(clientIdentity))
+                purposeOfPayment += clientIdentity;
+            
             return Ok(new SwiftRequisitesRespModel
             {
-                AccontName = string.Empty,
-                AccountNumber = string.Empty,
-                BankAddress = string.Empty,
-                Bic = string.Empty,
-                CompanyAddress = string.Empty,
-                CorrespondentAccount = string.Empty,
-                PurposeOfPayment = string.Empty
+                AccontName = creds.AccountName,
+                AccountNumber = creds.AccountNumber,
+                BankAddress = creds.BankAddress,
+                Bic = creds.Bic,
+                CompanyAddress = creds.CompanyAddress,
+                CorrespondentAccount = creds.CorrespondentAccount,
+                PurposeOfPayment = purposeOfPayment
             });
         }
 

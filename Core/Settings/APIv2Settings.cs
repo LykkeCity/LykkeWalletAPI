@@ -8,6 +8,7 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
+using Lykke.Service.SwiftCredentials.Client;
 
 namespace Core.Settings
 {
@@ -29,6 +30,7 @@ namespace Core.Settings
         public AssetDisclaimersServiceClientSettings AssetDisclaimersServiceClient { get; set; }
         public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }
         public ClientDialogsServiceClientSettings ClientDialogsServiceClient { set; get; }
+        public SwiftCredentialsServiceClientSettings SwiftCredentialsServiceClient { set; get; }
     }
 
     public class LimitationServiceSettings

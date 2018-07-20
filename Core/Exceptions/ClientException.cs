@@ -30,6 +30,8 @@ namespace Core.Exceptions
                     return "Pending dialogs";
                 case ExceptionType.AddressNotGenerated:
                     return "Address not generated";
+                case ExceptionType.KycRequired:
+                    return "KYC required for this operation";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(exceptionType), exceptionType, null);
             }
@@ -41,6 +43,7 @@ namespace Core.Exceptions
         AssetNotFound,
         AssetUnavailable,
         PendingDialogs,
-        AddressNotGenerated
+        AddressNotGenerated,
+        KycRequired
     }
 }
