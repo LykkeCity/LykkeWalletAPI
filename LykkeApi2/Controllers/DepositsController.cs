@@ -173,7 +173,7 @@ namespace LykkeApi2.Controllers
             
             return Ok(new SwiftRequisitesRespModel
             {
-                AccontName = creds.AccountName,
+                AccountName = creds.AccountName,
                 AccountNumber = creds.AccountNumber,
                 BankAddress = creds.BankAddress,
                 Bic = creds.Bic,

@@ -4,7 +4,7 @@
     {
         public string Bic { set; get; }
         public string AccountNumber { set; get; }
-        public string AccontName { set; get; }
+        public string AccountName { set; get; }
         public string PurposeOfPayment { set; get; }
         public string BankAddress { set; get; }
         public string CompanyAddress { set; get; }
