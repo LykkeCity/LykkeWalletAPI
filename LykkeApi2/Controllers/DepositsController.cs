@@ -137,10 +137,13 @@ namespace LykkeApi2.Controllers
         {
             var asset = await _assetsHelper.GetAssetAsync(assetId);
             
+            var assetsAvailableToClient =
+                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+            
             if(asset == null)
                 throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
             
-            if(!asset.SwiftDepositEnabled)
+            if(!asset.SwiftDepositEnabled || !assetsAvailableToClient.Contains(assetId))
                 throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
             
             var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
