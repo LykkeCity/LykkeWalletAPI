@@ -132,7 +132,7 @@ namespace LykkeApi2.Controllers
 
         [HttpPost]
         [Route("swift/{assetId}/email")]
-        public async Task<IActionResult> PostRequestSwiftRequisites([FromRoute] string assetId)
+        public async Task<IActionResult> PostRequestSwiftRequisites([FromRoute] string assetId, [FromQuery] double amount)
         {
             var asset = await _assetsHelper.GetAssetAsync(assetId);
             
@@ -154,6 +154,14 @@ namespace LykkeApi2.Controllers
             
             if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
                 throw new ClientException(ExceptionType.PendingDialogs);
+            
+            var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+
+            _swiftCredentialsClient.EmailRequest(
+                _requestContext.ClientId,
+                personalData.SpotRegulator,
+                assetId,
+                amount);
 
             return Ok();
         }
