@@ -130,6 +130,34 @@ namespace LykkeApi2.Controllers
             return Ok(resp);
         }
 
+        [HttpPost]
+        [Route("swift/{assetId}/email")]
+        public async Task<IActionResult> PostRequestSwiftRequisites([FromRoute] string assetId)
+        {
+            var asset = await _assetsHelper.GetAssetAsync(assetId);
+            
+            var assetsAvailableToClient =
+                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+            
+            if(asset == null)
+                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
+            
+            if(!asset.SwiftDepositEnabled || !assetsAvailableToClient.Contains(assetId))
+                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
+            
+            var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
+            if (status != KycStatus.Ok)
+                throw new ClientException(ExceptionType.KycRequired);
+            
+            var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
+            
+            if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
+                throw new ClientException(ExceptionType.PendingDialogs);
+
+            return Ok();
+        }
+
         [HttpGet]
         [Route("swift/{assetId}/requisites")]
         [ProducesResponseType(typeof(SwiftRequisitesRespModel), (int)HttpStatusCode.OK)]

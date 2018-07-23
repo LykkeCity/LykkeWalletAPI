@@ -105,7 +105,7 @@ namespace LykkeApi2.Modules
                 .SingleInstance();
             
             builder.RegisterSwiftCredentialsClient(_apiSettings.CurrentValue.SwiftCredentialsServiceClient);
-
+            
             builder.Populate(_services);
         }
     }
