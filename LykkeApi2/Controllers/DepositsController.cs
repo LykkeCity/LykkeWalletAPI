@@ -11,6 +11,7 @@ using Lykke.Service.ClientDialogs.Client.Models;
 using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Limitations.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using Lykke.Service.PersonalData.Contract;
@@ -37,6 +38,7 @@ namespace LykkeApi2.Controllers
         private readonly ISwiftCredentialsClient _swiftCredentialsClient;
         private readonly IKycStatusService _kycStatusService;
         private readonly IPersonalDataService _personalDataService;
+        private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly IRequestContext _requestContext;
 
         public DepositsController(
@@ -150,10 +152,14 @@ namespace LykkeApi2.Controllers
             if (status != KycStatus.Ok)
                 throw new ClientException(ExceptionType.KycRequired);
             
-            var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
+            var checkResult = await _limitationsServiceClient.CheckAsync(
+                _requestContext.ClientId,
+                assetId,
+                amount,
+                CurrencyOperationType.SwiftTransfer);
             
-            if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
-                throw new ClientException(ExceptionType.PendingDialogs);
+            if (!checkResult.IsValid)
+                throw new ClientException(ExceptionType.LimitReached);
             
             var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
 
