@@ -50,6 +50,7 @@ namespace LykkeApi2.Controllers
             ISwiftCredentialsClient swiftCredentialsClient,
             IKycStatusService kycStatusService,
             IPersonalDataService personalDataService,
+            ILimitationsServiceClient limitationsServiceClient,
             IRequestContext requestContext)
         {
             _paymentSystemService = paymentSystemService;
@@ -60,6 +61,7 @@ namespace LykkeApi2.Controllers
             _swiftCredentialsClient = swiftCredentialsClient;
             _kycStatusService = kycStatusService;
             _personalDataService = personalDataService;
+            _limitationsServiceClient = limitationsServiceClient;
             _requestContext = requestContext;
         }
 
