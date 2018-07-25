@@ -193,11 +193,6 @@ namespace LykkeApi2.Controllers
             if (status != KycStatus.Ok)
                 throw new ClientException(ExceptionType.KycRequired);
             
-            var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
-            
-            if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
-                throw new ClientException(ExceptionType.PendingDialogs);
-            
             var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
             
             var creds = await _swiftCredentialsClient.GetForClientAsync(_requestContext.ClientId, personalData.SpotRegulator, assetId);
