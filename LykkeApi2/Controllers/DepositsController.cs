@@ -194,18 +194,7 @@ namespace LykkeApi2.Controllers
             
             var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
             
-            var creds = await _swiftCredentialsClient.GetAsync(personalData.SpotRegulator, assetId);
-            
-            var assetTitle = asset.DisplayId ?? assetId;
-
-            var clientIdentity = personalData.Email != null ? personalData.Email.Replace("@", ".") : "{1}";
-            var purposeOfPayment = string.Format(creds.PurposeOfPayment, assetTitle, clientIdentity);
-
-            if (!purposeOfPayment.Contains(assetId) && !purposeOfPayment.Contains(assetTitle))
-                purposeOfPayment += assetTitle;
-
-            if (!purposeOfPayment.Contains(clientIdentity))
-                purposeOfPayment += clientIdentity;
+            var creds = await _swiftCredentialsClient.GetForClientAsync(_requestContext.ClientId, personalData.SpotRegulator, assetId);
             
             return Ok(new SwiftRequisitesRespModel
             {
@@ -215,7 +204,7 @@ namespace LykkeApi2.Controllers
                 Bic = creds.Bic,
                 CompanyAddress = creds.CompanyAddress,
                 CorrespondentAccount = creds.CorrespondentAccount,
-                PurposeOfPayment = purposeOfPayment
+                PurposeOfPayment = creds.PurposeOfPayment
             });
         }
 
