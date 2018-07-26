@@ -18,6 +18,7 @@ using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.SwiftCredentials.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
+using LykkeApi2.Models.Deposits;
 using LykkeApi2.Models.Fees;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -136,7 +137,7 @@ namespace LykkeApi2.Controllers
 
         [HttpPost]
         [Route("swift/{assetId}/email")]
-        public async Task<IActionResult> PostRequestSwiftRequisites([FromRoute] string assetId, [FromQuery] double amount)
+        public async Task<IActionResult> PostRequestSwiftRequisites([FromRoute] string assetId, [FromBody] SwiftDepositEmailModel model)
         {
             var asset = await _assetsHelper.GetAssetAsync(assetId);
             
@@ -157,7 +158,7 @@ namespace LykkeApi2.Controllers
             var checkResult = await _limitationsServiceClient.CheckAsync(
                 _requestContext.ClientId,
                 assetId,
-                amount,
+                model.Amount,
                 CurrencyOperationType.SwiftTransfer);
             
             if (!checkResult.IsValid)
@@ -169,7 +170,7 @@ namespace LykkeApi2.Controllers
                 _requestContext.ClientId,
                 personalData.SpotRegulator,
                 assetId,
-                amount);
+                model.Amount);
 
             return Ok();
         }
