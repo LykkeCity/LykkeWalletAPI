@@ -158,7 +158,7 @@ namespace LykkeApi2.Controllers
             var checkResult = await _limitationsServiceClient.CheckAsync(
                 _requestContext.ClientId,
                 assetId,
-                model.Amount,
+                decimal.ToDouble(model.Amount),
                 CurrencyOperationType.SwiftTransfer);
             
             if (!checkResult.IsValid)
@@ -166,7 +166,7 @@ namespace LykkeApi2.Controllers
             
             var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
 
-            _swiftCredentialsClient.EmailRequest(
+            _swiftCredentialsClient.EmailRequestAsync(
                 _requestContext.ClientId,
                 personalData.SpotRegulator,
                 assetId,

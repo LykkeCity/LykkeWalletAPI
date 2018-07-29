@@ -2,6 +2,6 @@
 {
     public class SwiftDepositEmailModel
     {
-        public double Amount { set; get; }
+        public decimal Amount { set; get; }
     }
 }
