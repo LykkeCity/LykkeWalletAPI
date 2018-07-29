@@ -34,6 +34,8 @@ namespace Core.Exceptions
                     return "KYC required for this operation";
                 case ExceptionType.LimitReached:
                     return "The limit is reached";
+                case ExceptionType.InvalidInput:
+                    return "One of the provided values was not valid";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(exceptionType), exceptionType, null);
             }
@@ -47,6 +49,7 @@ namespace Core.Exceptions
         PendingDialogs,
         AddressNotGenerated,
         KycRequired,
-        LimitReached
+        LimitReached,
+        InvalidInput
     }
 }

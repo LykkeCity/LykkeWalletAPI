@@ -150,6 +150,9 @@ namespace LykkeApi2.Controllers
             if(!asset.SwiftDepositEnabled || !assetsAvailableToClient.Contains(assetId))
                 throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
             
+            if(model.Amount <= 0 || model.Amount != decimal.Round(model.Amount, asset.Accuracy))
+                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.InvalidInput);
+            
             var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             if (status != KycStatus.Ok)
