@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization.Formatters;
 using System.Threading.Tasks;
 using Core.Exceptions;
 using Core.Services;
@@ -8,10 +9,16 @@ using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.ClientDialogs.Client.Models;
 using Lykke.Service.FeeCalculator.Client;
+using Lykke.Service.Kyc.Abstractions.Domain.Verification;
+using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Limitations.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
+using Lykke.Service.PersonalData.Contract;
+using Lykke.Service.SwiftCredentials.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
+using LykkeApi2.Models.Deposits;
 using LykkeApi2.Models.Fees;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -29,6 +36,10 @@ namespace LykkeApi2.Controllers
         private readonly IBlockchainWalletsClient _blockchainWalletsClient;
         private readonly IAssetsHelper _assetsHelper;
         private readonly IClientDialogsClient _clientDialogsClient;
+        private readonly ISwiftCredentialsClient _swiftCredentialsClient;
+        private readonly IKycStatusService _kycStatusService;
+        private readonly IPersonalDataService _personalDataService;
+        private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly IRequestContext _requestContext;
 
         public DepositsController(
@@ -37,6 +48,10 @@ namespace LykkeApi2.Controllers
             IAssetsHelper assetsHelper,
             IBlockchainWalletsClient blockchainWalletsClient,
             IClientDialogsClient clientDialogsClient,
+            ISwiftCredentialsClient swiftCredentialsClient,
+            IKycStatusService kycStatusService,
+            IPersonalDataService personalDataService,
+            ILimitationsServiceClient limitationsServiceClient,
             IRequestContext requestContext)
         {
             _paymentSystemService = paymentSystemService;
@@ -44,6 +59,10 @@ namespace LykkeApi2.Controllers
             _assetsHelper = assetsHelper;
             _blockchainWalletsClient = blockchainWalletsClient;
             _clientDialogsClient = clientDialogsClient;
+            _swiftCredentialsClient = swiftCredentialsClient;
+            _kycStatusService = kycStatusService;
+            _personalDataService = personalDataService;
+            _limitationsServiceClient = limitationsServiceClient;
             _requestContext = requestContext;
         }
 
@@ -114,6 +133,86 @@ namespace LykkeApi2.Controllers
             };
 
             return Ok(resp);
+        }
+
+        [HttpPost]
+        [Route("swift/{assetId}/email")]
+        public async Task<IActionResult> PostRequestSwiftRequisites([FromRoute] string assetId, [FromBody] SwiftDepositEmailModel model)
+        {
+            var asset = await _assetsHelper.GetAssetAsync(assetId);
+            
+            var assetsAvailableToClient =
+                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+            
+            if(asset == null)
+                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
+            
+            if(!asset.SwiftDepositEnabled || !assetsAvailableToClient.Contains(assetId))
+                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
+            
+            if(model.Amount <= 0 || model.Amount != decimal.Round(model.Amount, asset.Accuracy))
+                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.InvalidInput);
+            
+            var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
+            if (status != KycStatus.Ok)
+                throw new ClientException(ExceptionType.KycRequired);
+            
+            var checkResult = await _limitationsServiceClient.CheckAsync(
+                _requestContext.ClientId,
+                assetId,
+                decimal.ToDouble(model.Amount),
+                CurrencyOperationType.SwiftTransfer);
+            
+            if (!checkResult.IsValid)
+                throw new ClientException(ExceptionType.LimitReached);
+            
+            var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+
+            _swiftCredentialsClient.EmailRequestAsync(
+                _requestContext.ClientId,
+                personalData.SpotRegulator,
+                assetId,
+                model.Amount);
+
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("swift/{assetId}/requisites")]
+        [ProducesResponseType(typeof(SwiftRequisitesRespModel), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetSwiftRequisites([FromRoute] string assetId)
+        {
+            var asset = await _assetsHelper.GetAssetAsync(assetId);
+            
+            var assetsAvailableToClient =
+                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+            
+            if(asset == null)
+                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
+            
+            if(!asset.SwiftDepositEnabled || !assetsAvailableToClient.Contains(assetId))
+                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
+            
+            var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
+            if (status != KycStatus.Ok)
+                throw new ClientException(ExceptionType.KycRequired);
+            
+            var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+            
+            var creds = await _swiftCredentialsClient.GetForClientAsync(_requestContext.ClientId, personalData.SpotRegulator, assetId);
+            
+            return Ok(new SwiftRequisitesRespModel
+            {
+                AccountName = creds.AccountName,
+                AccountNumber = creds.AccountNumber,
+                BankAddress = creds.BankAddress,
+                Bic = creds.Bic,
+                CompanyAddress = creds.CompanyAddress,
+                CorrespondentAccount = creds.CorrespondentAccount,
+                PurposeOfPayment = creds.PurposeOfPayment
+            });
         }
 
         [HttpGet]

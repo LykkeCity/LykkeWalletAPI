@@ -30,6 +30,12 @@ namespace Core.Exceptions
                     return "Pending dialogs";
                 case ExceptionType.AddressNotGenerated:
                     return "Address not generated";
+                case ExceptionType.KycRequired:
+                    return "KYC required for this operation";
+                case ExceptionType.LimitReached:
+                    return "The limit is reached";
+                case ExceptionType.InvalidInput:
+                    return "One of the provided values was not valid";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(exceptionType), exceptionType, null);
             }
@@ -41,6 +47,9 @@ namespace Core.Exceptions
         AssetNotFound,
         AssetUnavailable,
         PendingDialogs,
-        AddressNotGenerated
+        AddressNotGenerated,
+        KycRequired,
+        LimitReached,
+        InvalidInput
     }
 }
