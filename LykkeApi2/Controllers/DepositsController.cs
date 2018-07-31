@@ -214,6 +214,54 @@ namespace LykkeApi2.Controllers
                 PurposeOfPayment = creds.PurposeOfPayment
             });
         }
+        
+        [HttpPost]
+        [Route("crypto/{assetId}/address")]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> PostCryptosDepositAddresses([FromRoute] string assetId)
+        {
+            var asset = await _assetsHelper.GetAssetAsync(assetId);
+
+            if (asset == null || asset.IsDisabled || !asset.BlockchainDepositEnabled)
+                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
+            
+            var assetsAvailableToClient =
+                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+
+            if (!assetsAvailableToClient.Contains(assetId) || assetId == "ETH") //temporary workaround for ETH until we can generate it through _blockchainWalletsClient.CreateWalletAsync 
+                throw new ClientException(ExceptionType.AssetUnavailable);
+
+            var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
+            
+            if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
+                throw new ClientException(ExceptionType.PendingDialogs);
+            
+            var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
+            if (status != KycStatus.Ok)
+                throw new ClientException(ExceptionType.KycRequired);
+
+            var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
+
+            if (isFirstGeneration)
+            {
+                await _blockchainWalletsClient.CreateWalletAsync(
+                    "first-generation-blockchain",
+                    assetId,
+                    Guid.Parse(_requestContext.ClientId));
+            }
+            else
+            {
+                await _blockchainWalletsClient.CreateWalletAsync(
+                    asset.BlockchainIntegrationLayerId,
+                    asset.BlockchainIntegrationLayerAssetId,
+                    Guid.Parse(_requestContext.ClientId));
+            }
+
+            return Ok();
+        }
 
         [HttpGet]
         [Route("crypto/{assetId}/address")]
@@ -237,6 +285,11 @@ namespace LykkeApi2.Controllers
             
             if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
                 throw new ClientException(ExceptionType.PendingDialogs);
+            
+            var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
+            if (status != KycStatus.Ok)
+                throw new ClientException(ExceptionType.KycRequired);
 
             var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
 
