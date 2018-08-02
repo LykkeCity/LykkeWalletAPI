@@ -73,6 +73,40 @@ namespace LykkeApi2.Controllers
             return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
         }
 
+        [HttpPost("client/csv")]
+        [SwaggerOperation("RequestClientHistoryCsv")]
+        [ProducesResponseType(typeof(RequestClientHistoryCsvResponseModel), (int)HttpStatusCode.OK)]
+        public IActionResult RequestClientHistoryCsv(
+            [FromQuery] HistoryOperationType[] operationType,
+            [FromQuery] string assetId,
+            [FromQuery] string assetPairId,
+            [FromQuery] int? take,
+            [FromQuery] int skip)
+        {
+            var id = Guid.NewGuid().ToString();
+            
+            _cqrsEngine.SendCommand(new ExportClientHistoryCommand
+            {
+                Id = id,
+                ClientId = _requestContext.ClientId,
+                OperationTypes = operationType,
+                AssetId = assetId,
+                AssetPairId = assetPairId,
+                Skip = skip,
+                Take = take
+            }, null, HistoryExportBuilderBoundedContext.Name);
+
+            return Ok(new RequestClientHistoryCsvResponseModel {Id = id});
+        }
+
+        [HttpGet("client/csv")]
+        [SwaggerOperation("GetClientHistoryCsv")]
+        [ProducesResponseType(typeof(GetClientHistoryCsvResponseModel), (int) HttpStatusCode.OK)]
+        public IActionResult GetClientHistoryCsv([FromQuery]string id)
+        {
+            return Ok(new GetClientHistoryCsvResponseModel { });
+        }
+
         /// <summary>
         /// Getting history by wallet identifier
         /// </summary>
@@ -113,31 +147,6 @@ namespace LykkeApi2.Controllers
             }
 
             return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
-        }
-
-        [HttpPost("client/csv")]
-        [SwaggerOperation("RequestClientHistoryCsv")]
-        public IActionResult RequestClientHistoryCsv(
-            [FromQuery] HistoryOperationType[] operationType,
-            [FromQuery] string assetId,
-            [FromQuery] string assetPairId,
-            [FromQuery] int? take,
-            [FromQuery] int skip)
-        {
-            var id = Guid.NewGuid().ToString();
-            
-            _cqrsEngine.SendCommand(new ExportClientHistoryCommand
-            {
-                Id = id,
-                ClientId = _requestContext.ClientId,
-                OperationTypes = operationType,
-                AssetId = assetId,
-                AssetPairId = assetPairId,
-                Skip = skip,
-                Take = take
-            }, null, HistoryExportBuilderBoundedContext.Name);
-
-            return Ok(new RequestClientHistoryCsvResponseModel {Id = id});
         }
     }
 }
