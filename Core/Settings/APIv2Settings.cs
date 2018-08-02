@@ -9,6 +9,7 @@ using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.Service.SwiftCredentials.Client;
+using Lykke.SettingsReader.Attributes;
 
 namespace Core.Settings
 {
@@ -31,6 +32,14 @@ namespace Core.Settings
         public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }
         public ClientDialogsServiceClientSettings ClientDialogsServiceClient { set; get; }
         public SwiftCredentialsServiceClientSettings SwiftCredentialsServiceClient { set; get; }
+        public SagasRabbitMq SagasRabbitMq { set; get; }
+    }
+    
+    public class SagasRabbitMq
+    {
+        [AmqpCheck]
+        public string RabbitConnectionString { get; set; }
+        public string RetryDelay { get; set; }
     }
 
     public class LimitationServiceSettings

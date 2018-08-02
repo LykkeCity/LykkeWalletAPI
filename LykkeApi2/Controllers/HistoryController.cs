@@ -8,6 +8,9 @@ using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Lykke.Cqrs;
+using Lykke.Job.HistoryExportBuilder.Contract;
+using Lykke.Job.HistoryExportBuilder.Contract.Commands;
 using Lykke.Service.ClientAccount.Client;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.OperationsHistory.AutorestClient.Models;
@@ -24,15 +27,18 @@ namespace LykkeApi2.Controllers
         private readonly IOperationsHistoryClient _operationsHistoryClient;
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountService;
+        private readonly ICqrsEngine _cqrsEngine;
 
         public HistoryController(
             IOperationsHistoryClient operationsHistoryClient, 
             IRequestContext requestContext, 
-            IClientAccountClient clientAccountService)
+            IClientAccountClient clientAccountService,
+            ICqrsEngine cqrsEngine)
         {
             _operationsHistoryClient = operationsHistoryClient ?? throw new ArgumentNullException(nameof(operationsHistoryClient));
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
+            _cqrsEngine = cqrsEngine;
         }
 
         /// <summary>
@@ -107,6 +113,31 @@ namespace LykkeApi2.Controllers
             }
 
             return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
+        }
+
+        [HttpPost("client/csv")]
+        [SwaggerOperation("RequestClientHistoryCsv")]
+        public IActionResult RequestClientHistoryCsv(
+            [FromQuery] HistoryOperationType[] operationType,
+            [FromQuery] string assetId,
+            [FromQuery] string assetPairId,
+            [FromQuery] int? take,
+            [FromQuery] int skip)
+        {
+            var id = Guid.NewGuid().ToString();
+            
+            _cqrsEngine.SendCommand(new ExportClientHistoryCommand
+            {
+                Id = id,
+                ClientId = _requestContext.ClientId,
+                OperationTypes = operationType,
+                AssetId = assetId,
+                AssetPairId = assetPairId,
+                Skip = skip,
+                Take = take
+            }, null, HistoryExportBuilderBoundedContext.Name);
+
+            return Ok(new RequestClientHistoryCsvResponseModel {Id = id});
         }
     }
 }
