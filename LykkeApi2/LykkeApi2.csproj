@@ -69,6 +69,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\LkeServices\LkeServices.csproj" />
+    <ProjectReference Include="..\Repositories\Repositories.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Strings\Phrases.Designer.cs">
@@ -90,5 +91,13 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Services" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Autofac, Version=4.6.1.0, Culture=neutral, PublicKeyToken=17863af14b0044da">
+      <HintPath>..\..\..\.nuget\packages\autofac\4.6.1\lib\netstandard1.1\Autofac.dll</HintPath>
+    </Reference>
+    <Reference Include="Lykke.AzureStorage, Version=8.10.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\.nuget\packages\lykke.azurestorage\8.10.0\lib\netstandard2.0\Lykke.AzureStorage.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

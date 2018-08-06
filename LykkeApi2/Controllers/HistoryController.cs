@@ -16,6 +16,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.OperationsHistory.AutorestClient.Models;
 using LykkeApi2.Models.History;
 using ErrorResponse = LykkeApi2.Models.ErrorResponse;
+using Repositories;
 
 namespace LykkeApi2.Controllers
 {
@@ -28,17 +29,20 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountService;
         private readonly ICqrsEngine _cqrsEngine;
+        private readonly HistoryExportsRepository _historyExportsRepository;
 
         public HistoryController(
             IOperationsHistoryClient operationsHistoryClient, 
             IRequestContext requestContext, 
             IClientAccountClient clientAccountService,
-            ICqrsEngine cqrsEngine)
+            ICqrsEngine cqrsEngine,
+            HistoryExportsRepository historyExportsRepository)
         {
             _operationsHistoryClient = operationsHistoryClient ?? throw new ArgumentNullException(nameof(operationsHistoryClient));
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
             _cqrsEngine = cqrsEngine;
+            _historyExportsRepository = historyExportsRepository;
         }
 
         /// <summary>
@@ -102,9 +106,9 @@ namespace LykkeApi2.Controllers
         [HttpGet("client/csv")]
         [SwaggerOperation("GetClientHistoryCsv")]
         [ProducesResponseType(typeof(GetClientHistoryCsvResponseModel), (int) HttpStatusCode.OK)]
-        public IActionResult GetClientHistoryCsv([FromQuery]string id)
+        public async Task<IActionResult> GetClientHistoryCsv([FromQuery]string id)
         {
-            return Ok(new GetClientHistoryCsvResponseModel { });
+            return Ok(new GetClientHistoryCsvResponseModel { Url = await _historyExportsRepository.GetUrl(_requestContext.ClientId, id)});
         }
 
         /// <summary>

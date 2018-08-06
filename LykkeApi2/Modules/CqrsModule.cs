@@ -6,9 +6,11 @@ using Lykke.Cqrs;
 using Lykke.Cqrs.Configuration;
 using Lykke.Job.HistoryExportBuilder.Contract;
 using Lykke.Job.HistoryExportBuilder.Contract.Commands;
+using Lykke.Job.HistoryExportBuilder.Contract.Events;
 using Lykke.Messaging;
 using Lykke.Messaging.RabbitMq;
 using Lykke.Messaging.Serialization;
+using LykkeApi2.Cqrs.Projections;
 
 namespace LykkeApi2.Modules
 {
@@ -29,6 +31,8 @@ namespace LykkeApi2.Modules
             var rabbitMqSettings = new RabbitMQ.Client.ConnectionFactory { Uri = _settings.SagasRabbitMq.RabbitConnectionString };
 
             builder.Register(context => new AutofacDependencyResolver(context)).As<IDependencyResolver>().SingleInstance();
+            
+            builder.RegisterType<HistoryExportProjection>().SingleInstance();
 
             var messagingEngine = new MessagingEngine(_log,
                 new TransportResolver(new Dictionary<string, TransportInfo>
@@ -53,6 +57,14 @@ namespace LykkeApi2.Modules
                             SerializationFormat.MessagePack,
                             environment: "lykke",
                             exclusiveQueuePostfix: "k8s")),
+                        
+                        Register.BoundedContext("apiv2")
+                            .ListeningEvents(
+                                typeof(ClientHistoryExpiredEvent),
+                                typeof(ClientHistoryExportedEvent))
+                            .From(HistoryExportBuilderBoundedContext.Name).On(defaultRoute)
+                            .WithProjection(typeof(HistoryExportProjection), HistoryExportBuilderBoundedContext.Name),
+                        
                         
                         Register.DefaultRouting
                             .PublishingCommands(typeof(ExportClientHistoryCommand))
