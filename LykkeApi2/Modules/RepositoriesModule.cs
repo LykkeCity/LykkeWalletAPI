@@ -9,8 +9,8 @@ namespace LykkeApi2.Modules
 {
     public class RepositoriesModule : Module
     {
-        private IReloadingManager<DbSettings> _dbSettings;
-        private ILog _log;
+        private readonly IReloadingManager<DbSettings> _dbSettings;
+        private readonly ILog _log;
         
         public RepositoriesModule(
             IReloadingManager<DbSettings> dbSettings,
@@ -24,7 +24,7 @@ namespace LykkeApi2.Modules
         {
             builder.Register(ctx =>
                 new HistoryExportsRepository(AzureTableStorage<HistoryExportEntry>.Create(
-                    _dbSettings.ConnectionString(x => x.LogsConnString),
+                    _dbSettings.ConnectionString(x => x.DataConnString),
                     HistoryExportsRepository.TableName,
                     _log)));
         }

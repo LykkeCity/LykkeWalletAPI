@@ -83,9 +83,7 @@ namespace LykkeApi2.Controllers
         public IActionResult RequestClientHistoryCsv(
             [FromQuery] HistoryOperationType[] operationType,
             [FromQuery] string assetId,
-            [FromQuery] string assetPairId,
-            [FromQuery] int? take,
-            [FromQuery] int skip)
+            [FromQuery] string assetPairId)
         {
             var id = Guid.NewGuid().ToString();
             
@@ -95,9 +93,7 @@ namespace LykkeApi2.Controllers
                 ClientId = _requestContext.ClientId,
                 OperationTypes = operationType,
                 AssetId = assetId,
-                AssetPairId = assetPairId,
-                Skip = skip,
-                Take = take
+                AssetPairId = assetPairId
             }, null, HistoryExportBuilderBoundedContext.Name);
 
             return Ok(new RequestClientHistoryCsvResponseModel {Id = id});
