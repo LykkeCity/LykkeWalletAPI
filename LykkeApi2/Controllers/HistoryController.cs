@@ -59,7 +59,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
-            [FromQuery] HistoryOperationType[] operationType,
+            [FromQuery(Name = "operationType")] HistoryOperationType[] operationType,
             [FromQuery] string assetId,
             [FromQuery] string assetPairId,
             [FromQuery] int take,
@@ -81,7 +81,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("RequestClientHistoryCsv")]
         [ProducesResponseType(typeof(RequestClientHistoryCsvResponseModel), (int)HttpStatusCode.OK)]
         public IActionResult RequestClientHistoryCsv(
-            [FromQuery] HistoryOperationType[] operationType,
+            [FromQuery(Name = "operationType")] HistoryOperationType[] operationType,
             [FromQuery] string assetId,
             [FromQuery] string assetPairId)
         {
@@ -124,7 +124,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
-            [FromQuery] HistoryOperationType[] operationType,
+            [FromQuery(Name = "operationType")] HistoryOperationType[] operationType,
             [FromQuery] string assetId,
             [FromQuery] string assetPairId,
             [FromQuery] int take,
