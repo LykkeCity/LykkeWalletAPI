@@ -80,10 +80,7 @@ namespace LykkeApi2.Controllers
         [HttpPost("client/csv")]
         [SwaggerOperation("RequestClientHistoryCsv")]
         [ProducesResponseType(typeof(RequestClientHistoryCsvResponseModel), (int)HttpStatusCode.OK)]
-        public IActionResult RequestClientHistoryCsv(
-            [FromQuery(Name = "operationType")] HistoryOperationType[] operationType,
-            [FromQuery] string assetId,
-            [FromQuery] string assetPairId)
+        public IActionResult RequestClientHistoryCsv([FromBody]RequestClientHistoryCsvRequestModel model)
         {
             var id = Guid.NewGuid().ToString();
             
@@ -91,9 +88,9 @@ namespace LykkeApi2.Controllers
             {
                 Id = id,
                 ClientId = _requestContext.ClientId,
-                OperationTypes = operationType,
-                AssetId = assetId,
-                AssetPairId = assetPairId
+                OperationTypes = model.OperationType,
+                AssetId = model.AssetId,
+                AssetPairId = model.AssetPairId
             }, null, HistoryExportBuilderBoundedContext.Name);
 
             return Ok(new RequestClientHistoryCsvResponseModel {Id = id});
