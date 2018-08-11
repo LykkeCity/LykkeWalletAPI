@@ -127,6 +127,33 @@ namespace LykkeApi2.Controllers
             
             return Ok();
         }
+
+        [HttpPost("limit/cancelAll")]
+        [SwaggerOperation("CancelAllLimitOrders")]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        public async Task<IActionResult> CancelAllLimitOrders()
+        {
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+
+            var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
+            if (confirmationRequired)
+            {
+                return BadRequest("Session confirmation is required");
+            }
+
+            var clientId = _requestContext.ClientId;
+
+            var activeOrders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
+
+            if (!activeOrders.Any())
+                return NotFound();
+
+            await Task.WhenAll(activeOrders.Select(x => _limitOrdersRepository.CancelByIdAsync(clientId, x.Id)));
+            await Task.WhenAll(activeOrders.Select(x => _matchingEngineClient.CancelLimitOrderAsync(x.Id)));
+            
+            return Ok();
+        }
         
         [HttpPost("market")]
         [SwaggerOperation("PlaceMarketOrder")]
