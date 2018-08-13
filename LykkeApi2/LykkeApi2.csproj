@@ -15,13 +15,13 @@
     <PackageReference Include="Autofac" Version="4.8.1" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="4.2.2" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="7.5.2" />
-    <PackageReference Include="Lykke.AzureStorage" Version="8.6.0" />
-    <PackageReference Include="Lykke.Common" Version="7.0.2" />
+    <PackageReference Include="Lykke.AzureStorage" Version="8.10.0" />
+    <PackageReference Include="Lykke.Common" Version="7.0.3" />
     <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.10.1" />
     <PackageReference Include="Lykke.Contracts" Version="1.0.51" />
     <PackageReference Include="Lykke.MatchingEngineConnector" Version="6.0.3" />
     <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.7" />
-    <PackageReference Include="Lykke.Logs" Version="5.1.0" />
+    <PackageReference Include="Lykke.Logs" Version="5.2.0" />
     <PackageReference Include="Lykke.MarketProfileService.Client" Version="1.0.19" />
     <PackageReference Include="Lykke.Service.BlockchainWallets.Client" Version="4.1.2" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
@@ -47,7 +47,7 @@
     <PackageReference Include="Lykke.Service.SwiftCredentials.Client" Version="1.0.0.8" />
     <PackageReference Include="Lykke.SlackNotification.AzureQueue" Version="2.0.5" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.3.0" />
-    <PackageReference Include="Lykke.SettingsReader" Version="2.4.1" />
+    <PackageReference Include="Lykke.SettingsReader" Version="3.0.0" />
     <PackageReference Include="MessagePack" Version="1.7.3.4" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.4" />
