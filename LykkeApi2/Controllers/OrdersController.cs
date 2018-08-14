@@ -132,8 +132,8 @@ namespace LykkeApi2.Controllers
             return Ok();
         }
 
-        [HttpPost("limit/cancelMany")]
-        [SwaggerOperation("CancelManyLimitOrders")]
+        [HttpPost("limit/cancelMultiple")]
+        [SwaggerOperation("CancelMultipleLimitOrders")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> CancelMultipleLimitOrders(LimitOrderCancelMultipleRequest model)
