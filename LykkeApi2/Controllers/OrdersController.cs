@@ -273,7 +273,7 @@ namespace LykkeApi2.Controllers
         }
         
         [HttpDelete("limit/{orderId}")]
-        [SwaggerOperation("CancelLimitOrder")]
+        [SwaggerOperation("CancelLimitOrderNew")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> CancelLimitOrderNew(string orderId)
