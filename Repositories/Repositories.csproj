@@ -6,4 +6,7 @@
   <ItemGroup>
     <PackageReference Include="Lykke.AzureStorage" Version="8.6.0" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+  </ItemGroup>
 </Project>

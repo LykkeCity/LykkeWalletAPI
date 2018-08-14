@@ -3,6 +3,7 @@ using Common.Log;
 using Repositories;
 using Core.Settings;
 using AzureStorage.Tables;
+using Core.Repositories;
 using Lykke.SettingsReader;
 
 namespace LykkeApi2.Modules
@@ -22,7 +23,7 @@ namespace LykkeApi2.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.Register(ctx =>
+            builder.RegisterInstance<IHistoryExportsRepository>(
                 new HistoryExportsRepository(AzureTableStorage<HistoryExportEntry>.Create(
                     _dbSettings.ConnectionString(x => x.DataConnString),
                     HistoryExportsRepository.TableName,

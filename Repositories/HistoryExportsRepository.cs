@@ -1,11 +1,12 @@
 ﻿using System.Threading.Tasks;
 using AzureStorage;
+using Core.Repositories;
 using Lykke.AzureStorage.Tables;
 using Microsoft.WindowsAzure.Storage.Table;
 
 namespace Repositories
 {
-    public class HistoryExportsRepository
+    public class HistoryExportsRepository : IHistoryExportsRepository
     {
         public const string TableName = "HistoryExportsApi2Projection";
         

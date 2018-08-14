@@ -8,6 +8,7 @@ using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Core.Repositories;
 using Lykke.Cqrs;
 using Lykke.Job.HistoryExportBuilder.Contract;
 using Lykke.Job.HistoryExportBuilder.Contract.Commands;
@@ -29,7 +30,7 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountService;
         private readonly ICqrsEngine _cqrsEngine;
-        private readonly HistoryExportsRepository _historyExportsRepository;
+        private readonly IHistoryExportsRepository _historyExportsRepository;
 
         public HistoryController(
             IOperationsHistoryClient operationsHistoryClient, 
