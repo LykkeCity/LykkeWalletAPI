@@ -37,7 +37,7 @@ namespace LykkeApi2.Controllers
             IRequestContext requestContext, 
             IClientAccountClient clientAccountService,
             ICqrsEngine cqrsEngine,
-            HistoryExportsRepository historyExportsRepository)
+            IHistoryExportsRepository historyExportsRepository)
         {
             _operationsHistoryClient = operationsHistoryClient ?? throw new ArgumentNullException(nameof(operationsHistoryClient));
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));

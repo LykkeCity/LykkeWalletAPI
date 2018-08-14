@@ -23,11 +23,13 @@ namespace LykkeApi2.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterInstance<IHistoryExportsRepository>(
+            builder.Register(ctx => 
                 new HistoryExportsRepository(AzureTableStorage<HistoryExportEntry>.Create(
                     _dbSettings.ConnectionString(x => x.DataConnString),
                     HistoryExportsRepository.TableName,
-                    _log)));
+                    _log)))
+                .As<IHistoryExportsRepository>()
+                .SingleInstance();
         }
     }
 }
