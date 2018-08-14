@@ -44,10 +44,10 @@ namespace Core.Settings
     }
 
     public class GlobalSettings
-    {
+    {        
         public string[] BlockedAssetPairs { get; set; }
         public bool BitcoinBlockchainOperationsDisabled { get; set; }
-        public bool BtcOperationsDisabled { get; set; }
+        public bool BtcOperationsDisabled { get; set; }        
     }
 
     public class SlackNotificationsSettings
@@ -69,6 +69,7 @@ namespace Core.Settings
         public CacheSettings CacheSettings { get; set; }
         public bool EnableFees { get; set; }
         public bool EnableSessionValidation { get; set; }
+        public bool EnableTwoFactor { get; set; }   
     }
 
     public class IcoSettings
@@ -122,6 +123,7 @@ namespace Core.Settings
     public class TargetClientIdFeeSettings
     {
         public string WalletApi { get; set; }
+        public string Cashout { get; set; }
     }
 
     public class IpEndpointSettings

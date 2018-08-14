@@ -12,6 +12,8 @@ using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Contracts;
+using Lykke.Service.Operations.Contracts.Commands;
+using Lykke.Service.Operations.Contracts.Orders;
 using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.Session.Client;
@@ -183,9 +185,9 @@ namespace LykkeApi2.Controllers
                     MinInvertedVolume = pair.MinInvertedVolume
                 },
                 Volume = Math.Abs(request.Volume),
-                OrderAction = request.OrderAction == Models.Orders.OrderAction.Buy
-					 ? Lykke.Service.Operations.Contracts.OrderAction.Buy
-					 : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+                OrderAction = request.OrderAction == OrderAction.Buy
+					 ? Lykke.Service.Operations.Contracts.Orders.OrderAction.Buy
+					 : Lykke.Service.Operations.Contracts.Orders.OrderAction.Sell,
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
@@ -248,7 +250,9 @@ namespace LykkeApi2.Controllers
                 },
                 Volume = Math.Abs(request.Volume),
                 Price = request.Price,
-                OrderAction = request.OrderAction == Models.Orders.OrderAction.Buy ? Lykke.Service.Operations.Contracts.OrderAction.Buy : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+                OrderAction = request.OrderAction == OrderAction.Buy 
+                    ? Lykke.Service.Operations.Contracts.Orders.OrderAction.Buy 
+                    : Lykke.Service.Operations.Contracts.Orders.OrderAction.Sell,
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
