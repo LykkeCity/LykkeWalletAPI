@@ -145,7 +145,8 @@ namespace LykkeApi2.Controllers
                     KycNeeded = asset.KycNeeded,
                     BlockchainWithdrawal = asset.BlockchainWithdrawal,
                     CashoutMinimalAmount = (decimal) asset.CashoutMinimalAmount,
-                    LowVolumeAmount = (decimal?) asset.LowVolumeAmount ?? 0
+                    LowVolumeAmount = (decimal?) asset.LowVolumeAmount ?? 0,
+                    LykkeEntityId = asset.LykkeEntityId
                 },
                 Client = new ClientCashoutModel
                 {
@@ -161,7 +162,7 @@ namespace LykkeApi2.Controllers
                     CashOutBlocked = false, // TODO
                     FeeSettings = new FeeSettingsCashoutModel
                     {
-                        TargetClients = new Dictionary<string, string>()
+                        TargetClients = new Dictionary<string, string>
                         {
                             { "Cashout", _feeSettings.TargetClientId.Cashout }
                         }
