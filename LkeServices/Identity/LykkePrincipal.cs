@@ -61,17 +61,6 @@ namespace LkeServices.Identity
             if (session == null)
                 return null;
 
-            if (DateTime.UtcNow - session.LastAction > LykkeConstants.SessionLifetime)
-            {
-                await _clientSessionsClient.DeleteSessionIfExistsAsync(token);
-                return null;
-            }
-
-            if (DateTime.UtcNow - session.LastAction > LykkeConstants.SessionRefreshPeriod)
-            {
-                await _clientSessionsClient.RefreshSessionAsync(token);
-            }
-
             result = new ClaimsPrincipal(LykkeIdentity.Create(session.ClientId));
             if (session.PartnerId != null)
             {
