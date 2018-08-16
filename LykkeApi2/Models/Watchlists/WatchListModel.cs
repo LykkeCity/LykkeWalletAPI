@@ -7,7 +7,6 @@ namespace LykkeApi2.Models.Watchlists
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public IEnumerable<string> AssetIds { get; set; }
         public IEnumerable<string> AssetPairIds { get; set; }
         public int Order { get; set; }
         public bool ReadOnlyProperty { get; set; }
@@ -23,7 +22,6 @@ namespace LykkeApi2.Models.Watchlists
                 Name = watchList.Name,
                 Order = watchList.Order,
                 ReadOnlyProperty = watchList.ReadOnlyProperty,
-                AssetIds = watchList.AssetIds ?? new List<string>(),
                 AssetPairIds = watchList.AssetIds ?? new List<string>()
             };
         }
