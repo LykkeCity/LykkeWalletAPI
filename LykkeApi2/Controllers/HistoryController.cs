@@ -8,11 +8,16 @@ using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Core.Repositories;
+using Lykke.Cqrs;
+using Lykke.Job.HistoryExportBuilder.Contract;
+using Lykke.Job.HistoryExportBuilder.Contract.Commands;
 using Lykke.Service.ClientAccount.Client;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Lykke.Service.OperationsHistory.AutorestClient.Models;
 using LykkeApi2.Models.History;
 using ErrorResponse = LykkeApi2.Models.ErrorResponse;
+using Repositories;
 
 namespace LykkeApi2.Controllers
 {
@@ -24,15 +29,21 @@ namespace LykkeApi2.Controllers
         private readonly IOperationsHistoryClient _operationsHistoryClient;
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountService;
+        private readonly ICqrsEngine _cqrsEngine;
+        private readonly IHistoryExportsRepository _historyExportsRepository;
 
         public HistoryController(
             IOperationsHistoryClient operationsHistoryClient, 
             IRequestContext requestContext, 
-            IClientAccountClient clientAccountService)
+            IClientAccountClient clientAccountService,
+            ICqrsEngine cqrsEngine,
+            IHistoryExportsRepository historyExportsRepository)
         {
             _operationsHistoryClient = operationsHistoryClient ?? throw new ArgumentNullException(nameof(operationsHistoryClient));
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
+            _cqrsEngine = cqrsEngine;
+            _historyExportsRepository = historyExportsRepository;
         }
 
         /// <summary>
@@ -49,7 +60,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByClientId(
-            [FromQuery] HistoryOperationType[] operationType,
+            [FromQuery(Name = "operationType")] HistoryOperationType[] operationType,
             [FromQuery] string assetId,
             [FromQuery] string assetPairId,
             [FromQuery] int take,
@@ -65,6 +76,33 @@ namespace LykkeApi2.Controllers
             }
 
             return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
+        }
+
+        [HttpPost("client/csv")]
+        [SwaggerOperation("RequestClientHistoryCsv")]
+        [ProducesResponseType(typeof(RequestClientHistoryCsvResponseModel), (int)HttpStatusCode.OK)]
+        public IActionResult RequestClientHistoryCsv([FromBody]RequestClientHistoryCsvRequestModel model)
+        {
+            var id = Guid.NewGuid().ToString();
+            
+            _cqrsEngine.SendCommand(new ExportClientHistoryCommand
+            {
+                Id = id,
+                ClientId = _requestContext.ClientId,
+                OperationTypes = model.OperationType,
+                AssetId = model.AssetId,
+                AssetPairId = model.AssetPairId
+            }, null, HistoryExportBuilderBoundedContext.Name);
+
+            return Ok(new RequestClientHistoryCsvResponseModel {Id = id});
+        }
+
+        [HttpGet("client/csv")]
+        [SwaggerOperation("GetClientHistoryCsv")]
+        [ProducesResponseType(typeof(GetClientHistoryCsvResponseModel), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> GetClientHistoryCsv([FromQuery]string id)
+        {
+            return Ok(new GetClientHistoryCsvResponseModel { Url = await _historyExportsRepository.GetUrl(_requestContext.ClientId, id)});
         }
 
         /// <summary>
@@ -84,7 +122,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
-            [FromQuery] HistoryOperationType[] operationType,
+            [FromQuery(Name = "operationType")] HistoryOperationType[] operationType,
             [FromQuery] string assetId,
             [FromQuery] string assetPairId,
             [FromQuery] int take,
