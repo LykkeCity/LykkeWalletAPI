@@ -34,8 +34,7 @@ namespace Core.Constants
 
         public const int DefaultRefundTimeoutDays = 30;
 
-        public static readonly TimeSpan SessionLifetime = TimeSpan.FromDays(3);
-        public static readonly TimeSpan SessionRefreshPeriod = TimeSpan.FromDays(1);
+
 
         #region Cache keys
 
