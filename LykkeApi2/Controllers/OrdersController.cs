@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Common;
 using Core.Identity;
 using Core.Settings;
 using Lykke.MatchingEngine.Connector.Abstractions.Models;
@@ -109,6 +110,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("CancelLimitOrder")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CancelLimitOrder(string orderId)
         {
             var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
@@ -126,8 +128,10 @@ namespace LykkeApi2.Controllers
             if (activeOrders.All(x => x.Id != orderId))
                 return NotFound();
             
-            await _limitOrdersRepository.CancelByIdAsync(clientId, orderId);
-            await _matchingEngineClient.CancelLimitOrderAsync(orderId);
+            var meResult = await _matchingEngineClient.CancelLimitOrderAsync(orderId);
+            
+            if(meResult.Status != MeStatusCodes.Ok)
+                throw new Exception($"{orderId} order cancelation failed with {meResult.ToJson()}");
             
             return Ok();
         }
@@ -276,33 +280,16 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("CancelLimitOrderNew")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        public async Task<IActionResult> CancelLimitOrderNew(string orderId)
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        public Task<IActionResult> CancelLimitOrderNew(string orderId)
         {
-            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
-
-            var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
-            if (confirmationRequired)
-            {
-                return BadRequest("Session confirmation is required");
-            }
-
-            var clientId = _requestContext.ClientId;
-
-            var activeOrders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
-
-            if (activeOrders.All(x => x.Id != orderId))
-                return NotFound();
-            
-            await _limitOrdersRepository.CancelByIdAsync(clientId, orderId);
-            await _matchingEngineClient.CancelLimitOrderAsync(orderId);
-            
-            return Ok();
+            return CancelLimitOrder(orderId);
         }
 
         [HttpDelete("limit")]
         [SwaggerOperation("CancelMultipleLimitOrders")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CancelMultipleLimitOrders([FromBody]LimitOrderCancelMultipleRequest model)
         {
             var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
@@ -319,7 +306,7 @@ namespace LykkeApi2.Controllers
                 
                 if (pair == null)
                 {
-                    return NotFound($"Asset pair '{model.AssetPairId}' not found.");
+                    return BadRequest($"Asset pair '{model.AssetPairId}' not found.");
                 }
             }
 
@@ -328,22 +315,21 @@ namespace LykkeApi2.Controllers
             var activeOrders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
 
             if (!activeOrders.Any())
-                return NotFound();
+                return Ok();
 
-            await _limitOrdersRepository.CancelMultipleAsync(
-                clientId,
-                new LimitOrderCancelMultipleRequestOR
-                {
-                    AssetPairId = model.AssetPairId
-                });
-            await _matchingEngineClient.MassCancelLimitOrdersAsync(new LimitOrderMassCancelModel
+            var cancelModel = new LimitOrderMassCancelModel
             {
                 AssetPairId = model.AssetPairId,
                 ClientId = clientId,
                 Id = Guid.NewGuid().ToString(),
                 IsBuy = null
-            });
+            };
             
+            var meResult = await _matchingEngineClient.MassCancelLimitOrdersAsync(cancelModel);
+            
+            if(meResult.Status != MeStatusCodes.Ok)
+                throw new Exception($"{cancelModel.ToJson()} request failed with {meResult.ToJson()}");
+
             return Ok();
         }
 
