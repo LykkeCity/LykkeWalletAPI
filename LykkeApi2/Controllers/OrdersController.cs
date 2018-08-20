@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Common;
 using Core.Identity;
 using Core.Settings;
+using Lykke.MatchingEngine.Connector.Abstractions.Models;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
@@ -12,6 +14,7 @@ using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Contracts;
+using Lykke.Service.OperationsRepository.AutorestClient.Models;
 using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.Session.Client;
@@ -22,6 +25,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using LimitOrderCancelMultipleRequest = LykkeApi2.Models.Orders.LimitOrderCancelMultipleRequest;
+using LimitOrderCancelMultipleRequestOR = Lykke.Service.OperationsRepository.AutorestClient.Models.LimitOrderCancelMultipleRequest;
 using OrderAction = LykkeApi2.Models.Orders.OrderAction;
 
 namespace LykkeApi2.Controllers
@@ -105,6 +110,7 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("CancelLimitOrder")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CancelLimitOrder(string orderId)
         {
             var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
@@ -122,8 +128,10 @@ namespace LykkeApi2.Controllers
             if (activeOrders.All(x => x.Id != orderId))
                 return NotFound();
             
-            await _limitOrdersRepository.CancelByIdAsync(clientId, orderId);
-            await _matchingEngineClient.CancelLimitOrderAsync(orderId);
+            var meResult = await _matchingEngineClient.CancelLimitOrderAsync(orderId);
+            
+            if(meResult.Status != MeStatusCodes.Ok)
+                throw new Exception($"{orderId} order cancelation failed with {meResult.ToJson()}");
             
             return Ok();
         }
@@ -266,7 +274,64 @@ namespace LykkeApi2.Controllers
             }
 
             return Created(Url.Action("Get", "Operations", new { id }), id);                  
-        }        
+        }
+        
+        [HttpDelete("limit/{orderId}")]
+        [SwaggerOperation("CancelLimitOrderNew")]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        public Task<IActionResult> CancelLimitOrderNew(string orderId)
+        {
+            return CancelLimitOrder(orderId);
+        }
+
+        [HttpDelete("limit")]
+        [SwaggerOperation("CancelMultipleLimitOrders")]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> CancelMultipleLimitOrders([FromBody]LimitOrderCancelMultipleRequest model)
+        {
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+
+            var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
+            if (confirmationRequired)
+            {
+                return BadRequest("Session confirmation is required");
+            }
+
+            if (!string.IsNullOrEmpty(model.AssetPairId))
+            {
+                var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(model.AssetPairId);
+                
+                if (pair == null)
+                {
+                    return BadRequest($"Asset pair '{model.AssetPairId}' not found.");
+                }
+            }
+
+            var clientId = _requestContext.ClientId;
+            
+            var activeOrders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
+
+            if (!activeOrders.Any())
+                return Ok();
+
+            var cancelModel = new LimitOrderMassCancelModel
+            {
+                AssetPairId = model.AssetPairId,
+                ClientId = clientId,
+                Id = Guid.NewGuid().ToString(),
+                IsBuy = null
+            };
+            
+            var meResult = await _matchingEngineClient.MassCancelLimitOrdersAsync(cancelModel);
+            
+            if(meResult.Status != MeStatusCodes.Ok)
+                throw new Exception($"{cancelModel.ToJson()} request failed with {meResult.ToJson()}");
+
+            return Ok();
+        }
 
         private AssetModel ConvertAssetToAssetModel(Asset asset)
         {
