@@ -523,4 +523,37 @@ We apologies for the inconvenience, and would like to thank you for your underst
   <data name="PaymentIsMoreThanMaxLimit" xml:space="preserve">
     <value>The order amount should be less than {0} {1}</value>
   </data>
+  <data name="InvalidPasswordHash" xml:space="preserve">
+    <value>Password hash is invalid.</value>
+  </data>
+  <data name="PasswordRecoveryFail" xml:space="preserve">
+    <value>Unable to complete password recovery.</value>
+  </data>
+  <data name="ImageTypeError_FileNameNullOrWhitespace" xml:space="preserve">
+    <value>{0} name should not be empty.</value>
+  </data>
+  <data name="ImageTypeError_FileExtensionEmptyOrInvalid" xml:space="preserve">
+    <value>{0} should have valid extension. Allowed extensions: {1}.</value>
+  </data>
+  <data name="ImageTypeError_FileStreamIsNull" xml:space="preserve">
+    <value>{0} should contain data.</value>
+  </data>
+  <data name="ImageTypeError_FileStreamIsTooShort" xml:space="preserve">
+    <value>{0} content should not be too short.</value>
+  </data>
+  <data name="ImageTypeError_InvalidHexSignature" xml:space="preserve">
+    <value>{0} should be an image. Allowed image formats: {1}.</value>
+  </data>
+  <data name="NoSpecialCharactersError_ContainsSpecialCharacters" xml:space="preserve">
+    <value>{0} should not contain any special characters.</value>
+  </data>
+  <data name="PasswordHashError_NotSha256" xml:space="preserve">
+    <value>{0} should be a valid sha256 hash.</value>
+  </data>
+  <data name="JweTokenError_NotJweToken" xml:space="preserve">
+    <value>{0} should be a valid JWE token.</value>
+  </data>
+  <data name="OnlyDigitsError_NotOnlyDigits" xml:space="preserve">
+    <value>{0} should contain only digits.</value>
+  </data>
 </root>

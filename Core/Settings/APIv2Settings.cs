@@ -1,7 +1,9 @@
 ﻿using System.Net;
+using Core.Constants;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.ClientDialogs.Client;
+using Lykke.Service.ClientAccountRecovery.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
@@ -33,6 +35,9 @@ namespace Core.Settings
         public ClientDialogsServiceClientSettings ClientDialogsServiceClient { set; get; }
         public SwiftCredentialsServiceClientSettings SwiftCredentialsServiceClient { set; get; }
         public SagasRabbitMq SagasRabbitMq { set; get; }
+        public ClientAccountRecoveryServiceClientSettings ClientRecoveryServiceClient { set; get; }
+        [Optional]
+        public ClientAccountRecoverySettings ClientAccountRecoverySettings { set; get; }
     }
     
     public class SagasRabbitMq
@@ -170,6 +175,12 @@ namespace Core.Settings
         {
             return string.Format(settings.OrderBooksCacheKeyPattern, assetPairId, isBuy);
         }
+    }
+
+    public class ClientAccountRecoverySettings
+    {
+        [Optional]
+        public int? SelfieImageMaxSizeMBytes { get; set; }
     }
 }
 

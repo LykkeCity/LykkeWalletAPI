@@ -28,6 +28,7 @@ using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.SwiftCredentials.Client;
+using Lykke.Service.PersonalData;
 
 namespace LykkeApi2.Modules
 {
@@ -68,6 +69,8 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
+
+            builder.RegisterPersonalDataClientAccountRecoveryClient(_apiSettings.CurrentValue.PersonalDataServiceSettings.ServiceUri, _log);
 
             builder.RegisterOperationsHistoryClient(_apiSettings.CurrentValue.OperationsHistoryServiceClient, _log);
 

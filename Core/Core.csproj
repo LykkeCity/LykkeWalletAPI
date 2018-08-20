@@ -8,6 +8,7 @@
     <PackageReference Include="Lykke.Service.AssetDisclaimers.Client" Version="3.0.0" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
     <PackageReference Include="Lykke.Service.ClientDialogs.Client" Version="1.0.0" />
+    <PackageReference Include="Lykke.Service.ClientAccountRecovery.Client" Version="1.0.18" />
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.220" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.1.2" />
@@ -15,7 +16,7 @@
     <PackageReference Include="Lykke.Service.OperationsHistory.Client" Version="2.2.2" />
     <PackageReference Include="Lykke.Service.Assets.Client" Version="4.0.1" />
     <PackageReference Include="Lykke.Service.OperationsRepository.Client" Version="1.0.97" />
-    <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.79" />
+    <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.82" />
     <PackageReference Include="Lykke.Service.PaymentSystem.Client" Version="1.0.22" />
     <PackageReference Include="Lykke.Service.ExchangeOperations.Client" Version="1.1.20" />
     <PackageReference Include="Lykke.Service.SwiftCredentials.Client" Version="1.0.0.8" />
