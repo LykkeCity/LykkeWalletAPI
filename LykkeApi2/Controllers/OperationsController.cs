@@ -125,6 +125,10 @@ namespace LykkeApi2.Controllers
                 return NotFound($"Asset '{cmd.AssetId}' not found.");
             }
 
+            var balance = await _balancesClient.GetClientBalanceByAssetId(new ClientBalanceByAssetIdModel(cmd.AssetId, _requestContext.ClientId));
+            var cashoutSettings = await _clientAccountClient.GetCashOutBlockAsync(_requestContext.ClientId);
+            var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
             var cashoutCommand = new CreateCashoutCommand
             {
                 DestinationAddress = cmd.DestinationAddress,
@@ -150,11 +154,10 @@ namespace LykkeApi2.Controllers
                 },
                 Client = new ClientCashoutModel
                 {
-                    Id = new Guid(_requestContext.ClientId),
-                    BackupDone = (await _clientAccountClient.GetBackupAsync(_requestContext.ClientId)).BackupDone,
-                    Balance = (await _balancesClient.GetClientBalanceByAssetId(new ClientBalanceByAssetIdModel(cmd.AssetId, _requestContext.ClientId))).Balance,                    
-                    CashOutBlocked = (await _clientAccountClient.GetCashOutBlockAsync(_requestContext.ClientId)).CashOutBlocked,
-                    KycStatus = (await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId)).ToString()
+                    Id = new Guid(_requestContext.ClientId),                    
+                    Balance = balance?.Balance ?? 0,
+                    CashOutBlocked = cashoutSettings.CashOutBlocked,
+                    KycStatus = kycStatus.ToString()
                 },
                 GlobalSettings = new GlobalSettingsCashoutModel
                 {
