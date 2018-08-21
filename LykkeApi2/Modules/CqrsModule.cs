@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Autofac;
 using Common.Log;
 using Core.Settings;
@@ -10,6 +10,7 @@ using Lykke.Job.HistoryExportBuilder.Contract.Events;
 using Lykke.Messaging;
 using Lykke.Messaging.RabbitMq;
 using Lykke.Messaging.Serialization;
+using Lykke.Service.Operations.Contracts.Commands;
 using LykkeApi2.Cqrs.Projections;
 
 namespace LykkeApi2.Modules
@@ -59,6 +60,8 @@ namespace LykkeApi2.Modules
                             exclusiveQueuePostfix: "k8s")),
                         
                         Register.BoundedContext("apiv2")
+                            .PublishingCommands(typeof(CreateCashoutCommand))
+                                .To("operations").With("commands")
                             .ListeningEvents(
                                 typeof(ClientHistoryExpiredEvent),
                                 typeof(ClientHistoryExportedEvent))
