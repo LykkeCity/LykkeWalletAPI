@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Core.Exceptions;
 using Core.Settings;
+using Lykke.Cqrs;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Balances.AutorestClient.Models;
 using Lykke.Service.Balances.Client;
@@ -33,6 +34,7 @@ namespace LykkeApi2.Controllers
         private readonly FeeSettings _feeSettings;
         private readonly BaseSettings _baseSettings;
         private readonly IOperationsClient _operationsClient;
+        private readonly ICqrsEngine _cqrsEngine;
         private readonly IRequestContext _requestContext;
 
         public OperationsController(
@@ -42,7 +44,8 @@ namespace LykkeApi2.Controllers
             IClientAccountClient clientAccountClient,
             FeeSettings feeSettings,
             BaseSettings baseSettings,
-            IOperationsClient operationsClient,            
+            IOperationsClient operationsClient,
+            ICqrsEngine cqrsEngine,
             IRequestContext requestContext)
         {
             _assetsServiceWithCache = assetsServiceWithCache;
@@ -52,6 +55,7 @@ namespace LykkeApi2.Controllers
             _feeSettings = feeSettings;
             _baseSettings = baseSettings;
             _operationsClient = operationsClient;
+            _cqrsEngine = cqrsEngine;
             _requestContext = requestContext;
         }
 
@@ -130,7 +134,8 @@ namespace LykkeApi2.Controllers
             var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             var cashoutCommand = new CreateCashoutCommand
-            {
+            {       
+                OperationId = id,
                 DestinationAddress = cmd.DestinationAddress,
                 DestinationAddressExtension = cmd.DestinationAddressExtension,
                 Volume = cmd.Volume,
@@ -173,18 +178,8 @@ namespace LykkeApi2.Controllers
                 }
             };
 
-            try
-            {
-                await _operationsClient.CreateCashout(id, cashoutCommand);
-            }
-            catch (HttpOperationException e)
-            {
-                if (e.Response.StatusCode == HttpStatusCode.BadRequest)
-                    return BadRequest(JObject.Parse(e.Response.Content));
-
-                throw;
-            }
-
+            _cqrsEngine.SendCommand(cashoutCommand, "operations-api", "operations");
+            
             return Created(Url.Action("Get", new { id }), id);
         }
 
