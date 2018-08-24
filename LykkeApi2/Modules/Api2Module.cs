@@ -8,10 +8,12 @@ using Core.Enumerators;
 using Core.Identity;
 using Core.Services;
 using Core.Settings;
+using Core.Services.Recovery;
 using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Countries;
 using LkeServices.Identity;
+using LkeServices.Recovery;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.RateCalculator.Client;
@@ -89,6 +91,12 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
 
+            builder.Register(c => new RecoveryFileSettings(_apiSettings.CurrentValue.ClientAccountRecoverySettings?.SelfieImageMaxSizeMBytes, _log))
+                .As<IRecoveryFileSettings>()
+                .SingleInstance();
+
+            RegisterDictionaryEntities(builder);
+            
             BindServices(builder, _settings);
             builder.Populate(_services);
         }

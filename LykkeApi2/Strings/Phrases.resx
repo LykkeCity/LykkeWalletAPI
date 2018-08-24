@@ -556,4 +556,7 @@ We apologies for the inconvenience, and would like to thank you for your underst
   <data name="OnlyDigitsError_NotOnlyDigits" xml:space="preserve">
     <value>{0} should contain only digits.</value>
   </data>
+  <data name="InvalidEnum" xml:space="preserve">
+    <value>{0} is invalid. Allowed values are: {1}.</value>
+  </data>
 </root>

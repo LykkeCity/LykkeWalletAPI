@@ -1,5 +1,4 @@
-﻿using Core.Constants;
-using FluentValidation;
+﻿using FluentValidation;
 using LykkeApi2.Models.Recovery;
 using LykkeApi2.Validation.Common;
 

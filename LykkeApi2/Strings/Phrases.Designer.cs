@@ -520,6 +520,15 @@ namespace LykkeApi2.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} is invalid. Allowed values are: {1}..
+        /// </summary>
+        public static string InvalidEnum {
+            get {
+                return ResourceManager.GetString("InvalidEnum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid Kyc status.
         /// </summary>
         public static string InvalidKycStatus {

@@ -26,6 +26,7 @@ using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.History.Client;
 using Lykke.Service.ConfirmationCodes.Client;
+using Lykke.Service.ClientAccountRecovery.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.SwiftCredentials.Client;
 using Lykke.Service.PersonalData;
@@ -108,6 +109,9 @@ namespace LykkeApi2.Modules
             builder.RegisterConfirmationCodesClient(_apiSettings.Nested(r => r.ConfirmationCodesClient).CurrentValue);
             
             builder.RegisterBlockchainCashoutPreconditionsCheckClient(_apiSettings.CurrentValue.BlockchainCashoutPreconditionsCheckServiceClient.ServiceUrl);
+
+            builder.RegisterClientAccountRecoveryClient(_apiSettings.CurrentValue.ClientRecoveryServiceClient.ServiceUrl,
+                _apiSettings.CurrentValue.ClientRecoveryServiceClient.ApiKey);
             
             builder.Populate(_services);
         }

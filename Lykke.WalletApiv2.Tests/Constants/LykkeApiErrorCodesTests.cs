@@ -21,12 +21,13 @@ namespace Lykke.WalletApiv2.Tests.Constants
             "KycRequired",
             "DepositLimitReached",
             "InconsistentState"
-            "RecoveryCompleteFailedInvalidData",
             "RecoveryStartAttemptLimitReached",
             "RecoveryUploadInvalidSelfieFile",
             "RecoverySubmitChallengeInvalidValue",
             "ModelValidationFailed",
             "InvalidInput",
+            "InvalidData",
+            "SomethingWentWrong",
         };
 
         /// <summary>

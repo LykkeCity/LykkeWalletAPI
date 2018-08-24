@@ -97,6 +97,24 @@ namespace Core.Exceptions
             return new LykkeApiErrorException(HttpStatusCode.Forbidden, lykkeApiErrorCode, message);
         }
 
+        /// <summary>
+        ///     Create a 500 Internal Server Error api error.
+        /// </summary>
+        /// <param name="lykkeApiErrorCode">
+        ///     Error code identifying what kind of error happened.
+        ///     Always use codes from <see cref="LykkeApiErrorCodes" />!
+        /// </param>
+        /// <param name="message">Message to include in response.</param>
+        /// <returns>
+        ///     New <see cref="LykkeApiErrorException" /> with <see cref="StatusCode" /> set to
+        ///     <see cref="HttpStatusCode.Forbidden" />.
+        /// </returns>
+        public static LykkeApiErrorException InternalServerError(ILykkeApiErrorCode lykkeApiErrorCode,
+            string message = "")
+        {
+            return new LykkeApiErrorException(HttpStatusCode.InternalServerError, lykkeApiErrorCode, message);
+        }
+
         private static string GetMessage(ILykkeApiErrorCode lykkeApiErrorCode, string message)
         {
             if (lykkeApiErrorCode == null)

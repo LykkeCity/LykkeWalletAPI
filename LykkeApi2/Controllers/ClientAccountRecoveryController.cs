@@ -1,13 +1,22 @@
-﻿using System.Threading.Tasks;
-using AutoMapper;
-using Core.Domain.Recovery;
-using Core.Dto.Recovery;
-using Core.Services.Recovery;
+﻿using System;
+using System.Net;
+using System.Threading.Tasks;
+using Common;
+using Common.Log;
+using Core.Constants;
+using Core.Exceptions;
+using Lykke.Common.Log;
+using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccountRecovery.Client;
+using Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models;
+using Lykke.Service.PersonalData.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Recovery;
 using LykkeApi2.Validation.Recovery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Refit;
+using Action = Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models.Action;
 
 namespace LykkeApi2.Controllers
 {
@@ -19,43 +28,77 @@ namespace LykkeApi2.Controllers
     [ApiController]
     public class ClientAccountRecoveryController : Controller
     {
-        private readonly IClientAccountRecoveryService _clientAccountRecoveryService;
-        private readonly IMapper _mapper;
+        private readonly ILog _log;
         private readonly IRequestContext _requestContext;
+        private readonly IClientAccountClient _clientAccountClient;
+        private readonly IAccountRecoveryService _accountRecoveryService;
+        private readonly IPersonalDataClientAccountRecoveryClient _personalDataClientAccountRecoveryClient;
 
         public ClientAccountRecoveryController(
-            IMapper mapper,
+            ILog log,
             IRequestContext requestContext,
-            IClientAccountRecoveryService clientAccountRecoveryService)
+            IClientAccountClient clientAccountClient,
+            IAccountRecoveryService accountRecoveryService,
+            IPersonalDataClientAccountRecoveryClient personalDataClientAccountRecoveryClient
+        )
         {
-            _mapper = mapper;
+            _log = log;
             _requestContext = requestContext;
-            _clientAccountRecoveryService = clientAccountRecoveryService;
+            _accountRecoveryService = accountRecoveryService;
+            _clientAccountClient = clientAccountClient;
+            _personalDataClientAccountRecoveryClient = personalDataClientAccountRecoveryClient;
         }
 
         /// <summary>Start client account recovery process.</summary>
         [HttpPost]
         [Route("start")]
         [ProducesResponseType(typeof(RecoveryStartResponseModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> StartRecovery([FromBody] RecoveryStartRequestModel model)
         {
-            var startRecoveryDto = _mapper.Map<RecoveryStartRequestModel, RecoveryStartDto>(model,
-                opt =>
-                {
-                    opt.Items["Ip"] = _requestContext.GetIp();
-                    opt.Items["UserAgent"] = _requestContext.UserAgent;
-                });
-
-            var stateToken = await _clientAccountRecoveryService.StartRecoveryAsync(startRecoveryDto);
-
-            var response = new RecoveryStartResponseModel
+            try
             {
-                StateToken = stateToken
-            };
+                var client = await _clientAccountClient.GetClientByEmailAndPartnerIdAsync(model.Email, model.PartnerId);
 
-            return Ok(response);
+                if (client == null) throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.ClientNotFound);
+
+                var newRecoveryRequest = new NewRecoveryRequest
+                {
+                    ClientId = client.Id,
+                    Ip = _requestContext.GetIp(),
+                    UserAgent = _requestContext.UserAgent
+                };
+
+                var newRecoveryResponse =
+                    await _accountRecoveryService.StartNewRecoveryAsync(newRecoveryRequest);
+
+                var response = new RecoveryStartResponseModel
+                {
+                    StateToken = newRecoveryResponse.StateToken
+                };
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+                _log.WriteWarningAsync(
+                    nameof(ClientAccountRecoveryController),
+                    nameof(StartRecovery),
+                    "Unable to start recovery.",
+                    e);
+
+                switch (e)
+                {
+                        case BadRequestException _:
+                            throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData);
+                        case ForbiddenException _:
+                            throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.RecoveryStartAttemptLimitReached);
+                        default:
+                            throw;
+                }
+            }
         }
 
         /// <summary>Get current recovery status.</summary>
@@ -64,11 +107,31 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(RecoveryStatusResponseModel), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetRecoveryStatus([FromQuery] RecoveryStatusRequestModel model)
         {
-            var recoveryStatus = await _clientAccountRecoveryService.GetRecoveryStatusAsync(model.StateToken);
+            try
+            {
+                var request = new RecoveryStatusRequest(model.StateToken);
 
-            var response = _mapper.Map<RecoveryStatus, RecoveryStatusResponseModel>(recoveryStatus);
+                var recoveryStatusResponse = await _accountRecoveryService.GetRecoveryStatusAsync(request);
 
-            return Ok(response);
+                var response = new RecoveryStatusResponseModel
+                {
+                    Challenge = recoveryStatusResponse.Challenge.ToString(),
+                    OverallProgress = recoveryStatusResponse.OverallProgress.ToString(),
+                    ChallengeInfo = recoveryStatusResponse.ChallengeInfo
+                };
+
+                return Ok(response);
+            }
+            catch (BadRequestException e)
+            {
+                _log.WriteWarningAsync(
+                    nameof(ClientAccountRecoveryController),
+                    nameof(GetRecoveryStatus),
+                    "Unable to get recovery status.",
+                    e);
+
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData);
+            }
         }
 
         /// <summary>Submit challenge to continue recovery process.</summary>
@@ -78,22 +141,42 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> SubmitChallenge([FromBody] RecoverySubmitChallengeRequestModel model)
         {
-            var submitChallengeDto = _mapper.Map<RecoverySubmitChallengeRequestModel, RecoverySubmitChallengeDto>(model,
-                opt =>
-                {
-                    opt.Items["Ip"] = _requestContext.GetIp();
-                    opt.Items["UserAgent"] = _requestContext.UserAgent;
-                });
-
-            var newState =
-                await _clientAccountRecoveryService.SubmitChallengeAsync(submitChallengeDto);
-
-            var response = new RecoverySubmitChallengeResponseModel
+            try
             {
-                StateToken = newState
-            };
+                var challengeRequest = new ChallengeRequest
+                {
+                    StateToken = model.StateToken,
+                    Action = model.Action.ParseEnum<Action>(),
+                    Value = model.Value ?? string.Empty,
+                    Ip = _requestContext.GetIp(),
+                    UserAgent = _requestContext.UserAgent
+                };
 
-            return Ok(response);
+                var challengeResponse = await _accountRecoveryService.SubmitChallengeAsync(challengeRequest);
+
+                if (challengeResponse.OperationStatus.Error)
+                    throw LykkeApiErrorException.BadRequest(
+                        LykkeApiErrorCodes.Service.RecoverySubmitChallengeInvalidValue,
+                        challengeResponse.OperationStatus.Message);
+
+                var response = new RecoverySubmitChallengeResponseModel
+                {
+                    StateToken = challengeResponse.StateToken
+                };
+
+                return Ok(response);
+            }
+            catch (BadRequestException e)
+            {
+                _log.WriteWarningAsync(
+                    nameof(ClientAccountRecoveryController),
+                    nameof(SubmitChallenge),
+                    $"Unable to submit challenge. Action: {model.Action}",
+                    e);
+
+                throw LykkeApiErrorException.BadRequest(
+                    LykkeApiErrorCodes.Service.RecoverySubmitChallengeInvalidValue);
+            }
         }
 
         /// <summary>Upload selfie file.</summary>
@@ -102,18 +185,39 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(RecoveryUploadFileResponseModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [SelfieMaxSize]
-        public async Task<IActionResult> UploadFile([FromForm]RecoveryUploadFileRequestModel model)
+        public async Task<IActionResult> UploadFile([FromForm] RecoveryUploadFileRequestModel model)
         {
             var file = model.File;
 
-            var fileId = await _clientAccountRecoveryService.UploadSelfieFileAsync(file);
-
-            var response = new RecoveryUploadFileResponseModel
+            try
             {
-                FileId = fileId
-            };
+                using (var imageStream = file.OpenReadStream())
+                {
+                    var streamPart = new StreamPart(imageStream, file.FileName, file.ContentType);
+                    var fileId = await _personalDataClientAccountRecoveryClient.UploadSelfieAsync(streamPart);
 
-            return Ok(response);
+                    var response = new RecoveryUploadFileResponseModel
+                    {
+                        FileId = fileId
+                    };
+
+                    return Ok(response);
+                }
+            }
+            catch (ApiException e)
+            {
+                _log.WriteWarningAsync(
+                    nameof(ClientAccountRecoveryController),
+                    nameof(UploadFile),
+                    $"Unable to upload file. FileName: {file.FileName}; Length: {file.Length} bytes; ContentType: {file.ContentType};",
+                    e);
+
+                if (e.StatusCode == HttpStatusCode.BadRequest)
+                    throw LykkeApiErrorException.BadRequest(
+                        LykkeApiErrorCodes.Service.RecoveryUploadInvalidSelfieFile);
+
+                throw LykkeApiErrorException.InternalServerError(LykkeApiErrorCodes.Service.SomethingWentWrong);
+            }
         }
 
         /// <summary>Complete recovery by setting new password.</summary>
@@ -123,15 +227,32 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Complete([FromBody] RecoveryCompleteRequestModel model)
         {
-            var recoveryCompleteDto = _mapper.Map<RecoveryCompleteRequestModel, RecoveryCompleteDto>(model,
-                opt =>
+            try
+            {
+                var passwordRequest = new PasswordRequest
                 {
-                    opt.Items["Ip"] = _requestContext.GetIp();
-                    opt.Items["UserAgent"] = _requestContext.UserAgent;
-                });
+                    StateToken = model.StateToken,
+                    PasswordHash = model.PasswordHash,
+                    Pin = model.Pin,
+                    Hint = model.Hint,
+                    Ip = _requestContext.GetIp(),
+                    UserAgent = _requestContext.UserAgent
+                };
 
-            await _clientAccountRecoveryService.CompleteRecoveryAsync(recoveryCompleteDto);
-            return Ok();
+                await _accountRecoveryService.UpdatePasswordAsync(passwordRequest);
+
+                return Ok();
+            }
+            catch (BadRequestException e)
+            {
+                _log.WriteWarningAsync(
+                    nameof(ClientAccountRecoveryController),
+                    nameof(Complete),
+                    "Unable to complete recovery.",
+                    e);
+
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData);
+            }
         }
     }
 }

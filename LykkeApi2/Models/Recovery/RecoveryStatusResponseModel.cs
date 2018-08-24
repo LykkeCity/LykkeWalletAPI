@@ -1,6 +1,4 @@
-﻿using Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models;
-
-namespace LykkeApi2.Models.Recovery
+﻿namespace LykkeApi2.Models.Recovery
 {
     /// <summary>
     ///     Response model containing information about current password recovery state.
@@ -10,12 +8,12 @@ namespace LykkeApi2.Models.Recovery
         /// <summary>
         ///     Current challenge provided for client.
         /// </summary>
-        public Challenge Challenge { get; set; }
+        public string Challenge { get; set; }
 
         /// <summary>
         ///     Overall progress status of password recovery.
         /// </summary>
-        public Progress OverallProgress { get; set; }
+        public string OverallProgress { get; set; }
 
         /// <summary>
         ///     Information about challenge.

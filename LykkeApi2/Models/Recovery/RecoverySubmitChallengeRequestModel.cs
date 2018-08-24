@@ -1,6 +1,4 @@
-﻿using Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models;
-
-namespace LykkeApi2.Models.Recovery
+﻿namespace LykkeApi2.Models.Recovery
 {
     /// <summary>
     ///     Request model for submitting data to complete current challenge.
@@ -15,7 +13,7 @@ namespace LykkeApi2.Models.Recovery
         /// <summary>
         ///     What action to perform on challenge.
         /// </summary>
-        public Action Action { get; set; }
+        public string Action { get; set; }
 
         /// <summary>
         ///     Value for submitting the challenge.

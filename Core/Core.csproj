@@ -8,8 +8,8 @@
     <PackageReference Include="Lykke.Service.AssetDisclaimers.Client" Version="3.0.0" />
     <PackageReference Include="Lykke.Service.BlockchainCashoutPreconditionsCheck.Client" Version="1.4.3" />
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
+    <PackageReference Include="Lykke.Service.ClientAccountRecovery.Client" Version="2.0.0-beta" />
     <PackageReference Include="Lykke.Service.ClientDialogs.Client" Version="1.0.0" />
-    <PackageReference Include="Lykke.Service.ClientAccountRecovery.Client" Version="1.0.18" />
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.220" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.1.2" />

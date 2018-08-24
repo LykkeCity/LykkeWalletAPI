@@ -77,12 +77,6 @@ namespace Core.Constants
             public static readonly ILykkeApiErrorCode TwoFactorRequired =
                 new LykkeApiErrorCode(nameof(InconsistentState), "The action requires 2fa enabled.");
 
-            ///     Recovery completion process failed because of invalid data.
-            /// </summary>
-            public static readonly ILykkeApiErrorCode RecoveryCompleteFailedInvalidData =
-                new LykkeApiErrorCode(nameof(RecoveryCompleteFailedInvalidData),
-                    "Can not complete the recovery, invalid data was passed.");
-
             /// <summary>
             ///     Recovery start process is forbidden because recovery attempt limit reached.
             /// </summary>
@@ -102,6 +96,20 @@ namespace Core.Constants
             public static readonly ILykkeApiErrorCode RecoverySubmitChallengeInvalidValue =
                 new LykkeApiErrorCode(nameof(RecoverySubmitChallengeInvalidValue),
                     "An invalid value was submitted to the challenge.");
+
+            /// <summary>
+            ///     Bad request invalid data.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode InvalidData =
+                new LykkeApiErrorCode(nameof(InvalidData),
+                    "Invalid data was passed.");
+
+            /// <summary>
+            ///     Internal server error something went wrong.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode SomethingWentWrong =
+                new LykkeApiErrorCode(nameof(SomethingWentWrong),
+                    "Something went wrong.");
         }
 
         /// <summary>
