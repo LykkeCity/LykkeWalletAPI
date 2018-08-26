@@ -14,6 +14,7 @@ using LykkeApi2.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Core.Settings;
+using Lykke.Common;
 using LykkeApi2.Infrastructure.LykkeApiError;
 using LykkeApi2.Middleware;
 using LykkeApi2.Middleware.LykkeApiError;
@@ -85,7 +86,12 @@ namespace LykkeApi2
                     });
 
                 var builder = new ContainerBuilder();
-                var appSettings = Configuration.LoadSettings<APIv2Settings>();
+                var appSettings = Configuration.LoadSettings<APIv2Settings>(options =>
+                {
+                    options.SetConnString(x => x.SlackNotifications.AzureQueue.ConnectionString);
+                    options.SetQueueName(x => x.SlackNotifications.AzureQueue.QueueName);
+                    options.SenderName = $"{AppEnvironment.Name} {AppEnvironment.Version}";
+                });
                 Log = CreateLogWithSlack(services, appSettings);
                 builder.Populate(services);
                 builder.RegisterModule(new Api2Module(appSettings, Log));
