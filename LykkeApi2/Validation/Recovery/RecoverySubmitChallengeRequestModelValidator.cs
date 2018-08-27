@@ -11,7 +11,7 @@ namespace LykkeApi2.Validation.Recovery
             {
                 c.AllowNull();
                 c.AllowEmpty();
-                c.SetAllowed('.', '-');
+                c.SetAllowed('.', '-', '+', '/', '=');
             });
 
         public RecoverySubmitChallengeRequestModelValidator()
