@@ -65,6 +65,12 @@ namespace Core.Constants
             /// </summary>
             public static readonly ILykkeApiErrorCode DepositLimitReached =
                 new LykkeApiErrorCode(nameof(DepositLimitReached), "The deposit limit is reached.");
+
+            /// <summary>
+            ///     The deposit limit is reached.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode InconsistentState =
+                new LykkeApiErrorCode(nameof(InconsistentState), "The call was unexpected.");
         }
 
         /// <summary>

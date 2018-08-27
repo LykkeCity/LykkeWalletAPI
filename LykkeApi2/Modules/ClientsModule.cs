@@ -26,6 +26,7 @@ using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.ClientDialogs.Client;
+using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.SwiftCredentials.Client;
 
@@ -105,6 +106,8 @@ namespace LykkeApi2.Modules
                 .SingleInstance();
             
             builder.RegisterSwiftCredentialsClient(_apiSettings.CurrentValue.SwiftCredentialsServiceClient);
+            
+            builder.RegisterConfirmationCodesClient(_apiSettings.Nested(r => r.ConfirmationCodesClient).CurrentValue);
             
             builder.Populate(_services);
         }
