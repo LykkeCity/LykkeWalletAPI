@@ -14,6 +14,7 @@ namespace LykkeApi2.Controllers
 {
     [Authorize]
     [Route("api/dialogs")]
+    [ApiController]
     public class DialogsController : Controller
     {
         private readonly IClientDialogsClient _clientDialogsClient;

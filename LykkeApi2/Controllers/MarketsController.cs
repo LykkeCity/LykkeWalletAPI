@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LykkeApi2.Controllers
 {
     [Route("api/markets")]
+    [ApiController]
     public class MarketsController : Controller
     {
         private readonly ILykkeMarketProfileServiceAPI _marketProfileService;

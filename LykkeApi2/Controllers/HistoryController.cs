@@ -4,7 +4,6 @@ using System.Net;
 using Lykke.Service.OperationsHistory.Client;
 using LykkeApi2.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -23,7 +22,7 @@ namespace LykkeApi2.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    [ValidateModel]
+    [ApiController]
     public class HistoryController : Controller
     {
         private readonly IOperationsHistoryClient _operationsHistoryClient;

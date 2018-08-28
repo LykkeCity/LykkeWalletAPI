@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Runtime.Serialization.Formatters;
 using System.Threading.Tasks;
+using Core.Constants;
 using Core.Exceptions;
 using Core.Services;
 using Lykke.Service.BlockchainWallets.Client;
@@ -29,6 +29,7 @@ namespace LykkeApi2.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [ApiController]
     public class DepositsController : Controller
     {
         private readonly IPaymentSystemClient _paymentSystemService;
@@ -145,18 +146,18 @@ namespace LykkeApi2.Controllers
                 await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
             
             if(asset == null)
-                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
+                throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.AssetNotFound);
             
             if(!asset.SwiftDepositEnabled || !assetsAvailableToClient.Contains(assetId))
-                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
             
             if(model.Amount <= 0 || model.Amount != decimal.Round(model.Amount, asset.Accuracy))
-                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.InvalidInput);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
             
             var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             if (status != KycStatus.Ok)
-                throw new ClientException(ExceptionType.KycRequired);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
             
             var checkResult = await _limitationsServiceClient.CheckAsync(
                 _requestContext.ClientId,
@@ -165,7 +166,7 @@ namespace LykkeApi2.Controllers
                 CurrencyOperationType.SwiftTransfer);
             
             if (!checkResult.IsValid)
-                throw new ClientException(ExceptionType.LimitReached);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.DepositLimitReached);
             
             var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
 
@@ -189,15 +190,15 @@ namespace LykkeApi2.Controllers
                 await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
             
             if(asset == null)
-                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
+                throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.AssetNotFound);
             
             if(!asset.SwiftDepositEnabled || !assetsAvailableToClient.Contains(assetId))
-                throw new ClientException(HttpStatusCode.BadRequest, ExceptionType.AssetUnavailable);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
             
             var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             if (status != KycStatus.Ok)
-                throw new ClientException(ExceptionType.KycRequired);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
             
             var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
             
@@ -225,23 +226,23 @@ namespace LykkeApi2.Controllers
             var asset = await _assetsHelper.GetAssetAsync(assetId);
 
             if (asset == null || asset.IsDisabled || !asset.BlockchainDepositEnabled)
-                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
+                throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.AssetNotFound);
             
             var assetsAvailableToClient =
                 await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             if (!assetsAvailableToClient.Contains(assetId) || assetId == "ETH") //temporary workaround for ETH until we can generate it through _blockchainWalletsClient.CreateWalletAsync 
-                throw new ClientException(ExceptionType.AssetUnavailable);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
 
             var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
             
             if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
-                throw new ClientException(ExceptionType.PendingDialogs);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.PendingDialogs);
             
             var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             if (status != KycStatus.Ok)
-                throw new ClientException(ExceptionType.KycRequired);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
 
             var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
 
@@ -273,24 +274,24 @@ namespace LykkeApi2.Controllers
             var asset = await _assetsHelper.GetAssetAsync(assetId);
 
             if (asset == null || asset.IsDisabled || !asset.BlockchainDepositEnabled)
-                throw new ClientException(HttpStatusCode.NotFound, ExceptionType.AssetNotFound);
+                throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.AssetNotFound);
             
             var assetsAvailableToClient =
                 await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             if (!assetsAvailableToClient.Contains(assetId))
-                throw new ClientException(ExceptionType.AssetUnavailable);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
 
             var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
             
             if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
-                throw new ClientException(ExceptionType.PendingDialogs);
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.PendingDialogs);
             
             var status = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             if (status != KycStatus.Ok)
-                throw new ClientException(ExceptionType.KycRequired);
-
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
+            
             var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
 
             var depositInfo =
@@ -305,7 +306,8 @@ namespace LykkeApi2.Controllers
                         Guid.Parse(_requestContext.ClientId));
 
             if (depositInfo == null)
-                throw new ClientException(ExceptionType.AddressNotGenerated);
+                throw LykkeApiErrorException.BadRequest(
+                    LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
 
             return Ok(new CryptoDepositAddressRespModel
                 {

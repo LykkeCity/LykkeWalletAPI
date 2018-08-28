@@ -16,6 +16,7 @@ namespace LykkeApi2.Controllers
 {
     [Authorize]
     [Route("api/watchlists")]
+    [ApiController]
     public class WatchlistsController : Controller
     {
         private readonly IRequestContext _requestContext;
