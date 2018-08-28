@@ -31,6 +31,7 @@ namespace LykkeApi2.Controllers
     [LowerVersion(Devices = "IPhone,IPad", LowerVersion = 181)]
     [LowerVersion(Devices = "android", LowerVersion = 659)]
     [Route("api/client")]
+    [ApiController]
     public class ClientController : Controller
     {
         private readonly ILog _log;

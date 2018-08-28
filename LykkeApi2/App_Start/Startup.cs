@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -15,12 +16,17 @@ using LykkeApi2.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Core.Settings;
+using LykkeApi2.Infrastructure.LykkeApiError;
 using LykkeApi2.Middleware;
+using LykkeApi2.Middleware.LykkeApiError;
+using LykkeApi2.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -53,7 +59,7 @@ namespace LykkeApi2
         {
             try
             {
-                services.AddMvc(options => { options.Filters.Add<ValidateModelAttribute>(); })
+                services.AddMvc()
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
                     .AddJsonOptions(options =>
                     {
@@ -74,6 +80,13 @@ namespace LykkeApi2
                         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                     })
                     .AddScheme<LykkeAuthOptions, LykkeAuthHandler>("Bearer", options => { });
+
+                services.Configure<ApiBehaviorOptions>(options =>
+                    {
+                        // Wrap failed model state into LykkeApiErrorResponse.
+                        options.InvalidModelStateResponseFactory =
+                            InvalidModelStateResponseFactory.CreateInvalidModelResponse;
+                    });
 
                 var builder = new ContainerBuilder();
                 var appSettings = Configuration.LoadSettings<APIv2Settings>();
@@ -107,7 +120,7 @@ namespace LykkeApi2
                     app.UseDeveloperExceptionPage();
                 }
                 
-                app.UseMiddleware<ClientExceptionMiddleware>();
+                app.UseMiddleware<LykkeApiErrorMiddleware>();
                 
                 app.UseCors(builder =>
                 {

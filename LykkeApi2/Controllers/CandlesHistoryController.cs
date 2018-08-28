@@ -20,7 +20,7 @@ using LykkeApi2.Models.CandleSticks;
 namespace LykkeApi2.Controllers
 {
     [Route("api/candlesHistory")]
-    [ValidateModel]
+    [ApiController]
     public class CandlesHistoryController : Controller
     {
         private readonly ICandlesHistoryServiceProvider _candlesServiceProvider;

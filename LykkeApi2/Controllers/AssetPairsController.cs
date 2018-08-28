@@ -20,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LykkeApi2.Controllers
 {
     [Route("api/[controller]")]
-    [ValidateModel]
+    [ApiController]
     public class AssetPairsController : Controller
     {
         private readonly ILykkeMarketProfileServiceAPI _marketProfileService;

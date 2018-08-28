@@ -33,6 +33,7 @@ namespace LykkeApi2.Controllers
 {
     [Microsoft.AspNetCore.Authorization.Authorize]
     [Route("api/orders")]
+    [ApiController]
     public class OrdersController : Controller
     {
         private readonly IRequestContext _requestContext;

@@ -11,6 +11,7 @@ namespace LykkeApi2.Controllers
 {
     [Authorize]
     [Route("api/dictionary")]
+    [ApiController]
     public class DictionaryController : Controller
     {
         private readonly IRequestContext _requestContext;

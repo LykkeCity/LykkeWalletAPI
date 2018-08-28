@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace LykkeApi2.Controllers
 {
     [Route("api/assets")]
+    [ApiController]
     public class AssetsController : Controller
     {
         private readonly IClientAccountSettingsClient _clientAccountSettingsClient;

@@ -14,6 +14,7 @@ namespace LykkeApi2.Controllers
 {
     [Authorize]
     [Route("api/operations")]
+    [ApiController]
     public class OperationsController : Controller
     {
         private readonly IOperationsClient _operationsClient;
