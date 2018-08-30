@@ -22,6 +22,7 @@ namespace Lykke.WalletApiv2.Tests.Constants
             "DepositLimitReached",
             "ModelValidationFailed",
             "InvalidInput",
+            "InconsistentState"
         };
 
         /// <summary>
