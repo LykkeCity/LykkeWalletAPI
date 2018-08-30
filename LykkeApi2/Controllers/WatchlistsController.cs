@@ -31,7 +31,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<WatchList>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<WatchListModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetWatchlists()
         {
             var watchlists = await GetAllWatchlists();
