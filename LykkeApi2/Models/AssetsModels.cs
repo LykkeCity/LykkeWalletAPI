@@ -1,4 +1,5 @@
-﻿using Lykke.Service.Assets.Client.Models;
+﻿using System;
+using Lykke.Service.Assets.Client.Models;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -80,8 +81,9 @@ namespace LykkeApi2.Models
 
     public class BaseAssetUpdateModel
     {
-        [Required]
+        [Obsolete]
         public string BaseAsssetId { get; set; }
+        public string BaseAssetId { get; set; }
     }
 
     public class AssetIdsModel

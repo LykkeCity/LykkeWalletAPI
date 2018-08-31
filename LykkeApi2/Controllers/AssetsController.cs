@@ -228,10 +228,12 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> SetBaseAsset([FromBody] BaseAssetUpdateModel model)
         {
-            if (string.IsNullOrWhiteSpace(model.BaseAsssetId))
+            var baseAsset = model.BaseAssetId ?? model.BaseAsssetId;
+            
+            if (string.IsNullOrWhiteSpace(baseAsset))
                 return BadRequest();
 
-            var asset = await _assetsHelper.GetAssetAsync(model.BaseAsssetId);
+            var asset = await _assetsHelper.GetAssetAsync(baseAsset);
             if (asset == null || asset.IsDisabled)
             {
                 return NotFound();
@@ -241,10 +243,10 @@ namespace LykkeApi2.Controllers
                 await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId,
                     true);
 
-            if (!asset.IsBase || !assetsAvailableToUser.Contains(model.BaseAsssetId))
+            if (!asset.IsBase || !assetsAvailableToUser.Contains(baseAsset))
                 return BadRequest();
 
-            await _clientAccountSettingsClient.SetBaseAssetAsync(_requestContext.ClientId, model.BaseAsssetId);
+            await _clientAccountSettingsClient.SetBaseAssetAsync(_requestContext.ClientId, baseAsset);
 
             return Ok();
         }
