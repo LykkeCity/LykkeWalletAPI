@@ -31,7 +31,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<WatchList>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<WatchListModel>), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetWatchlists()
         {
             var watchlists = await GetAllWatchlists();
@@ -60,7 +60,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] WatchListCreateModel model)
         {
-            if ((model.AssetPairIds != null ? !await IsValidAsync(model.AssetPairIds) : !await IsValidAsync(model.AssetIds)) || //TODO: remove AssetIds at all
+            if (!await IsValidAsync(model.AssetPairIds) ||
                 string.IsNullOrEmpty(model.Name))
                 return BadRequest();
             
@@ -74,7 +74,7 @@ namespace LykkeApi2.Controllers
                 Id = Guid.NewGuid().ToString(),
                 Name = model.Name,
                 Order = model.Order,
-                AssetIds = model.AssetPairIds != null ? model.AssetPairIds.ToList() : model.AssetIds.ToList() //TODO: remove AssetIds at all
+                AssetIds = model.AssetPairIds.ToList()
             };
 
             var result = await _assetsHelper.AddCustomWatchListAsync(_requestContext.ClientId, watchList);
@@ -94,7 +94,7 @@ namespace LykkeApi2.Controllers
                 return NotFound();
 
             if (watchList.ReadOnlyProperty ||
-                (model.AssetPairIds != null ? !await IsValidAsync(model.AssetPairIds) : !await IsValidAsync(model.AssetIds)) || //TODO: remove AssetIds at all
+                !await IsValidAsync(model.AssetPairIds) ||
                 string.IsNullOrEmpty(model.Name))
                 return BadRequest();
 
@@ -108,7 +108,7 @@ namespace LykkeApi2.Controllers
                 Id = id,
                 Name = model.Name,
                 Order = model.Order,
-                AssetIds = model.AssetPairIds != null ? model.AssetPairIds.ToList() : model.AssetIds.ToList() //TODO: remove AssetIds at all
+                AssetIds = model.AssetPairIds.ToList()
             };
 
             await _assetsHelper.UpdateCustomWatchListAsync(_requestContext.ClientId, newWatchList);
