@@ -11,6 +11,7 @@ namespace LykkeApi2.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [Produces("application/json")]
+    [ApiController]
     public class CatalogsController : Controller
     {
         private readonly ICountryPhoneCodeService _countryPhoneCodeService;

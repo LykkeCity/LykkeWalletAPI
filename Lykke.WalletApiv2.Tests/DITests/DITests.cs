@@ -13,17 +13,18 @@ using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.SettingsReader.ReloadingManager;
-using Core;
-using Xunit;
+using NUnit.Framework;
 
 namespace Lykke.WalletApiv2.Tests.DITests
 {
-    public class DITests
+    [TestFixture]
+    public class DiTests
     {
         private const string MockUrl = "http://localhost";
-        private readonly IContainer _container;
+        private IContainer _container;
 
-        public DITests()
+        [SetUp]
+        public void Init()
         {
             var mockLog = new Mock<ILog>();
 
@@ -48,7 +49,8 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 OperationsHistoryServiceClient = new OperationsHistoryServiceClientSettings{ServiceUrl = MockUrl},
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},
                 PersonalDataServiceSettings = new PersonalDataServiceClientSettings{ServiceUri = MockUrl},
-                MatchingEngineClient = new MatchingEngineSettings{IpEndpoint = new IpEndpointSettings{Host = "127.0.0.1", Port = 80}}
+                MatchingEngineClient = new MatchingEngineSettings{IpEndpoint = new IpEndpointSettings{Host = "127.0.0.1", Port = 80}},
+                
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
 
@@ -64,7 +66,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
             _container = containerBuilder.Build();
         }
 
-        [Fact]
+        [Test]
         public void Test_InstantiateControllers()
         {
             //Arrange
@@ -72,7 +74,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
             controllersToTest.ForEach(controller =>
             {
                 //Act-Assert - ok if no exception
-                this._container.Resolve(controller);
+                _container.Resolve(controller);
             });
         }
     }

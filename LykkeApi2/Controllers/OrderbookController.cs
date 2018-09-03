@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LykkeApi2.Controllers
 {
     [Route("api/[controller]")]
+    [ApiController]
     public class OrderbookController : Controller
     {
         private readonly IAssetsHelper _assetsHelper;

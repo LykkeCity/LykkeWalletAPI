@@ -14,6 +14,7 @@ namespace LykkeApi2.Controllers
 {
     [Authorize]
     [Route("api/hft")]
+    [ApiController]
     public class HftController : Controller
     {
         private readonly IHftInternalServiceAPI _hftInternalService;
