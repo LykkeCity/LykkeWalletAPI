@@ -34,7 +34,7 @@ namespace LykkeApi2.Controllers
             IRequestContext requestContext,
             IClientAccountClient clientAccountService,
             ICqrsEngine cqrsEngine,
-            IHistoryExportsRepository historyExportsRepository, 
+            IHistoryExportsRepository historyExportsRepository,
             IHistoryClient historyClient)
         {
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
@@ -75,7 +75,7 @@ namespace LykkeApi2.Controllers
         /// Getting history by wallet identifier
         /// </summary>
         /// <param name="walletId">Wallet identifier</param>
-        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
+        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, OrderEvent, Transfer</param>
         /// <param name="assetId">Asset identifier</param>
         /// <param name="assetPairId">Asset pair identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
@@ -88,13 +88,21 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
-            [FromQuery(Name = "operationType")] HistoryType[] operationType,
+            [FromQuery(Name = "operationType")] string[] operationType,
             [FromQuery] string assetId,
             [FromQuery] string assetPairId,
             [FromQuery] int take,
             [FromQuery] int skip)
         {
             var clientId = _requestContext.ClientId;
+
+            // TODO: should be removed after release. operationType parameter should be of type HistoryType[]
+            var types = new HashSet<HistoryType>();
+            foreach (var opType in operationType)
+            {
+                if (Enum.TryParse<HistoryType>(opType, out var result))
+                    types.Add(result);
+            }
 
             var wallets = (await _clientAccountService.GetWalletsByClientIdAsync(clientId)).ToList();
 
@@ -109,7 +117,7 @@ namespace LykkeApi2.Controllers
             if (isTradingWallet)
                 walletId = clientId;
 
-            var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), operationType,
+            var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), types.ToArray(),
                 assetId, assetPairId, offset: skip, limit: take);
 
             return Ok(data.SelectMany(x => x.ToResponseModel()));
