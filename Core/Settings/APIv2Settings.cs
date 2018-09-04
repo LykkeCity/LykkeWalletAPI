@@ -5,8 +5,6 @@ using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Kyc.Client;
-using Lykke.Service.OperationsHistory.Client;
-using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.Service.SwiftCredentials.Client;
@@ -19,7 +17,6 @@ namespace Core.Settings
         public BaseSettings WalletApiv2 { get; set; }
         public SlackNotificationsSettings SlackNotifications { get; set; }
         public PersonalDataServiceClientSettings PersonalDataServiceSettings { get; set; }
-        public OperationsHistoryServiceClientSettings OperationsHistoryServiceClient { get; set; }
         public BlockchainWalletsServiceClientSettings BlockchainWalletsServiceClient { get; set; }
         public ClientDictionariesServiceClientSettings ClientDictionariesServiceClient { get; set; }
         public MatchingEngineSettings MatchingEngineClient { set; get; }
@@ -107,7 +104,7 @@ namespace Core.Settings
         public string HftInternalServiceUrl { get; set; }
         public string SessionUrl { get; set; }
         public string OperationsUrl { get; set; }
-        public OperationsRepositoryServiceClientSettings OperationsRepositoryClient { set; get; }
+        public string HistoryServiceUrl { get; set; }
         public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
     }
 

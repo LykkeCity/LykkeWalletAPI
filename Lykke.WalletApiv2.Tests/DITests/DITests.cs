@@ -9,8 +9,6 @@ using Core.Settings;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Client;
-using Lykke.Service.OperationsHistory.Client;
-using Lykke.Service.OperationsRepository.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.SettingsReader.ReloadingManager;
 using NUnit.Framework;
@@ -39,14 +37,12 @@ namespace Lykke.WalletApiv2.Tests.DITests
                     Db = new DbSettings(),
                     Services = new ServiceSettings
                     {
-                        OperationsRepositoryClient = new OperationsRepositoryServiceClientSettings{ServiceUrl = MockUrl, RequestTimeout = 300},
                         AffiliateServiceClient = new AffiliateServiceClientSettings { ServiceUrl = MockUrl }
                     },
                     DeploymentSettings = new DeploymentSettings(),
                     CacheSettings = new CacheSettings(),                    
                 },                
                 ClientDictionariesServiceClient = new ClientDictionariesServiceClientSettings() { ServiceUrl = MockUrl },
-                OperationsHistoryServiceClient = new OperationsHistoryServiceClientSettings{ServiceUrl = MockUrl},
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},
                 PersonalDataServiceSettings = new PersonalDataServiceClientSettings{ServiceUri = MockUrl},
                 MatchingEngineClient = new MatchingEngineSettings{IpEndpoint = new IpEndpointSettings{Host = "127.0.0.1", Port = 80}},

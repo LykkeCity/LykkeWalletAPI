@@ -11,14 +11,12 @@ using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.History.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Contracts;
-using Lykke.Service.OperationsRepository.AutorestClient.Models;
-using Lykke.Service.OperationsRepository.Client.Abstractions.CashOperations;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.Session.Client;
-using Lykke.Service.Session.Contracts;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Orders;
 using Microsoft.AspNetCore.Mvc;
@@ -26,7 +24,6 @@ using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using LimitOrderCancelMultipleRequest = LykkeApi2.Models.Orders.LimitOrderCancelMultipleRequest;
-using LimitOrderCancelMultipleRequestOR = Lykke.Service.OperationsRepository.AutorestClient.Models.LimitOrderCancelMultipleRequest;
 using OrderAction = LykkeApi2.Models.Orders.OrderAction;
 
 namespace LykkeApi2.Controllers
@@ -44,12 +41,12 @@ namespace LykkeApi2.Controllers
         private readonly IClientAccountClient _clientAccountClient;
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
         private readonly IMatchingEngineClient _matchingEngineClient;
-        private readonly ILimitOrdersRepositoryClient _limitOrdersRepository;        
         private readonly FeeSettings _feeSettings;
         private readonly IOperationsClient _operationsClient;
         private readonly BaseSettings _baseSettings;
         private readonly IcoSettings _icoSettings;
         private readonly GlobalSettings _globalSettings;
+        private readonly IHistoryClient _historyClient;
 
         public OrdersController(
             IRequestContext requestContext,
@@ -60,12 +57,12 @@ namespace LykkeApi2.Controllers
             IClientAccountClient clientAccountClient,
             IAssetsServiceWithCache assetsServiceWithCache,
             IMatchingEngineClient matchingEngineClient,
-            ILimitOrdersRepositoryClient limitOrdersRepository,            
             FeeSettings feeSettings,
             IOperationsClient operationsClient,
             BaseSettings baseSettings,
             IcoSettings icoSettings,
-            GlobalSettings globalSettings)
+            GlobalSettings globalSettings, 
+            IHistoryClient historyClient)
         {
             _requestContext = requestContext;
             _lykkePrincipal = lykkePrincipal;
@@ -75,43 +72,42 @@ namespace LykkeApi2.Controllers
             _clientAccountClient = clientAccountClient;
             _assetsServiceWithCache = assetsServiceWithCache;
             _matchingEngineClient = matchingEngineClient;
-            _limitOrdersRepository = limitOrdersRepository;            
             _feeSettings = feeSettings;
             _operationsClient = operationsClient;
             _baseSettings = baseSettings;
             _icoSettings = icoSettings;
             _globalSettings = globalSettings;
+            _historyClient = historyClient;
         }
-        
+
         [HttpGet]
         [SwaggerOperation("GetActiveLimitOrders")]
-        [ProducesResponseType(typeof(IEnumerable<LimitOrderResponseModel>), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetLimitOrders()
+        [ProducesResponseType(typeof(IEnumerable<LimitOrderResponseModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetLimitOrders(int offset = 0, int limit = 1000)
         {
             var clientId = _requestContext.ClientId;
 
-            var orders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
-            
+            var orders = await _historyClient.OrdersApi.GetActiveOrdersByWalletAsync(Guid.Parse(clientId), offset, limit);
+
             return Ok(orders.Select(x => new LimitOrderResponseModel
             {
                 AssetPairId = x.AssetPairId,
-                CreateDateTime = x.CreatedAt,
+                CreateDateTime = x.CreateDt,
                 Id = x.Id,
-                Price = (decimal)x.Price,
-                Volume = Math.Abs((decimal)x.Volume),
-                RemainingVolume = Math.Abs((decimal)(x.RemainingVolume ?? 0)),
-                OrderAction = x.Volume > 0 ? OrderAction.Buy.ToString() : OrderAction.Sell.ToString(),
-                Status = x.Status
-            })
-            .OrderByDescending(x => x.CreateDateTime));
+                Price = x.Price.GetValueOrDefault(0),
+                Volume = Math.Abs(x.Volume),
+                RemainingVolume = Math.Abs(x.RemainingVolume),
+                OrderAction = x.Side.ToString(),
+                Status = x.Status.ToString()
+            }));
         }
 
         [HttpPost("limit/{orderId}/cancel")]
         [SwaggerOperation("CancelLimitOrder")]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CancelLimitOrder(string orderId)
         {
             var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
@@ -122,32 +118,35 @@ namespace LykkeApi2.Controllers
                 return BadRequest("Session confirmation is required");
             }
 
+            if (!Guid.TryParse(orderId, out var id))
+                return BadRequest();
+
             var clientId = _requestContext.ClientId;
 
-            var activeOrders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
+            var order = await _historyClient.OrdersApi.GetOrderAsync(id);
 
-            if (activeOrders.All(x => x.Id != orderId))
+            if (order.WalletId != Guid.Parse(clientId))
                 return NotFound();
-            
+
             var meResult = await _matchingEngineClient.CancelLimitOrderAsync(orderId);
-            
-            if(meResult.Status != MeStatusCodes.Ok)
+
+            if (meResult.Status != MeStatusCodes.Ok)
                 throw new Exception($"{orderId} order cancelation failed with {meResult.ToJson()}");
-            
+
             return Ok();
         }
-        
+
         [HttpPost("market")]
         [SwaggerOperation("PlaceMarketOrder")]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> PlaceMarketOrder([FromBody] MarketOrderRequest request)
         {
             var id = Guid.NewGuid();
 
             var asset = await _assetsServiceWithCache.TryGetAssetAsync(request.AssetId);
-            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);            
+            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
 
             if (asset == null)
             {
@@ -192,9 +191,9 @@ namespace LykkeApi2.Controllers
                     MinInvertedVolume = pair.MinInvertedVolume
                 },
                 Volume = Math.Abs(request.Volume),
-                OrderAction = request.OrderAction == Models.Orders.OrderAction.Buy
-					 ? Lykke.Service.Operations.Contracts.OrderAction.Buy
-					 : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+                OrderAction = request.OrderAction == OrderAction.Buy
+                     ? Lykke.Service.Operations.Contracts.OrderAction.Buy
+                     : Lykke.Service.Operations.Contracts.OrderAction.Sell,
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
@@ -216,9 +215,9 @@ namespace LykkeApi2.Controllers
 
         [HttpPost("limit")]
         [SwaggerOperation("PlaceLimitOrder")]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> PlaceLimitOrder([FromBody] LimitOrderRequest request)
         {
             var id = Guid.NewGuid();
@@ -257,7 +256,7 @@ namespace LykkeApi2.Controllers
                 },
                 Volume = Math.Abs(request.Volume),
                 Price = request.Price,
-                OrderAction = request.OrderAction == Models.Orders.OrderAction.Buy ? Lykke.Service.Operations.Contracts.OrderAction.Buy : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+                OrderAction = request.OrderAction == OrderAction.Buy ? Lykke.Service.Operations.Contracts.OrderAction.Buy : Lykke.Service.Operations.Contracts.OrderAction.Sell,
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
@@ -274,14 +273,14 @@ namespace LykkeApi2.Controllers
                 throw;
             }
 
-            return Created(Url.Action("Get", "Operations", new { id }), id);                  
+            return Created(Url.Action("Get", "Operations", new { id }), id);
         }
-        
+
         [HttpDelete("limit/{orderId}")]
         [SwaggerOperation("CancelLimitOrderNew")]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public Task<IActionResult> CancelLimitOrderNew(string orderId)
         {
             return CancelLimitOrder(orderId);
@@ -289,8 +288,8 @@ namespace LykkeApi2.Controllers
 
         [HttpDelete("limit")]
         [SwaggerOperation("CancelMultipleLimitOrders")]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CancelMultipleLimitOrders([FromBody]LimitOrderCancelMultipleRequest model)
         {
             var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
@@ -304,7 +303,7 @@ namespace LykkeApi2.Controllers
             if (!string.IsNullOrEmpty(model.AssetPairId))
             {
                 var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(model.AssetPairId);
-                
+
                 if (pair == null)
                 {
                     return BadRequest($"Asset pair '{model.AssetPairId}' not found.");
@@ -312,8 +311,8 @@ namespace LykkeApi2.Controllers
             }
 
             var clientId = _requestContext.ClientId;
-            
-            var activeOrders = await _limitOrdersRepository.GetActiveByClientIdAsync(clientId);
+
+            var activeOrders = await _historyClient.OrdersApi.GetActiveOrdersByWalletAsync(Guid.Parse(clientId), 0, 1);
 
             if (!activeOrders.Any())
                 return Ok();
@@ -325,10 +324,10 @@ namespace LykkeApi2.Controllers
                 Id = Guid.NewGuid().ToString(),
                 IsBuy = null
             };
-            
+
             var meResult = await _matchingEngineClient.MassCancelLimitOrdersAsync(cancelModel);
-            
-            if(meResult.Status != MeStatusCodes.Ok)
+
+            if (meResult.Status != MeStatusCodes.Ok)
                 throw new Exception($"{cancelModel.ToJson()} request failed with {meResult.ToJson()}");
 
             return Ok();
