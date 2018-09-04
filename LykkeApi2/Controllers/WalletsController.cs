@@ -199,7 +199,7 @@ namespace LykkeApi2.Controllers
             var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
 
-            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
             
             foreach (var wallet in wallets)
             {
@@ -229,7 +229,7 @@ namespace LykkeApi2.Controllers
         {
             var clientBalances = await _balancesClient.GetClientBalances(_requestContext.ClientId);
             
-            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             return Ok(clientBalances?.Where(x => availableAssets.Contains(x.AssetId)).Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]);
         }
@@ -251,7 +251,7 @@ namespace LykkeApi2.Controllers
 
             var clientBalances = await _balancesClient.GetClientBalances(walletId);
             
-            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             return Ok(clientBalances?.Where(x => availableAssets.Contains(x.AssetId)).Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]);
         }
@@ -271,7 +271,7 @@ namespace LykkeApi2.Controllers
             var wallets = await _clientAccountService.GetWalletsByClientIdAsync(_requestContext.ClientId);
             var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
             
-            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             if (!availableAssets.Contains(assetId))
                 return NotFound();
@@ -315,7 +315,7 @@ namespace LykkeApi2.Controllers
                     AssetId = assetId
                 });
             
-            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             if (!availableAssets.Contains(assetId))
                 return NotFound();
@@ -350,7 +350,7 @@ namespace LykkeApi2.Controllers
                     AssetId = assetId
                 });
             
-            var availableAssets = await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+            var availableAssets = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             if (!availableAssets.Contains(assetId))
                 return NotFound();

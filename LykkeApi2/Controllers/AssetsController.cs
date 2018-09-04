@@ -241,7 +241,7 @@ namespace LykkeApi2.Controllers
             }
 
             var assetsAvailableToUser =
-                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId,
+                await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId,
                     true);
 
             if (!asset.IsBase || !assetsAvailableToUser.Contains(baseAsset))
@@ -262,7 +262,7 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> GetAvailableAssets()
         {
             var assetsAvailableToUser =
-                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+                await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
             
             return Ok(
                 AssetIdsModel.Create(

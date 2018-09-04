@@ -21,6 +21,7 @@ using Lykke.Service.Kyc.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.Session.Client;
 using Lykke.Service.AssetDisclaimers.Client;
+using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.History.Client;
@@ -105,6 +106,8 @@ namespace LykkeApi2.Modules
             builder.RegisterHistoryClient(new HistoryServiceClientSettings { ServiceUrl = _settings.HistoryServiceUrl });
 
             builder.RegisterConfirmationCodesClient(_apiSettings.Nested(r => r.ConfirmationCodesClient).CurrentValue);
+            
+            builder.RegisterBlockchainCashoutPreconditionsCheckClient(_apiSettings.CurrentValue.BlockchainCashoutPreconditionsCheckServiceClient.ServiceUrl);
             
             builder.Populate(_services);
         }
