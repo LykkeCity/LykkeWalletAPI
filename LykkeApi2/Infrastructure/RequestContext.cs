@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Security.Claims;
 using Common;
+using Core.Constants;
 using LykkeApi2.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
 
@@ -56,7 +57,7 @@ namespace LykkeApi2.Infrastructure
             get
             {
                 var identity = (ClaimsIdentity) _httpContext?.User.Identity;
-                return identity?.Claims.FirstOrDefault(x => x.Type == "PartnerId")?.Value;
+                return identity?.Claims.FirstOrDefault(x => x.Type == LykkeConstants.PartnerId)?.Value;
             }
         }
 

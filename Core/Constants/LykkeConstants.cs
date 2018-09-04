@@ -33,6 +33,7 @@ namespace Core.Constants
         public const int MaxEmailLength = 50;
 
         public const int DefaultRefundTimeoutDays = 30;
+        public const string PartnerId = "http://lykke.com/oauth/partner_id";
 
 
 

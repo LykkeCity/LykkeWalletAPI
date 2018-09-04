@@ -36,6 +36,13 @@ namespace Core.Settings
         public SagasRabbitMq SagasRabbitMq { set; get; }
     }
 
+    public class OAuthSettings
+    {
+        public string ClientId { get; set; }
+        public string ClientSecret { get; set; }
+        public string Authority { get; set; }
+    }
+
     public class SagasRabbitMq
     {
         [AmqpCheck]
@@ -80,6 +87,7 @@ namespace Core.Settings
         public CashoutSettings CashoutSettings { get; set; }
         public bool EnableFees { get; set; }
         public bool EnableSessionValidation { get; set; }
+        public OAuthSettings OAuthSettings { get; set; }
         public bool EnableTwoFactor { get; set; }
         public int MaxTwoFactorConfirmationAttempts { get; set; }
     }
