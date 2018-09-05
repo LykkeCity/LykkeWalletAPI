@@ -130,7 +130,8 @@ namespace LykkeApi2.Models.History
                 Type = HistoryType.OrderEvent,
                 Amount = orderEvent.Volume,
                 AssetPair = orderEvent.AssetPairId,
-                State = status
+                State = status,
+                Price = orderEvent.Price
             };
         }
     }
