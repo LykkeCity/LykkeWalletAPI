@@ -46,9 +46,6 @@ namespace LykkeApi2.Models.History
                 case CashoutModel cashout:
                     yield return cashout.ToResponseModel();
                     break;
-                case TransferModel transfer:
-                    yield return transfer.ToResponseModel();
-                    break;
                 case TradeModel trade:
                     foreach (var item in trade.ToResponseModel())
                         yield return item;
@@ -116,21 +113,6 @@ namespace LykkeApi2.Models.History
                 Amount = cashout.Volume,
                 State = cashout.State,
                 FeeSize = cashout.FeeSize.GetValueOrDefault(0),
-                FeeType = FeeType.Absolute
-            };
-        }
-
-        public static HistoryResponseModel ToResponseModel(this TransferModel transfer)
-        {
-            return new HistoryResponseModel
-            {
-                Id = transfer.Id.ToString(),
-                DateTime = transfer.Timestamp,
-                Type = HistoryType.Transfer,
-                Asset = transfer.AssetId,
-                Amount = transfer.Volume,
-                State = HistoryState.Finished,
-                FeeSize = transfer.FeeSize.GetValueOrDefault(0),
                 FeeType = FeeType.Absolute
             };
         }
