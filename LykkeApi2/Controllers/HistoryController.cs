@@ -55,7 +55,7 @@ namespace LykkeApi2.Controllers
             {
                 Id = id,
                 ClientId = _requestContext.ClientId,
-                OperationTypes2 = model.OperationType,
+                OperationTypes = model.OperationType,
                 AssetId = model.AssetId,
                 AssetPairId = model.AssetPairId
             }, null, HistoryExportBuilderBoundedContext.Name);
