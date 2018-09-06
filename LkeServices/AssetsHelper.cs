@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common;
@@ -7,8 +6,6 @@ using Core.Services;
 using JetBrains.Annotations;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
-using Lykke.Service.Assets.Client.Models.Extensions;
-using Lykke.Service.ClientAccount.Client;
 
 namespace LkeServices
 {
