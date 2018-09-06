@@ -1,7 +1,5 @@
-﻿using Common.Log;
-using Lykke.Service.CandlesHistory.Client;
+﻿using Lykke.Service.CandlesHistory.Client;
 using Lykke.Service.CandlesHistory.Client.Custom;
-using Lykke.Service.CandlesHistory.Client.Models;
 using LykkeApi2.Models;
 using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Mvc;
@@ -9,12 +7,8 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Common;
 using Core.Candles;
-using Core.Enumerators;
-using LkeServices.Candles;
-using Lykke.Service.Assets.Client;
-using Lykke.Service.Assets.Client.Models;
+using Core.Services;
 using LykkeApi2.Models.CandleSticks;
 
 namespace LykkeApi2.Controllers
@@ -24,17 +18,14 @@ namespace LykkeApi2.Controllers
     public class CandlesHistoryController : Controller
     {
         private readonly ICandlesHistoryServiceProvider _candlesServiceProvider;
-        private readonly CachedDataDictionary<string, AssetPair> _assetPairs;
-        private readonly IAssetsService _assetsService;
+        private readonly IAssetsHelper _assetsHelper;
 
         public CandlesHistoryController(
             ICandlesHistoryServiceProvider candlesServiceProvider,
-            IAssetsService assetsService,
-            CachedDataDictionary<string, AssetPair> assetPairs)
+            IAssetsHelper assetsHelper)
         {
             _candlesServiceProvider = candlesServiceProvider;
-            _assetsService = assetsService;
-            _assetPairs = assetPairs;
+            _assetsHelper = assetsHelper;
         }
 
         /// <summary>
@@ -64,7 +55,7 @@ namespace LykkeApi2.Controllers
         {
             try
             {
-                var assetPair = (await _assetPairs.Values()).FirstOrDefault(x => x.Id == request.AssetPairId);
+                var assetPair = await _assetsHelper.GetAssetPairAsync(request.AssetPairId);
 
                 if (assetPair == null)
                     return NotFound("Asset pair not found");
@@ -78,9 +69,9 @@ namespace LykkeApi2.Controllers
                     request.FromMoment,
                     request.ToMoment);
 
-                var baseAsset = await _assetsService.AssetGetAsync(assetPair.BaseAssetId);
+                var baseAsset = await _assetsHelper.GetAssetAsync(assetPair.BaseAssetId);
 
-                var quotingAsset = await _assetsService.AssetGetAsync(assetPair.QuotingAssetId);
+                var quotingAsset = await _assetsHelper.GetAssetAsync(assetPair.QuotingAssetId);
 
                 return Ok(
                     candles.ToResponseModel(

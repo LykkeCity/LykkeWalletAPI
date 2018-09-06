@@ -111,7 +111,7 @@ namespace LykkeApi2.Modules
                     async () =>
                         (await ctx.Resolve<IAssetsService>().AssetGetAllAsync(true))
                         .ToDictionary(itm => itm.Id),
-                    60);
+                    TimeSpan.FromMinutes(60));
             }).SingleInstance();
 
             builder.Register(c =>
@@ -121,7 +121,7 @@ namespace LykkeApi2.Modules
                     async () =>
                         (await ctx.Resolve<IAssetsService>().AssetPairGetAllAsync())
                         .ToDictionary(itm => itm.Id),
-                    60);
+                    TimeSpan.FromMinutes(60));
             }).SingleInstance();
         }
 
