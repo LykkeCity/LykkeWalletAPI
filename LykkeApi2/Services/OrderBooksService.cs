@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Common;
 using Core.Domain.Orderbook;
 using Core.Services;
-using Lykke.Service.Assets.Client.Models;
 using Core.Settings;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -14,21 +13,20 @@ namespace LykkeApi2.Services
     {
         private readonly IDistributedCache _distributedCache;
         private readonly CacheSettings _cacheSettings;
-        private readonly CachedDataDictionary<string, AssetPair> _assetPairsDict;
+        private readonly IAssetsHelper _assetsHelper;
 
         public OrderBooksService(
             IDistributedCache distributedCache,
             CacheSettings cacheSettings,
-            CachedDataDictionary<string, AssetPair> assetPairsDict
-            )
+            IAssetsHelper assetsHelper)
         {
             _distributedCache = distributedCache;
             _cacheSettings = cacheSettings;
-            _assetPairsDict = assetPairsDict;
+            _assetsHelper = assetsHelper;
         }
         public async Task<IEnumerable<IOrderBook>> GetAllAsync()
         {
-            var assetPairs = await _assetPairsDict.Values();
+            var assetPairs = await _assetsHelper.GetAllAssetPairsAsync();
 
             var orderBooks = new List<IOrderBook>();
 
