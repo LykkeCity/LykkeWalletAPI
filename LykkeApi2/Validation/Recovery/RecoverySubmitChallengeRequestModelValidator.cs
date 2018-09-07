@@ -3,7 +3,7 @@ using FluentValidation;
 using LykkeApi2.Models.Recovery;
 using LykkeApi2.Strings;
 using LykkeApi2.Validation.Common;
-using Action = Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models.Action;
+using Action = Lykke.Service.ClientAccountRecovery.Client.Models.Enums.Action;
 
 namespace LykkeApi2.Validation.Recovery
 {

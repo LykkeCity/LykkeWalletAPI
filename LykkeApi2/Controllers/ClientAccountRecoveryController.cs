@@ -1,22 +1,20 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
 using Common;
 using Common.Log;
 using Core.Constants;
 using Core.Exceptions;
-using Lykke.Common.Log;
+using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccountRecovery.Client;
-using Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models;
-using Lykke.Service.PersonalData.Client;
+using Lykke.Service.ClientAccountRecovery.Client.Models.Enums;
+using Lykke.Service.ClientAccountRecovery.Client.Models.Recovery;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Recovery;
 using LykkeApi2.Validation.Recovery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Refit;
-using Action = Lykke.Service.ClientAccountRecovery.Client.AutoRestClient.Models.Action;
 
 namespace LykkeApi2.Controllers
 {
@@ -31,22 +29,19 @@ namespace LykkeApi2.Controllers
         private readonly ILog _log;
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountClient;
-        private readonly IAccountRecoveryService _accountRecoveryService;
-        private readonly IPersonalDataClientAccountRecoveryClient _personalDataClientAccountRecoveryClient;
+        private readonly IClientAccountRecoveryServiceClient _accountRecoveryServiceClient;
 
         public ClientAccountRecoveryController(
             ILog log,
             IRequestContext requestContext,
             IClientAccountClient clientAccountClient,
-            IAccountRecoveryService accountRecoveryService,
-            IPersonalDataClientAccountRecoveryClient personalDataClientAccountRecoveryClient
+            IClientAccountRecoveryServiceClient accountRecoveryServiceClient
         )
         {
             _log = log;
             _requestContext = requestContext;
-            _accountRecoveryService = accountRecoveryService;
+            _accountRecoveryServiceClient = accountRecoveryServiceClient;
             _clientAccountClient = clientAccountClient;
-            _personalDataClientAccountRecoveryClient = personalDataClientAccountRecoveryClient;
         }
 
         /// <summary>Start client account recovery process.</summary>
@@ -72,7 +67,7 @@ namespace LykkeApi2.Controllers
                 };
 
                 var newRecoveryResponse =
-                    await _accountRecoveryService.StartNewRecoveryAsync(newRecoveryRequest);
+                    await _accountRecoveryServiceClient.RecoveryApi.StartNewRecoveryAsync(newRecoveryRequest);
 
                 var response = new RecoveryStartResponseModel
                 {
@@ -81,7 +76,7 @@ namespace LykkeApi2.Controllers
 
                 return Ok(response);
             }
-            catch (Exception e)
+            catch (ClientApiException e)
             {
                 _log.WriteWarningAsync(
                     nameof(ClientAccountRecoveryController),
@@ -89,14 +84,15 @@ namespace LykkeApi2.Controllers
                     "Unable to start recovery.",
                     e);
 
-                switch (e)
+                switch (e.HttpStatusCode)
                 {
-                        case BadRequestException _:
-                            throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData);
-                        case ForbiddenException _:
-                            throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.RecoveryStartAttemptLimitReached);
-                        default:
-                            throw;
+                    case HttpStatusCode.BadRequest:
+                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData);
+                    case HttpStatusCode.Forbidden:
+                        throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service
+                            .RecoveryStartAttemptLimitReached);
+                    default:
+                        throw LykkeApiErrorException.InternalServerError(LykkeApiErrorCodes.Service.SomethingWentWrong);
                 }
             }
         }
@@ -109,9 +105,13 @@ namespace LykkeApi2.Controllers
         {
             try
             {
-                var request = new RecoveryStatusRequest(model.StateToken);
+                var request = new RecoveryStatusRequest
+                {
+                    StateToken = model.StateToken
+                };
 
-                var recoveryStatusResponse = await _accountRecoveryService.GetRecoveryStatusAsync(request);
+                var recoveryStatusResponse =
+                    await _accountRecoveryServiceClient.RecoveryApi.GetRecoveryStatusAsync(request);
 
                 var response = new RecoveryStatusResponseModel
                 {
@@ -122,7 +122,7 @@ namespace LykkeApi2.Controllers
 
                 return Ok(response);
             }
-            catch (BadRequestException e)
+            catch (ClientApiException e)
             {
                 _log.WriteWarningAsync(
                     nameof(ClientAccountRecoveryController),
@@ -130,7 +130,10 @@ namespace LykkeApi2.Controllers
                     "Unable to get recovery status.",
                     e);
 
-                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData);
+                if (e.HttpStatusCode == HttpStatusCode.BadRequest)
+                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData);
+
+                throw LykkeApiErrorException.InternalServerError(LykkeApiErrorCodes.Service.SomethingWentWrong);
             }
         }
 
@@ -152,7 +155,8 @@ namespace LykkeApi2.Controllers
                     UserAgent = _requestContext.UserAgent
                 };
 
-                var challengeResponse = await _accountRecoveryService.SubmitChallengeAsync(challengeRequest);
+                var challengeResponse =
+                    await _accountRecoveryServiceClient.RecoveryApi.SubmitChallengeAsync(challengeRequest);
 
                 if (challengeResponse.OperationStatus.Error)
                     throw LykkeApiErrorException.BadRequest(
@@ -166,7 +170,7 @@ namespace LykkeApi2.Controllers
 
                 return Ok(response);
             }
-            catch (BadRequestException e)
+            catch (ClientApiException e)
             {
                 _log.WriteWarningAsync(
                     nameof(ClientAccountRecoveryController),
@@ -174,8 +178,11 @@ namespace LykkeApi2.Controllers
                     $"Unable to submit challenge. Action: {model.Action}",
                     e);
 
-                throw LykkeApiErrorException.BadRequest(
-                    LykkeApiErrorCodes.Service.RecoverySubmitChallengeInvalidValue);
+                if (e.HttpStatusCode == HttpStatusCode.BadRequest)
+                    throw LykkeApiErrorException.BadRequest(
+                        LykkeApiErrorCodes.Service.RecoverySubmitChallengeInvalidValue);
+
+                throw LykkeApiErrorException.InternalServerError(LykkeApiErrorCodes.Service.SomethingWentWrong);
             }
         }
 
@@ -194,17 +201,19 @@ namespace LykkeApi2.Controllers
                 using (var imageStream = file.OpenReadStream())
                 {
                     var streamPart = new StreamPart(imageStream, file.FileName, file.ContentType);
-                    var fileId = await _personalDataClientAccountRecoveryClient.UploadSelfieAsync(streamPart);
+
+                    var selfieResponse =
+                        await _accountRecoveryServiceClient.RecoveryApi.UploadSelfieAsync(model.StateToken, streamPart);
 
                     var response = new RecoveryUploadFileResponseModel
                     {
-                        FileId = fileId
+                        FileId = selfieResponse.FileId
                     };
 
                     return Ok(response);
                 }
             }
-            catch (ApiException e)
+            catch (ClientApiException e)
             {
                 _log.WriteWarningAsync(
                     nameof(ClientAccountRecoveryController),
@@ -212,9 +221,8 @@ namespace LykkeApi2.Controllers
                     $"Unable to upload file. FileName: {file.FileName}; Length: {file.Length} bytes; ContentType: {file.ContentType};",
                     e);
 
-                if (e.StatusCode == HttpStatusCode.BadRequest)
-                    throw LykkeApiErrorException.BadRequest(
-                        LykkeApiErrorCodes.Service.RecoveryUploadInvalidSelfieFile);
+                if (e.HttpStatusCode == HttpStatusCode.BadRequest)
+                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData, e.Message);
 
                 throw LykkeApiErrorException.InternalServerError(LykkeApiErrorCodes.Service.SomethingWentWrong);
             }
@@ -239,11 +247,11 @@ namespace LykkeApi2.Controllers
                     UserAgent = _requestContext.UserAgent
                 };
 
-                await _accountRecoveryService.UpdatePasswordAsync(passwordRequest);
+                await _accountRecoveryServiceClient.RecoveryApi.UpdatePasswordAsync(passwordRequest);
 
                 return Ok();
             }
-            catch (BadRequestException e)
+            catch (ClientApiException e)
             {
                 _log.WriteWarningAsync(
                     nameof(ClientAccountRecoveryController),
@@ -251,7 +259,10 @@ namespace LykkeApi2.Controllers
                     "Unable to complete recovery.",
                     e);
 
-                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData);
+                if (e.HttpStatusCode == HttpStatusCode.BadRequest)
+                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidData);
+
+                throw LykkeApiErrorException.InternalServerError(LykkeApiErrorCodes.Service.SomethingWentWrong);
             }
         }
     }

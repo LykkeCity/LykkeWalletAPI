@@ -10,6 +10,9 @@ namespace LykkeApi2.Validation.Recovery
         {
             CascadeMode = CascadeMode.StopOnFirstFailure;
 
+            RuleFor(x => x.StateToken)
+                .Custom(StateTokenFluentValidator.Validate);
+
             RuleFor(x => x.File)
                 .NotNull()
                 .SetValidator(new ImageTypeIFormFileFluentValidator(".jpg", ".jpeg", ".png", ".gif", ".bmp"));

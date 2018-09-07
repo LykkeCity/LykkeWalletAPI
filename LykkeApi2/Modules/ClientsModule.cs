@@ -110,8 +110,7 @@ namespace LykkeApi2.Modules
             
             builder.RegisterBlockchainCashoutPreconditionsCheckClient(_apiSettings.CurrentValue.BlockchainCashoutPreconditionsCheckServiceClient.ServiceUrl);
 
-            builder.RegisterClientAccountRecoveryClient(_apiSettings.CurrentValue.ClientRecoveryServiceClient.ServiceUrl,
-                _apiSettings.CurrentValue.ClientRecoveryServiceClient.ApiKey);
+            builder.RegisterClientAccountRecoveryServiceClient(_apiSettings.CurrentValue.ClientRecoveryServiceClient);
             
             builder.Populate(_services);
         }
