@@ -80,7 +80,7 @@ namespace LykkeApi2.Modules
 
             _services.RegisterAssetsClient(AssetServiceSettings.Create(
                 new Uri(_settings.AssetsServiceUrl),
-                TimeSpan.FromMinutes(1)),_log);
+                TimeSpan.FromMinutes(60)),_log);
 
 
             builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);

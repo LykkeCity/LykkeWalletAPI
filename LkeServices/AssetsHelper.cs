@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Common;
-using Core.Services;
+﻿using Core.Services;
 using JetBrains.Annotations;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace LkeServices
 {
@@ -13,37 +12,33 @@ namespace LkeServices
     public class AssetsHelper : IAssetsHelper
     {
         private readonly IAssetsService _assetsService;
-        private readonly CachedDataDictionary<string, Asset> _assetsCache;
-        private readonly CachedDataDictionary<string, AssetPair> _assetPairsCache;
+        private readonly IAssetsServiceWithCache _assetsServiceWithCache;
 
         public AssetsHelper(
-            IAssetsService assetsService,
-            CachedDataDictionary<string, Asset> assetsCache,
-            CachedDataDictionary<string, AssetPair> assetPairsCache)
+            IAssetsService assetsService, IAssetsServiceWithCache assetsServiceWithCache)
         {
             _assetsService = assetsService;
-            _assetsCache = assetsCache;
-            _assetPairsCache = assetPairsCache;
+            _assetsServiceWithCache = assetsServiceWithCache;
         }
 
         public Task<Asset> GetAssetAsync(string assetId)
         {
-            return _assetsCache.GetItemAsync(assetId);
+            return _assetsServiceWithCache.TryGetAssetAsync(assetId);
         }
 
-        public Task<IEnumerable<Asset>> GetAllAssetsAsync()
+        public Task<IReadOnlyCollection<Asset>> GetAllAssetsAsync()
         {
-            return _assetsCache.Values();
+            return _assetsServiceWithCache.GetAllAssetsAsync(true);
         }
 
         public Task<AssetPair> GetAssetPairAsync(string assetPairId)
         {
-            return _assetPairsCache.GetItemAsync(assetPairId);
+            return _assetsServiceWithCache.TryGetAssetPairAsync(assetPairId);
         }
 
-        public Task<IEnumerable<AssetPair>> GetAllAssetPairsAsync()
+        public Task<IReadOnlyCollection<AssetPair>> GetAllAssetPairsAsync()
         {
-            return _assetPairsCache.Values();
+            return _assetsServiceWithCache.GetAllAssetPairsAsync();
         }
 
         public Task<AssetAttributes> GetAssetsAttributesAsync(string assetId)
@@ -56,10 +51,9 @@ namespace LkeServices
             return _assetsService.AssetAttributeGetAsync(assetId, key);
         }
 
-        public async Task<IEnumerable<AssetExtendedInfo>> GetAssetsExtendedInfosAsync()
+        public Task<IList<AssetExtendedInfo>> GetAssetsExtendedInfosAsync()
         {
-            var resp = await _assetsService.AssetExtendedInfoGetAllAsync();
-            return resp;
+            return _assetsService.AssetExtendedInfoGetAllAsync();
         }
 
         public Task<AssetExtendedInfo> GetAssetExtendedInfoAsync(string assetId)
@@ -72,29 +66,28 @@ namespace LkeServices
             return _assetsService.AssetExtendedInfoGetDefaultAsync();
         }
 
-        public async Task<IEnumerable<AssetCategory>> GetAssetCategoriesAsync()
+        public Task<IList<AssetCategory>> GetAssetCategoriesAsync()
         {
-            var resp = await _assetsService.AssetCategoryGetAllAsync();
-            return resp;
+            return _assetsService.AssetCategoryGetAllAsync();
         }
 
         public Task<AssetCategory> GetAssetCategoryAsync(string categoryId)
         {
             return _assetsService.AssetCategoryGetAsync(categoryId);
         }
-        
+
         public async Task<HashSet<string>> GetAssetsAvailableToClientAsync(
             string clientId,
             string partnerId,
             bool? tradable = default(bool?))
         {
-            var allAssets = await _assetsCache.Values();
-            var relevantAssets = allAssets.Where(x => !x.IsDisabled && (!tradable.HasValue || x.IsTradable == tradable ));
-            
+            var allAssets = await GetAllAssetsAsync();
+            var relevantAssets = allAssets.Where(x => !x.IsDisabled && (!tradable.HasValue || x.IsTradable == tradable));
+
             var assetsAvailableToUser = new HashSet<string>(await _assetsService.ClientGetAssetIdsAsync(clientId, true));
-            
+
             var result = new HashSet<string>(relevantAssets.Where(x =>
-                    assetsAvailableToUser.Contains(x.Id) && 
+                    assetsAvailableToUser.Contains(x.Id) &&
                     (x.NotLykkeAsset
                         ? partnerId != null && x.PartnerIds.Contains(partnerId)
                         : partnerId == null || x.PartnerIds.Contains(partnerId)))
@@ -108,12 +101,12 @@ namespace LkeServices
             var allNondisabledAssetPairs = (await GetAllAssetPairsAsync()).Where(s => !s.IsDisabled);
 
             var assetsAvailableToUser = await GetAssetsAvailableToClientAsync(clientId, partnerId, tradable);
-            
+
             var availableAssetPairs =
                 allNondisabledAssetPairs.Where(x =>
                     assetsAvailableToUser.Contains(x.BaseAssetId) &&
                     assetsAvailableToUser.Contains(x.QuotingAssetId));
-            
+
             return new HashSet<string>(availableAssetPairs.Select(x => x.Id));
         }
 
@@ -132,10 +125,9 @@ namespace LkeServices
             return _assetsService.WatchListCustomRemoveAsync(watchListId, clientId);
         }
 
-        public async Task<IEnumerable<WatchList>> GetAllCustomWatchListsForClient(string clientId)
+        public Task<IList<WatchList>> GetAllCustomWatchListsForClient(string clientId)
         {
-            var resp = await _assetsService.WatchListGetAllAsync(clientId);
-            return resp;
+            return _assetsService.WatchListGetAllAsync(clientId);
         }
 
         public Task<WatchList> GetCustomWatchListAsync(string clientId, string watchListId)
