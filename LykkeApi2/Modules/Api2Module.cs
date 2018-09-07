@@ -1,36 +1,28 @@
-﻿using System;
-using System.Linq;
-using Autofac;
+﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AzureStorage;
-using AzureStorage.Tables;
-using AzureStorage.Tables.Templates.Index;
-using Common;
 using Common.Cache;
 using Common.Log;
-using Core;
 using Core.Candles;
 using Core.Countries;
 using Core.Enumerators;
-using Core.Exchange;
 using Core.Identity;
 using Core.Services;
+using Core.Settings;
 using LkeServices;
 using LkeServices.Candles;
 using LkeServices.Countries;
 using LkeServices.Identity;
 using Lykke.Service.Assets.Client;
-using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.RateCalculator.Client;
 using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
-using Core.Settings;
 using LykkeApi2.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace LykkeApi2.Modules
 {
@@ -76,9 +68,9 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
-			
+
             _services.AddSingleton<ClientAccountLogic>();
-            
+
             _services.AddSingleton<ICandlesHistoryServiceProvider>(x =>
             {
                 var provider = new CandlesHistoryServiceProvider();
@@ -97,32 +89,8 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
 
-            RegisterDictionaryEntities(builder);
             BindServices(builder, _settings);
             builder.Populate(_services);
-        }
-
-        private void RegisterDictionaryEntities(ContainerBuilder builder)
-        {
-            builder.Register(c =>
-            {
-                var ctx = c.Resolve<IComponentContext>();
-                return new CachedDataDictionary<string, Asset>(
-                    async () =>
-                        (await ctx.Resolve<IAssetsService>().AssetGetAllAsync(true))
-                        .ToDictionary(itm => itm.Id),
-                    TimeSpan.FromMinutes(60));
-            }).SingleInstance();
-
-            builder.Register(c =>
-            {
-                var ctx = c.Resolve<IComponentContext>();
-                return new CachedDataDictionary<string, AssetPair>(
-                    async () =>
-                        (await ctx.Resolve<IAssetsService>().AssetPairGetAllAsync())
-                        .ToDictionary(itm => itm.Id),
-                    TimeSpan.FromMinutes(60));
-            }).SingleInstance();
         }
 
         private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings)
