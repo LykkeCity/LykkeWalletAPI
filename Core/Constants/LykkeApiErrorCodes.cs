@@ -71,6 +71,12 @@ namespace Core.Constants
             /// </summary>
             public static readonly ILykkeApiErrorCode InconsistentState =
                 new LykkeApiErrorCode(nameof(InconsistentState), "The call was unexpected.");
+
+            /// <summary>
+            ///     Two factor authentication should be enabled.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode TwoFactorRequired =
+                new LykkeApiErrorCode(nameof(InconsistentState), "The action requires 2fa enabled.");
         }
 
         /// <summary>
