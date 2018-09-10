@@ -30,6 +30,7 @@
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.0" />
     <PackageReference Include="Lykke.Service.ClientDialogs.Client" Version="1.0.0" />
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
+    <PackageReference Include="Lykke.Service.ConfirmationCodes.Client" Version="1.0.12" />
     <PackageReference Include="Lykke.Service.FeeCalculator.Client" Version="2.1.4" />
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.220" />
     <PackageReference Include="Lykke.Service.Kyc.Abstractions" Version="1.0.221" />

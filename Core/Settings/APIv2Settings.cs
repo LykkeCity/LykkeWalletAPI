@@ -3,6 +3,7 @@ using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.ClientDictionaries.Client;
+using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.OperationsRepository.Client;
@@ -32,6 +33,7 @@ namespace Core.Settings
         public PaymentSystemServiceClientSettings PaymentSystemServiceClient { set; get; }
         public ClientDialogsServiceClientSettings ClientDialogsServiceClient { set; get; }
         public SwiftCredentialsServiceClientSettings SwiftCredentialsServiceClient { set; get; }
+        public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { set; get; }
         public SagasRabbitMq SagasRabbitMq { set; get; }
     }
     
