@@ -104,17 +104,13 @@ namespace LykkeApi2.Controllers
                     types.Add(result);
             }
 
-            var wallets = (await _clientAccountService.GetWalletsByClientIdAsync(clientId)).ToList();
+            var wallet = await _clientAccountService.GetWalletAsync(walletId);
 
-            var isTradingWallet = wallets.FirstOrDefault(x => x.Id == walletId)?.Type == "Trading";
-
-            if (!isTradingWallet && !wallets.Any(x => x.Id.Equals(walletId)))
-            {
+            if (wallet == null || wallet.ClientId != clientId)
                 return NotFound();
-            }
 
             // TODO: remove after migration to wallet id
-            if (isTradingWallet)
+            if (wallet.Type == "Trading")
                 walletId = clientId;
 
             var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), types.ToArray(),
