@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using Lykke.Service.OperationsHistory.Client;
 using LykkeApi2.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -12,11 +11,11 @@ using Lykke.Cqrs;
 using Lykke.Job.HistoryExportBuilder.Contract;
 using Lykke.Job.HistoryExportBuilder.Contract.Commands;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.History.Client;
+using Lykke.Service.History.Contracts.Enums;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using Lykke.Service.OperationsHistory.AutorestClient.Models;
 using LykkeApi2.Models.History;
 using ErrorResponse = LykkeApi2.Models.ErrorResponse;
-using Repositories;
 
 namespace LykkeApi2.Controllers
 {
@@ -25,56 +24,24 @@ namespace LykkeApi2.Controllers
     [ApiController]
     public class HistoryController : Controller
     {
-        private readonly IOperationsHistoryClient _operationsHistoryClient;
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountService;
         private readonly ICqrsEngine _cqrsEngine;
         private readonly IHistoryExportsRepository _historyExportsRepository;
+        private readonly IHistoryClient _historyClient;
 
         public HistoryController(
-            IOperationsHistoryClient operationsHistoryClient, 
-            IRequestContext requestContext, 
+            IRequestContext requestContext,
             IClientAccountClient clientAccountService,
             ICqrsEngine cqrsEngine,
-            IHistoryExportsRepository historyExportsRepository)
+            IHistoryExportsRepository historyExportsRepository,
+            IHistoryClient historyClient)
         {
-            _operationsHistoryClient = operationsHistoryClient ?? throw new ArgumentNullException(nameof(operationsHistoryClient));
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
             _cqrsEngine = cqrsEngine;
             _historyExportsRepository = historyExportsRepository;
-        }
-
-        /// <summary>
-        /// Get history by client identifier
-        /// </summary>
-        /// <param name="operationType">The types of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
-        /// <param name="assetId">Asset identifier</param>
-        /// <param name="assetPairId">Asset pair identifier</param>
-        /// <param name="take">How many maximum items have to be returned</param>
-        /// <param name="skip">How many items skip before returning</param>
-        /// <returns></returns>
-        [HttpGet("client")]
-        [SwaggerOperation("GetByClientId")]
-        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
-        public async Task<IActionResult> GetByClientId(
-            [FromQuery(Name = "operationType")] HistoryOperationType[] operationType,
-            [FromQuery] string assetId,
-            [FromQuery] string assetPairId,
-            [FromQuery] int take,
-            [FromQuery] int skip)
-        {
-            var clientId = _requestContext.ClientId;
-
-            var response = await _operationsHistoryClient.GetByClientId(clientId, operationType, assetId, assetPairId, take, skip);
-
-            if (response.Error != null)
-            {
-                return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
-            }
-
-            return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
+            _historyClient = historyClient;
         }
 
         [HttpPost("client/csv")]
@@ -83,7 +50,7 @@ namespace LykkeApi2.Controllers
         public IActionResult RequestClientHistoryCsv([FromBody]RequestClientHistoryCsvRequestModel model)
         {
             var id = Guid.NewGuid().ToString();
-            
+
             _cqrsEngine.SendCommand(new ExportClientHistoryCommand
             {
                 Id = id,
@@ -93,22 +60,22 @@ namespace LykkeApi2.Controllers
                 AssetPairId = model.AssetPairId
             }, null, HistoryExportBuilderBoundedContext.Name);
 
-            return Ok(new RequestClientHistoryCsvResponseModel {Id = id});
+            return Ok(new RequestClientHistoryCsvResponseModel { Id = id });
         }
 
         [HttpGet("client/csv")]
         [SwaggerOperation("GetClientHistoryCsv")]
-        [ProducesResponseType(typeof(GetClientHistoryCsvResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GetClientHistoryCsvResponseModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetClientHistoryCsv([FromQuery]string id)
         {
-            return Ok(new GetClientHistoryCsvResponseModel { Url = await _historyExportsRepository.GetUrl(_requestContext.ClientId, id)});
+            return Ok(new GetClientHistoryCsvResponseModel { Url = await _historyExportsRepository.GetUrl(_requestContext.ClientId, id) });
         }
 
         /// <summary>
         /// Getting history by wallet identifier
         /// </summary>
         /// <param name="walletId">Wallet identifier</param>
-        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, LimitTrade, LimitTradeEvent</param>
+        /// <param name="operationType">The type of the operation, possible values: CashIn, CashOut, Trade, OrderEvent</param>
         /// <param name="assetId">Asset identifier</param>
         /// <param name="assetPairId">Asset pair identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
@@ -116,12 +83,12 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("wallet/{walletId}")]
         [SwaggerOperation("GetByWalletId")]
-        [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(IEnumerable<HistoryResponseModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetByWalletId(
             string walletId,
-            [FromQuery(Name = "operationType")] HistoryOperationType[] operationType,
+            [FromQuery(Name = "operationType")] string[] operationType,
             [FromQuery] string assetId,
             [FromQuery] string assetPairId,
             [FromQuery] int take,
@@ -129,21 +96,27 @@ namespace LykkeApi2.Controllers
         {
             var clientId = _requestContext.ClientId;
 
-            var wallets = await _clientAccountService.GetWalletsByClientIdAsync(clientId);
-
-            if (!wallets.Any(x => x.Id.Equals(walletId)))
+            // TODO: should be removed after release. operationType parameter should be of type HistoryType[]
+            var types = new HashSet<HistoryType>();
+            foreach (var opType in operationType)
             {
+                if (Enum.TryParse<HistoryType>(opType, out var result))
+                    types.Add(result);
+            }
+
+            var wallet = await _clientAccountService.GetWalletAsync(walletId);
+
+            if (wallet == null || wallet.ClientId != clientId)
                 return NotFound();
-            }
 
-            var response = await _operationsHistoryClient.GetByWalletId(walletId, operationType, assetId, assetPairId, take, skip);
+            // TODO: remove after migration to wallet id
+            if (wallet.Type == "Trading")
+                walletId = clientId;
 
-            if (response.Error != null)
-            {
-                return StatusCode((int) HttpStatusCode.InternalServerError, response.Error);
-            }
+            var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), types.ToArray(),
+                assetId, assetPairId, offset: skip, limit: take);
 
-            return Ok(response.Records.Where(x => x != null).Select(x => x.ToResponseModel()));
+            return Ok(data.SelectMany(x => x.ToResponseModel()));
         }
     }
 }

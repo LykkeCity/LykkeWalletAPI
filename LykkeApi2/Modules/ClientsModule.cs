@@ -7,14 +7,12 @@ using Lykke.Service.Operations.Client;
 using Lykke.Service.Registration;
 using Lykke.SettingsReader;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.OperationsHistory.Client;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Common.Log;
 using Core.Settings;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
-using Lykke.Service.OperationsRepository.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.ClientDictionaries.Client;
@@ -25,7 +23,7 @@ using Lykke.Service.Session.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.BlockchainWallets.Client;
-using Lykke.Service.ClientDialogs.Client;
+using Lykke.Service.History.Client;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.SwiftCredentials.Client;
@@ -69,9 +67,7 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
-
-            builder.RegisterOperationsHistoryClient(_apiSettings.CurrentValue.OperationsHistoryServiceClient, _log);
-
+            
             builder.RegisterInstance(
                 new KycStatusServiceClient(_apiSettings.CurrentValue.KycServiceClient, _log))
                 .As<IKycStatusService>().SingleInstance();
@@ -87,9 +83,8 @@ namespace LykkeApi2.Modules
             builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);
 
             builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog: null, ignoreErrors: true);
-            builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 
-            builder.RegisterOperationsRepositoryClients(_settings.OperationsRepositoryClient, _log);
+            builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 
             builder.RegisterAffiliateClient(_settings.AffiliateServiceClient.ServiceUrl, _log);
 
@@ -98,15 +93,17 @@ namespace LykkeApi2.Modules
             builder.RegisterPaymentSystemClient(_apiSettings.CurrentValue.PaymentSystemServiceClient.ServiceUrl, _log);
 
             builder.RegisterLimitationsServiceClient(_apiSettings.CurrentValue.LimitationServiceClient.ServiceUrl);
-            
+
             builder.RegisterClientDialogsClient(_apiSettings.CurrentValue.ClientDialogsServiceClient);
-            
+
             builder.Register(ctx => new BlockchainWalletsClient(_apiSettings.CurrentValue.BlockchainWalletsServiceClient.ServiceUrl, _log))
                 .As<IBlockchainWalletsClient>()
                 .SingleInstance();
-            
+
             builder.RegisterSwiftCredentialsClient(_apiSettings.CurrentValue.SwiftCredentialsServiceClient);
-            
+
+            builder.RegisterHistoryClient(new HistoryServiceClientSettings { ServiceUrl = _settings.HistoryServiceUrl });
+
             builder.RegisterConfirmationCodesClient(_apiSettings.Nested(r => r.ConfirmationCodesClient).CurrentValue);
             
             builder.Populate(_services);
