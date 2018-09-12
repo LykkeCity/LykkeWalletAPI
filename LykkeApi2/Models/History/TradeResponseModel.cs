@@ -63,8 +63,8 @@ namespace LykkeApi2.Models.History
                 AssetPairId = assetPair.Id,
                 BaseAssetName = baseAsset?.DisplayId ?? assetPair.BaseAssetId,
                 QuoteAssetName = quoteAsset?.DisplayId ?? assetPair.QuotingAssetId,
-                BaseVolume = tradeModel.BaseVolume,
-                QuoteVolume = tradeModel.QuotingVolume,
+                BaseVolume = Math.Abs(tradeModel.BaseVolume),
+                QuoteVolume = Math.Abs(tradeModel.QuotingVolume),
                 Direction = tradeModel.BaseVolume > 0 ? Direction.Buy : Direction.Sell,
                 Price = tradeModel.Price,
                 Timestamp = tradeModel.Timestamp

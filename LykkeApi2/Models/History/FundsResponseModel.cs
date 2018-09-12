@@ -69,7 +69,7 @@ namespace LykkeApi2.Models.History
                         return new FundsResponseModel
                         {
                             Id = cashin.Id,
-                            Volume = cashin.Volume,
+                            Volume = Math.Abs(cashin.Volume),
                             AssetId = cashin.AssetId,
                             AssetName = asset?.DisplayId ?? cashin.AssetId,
                             Operation = FundsOperation.Deposit,
@@ -84,7 +84,7 @@ namespace LykkeApi2.Models.History
                         return new FundsResponseModel
                         {
                             Id = cashout.Id,
-                            Volume = cashout.Volume,
+                            Volume = Math.Abs(cashout.Volume),
                             AssetId = cashout.AssetId,
                             AssetName = asset?.DisplayId ?? cashout.AssetId,
                             Operation = FundsOperation.Withdraw,
