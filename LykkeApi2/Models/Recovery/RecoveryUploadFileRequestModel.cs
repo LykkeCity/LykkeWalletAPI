@@ -11,7 +11,7 @@ namespace LykkeApi2.Models.Recovery
         /// <summary>
         ///     JWE token containing current state of recovery process.
         /// </summary>
-        [FromForm]
+        [FromQuery]
         public string StateToken { get; set; }
 
         // Note: swashbuckle incorrectly interprets File as query param instead of FormData.
