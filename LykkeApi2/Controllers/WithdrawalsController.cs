@@ -53,6 +53,11 @@ namespace LykkeApi2.Controllers
         {
             var asset = await GetCryptoWithdrawalAssetAsync(assetId);
 
+            if (string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId))
+            {
+                return Ok(new WithdrawalCryptoInfoModel());
+            }
+
             var blockchainCapabilities = await _blockchainWalletsClient.GetCapabilititesAsync(asset.BlockchainIntegrationLayerId);
 
             var constants =
@@ -104,9 +109,19 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(baseAddress))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
 
-            var blockchainCapabilities = await _blockchainWalletsClient.GetCapabilititesAsync(asset.BlockchainIntegrationLayerId);
+            if (string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId))
+            {
+                return Ok(new WithdrawalCryptoAddressValidationModel
+                {
+                    IsValid = true
+                });
+            }
 
-            if (blockchainCapabilities.IsPublicAddressExtensionRequired && string.IsNullOrWhiteSpace(addressExtension))
+            var blockchainCapabilities =
+                await _blockchainWalletsClient.GetCapabilititesAsync(asset.BlockchainIntegrationLayerId);
+
+            if (blockchainCapabilities.IsPublicAddressExtensionRequired &&
+                string.IsNullOrWhiteSpace(addressExtension))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
 
             var destinationAddress = blockchainCapabilities.IsPublicAddressExtensionRequired
@@ -121,7 +136,6 @@ namespace LykkeApi2.Controllers
                 {
                     AssetId = assetId,
                     DestinationAddress = destinationAddress
-
                 });
 
             return Ok(
