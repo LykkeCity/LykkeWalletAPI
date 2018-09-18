@@ -42,11 +42,16 @@ namespace LykkeApi2.Controllers
             _requestContext = requestContext;
         }
 
+        /// <summary>
+        /// Get additional asset info for crypto withdrawal
+        /// </summary>
+        /// <param name="assetId"></param>
+        /// <returns></returns>
         [HttpGet("crypto/{assetId}/info")]
         [ProducesResponseType(typeof(WithdrawalCryptoInfoModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAssetInfo([FromRoute] string assetId)
         {
-            var asset = await GetAssetAsync(assetId);
+            var asset = await GetCryptoWithdrawalAssetAsync(assetId);
 
             var blockchainCapabilities = await _blockchainWalletsClient.GetCapabilititesAsync(asset.BlockchainIntegrationLayerId);
 
@@ -64,17 +69,29 @@ namespace LykkeApi2.Controllers
             });
         }
 
+        /// <summary>
+        /// Get asset fee for crypto withdrawal
+        /// </summary>
+        /// <param name="assetId"></param>
+        /// <returns></returns>
         [HttpGet("crypto/{assetId}/fee")]
         [ProducesResponseType(typeof(WithdrawalCryptoFeeModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetCryptoFee([FromRoute] string assetId)
         {
-            var asset = await GetAssetAsync(assetId);
+            var asset = await GetCryptoWithdrawalAssetAsync(assetId);
 
-            var fee = await _feeCalculatorClient.GetCashoutFeeAsync(assetId);
+            var fee = await _feeCalculatorClient.GetCashoutFeeAsync(asset.Id);
 
             return Ok(fee.ToApiModel());
         }
 
+        /// <summary>
+        /// Validate asset withdrawal address and extension (if presented)
+        /// </summary>
+        /// <param name="assetId"></param>
+        /// <param name="baseAddress"></param>
+        /// <param name="addressExtension"></param>
+        /// <returns></returns>
         [HttpGet("crypto/{assetId}/validateAddress")]
         [ProducesResponseType(typeof(WithdrawalCryptoAddressValidationModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> ValidateCryptoAddress(
@@ -82,7 +99,7 @@ namespace LykkeApi2.Controllers
             [FromQuery] string baseAddress,
             [FromQuery] string addressExtension)
         {
-            var asset = await GetAssetAsync(assetId);
+            var asset = await GetCryptoWithdrawalAssetAsync(assetId);
 
             if (string.IsNullOrWhiteSpace(baseAddress))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
@@ -114,6 +131,10 @@ namespace LykkeApi2.Controllers
                 });
         }
 
+        /// <summary>
+        /// Get available assets for crypto and swift withdrawal
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("available")]
         [ProducesResponseType(typeof(WithdrawalMethodsResponse), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailableMethods()
@@ -150,14 +171,14 @@ namespace LykkeApi2.Controllers
             return Ok(model);
         }
 
-        private async Task<Asset> GetAssetAsync(string assetId)
+        private async Task<Asset> GetCryptoWithdrawalAssetAsync(string assetId)
         {
             var asset = await _assetsHelper.GetAssetAsync(assetId);
 
             if (asset == null || asset.IsDisabled)
-                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetNotFound);
+                throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.AssetNotFound);
 
-            if (asset.BlockchainWithdrawal == false)
+            if (!asset.BlockchainWithdrawal)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
 
             return asset;
