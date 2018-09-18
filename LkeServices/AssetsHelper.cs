@@ -1,10 +1,11 @@
-﻿using Core.Services;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Common;
+using Core.Services;
 using JetBrains.Annotations;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LkeServices
 {
@@ -76,7 +77,7 @@ namespace LkeServices
             return _assetsService.AssetCategoryGetAsync(categoryId);
         }
 
-        public async Task<HashSet<string>> GetAssetsAvailableToClientAsync(
+        public async Task<IEnumerable<Asset>> GetAssetsAvailableToClientAsync(
             string clientId,
             string partnerId,
             bool? tradable = default(bool?))
@@ -86,27 +87,36 @@ namespace LkeServices
 
             var assetsAvailableToUser = new HashSet<string>(await _assetsService.ClientGetAssetIdsAsync(clientId, true));
 
-            var result = new HashSet<string>(relevantAssets.Where(x =>
+            return relevantAssets.Where(x =>
                     assetsAvailableToUser.Contains(x.Id) &&
                     (x.NotLykkeAsset
                         ? partnerId != null && x.PartnerIds.Contains(partnerId)
-                        : partnerId == null || x.PartnerIds.Contains(partnerId)))
-                .Select(x => x.Id));
-
-            return result;
+                        : partnerId == null || x.PartnerIds.Contains(partnerId)));
         }
 
-        public async Task<HashSet<string>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId, bool? tradable = default(bool?))
+        public async Task<HashSet<string>> GetSetOfAssetsAvailableToClientAsync(
+            string clientId,
+            string partnerId,
+            bool? tradable = default(bool?))
+        {
+            var availableAssets = await GetAssetsAvailableToClientAsync(clientId, partnerId, tradable);
+            return new HashSet<string>(availableAssets.Select(x => x.Id));
+        }
+
+        public async Task<IEnumerable<AssetPair>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId, bool? tradable = default(bool?))
         {
             var allNondisabledAssetPairs = (await GetAllAssetPairsAsync()).Where(s => !s.IsDisabled);
 
-            var assetsAvailableToUser = await GetAssetsAvailableToClientAsync(clientId, partnerId, tradable);
+            var assetsAvailableToUser = await GetSetOfAssetsAvailableToClientAsync(clientId, partnerId, tradable);
 
-            var availableAssetPairs =
-                allNondisabledAssetPairs.Where(x =>
+            return allNondisabledAssetPairs.Where(x =>
                     assetsAvailableToUser.Contains(x.BaseAssetId) &&
                     assetsAvailableToUser.Contains(x.QuotingAssetId));
+        }
 
+        public async Task<HashSet<string>> GetSetOfAssetPairsAvailableToClientAsync(string clientId, string partnerId, bool? tradable = default(bool?))
+        {
+            var availableAssetPairs = await GetAssetPairsAvailableToClientAsync(clientId, partnerId, tradable);
             return new HashSet<string>(availableAssetPairs.Select(x => x.Id));
         }
 

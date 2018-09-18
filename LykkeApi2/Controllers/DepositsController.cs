@@ -143,7 +143,7 @@ namespace LykkeApi2.Controllers
             var asset = await _assetsHelper.GetAssetAsync(assetId);
             
             var assetsAvailableToClient =
-                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+                await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
             
             if(asset == null)
                 throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.AssetNotFound);
@@ -187,7 +187,7 @@ namespace LykkeApi2.Controllers
             var asset = await _assetsHelper.GetAssetAsync(assetId);
             
             var assetsAvailableToClient =
-                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+                await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
             
             if(asset == null)
                 throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.AssetNotFound);
@@ -229,7 +229,7 @@ namespace LykkeApi2.Controllers
                 throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.AssetNotFound);
             
             var assetsAvailableToClient =
-                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+                await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             if (!assetsAvailableToClient.Contains(assetId) || assetId == "ETH") //temporary workaround for ETH until we can generate it through _blockchainWalletsClient.CreateWalletAsync 
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
@@ -277,7 +277,7 @@ namespace LykkeApi2.Controllers
                 throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.AssetNotFound);
             
             var assetsAvailableToClient =
-                await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+                await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             if (!assetsAvailableToClient.Contains(assetId))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);

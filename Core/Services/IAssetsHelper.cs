@@ -17,9 +17,15 @@ namespace Core.Services
         Task<AssetExtendedInfo> GetDefaultAssetExtendedInfoAsync();
         Task<IList<AssetCategory>> GetAssetCategoriesAsync();
         Task<AssetCategory> GetAssetCategoryAsync(string categoryId);
-        Task<HashSet<string>> GetAssetsAvailableToClientAsync(string clientId, string partnerId,
+
+        Task<IEnumerable<Asset>> GetAssetsAvailableToClientAsync(string clientId, string partnerId,
             bool? tradable = default(bool?));
-        Task<HashSet<string>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId,
+        Task<HashSet<string>> GetSetOfAssetsAvailableToClientAsync(string clientId, string partnerId,
+            bool? tradable = default(bool?));
+
+        Task<IEnumerable<AssetPair>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId,
+            bool? tradable = default(bool?));
+        Task<HashSet<string>> GetSetOfAssetPairsAvailableToClientAsync(string clientId, string partnerId,
             bool? tradable = default(bool?));
 
         Task<WatchList> AddCustomWatchListAsync(string clientId, WatchList watchList);
