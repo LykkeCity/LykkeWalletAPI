@@ -35,7 +35,7 @@ namespace Core.Settings
         public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { set; get; }
         public SagasRabbitMq SagasRabbitMq { set; get; }
     }
-    
+
     public class SagasRabbitMq
     {
         [AmqpCheck]
@@ -54,10 +54,10 @@ namespace Core.Settings
     }
 
     public class GlobalSettings
-    {        
+    {
         public string[] BlockedAssetPairs { get; set; }
         public bool BitcoinBlockchainOperationsDisabled { get; set; }
-        public bool BtcOperationsDisabled { get; set; }        
+        public bool BtcOperationsDisabled { get; set; }
     }
 
     public class SlackNotificationsSettings
@@ -77,6 +77,7 @@ namespace Core.Settings
         public ServiceSettings Services { get; set; }
         public DeploymentSettings DeploymentSettings { get; set; }
         public CacheSettings CacheSettings { get; set; }
+        public CashoutSettings CashoutSettings { get; set; }
         public bool EnableFees { get; set; }
         public bool EnableSessionValidation { get; set; }
         public bool EnableTwoFactor { get; set; }
@@ -116,11 +117,11 @@ namespace Core.Settings
     {
         public IpEndpointSettings IpEndpoint { get; set; }
     }
-    
+
     public class FeeCalculatorSettings
     {
         public string ServiceUrl { get; set; }
-    }    
+    }
 
     public class PaymentSystemSettings
     {
@@ -131,11 +132,12 @@ namespace Core.Settings
     {
         public TargetClientIdFeeSettings TargetClientId { get; set; }
     }
-    
+
     public class TargetClientIdFeeSettings
     {
         public string WalletApi { get; set; }
         public string Cashout { get; set; }
+        public string Withdrawal { get; set; }
     }
 
     public class IpEndpointSettings
@@ -155,7 +157,7 @@ namespace Core.Settings
             return new IPEndPoint(addresses[0], Port);
         }
     }
-    
+
     public class DeploymentSettings
     {
         public bool IsProduction { get; set; }
@@ -166,6 +168,11 @@ namespace Core.Settings
         public string FinanceDataCacheInstance { get; set; }
         public string RedisConfiguration { get; set; }
         public string OrderBooksCacheKeyPattern { get; set; }
+    }
+
+    public class CashoutSettings
+    {
+        public string SwiftHotwallet { get; set; }
     }
 
     public static class CacheSettingsExt

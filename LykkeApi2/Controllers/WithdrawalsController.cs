@@ -185,6 +185,17 @@ namespace LykkeApi2.Controllers
             return Ok(model);
         }
 
+        /// <summary>
+        /// Get last swift cashout data
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("swift/last")]
+        [ProducesResponseType(typeof(SwiftLastResponse), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> GetLastSwift()
+        {
+            return Ok(new SwiftLastResponse());
+        }
+
         private async Task<Asset> GetCryptoWithdrawalAssetAsync(string assetId)
         {
             var asset = await _assetsHelper.GetAssetAsync(assetId);
