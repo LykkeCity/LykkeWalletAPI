@@ -302,38 +302,6 @@ namespace LykkeApi2.Controllers
             if (pair.IsDisabled)
                 return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
             
-            if (request.LowerLimitPrice.HasValue && request.LowerLimitPrice.Value <= 0 )
-                return BadRequest($"{nameof(request.LowerLimitPrice)} must be > 0");
-            
-            if (request.LowerPrice.HasValue && request.LowerPrice.Value <= 0 )
-                return BadRequest($"{nameof(request.LowerPrice)} must be > 0");
-            
-            if (request.UpperLimitPrice.HasValue && request.UpperLimitPrice.Value <= 0 )
-                return BadRequest($"{nameof(request.UpperLimitPrice)} must be > 0");
-            
-            if (request.UpperPrice.HasValue && request.UpperPrice.Value <= 0 )
-                return BadRequest($"{nameof(request.UpperPrice)} must be > 0");
-            
-            if (request.LowerLimitPrice.HasValue && !request.LowerPrice.HasValue)
-                return BadRequest($"{nameof(request.LowerPrice)} must be set with {nameof(request.LowerLimitPrice)}");
-            
-            if (request.LowerPrice.HasValue && !request.LowerLimitPrice.HasValue)
-                return BadRequest($"{nameof(request.LowerLimitPrice)} must be set with {nameof(request.LowerPrice)}");
-            
-            if (request.UpperLimitPrice.HasValue && !request.UpperPrice.HasValue)
-                return BadRequest($"{nameof(request.UpperPrice)} must be set with {nameof(request.UpperLimitPrice)}");
-            
-            if (request.UpperPrice.HasValue && !request.UpperLimitPrice.HasValue)
-                return BadRequest($"{nameof(request.UpperLimitPrice)} must be set with {nameof(request.UpperPrice)}");
-            
-            if (!request.LowerLimitPrice.HasValue && !request.LowerPrice.HasValue || 
-                !request.UpperLimitPrice.HasValue && !request.UpperPrice.HasValue)
-                return BadRequest("upper or lower prices must be set");
-            
-            if (request.LowerLimitPrice.HasValue && request.UpperLimitPrice.HasValue &&
-                request.UpperLimitPrice <= request.LowerLimitPrice)
-                return BadRequest($"{nameof(request.UpperLimitPrice)} must be greater than {nameof(request.LowerLimitPrice)}");
-            
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
