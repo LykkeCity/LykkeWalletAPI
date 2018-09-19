@@ -49,6 +49,8 @@ namespace LykkeApi2.Models.History
         public FundsStatus Status { get; set; }
 
         public DateTime Timestamp { get; set; }
+
+        public string BlockchainHash { get; set; }
     }
 
     public static class FundsModelExtensions
@@ -75,7 +77,8 @@ namespace LykkeApi2.Models.History
                             Operation = FundsOperation.Deposit,
                             Status = FundsStatus.Completed,
                             Type = FundsType.Undefined,
-                            Timestamp = cashin.Timestamp
+                            Timestamp = cashin.Timestamp,
+                            BlockchainHash = cashin.BlockchainHash
                         };
                     }
                 case CashoutModel cashout:
@@ -90,7 +93,8 @@ namespace LykkeApi2.Models.History
                             Operation = FundsOperation.Withdraw,
                             Status = FundsStatus.Completed,
                             Type = FundsType.Undefined,
-                            Timestamp = cashout.Timestamp
+                            Timestamp = cashout.Timestamp,
+                            BlockchainHash = cashout.BlockchainHash
                         };
                     }
                 default:
