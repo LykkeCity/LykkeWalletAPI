@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Lykke.Service.Operations.Client;
-using Lykke.Service.Operations.Contracts;
+using Lykke.Service.Operations.Contracts.Commands;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Operations;
 using Microsoft.AspNetCore.Authorization;

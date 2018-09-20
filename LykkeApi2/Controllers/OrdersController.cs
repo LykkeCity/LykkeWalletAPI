@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using Common;
 using Core.Identity;
 using Core.Settings;
-using Lykke.MatchingEngine.Connector.Abstractions.Models;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
+using Lykke.MatchingEngine.Connector.Models.Api;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.ClientAccount.Client;
@@ -15,6 +15,8 @@ using Lykke.Service.History.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Contracts;
+using Lykke.Service.Operations.Contracts.Commands;
+using Lykke.Service.Operations.Contracts.Orders;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.Session.Client;
 using LykkeApi2.Infrastructure;
@@ -82,8 +84,8 @@ namespace LykkeApi2.Controllers
 
         [HttpGet]
         [SwaggerOperation("GetActiveLimitOrders")]
-        [ProducesResponseType(typeof(IEnumerable<LimitOrderResponseModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(IEnumerable<LimitOrderResponseModel>), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetLimitOrders(int offset = 0, int limit = 1000)
         {
             var clientId = _requestContext.ClientId;
@@ -96,10 +98,15 @@ namespace LykkeApi2.Controllers
                 CreateDateTime = x.CreateDt,
                 Id = x.Id,
                 Price = x.Price.GetValueOrDefault(0),
+                LowerLimitPrice = x.LowerLimitPrice,
+                LowerPrice = x.LowerPrice,
+                UpperLimitPrice = x.UpperLimitPrice,
+                UpperPrice = x.UpperPrice,
                 Volume = Math.Abs(x.Volume),
                 RemainingVolume = Math.Abs(x.RemainingVolume),
                 OrderAction = x.Side.ToString(),
-                Status = x.Status.ToString()
+                Status = x.Status.ToString(),
+                Type = x.Type.ToString()
             }));
         }
 
@@ -192,8 +199,8 @@ namespace LykkeApi2.Controllers
                 },
                 Volume = Math.Abs(request.Volume),
                 OrderAction = request.OrderAction == OrderAction.Buy
-                     ? Lykke.Service.Operations.Contracts.OrderAction.Buy
-                     : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+                     ? Lykke.Service.Operations.Contracts.Orders.OrderAction.Buy
+                     : Lykke.Service.Operations.Contracts.Orders.OrderAction.Sell,
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
@@ -256,7 +263,9 @@ namespace LykkeApi2.Controllers
                 },
                 Volume = Math.Abs(request.Volume),
                 Price = request.Price,
-                OrderAction = request.OrderAction == OrderAction.Buy ? Lykke.Service.Operations.Contracts.OrderAction.Buy : Lykke.Service.Operations.Contracts.OrderAction.Sell,
+                OrderAction = request.OrderAction == OrderAction.Buy 
+                    ? Lykke.Service.Operations.Contracts.Orders.OrderAction.Buy 
+                    : Lykke.Service.Operations.Contracts.Orders.OrderAction.Sell,
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()
             };
@@ -264,6 +273,68 @@ namespace LykkeApi2.Controllers
             try
             {
                 await _operationsClient.PlaceLimitOrder(id, command);
+            }
+            catch (HttpOperationException e)
+            {
+                if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+                    return BadRequest(JObject.Parse(e.Response.Content));
+
+                throw;
+            }
+
+            return Created(Url.Action("Get", "Operations", new { id }), id);                  
+        }
+        
+        [HttpPost("stoplimit")]
+        [SwaggerOperation("PlaceStopLimitOrder")]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        public async Task<IActionResult> PlaceStopLimitOrder([FromBody] StopLimitOrderRequest request)
+        {
+            var id = Guid.NewGuid();
+
+            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
+
+            if (pair == null)
+                return NotFound($"Asset pair '{request.AssetPairId}' not found.");
+
+            if (pair.IsDisabled)
+                return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
+            
+            var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
+            var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
+
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+            var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
+            if (confirmationRequired)
+            {
+                return BadRequest("Session confirmation is required");
+            }
+
+            var command = new CreateStopLimitOrderCommand
+            {
+                AssetPair = new AssetPairModel
+                {
+                    Id = request.AssetPairId,
+                    BaseAsset = ConvertAssetToAssetModel(baseAsset),
+                    QuotingAsset = ConvertAssetToAssetModel(quotingAsset),
+                    MinVolume = pair.MinVolume,
+                    MinInvertedVolume = pair.MinInvertedVolume
+                },
+                Volume = Math.Abs(request.Volume),
+                LowerLimitPrice = request.LowerLimitPrice,
+                LowerPrice = request.LowerPrice,
+                UpperLimitPrice = request.UpperLimitPrice,
+                UpperPrice = request.UpperPrice,
+                OrderAction = request.OrderAction == OrderAction.Buy ? Lykke.Service.Operations.Contracts.Orders.OrderAction.Buy : Lykke.Service.Operations.Contracts.Orders.OrderAction.Sell,
+                Client = await GetClientModel(),
+                GlobalSettings = GetGlobalSettings()
+            };
+
+            try
+            {
+                await _operationsClient.PlaceStopLimitOrder(id, command);
             }
             catch (HttpOperationException e)
             {
