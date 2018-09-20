@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Autofac;
 using Common.Log;
 using Core.Settings;
@@ -10,6 +10,8 @@ using Lykke.Job.HistoryExportBuilder.Contract.Events;
 using Lykke.Messaging;
 using Lykke.Messaging.RabbitMq;
 using Lykke.Messaging.Serialization;
+using Lykke.Service.Operations.Contracts;
+using Lykke.Service.Operations.Contracts.Commands;
 using LykkeApi2.Cqrs.Projections;
 
 namespace LykkeApi2.Modules
@@ -28,10 +30,13 @@ namespace LykkeApi2.Modules
         protected override void Load(ContainerBuilder builder)
         {
             MessagePackSerializerFactory.Defaults.FormatterResolver = MessagePack.Resolvers.ContractlessStandardResolver.Instance;
-            var rabbitMqSettings = new RabbitMQ.Client.ConnectionFactory { Uri = _settings.SagasRabbitMq.RabbitConnectionString };
+            var rabbitMqSettings = new RabbitMQ.Client.ConnectionFactory
+            {
+                Uri = _settings.SagasRabbitMq.RabbitConnectionString
+            };
 
             builder.Register(context => new AutofacDependencyResolver(context)).As<IDependencyResolver>().SingleInstance();
-            
+
             builder.RegisterType<HistoryExportProjection>().SingleInstance();
 
             var messagingEngine = new MessagingEngine(_log,
@@ -46,7 +51,7 @@ namespace LykkeApi2.Modules
                 {
                     const string defaultPipeline = "commands";
                     const string defaultRoute = "self";
-                    
+
                     return new CqrsEngine(_log,
                         ctx.Resolve<IDependencyResolver>(),
                         messagingEngine,
@@ -57,15 +62,19 @@ namespace LykkeApi2.Modules
                             SerializationFormat.MessagePack,
                             environment: "lykke",
                             exclusiveQueuePostfix: "k8s")),
-                        
+
                         Register.BoundedContext("apiv2")
+                            .PublishingCommands(typeof(CreateCashoutCommand))
+                                .To(OperationsBoundedContext.Name).With(defaultPipeline)
                             .ListeningEvents(
                                 typeof(ClientHistoryExpiredEvent),
                                 typeof(ClientHistoryExportedEvent))
                             .From(HistoryExportBuilderBoundedContext.Name).On(defaultRoute)
-                            .WithProjection(typeof(HistoryExportProjection), HistoryExportBuilderBoundedContext.Name),
-                        
-                        
+                            .WithProjection(typeof(HistoryExportProjection), HistoryExportBuilderBoundedContext.Name)
+                            .PublishingCommands(typeof(ConfirmCommand))
+                                .To(OperationsBoundedContext.Name).With(defaultPipeline),
+
+
                         Register.DefaultRouting
                             .PublishingCommands(typeof(ExportClientHistoryCommand))
                             .To(HistoryExportBuilderBoundedContext.Name).With(defaultPipeline)

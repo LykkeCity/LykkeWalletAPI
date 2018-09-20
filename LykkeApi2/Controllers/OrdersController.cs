@@ -63,7 +63,7 @@ namespace LykkeApi2.Controllers
             IOperationsClient operationsClient,
             BaseSettings baseSettings,
             IcoSettings icoSettings,
-            GlobalSettings globalSettings, 
+            GlobalSettings globalSettings,
             IHistoryClient historyClient)
         {
             _requestContext = requestContext;
@@ -263,8 +263,8 @@ namespace LykkeApi2.Controllers
                 },
                 Volume = Math.Abs(request.Volume),
                 Price = request.Price,
-                OrderAction = request.OrderAction == OrderAction.Buy 
-                    ? Lykke.Service.Operations.Contracts.Orders.OrderAction.Buy 
+                OrderAction = request.OrderAction == OrderAction.Buy
+                    ? Lykke.Service.Operations.Contracts.Orders.OrderAction.Buy
                     : Lykke.Service.Operations.Contracts.Orders.OrderAction.Sell,
                 Client = await GetClientModel(),
                 GlobalSettings = GetGlobalSettings()

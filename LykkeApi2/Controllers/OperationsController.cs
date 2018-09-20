@@ -1,8 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Constants;
+using Core.Exceptions;
+using Core.Settings;
+using Lykke.Cqrs;
+using Lykke.Service.Assets.Client;
+using Lykke.Service.Balances.AutorestClient.Models;
+using Lykke.Service.Balances.Client;
+using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ConfirmationCodes.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Operations.Client;
+using Lykke.Service.Operations.Contracts;
 using Lykke.Service.Operations.Contracts.Commands;
+using Lykke.Service.Operations.Contracts.Cashout;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Operations;
 using Microsoft.AspNetCore.Authorization;
@@ -17,13 +30,39 @@ namespace LykkeApi2.Controllers
     [ApiController]
     public class OperationsController : Controller
     {
+        private readonly IAssetsServiceWithCache _assetsServiceWithCache;
+        private readonly IBalancesClient _balancesClient;
+        private readonly IKycStatusService _kycStatusService;
+        private readonly IClientAccountClient _clientAccountClient;
+        private readonly FeeSettings _feeSettings;
+        private readonly BaseSettings _baseSettings;
         private readonly IOperationsClient _operationsClient;
+        private readonly ICqrsEngine _cqrsEngine;
         private readonly IRequestContext _requestContext;
+        private readonly IConfirmationCodesClient _confirmationCodesClient;
 
-        public OperationsController(IOperationsClient operationsClient, IRequestContext requestContext)
+        public OperationsController(
+            IAssetsServiceWithCache assetsServiceWithCache,
+            IBalancesClient balancesClient,
+            IKycStatusService kycStatusService,
+            IClientAccountClient clientAccountClient,
+            FeeSettings feeSettings,
+            BaseSettings baseSettings,
+            IOperationsClient operationsClient,
+            ICqrsEngine cqrsEngine,
+            IRequestContext requestContext,
+            IConfirmationCodesClient confirmationCodesClient)
         {
+            _assetsServiceWithCache = assetsServiceWithCache;
+            _balancesClient = balancesClient;
+            _kycStatusService = kycStatusService;
+            _clientAccountClient = clientAccountClient;
+            _feeSettings = feeSettings;
+            _baseSettings = baseSettings;
             _operationsClient = operationsClient;
+            _cqrsEngine = cqrsEngine;
             _requestContext = requestContext;
+            _confirmationCodesClient = confirmationCodesClient;
         }
 
         /// <summary>
@@ -45,14 +84,39 @@ namespace LykkeApi2.Controllers
             {
                 if (e.Response.StatusCode == HttpStatusCode.NotFound)
                     return NotFound();
-                
+
                 throw;
-            }            
+            }
 
             if (operation == null)
                 return NotFound();
 
             return Ok(operation.ToApiModel());
+        }
+
+        /// <summary>
+        /// Create transfer operation (obsolete)
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Obsolete]
+        [HttpPost]
+        [Route("transfer/{id}")]
+        public async Task<IActionResult> TransferOld([FromBody]CreateTransferRequest cmd, Guid id)
+        {
+            await _operationsClient.Transfer(id,
+                new CreateTransferCommand
+                {
+                    ClientId = new Guid(_requestContext.ClientId),
+                    Amount = cmd.Amount,
+                    SourceWalletId =
+                    cmd.SourceWalletId,
+                    WalletId = cmd.WalletId,
+                    AssetId = cmd.AssetId
+                });
+
+            return Created(Url.Action("Get", new { id }), id);
         }
 
         /// <summary>
@@ -62,21 +126,109 @@ namespace LykkeApi2.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        [Route("transfer/{id}")]
-        public async Task<IActionResult> Transfer([FromBody]CreateTransferRequest cmd, Guid id)
+        [Route("transfer")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> Transfer([FromBody]CreateTransferRequest cmd, [FromQuery] Guid? id)
         {
-            await _operationsClient.Transfer(id, 
+            var operationId = id ?? Guid.NewGuid();
+
+            await _operationsClient.Transfer(operationId,
                 new CreateTransferCommand
                 {
                     ClientId = new Guid(_requestContext.ClientId),
                     Amount = cmd.Amount,
-                    SourceWalletId = 
-                    cmd.SourceWalletId,
+                    SourceWalletId =
+                        cmd.SourceWalletId,
                     WalletId = cmd.WalletId,
-                    AssetId = cmd.AssetId                    
+                    AssetId = cmd.AssetId
                 });
-            
-            return Created(Url.Action("Get", new { id }), id);
+
+            return Created(Url.Action("Get", new { operationId }), operationId);
+        }
+
+        /// <summary>
+        /// Create cashout operation
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("cashout/crypto")]
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> Cashout([FromBody] CreateCashoutRequest cmd, [FromQuery]Guid? id)
+        {
+            if (string.IsNullOrWhiteSpace(cmd.DestinationAddress) || string.IsNullOrWhiteSpace(cmd.AssetId) || cmd.Volume == 0m)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
+
+            var asset = await _assetsServiceWithCache.TryGetAssetAsync(cmd.AssetId);
+
+            if (asset == null)
+            {
+                return NotFound($"Asset '{cmd.AssetId}' not found.");
+            }
+
+            var balance = await _balancesClient.GetClientBalanceByAssetId(new ClientBalanceByAssetIdModel(cmd.AssetId, _requestContext.ClientId));
+            var cashoutSettings = await _clientAccountClient.GetCashOutBlockAsync(_requestContext.ClientId);
+            var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+            var clientHasGoogle2Fa = await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId);
+
+            if (_baseSettings.EnableTwoFactor && !clientHasGoogle2Fa)
+                throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.TwoFactorRequired);
+
+            var operationId = id ?? Guid.NewGuid();
+
+            var cashoutCommand = new CreateCashoutCommand
+            {
+                OperationId = operationId,
+                DestinationAddress = cmd.DestinationAddress,
+                DestinationAddressExtension = cmd.DestinationAddressExtension,
+                Volume = cmd.Volume,
+                Asset = new AssetCashoutModel
+                {
+                    Id = asset.Id,
+                    DisplayId = asset.DisplayId,
+                    MultiplierPower = asset.MultiplierPower,
+                    AssetAddress = asset.AssetAddress,
+                    Accuracy = asset.Accuracy,
+                    BlockchainIntegrationLayerId = asset.BlockchainIntegrationLayerId,
+                    Blockchain = asset.Blockchain.ToString(),
+                    Type = asset.Type?.ToString(),
+                    IsTradable = asset.IsTradable,
+                    IsTrusted = asset.IsTrusted,
+                    KycNeeded = asset.KycNeeded,
+                    BlockchainWithdrawal = asset.BlockchainWithdrawal,
+                    CashoutMinimalAmount = (decimal)asset.CashoutMinimalAmount,
+                    LowVolumeAmount = (decimal?)asset.LowVolumeAmount ?? 0,
+                    LykkeEntityId = asset.LykkeEntityId
+                },
+                Client = new ClientCashoutModel
+                {
+                    Id = new Guid(_requestContext.ClientId),
+                    Balance = balance?.Balance ?? 0,
+                    CashOutBlocked = cashoutSettings.CashOutBlocked,
+                    KycStatus = kycStatus.ToString(),
+                    ConfirmationType = "google"
+                },
+                GlobalSettings = new GlobalSettingsCashoutModel
+                {
+                    MaxConfirmationAttempts = _baseSettings.MaxTwoFactorConfirmationAttempts,
+                    TwoFactorEnabled = _baseSettings.EnableTwoFactor,
+                    CashOutBlocked = false, // TODO
+                    FeeSettings = new FeeSettingsCashoutModel
+                    {
+                        TargetClients = new Dictionary<string, string>
+                        {
+                            { "Cashout", _feeSettings.TargetClientId.Cashout }
+                        }
+                    }
+                }
+            };
+
+            _cqrsEngine.SendCommand(cashoutCommand, "apiv2", OperationsBoundedContext.Name);
+
+            return Created(Url.Action("Get", new { operationId }), operationId);
         }
 
         /// <summary>
@@ -88,7 +240,7 @@ namespace LykkeApi2.Controllers
         [Route("cancel/{id}")]
         public async Task Cancel(Guid id)
         {
-            await _operationsClient.Cancel(id);            
+            await _operationsClient.Cancel(id);
         }
     }
 }
