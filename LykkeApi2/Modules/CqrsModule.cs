@@ -10,8 +10,6 @@ using Lykke.Job.HistoryExportBuilder.Contract.Events;
 using Lykke.Messaging;
 using Lykke.Messaging.RabbitMq;
 using Lykke.Messaging.Serialization;
-using Lykke.Service.ConfirmationCodes.Contract;
-using Lykke.Service.ConfirmationCodes.Contract.Commands;
 using Lykke.Service.Operations.Contracts;
 using Lykke.Service.Operations.Contracts.Commands;
 using LykkeApi2.Cqrs.Projections;
