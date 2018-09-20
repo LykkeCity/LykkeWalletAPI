@@ -83,11 +83,11 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("GetActiveLimitOrders")]
         [ProducesResponseType(typeof(IEnumerable<LimitOrderResponseModel>), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetLimitOrders(int offset = 0, int limit = 1000)
+        public async Task<IActionResult> GetLimitOrders(int offset = 0, int limit = 1000, string assetPair = null)
         {
             var clientId = _requestContext.ClientId;
 
-            var orders = await _historyClient.OrdersApi.GetActiveOrdersByWalletAsync(Guid.Parse(clientId), offset, limit);
+            var orders = await _historyClient.OrdersApi.GetActiveOrdersByWalletAsync(Guid.Parse(clientId), offset, limit, assetPair);
 
             return Ok(orders.Select(x => new LimitOrderResponseModel
             {
