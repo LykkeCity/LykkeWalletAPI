@@ -89,9 +89,4 @@
   <ItemGroup>
     <Folder Include="Services" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Update="appsettings.dev.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
 </Project>
