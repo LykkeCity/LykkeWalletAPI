@@ -16,6 +16,7 @@ using Lykke.Service.Operations.Client;
 using Lykke.Service.Operations.Contracts;
 using Lykke.Service.Operations.Contracts.Commands;
 using Lykke.Service.Operations.Contracts.Cashout;
+using Lykke.Service.Operations.Contracts.SwiftCashout;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Operations;
 using Microsoft.AspNetCore.Authorization;
@@ -227,6 +228,71 @@ namespace LykkeApi2.Controllers
             };
 
             _cqrsEngine.SendCommand(cashoutCommand, "apiv2", OperationsBoundedContext.Name);
+
+            return Created(Url.Action("Get", new { operationId }), operationId);
+        }
+
+        /// <summary>
+        /// Create swift cashout operation
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("cashout/swift")]
+        [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        public async Task<IActionResult> SwiftCashout([FromBody] CreateSwiftCashoutRequest cmd, [FromQuery] Guid? id)
+        {
+            if (string.IsNullOrWhiteSpace(cmd.AssetId) || cmd.Volume == 0m)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
+
+            var asset = await _assetsServiceWithCache.TryGetAssetAsync(cmd.AssetId);
+
+            if (asset == null)
+            {
+                return NotFound($"Asset '{cmd.AssetId}' not found.");
+            }
+
+            var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
+            var operationId = id ?? Guid.NewGuid();
+
+            var command = new CreateSwiftCashoutCommand
+            {
+                OperationId = operationId,
+                Volume = cmd.Volume,
+                Asset = new SwiftCashoutAssetModel
+                {
+                    Id = asset.Id,
+                    KycNeeded = asset.KycNeeded,
+                    SwiftCashoutEnabled = asset.SwiftWithdrawal,
+                    LykkeEntityId = asset.LykkeEntityId
+                },
+                Client = new SwiftCashoutClientModel
+                {
+                    Id = new Guid(_requestContext.ClientId),
+                    KycStatus = kycStatus.ToString()
+                },
+                Swift = new SwiftFieldsModel
+                {
+                    AccHolderAddress = cmd.AccHolderAddress,
+                    AccHolderCity = cmd.AccHolderCity,
+                    AccHolderZipCode = cmd.AccHolderZipCode,
+                    AccName = cmd.AccName,
+                    AccNumber = cmd.AccNumber,
+                    BankName = cmd.BankName,
+                    Bic = cmd.Bic
+                },
+                CashoutSettings = new SwiftCashoutSettingsModel
+                {
+                    FeeTargetId = _feeSettings.TargetClientId.Withdrawal,
+                    HotwalletTargetId = _baseSettings.CashoutSettings.SwiftHotwallet
+                }
+            };
+
+            _cqrsEngine.SendCommand(command, "apiv2", OperationsBoundedContext.Name);
 
             return Created(Url.Action("Get", new { operationId }), operationId);
         }

@@ -64,7 +64,7 @@ namespace LykkeApi2.Modules
                             exclusiveQueuePostfix: "k8s")),
 
                         Register.BoundedContext("apiv2")
-                            .PublishingCommands(typeof(CreateCashoutCommand))
+                            .PublishingCommands(typeof(CreateCashoutCommand), typeof(CreateSwiftCashoutCommand))
                                 .To(OperationsBoundedContext.Name).With(defaultPipeline)
                             .ListeningEvents(
                                 typeof(ClientHistoryExpiredEvent),
