@@ -285,67 +285,67 @@ namespace LykkeApi2.Controllers
             return Created(Url.Action("Get", "Operations", new { id }), id);                  
         }
         
-        [HttpPost("stoplimit")]
-        [SwaggerOperation("PlaceStopLimitOrder")]
-        [ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
-        public async Task<IActionResult> PlaceStopLimitOrder([FromBody] StopLimitOrderRequest request)
-        {
-            var id = Guid.NewGuid();
+        //[HttpPost("stoplimit")]
+        //[SwaggerOperation("PlaceStopLimitOrder")]
+        //[ProducesResponseType(typeof(string), (int) HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(void), (int) HttpStatusCode.BadRequest)]
+        //[ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
+        //public async Task<IActionResult> PlaceStopLimitOrder([FromBody] StopLimitOrderRequest request)
+        //{
+        //    var id = Guid.NewGuid();
 
-            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
+        //    var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
 
-            if (pair == null)
-                return NotFound($"Asset pair '{request.AssetPairId}' not found.");
+        //    if (pair == null)
+        //        return NotFound($"Asset pair '{request.AssetPairId}' not found.");
 
-            if (pair.IsDisabled)
-                return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
+        //    if (pair.IsDisabled)
+        //        return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
             
-            var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
-            var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
+        //    var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
+        //    var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
-            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
-            var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
-            if (confirmationRequired)
-            {
-                return BadRequest("Session confirmation is required");
-            }
+        //    var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+        //    var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
+        //    if (confirmationRequired)
+        //    {
+        //        return BadRequest("Session confirmation is required");
+        //    }
 
-            var command = new CreateStopLimitOrderCommand
-            {
-                AssetPair = new AssetPairModel
-                {
-                    Id = request.AssetPairId,
-                    BaseAsset = ConvertAssetToAssetModel(baseAsset),
-                    QuotingAsset = ConvertAssetToAssetModel(quotingAsset),
-                    MinVolume = pair.MinVolume,
-                    MinInvertedVolume = pair.MinInvertedVolume
-                },
-                Volume = Math.Abs(request.Volume),
-                LowerLimitPrice = request.LowerLimitPrice,
-                LowerPrice = request.LowerPrice,
-                UpperLimitPrice = request.UpperLimitPrice,
-                UpperPrice = request.UpperPrice,
-                OrderAction = request.OrderAction == OrderAction.Buy ? Lykke.Service.Operations.Contracts.Orders.OrderAction.Buy : Lykke.Service.Operations.Contracts.Orders.OrderAction.Sell,
-                Client = await GetClientModel(),
-                GlobalSettings = GetGlobalSettings()
-            };
+        //    var command = new CreateStopLimitOrderCommand
+        //    {
+        //        AssetPair = new AssetPairModel
+        //        {
+        //            Id = request.AssetPairId,
+        //            BaseAsset = ConvertAssetToAssetModel(baseAsset),
+        //            QuotingAsset = ConvertAssetToAssetModel(quotingAsset),
+        //            MinVolume = pair.MinVolume,
+        //            MinInvertedVolume = pair.MinInvertedVolume
+        //        },
+        //        Volume = Math.Abs(request.Volume),
+        //        LowerLimitPrice = request.LowerLimitPrice,
+        //        LowerPrice = request.LowerPrice,
+        //        UpperLimitPrice = request.UpperLimitPrice,
+        //        UpperPrice = request.UpperPrice,
+        //        OrderAction = request.OrderAction == OrderAction.Buy ? Lykke.Service.Operations.Contracts.Orders.OrderAction.Buy : Lykke.Service.Operations.Contracts.Orders.OrderAction.Sell,
+        //        Client = await GetClientModel(),
+        //        GlobalSettings = GetGlobalSettings()
+        //    };
 
-            try
-            {
-                await _operationsClient.PlaceStopLimitOrder(id, command);
-            }
-            catch (HttpOperationException e)
-            {
-                if (e.Response.StatusCode == HttpStatusCode.BadRequest)
-                    return BadRequest(JObject.Parse(e.Response.Content));
+        //    try
+        //    {
+        //        await _operationsClient.PlaceStopLimitOrder(id, command);
+        //    }
+        //    catch (HttpOperationException e)
+        //    {
+        //        if (e.Response.StatusCode == HttpStatusCode.BadRequest)
+        //            return BadRequest(JObject.Parse(e.Response.Content));
 
-                throw;
-            }
+        //        throw;
+        //    }
 
-            return Created(Url.Action("Get", "Operations", new { id }), id);
-        }
+        //    return Created(Url.Action("Get", "Operations", new { id }), id);
+        //}
 
         [HttpDelete("limit/{orderId}")]
         [SwaggerOperation("CancelLimitOrderNew")]
