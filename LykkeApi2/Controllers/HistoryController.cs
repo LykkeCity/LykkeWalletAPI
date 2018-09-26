@@ -6,13 +6,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Common;
 using Core.Repositories;
+using Core.Services;
 using Lykke.Cqrs;
 using Lykke.Job.HistoryExportBuilder.Contract;
 using Lykke.Job.HistoryExportBuilder.Contract.Commands;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.History.Client;
 using Lykke.Service.History.Contracts.Enums;
+using Lykke.Service.History.Contracts.History;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using LykkeApi2.Models.History;
 using ErrorResponse = LykkeApi2.Models.ErrorResponse;
@@ -29,19 +32,22 @@ namespace LykkeApi2.Controllers
         private readonly ICqrsEngine _cqrsEngine;
         private readonly IHistoryExportsRepository _historyExportsRepository;
         private readonly IHistoryClient _historyClient;
+        private readonly IAssetsHelper _assetsHelper;
 
         public HistoryController(
             IRequestContext requestContext,
             IClientAccountClient clientAccountService,
             ICqrsEngine cqrsEngine,
             IHistoryExportsRepository historyExportsRepository,
-            IHistoryClient historyClient)
+            IHistoryClient historyClient,
+            IAssetsHelper assetsHelper)
         {
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
             _cqrsEngine = cqrsEngine;
             _historyExportsRepository = historyExportsRepository;
             _historyClient = historyClient;
+            _assetsHelper = assetsHelper;
         }
 
         [HttpPost("client/csv")]
@@ -117,6 +123,87 @@ namespace LykkeApi2.Controllers
                 assetId, assetPairId, offset: skip, limit: take);
 
             return Ok(data.SelectMany(x => x.ToResponseModel()));
+        }
+
+        /// <summary>
+        /// Getting history by wallet identifier
+        /// </summary>
+        /// <param name="walletId">Wallet identifier</param>
+        /// <param name="assetPairId">Asset pair identifier</param>
+        /// <param name="take">How many maximum items have to be returned</param>
+        /// <param name="skip">How many items skip before returning</param>
+        /// <returns></returns>
+        [HttpGet("{walletId}/trades")]
+        [SwaggerOperation("GetTradesByWalletId")]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(IEnumerable<TradeResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetTradesByWalletId(
+            string walletId,
+            [FromQuery] string assetPairId,
+            [FromQuery] int take,
+            [FromQuery] int skip)
+        {
+            var clientId = _requestContext.ClientId;
+
+            var wallet = await _clientAccountService.GetWalletAsync(walletId);
+
+            if (wallet == null || wallet.ClientId != clientId)
+                return NotFound();
+
+            // TODO: remove after migration to wallet id
+            if (wallet.Type == "Trading")
+                walletId = clientId;
+
+            var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), new[] { HistoryType.Trade },
+                assetPairId: assetPairId, offset: skip, limit: take);
+
+            var result = await data.SelectAsync(x => x.ToTradeResponseModel(_assetsHelper));
+
+            return Ok(result.OrderByDescending(x => x.Timestamp));
+        }
+
+        /// <summary>
+        /// Getting history by wallet identifier
+        /// </summary>
+        /// <param name="walletId">Wallet identifier</param>
+        /// <param name="operation"></param>
+        /// <param name="assetId">Asset identifier</param>
+        /// <param name="take">How many maximum items have to be returned</param>
+        /// <param name="skip">How many items skip before returning</param>
+        /// <returns></returns>
+        [HttpGet("{walletId}/funds")]
+        [SwaggerOperation("GetFundsByWalletId")]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(IEnumerable<FundsResponseModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetFundsByWalletId(
+            string walletId,
+            [FromQuery(Name = "operation")] FundsOperation[] operation,
+            [FromQuery] string assetId,
+            [FromQuery] int take,
+            [FromQuery] int skip)
+        {
+            var clientId = _requestContext.ClientId;
+
+            var wallet = await _clientAccountService.GetWalletAsync(walletId);
+
+            if (wallet == null || wallet.ClientId != clientId)
+                return NotFound();
+
+            // TODO: remove after migration to wallet id
+            if (wallet.Type == "Trading")
+                walletId = clientId;
+
+            if (operation.Length == 0)
+                operation = Enum.GetValues(typeof(FundsOperation)).Cast<FundsOperation>().ToArray();
+
+            var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), operation.Select(x => x.ToHistoryType()).ToArray(),
+                assetId: assetId, offset: skip, limit: take);
+
+            var result = await data.SelectAsync(x => x.ToFundsResponseModel(_assetsHelper));
+
+            return Ok(result.OrderByDescending(x => x.Timestamp));
         }
     }
 }
