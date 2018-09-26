@@ -180,7 +180,10 @@ namespace LykkeApi2.Controllers
             var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
             var clientHasGoogle2Fa = await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId);
 
-            if (_baseSettings.EnableTwoFactor && !clientHasGoogle2Fa && !_clientIdsWithout2FA.Contains(_requestContext.ClientId))
+            var twoFactorEnabled = _baseSettings.EnableTwoFactor &&
+                                   !_clientIdsWithout2FA.Contains(_requestContext.ClientId);
+
+            if (!_clientIdsWithout2FA.Contains(_requestContext.ClientId) && !clientHasGoogle2Fa)
                 throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.TwoFactorRequired);
 
             var operationId = id ?? Guid.NewGuid();
@@ -220,7 +223,7 @@ namespace LykkeApi2.Controllers
                 GlobalSettings = new GlobalSettingsCashoutModel
                 {
                     MaxConfirmationAttempts = _baseSettings.MaxTwoFactorConfirmationAttempts,
-                    TwoFactorEnabled = _baseSettings.EnableTwoFactor,
+                    TwoFactorEnabled = twoFactorEnabled,
                     CashOutBlocked = false, // TODO
                     FeeSettings = new FeeSettingsCashoutModel
                     {
