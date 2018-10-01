@@ -64,7 +64,7 @@ namespace LkeServices.Identity
             result = new ClaimsPrincipal(LykkeIdentity.Create(session.ClientId));
             if (session.PartnerId != null)
             {
-                (result.Identity as ClaimsIdentity)?.AddClaim(new Claim("PartnerId", session.PartnerId));
+                (result.Identity as ClaimsIdentity)?.AddClaim(new Claim(LykkeConstants.PartnerId, session.PartnerId));
             }
 
             if (session.Pinned)

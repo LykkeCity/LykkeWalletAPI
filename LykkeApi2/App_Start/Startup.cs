@@ -14,6 +14,8 @@ using LykkeApi2.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Core.Settings;
+using IdentityModel.AspNetCore.OAuth2Introspection;
+using IdentityServer4.AccessTokenValidation;
 using Lykke.Common;
 using LykkeApi2.Infrastructure.LykkeApiError;
 using LykkeApi2.Middleware;
@@ -56,6 +58,13 @@ namespace LykkeApi2
         {
             try
             {
+                 var appSettings = Configuration.LoadSettings<APIv2Settings>(options =>
+	                {
+	                    options.SetConnString(x => x.SlackNotifications.AzureQueue.ConnectionString);
+	                    options.SetQueueName(x => x.SlackNotifications.AzureQueue.QueueName);
+	                    options.SenderName = $"{AppEnvironment.Name} {AppEnvironment.Version}";
+	                });
+
                 services.AddMvc()
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
                     .AddJsonOptions(options =>
@@ -71,12 +80,15 @@ namespace LykkeApi2
                     options.OperationFilter<ApiKeyHeaderOperationFilter>();
                 });
 
-                services.AddAuthentication(options =>
-                    {
-                        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                    })
-                    .AddScheme<LykkeAuthOptions, LykkeAuthHandler>("Bearer", options => { });
+                services.AddAuthentication(OAuth2IntrospectionDefaults.AuthenticationScheme)
+                    .AddOAuth2Introspection(options =>
+                {
+                    options.Authority = appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
+                    options.ClientId = appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
+                    options.ClientSecret = appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientSecret;
+                    options.NameClaimType = "sub";
+                }).CustomizeServerAuthentication();
+
 
                 services.Configure<ApiBehaviorOptions>(options =>
                     {
@@ -86,18 +98,13 @@ namespace LykkeApi2
                     });
 
                 var builder = new ContainerBuilder();
-                var appSettings = Configuration.LoadSettings<APIv2Settings>(options =>
-                {
-                    options.SetConnString(x => x.SlackNotifications.AzureQueue.ConnectionString);
-                    options.SetQueueName(x => x.SlackNotifications.AzureQueue.QueueName);
-                    options.SenderName = $"{AppEnvironment.Name} {AppEnvironment.Version}";
-                });
+
                 Log = CreateLogWithSlack(services, appSettings);
                 builder.Populate(services);
                 builder.RegisterModule(new Api2Module(appSettings, Log));
                 builder.RegisterModule(new CqrsModule(appSettings.CurrentValue, Log));
                 builder.RegisterModule(new ClientsModule(appSettings, Log));
-                builder.RegisterModule(new AspNetCoreModule());                
+                builder.RegisterModule(new AspNetCoreModule());
                 builder.RegisterModule(new RepositoriesModule(appSettings.Nested(x => x.WalletApiv2.Db), Log));
 
                 ApplicationContainer = builder.Build();
@@ -121,9 +128,9 @@ namespace LykkeApi2
                 {
                     app.UseDeveloperExceptionPage();
                 }
-                
+
                 app.UseMiddleware<LykkeApiErrorMiddleware>();
-                
+
                 app.UseCors(builder =>
                 {
                     builder.AllowAnyOrigin();
@@ -140,7 +147,7 @@ namespace LykkeApi2
                 app.UseAuthentication();
 
                 app.UseMiddleware<ClientBansMiddleware>();
-                
+
                 app.UseMvc(routes =>
                 {
                     routes.MapRoute(
