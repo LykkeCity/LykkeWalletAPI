@@ -183,7 +183,7 @@ namespace LykkeApi2.Controllers
             var twoFactorEnabled = _baseSettings.EnableTwoFactor &&
                                    !_clientIdsWithout2FA.Contains(_requestContext.ClientId);
 
-            if (!_clientIdsWithout2FA.Contains(_requestContext.ClientId) && !clientHasGoogle2Fa)
+            if (twoFactorEnabled && !clientHasGoogle2Fa)
                 throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.TwoFactorRequired);
 
             var operationId = id ?? Guid.NewGuid();
