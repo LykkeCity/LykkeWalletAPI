@@ -68,7 +68,7 @@ namespace LykkeApi2.Modules
 
             builder.RegisterClientSessionClient(_apiSettings.CurrentValue.WalletApiv2.Services.SessionUrl, _log);
 
-            builder.RegisterPersonalDataClientAccountRecoveryClient(_apiSettings.CurrentValue.PersonalDataServiceSettings.ServiceUri, _log);
+            builder.RegisterPersonalDataServiceClient(_apiSettings.CurrentValue.PersonalDataServiceSettings);
 
             builder.RegisterInstance(
                 new KycStatusServiceClient(_apiSettings.CurrentValue.KycServiceClient, _log))

@@ -65,8 +65,9 @@ namespace Core.Constants
             /// </summary>
             public static readonly ILykkeApiErrorCode DepositLimitReached =
                 new LykkeApiErrorCode(nameof(DepositLimitReached), "The deposit limit is reached.");
+
             /// <summary>
-            ///     The deposit limit is reached.
+            ///     Inconsistent state.
             /// </summary>
             public static readonly ILykkeApiErrorCode InconsistentState =
                 new LykkeApiErrorCode(nameof(InconsistentState), "The call was unexpected.");
@@ -75,7 +76,7 @@ namespace Core.Constants
             ///     Two factor authentication should be enabled.
             /// </summary>
             public static readonly ILykkeApiErrorCode TwoFactorRequired =
-                new LykkeApiErrorCode(nameof(InconsistentState), "The action requires 2fa enabled.");
+                new LykkeApiErrorCode(nameof(TwoFactorRequired), "The action requires 2fa enabled.");
 
             /// <summary>
             ///     Recovery start process is forbidden because recovery attempt limit reached.

@@ -94,8 +94,6 @@ namespace LykkeApi2.Modules
             builder.Register(c => new RecoveryFileSettings(_apiSettings.CurrentValue.ClientAccountRecoverySettings?.SelfieImageMaxSizeMBytes, _log))
                 .As<IRecoveryFileSettings>()
                 .SingleInstance();
-
-            RegisterDictionaryEntities(builder);
             
             BindServices(builder, _settings);
             builder.Populate(_services);
