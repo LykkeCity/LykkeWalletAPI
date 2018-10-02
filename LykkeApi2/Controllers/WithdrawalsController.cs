@@ -134,8 +134,8 @@ namespace LykkeApi2.Controllers
             var addressValidationResult = await _blockchainCashoutPreconditionsCheckClient.ValidateCashoutAsync(
                 new CashoutValidateModel
                 {
-                    AssetId = assetId,
-                    DestinationAddress = destinationAddress
+                    AssetId = System.Web.HttpUtility.UrlEncode(assetId),
+                    DestinationAddress = System.Web.HttpUtility.UrlEncode(destinationAddress)
                 });
 
             return Ok(
