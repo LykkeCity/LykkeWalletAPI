@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Core.Constants;
@@ -41,6 +42,8 @@ namespace LykkeApi2.Controllers
         private readonly ICqrsEngine _cqrsEngine;
         private readonly IRequestContext _requestContext;
         private readonly IConfirmationCodesClient _confirmationCodesClient;
+        // ReSharper disable once InconsistentNaming
+        private readonly ISet<string> _clientIdsWithout2FA;
 
         public OperationsController(
             IAssetsServiceWithCache assetsServiceWithCache,
@@ -64,6 +67,8 @@ namespace LykkeApi2.Controllers
             _cqrsEngine = cqrsEngine;
             _requestContext = requestContext;
             _confirmationCodesClient = confirmationCodesClient;
+
+            _clientIdsWithout2FA = (baseSettings.ClientIdsWithout2FA ?? Enumerable.Empty<string>()).ToHashSet();
         }
 
         /// <summary>
@@ -175,7 +180,10 @@ namespace LykkeApi2.Controllers
             var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
             var clientHasGoogle2Fa = await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId);
 
-            if (_baseSettings.EnableTwoFactor && !clientHasGoogle2Fa)
+            var twoFactorEnabled = _baseSettings.EnableTwoFactor &&
+                                   !_clientIdsWithout2FA.Contains(_requestContext.ClientId);
+
+            if (twoFactorEnabled && !clientHasGoogle2Fa)
                 throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.TwoFactorRequired);
 
             var operationId = id ?? Guid.NewGuid();
@@ -215,7 +223,7 @@ namespace LykkeApi2.Controllers
                 GlobalSettings = new GlobalSettingsCashoutModel
                 {
                     MaxConfirmationAttempts = _baseSettings.MaxTwoFactorConfirmationAttempts,
-                    TwoFactorEnabled = _baseSettings.EnableTwoFactor,
+                    TwoFactorEnabled = twoFactorEnabled,
                     CashOutBlocked = false, // TODO
                     FeeSettings = new FeeSettingsCashoutModel
                     {
