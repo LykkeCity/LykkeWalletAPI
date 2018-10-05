@@ -90,9 +90,6 @@ namespace Core.Settings
         public OAuthSettings OAuthSettings { get; set; }
         public bool EnableTwoFactor { get; set; }
         public int MaxTwoFactorConfirmationAttempts { get; set; }
-        [Optional]
-        // ReSharper disable once InconsistentNaming
-        public string[] ClientIdsWithout2FA { get; set; }
     }
 
     public class IcoSettings
