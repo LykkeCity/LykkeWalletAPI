@@ -8,6 +8,7 @@ using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.ConfirmationCodes.Client.Models.Request;
 using Lykke.Service.Operations.Contracts;
 using Lykke.Service.Operations.Contracts.Commands;
+using Lykke.Service.Session.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models._2Fa;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,7 @@ namespace LykkeApi2.Controllers
     {
         private readonly IConfirmationCodesClient _confirmationCodesClient;
         private readonly IRequestContext _requestContext;
+        private readonly IClientSessionsClient _clientSessionsClient;
         private readonly ICqrsEngine _cqrsEngine;
 
         public SecondFactorAuthController(
@@ -100,6 +102,31 @@ namespace LykkeApi2.Controllers
                 if (e.StatusCode == HttpStatusCode.BadRequest)
                     throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
 
+                throw;
+            }
+        }
+
+        [HttpPost("session")]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> ConfirmTradingSession([FromBody] TradingSessionConfirmModel model)
+        {
+            try
+            {
+                var codeIsValid =
+                    await _confirmationCodesClient.Google2FaCheckCodeAsync(_requestContext.ClientId, model.Confirmation);
+
+                if (codeIsValid)
+                {
+                    await _clientSessionsClient.ConfirmTradingSession(_requestContext.ClientId, model.SessionId);
+                }
+
+                return Ok();
+            }
+            catch (ApiException e)
+            {
+                if (e.StatusCode == HttpStatusCode.BadRequest)
+                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.TwoFactorRequired);
+            
                 throw;
             }
         }
