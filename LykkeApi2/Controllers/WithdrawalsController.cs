@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using Core.Exceptions;
 using Core.Services;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
-using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client.Models;
+using Lykke.Service.BlockchainCashoutPreconditionsCheck.Contract.Requests;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.FeeCalculator.Client;
 using LykkeApi2.Infrastructure;
@@ -124,15 +125,33 @@ namespace LykkeApi2.Controllers
                 string.IsNullOrWhiteSpace(addressExtension))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
 
-            var destinationAddress = blockchainCapabilities.IsPublicAddressExtensionRequired
-                ? await _blockchainWalletsClient.MergeAddressAsync(
-                    asset.BlockchainIntegrationLayerId,
-                    baseAddress,
-                    addressExtension)
-                : baseAddress;
+            string destinationAddress = null;
+
+            if (blockchainCapabilities.IsPublicAddressExtensionRequired)
+            {
+                try
+                {
+                    destinationAddress = await _blockchainWalletsClient.MergeAddressAsync(
+                        asset.BlockchainIntegrationLayerId,
+                        baseAddress,
+                        addressExtension);
+                }
+                catch (Exception e)
+                {
+                    return Ok(
+                        new WithdrawalCryptoAddressValidationModel
+                        {
+                            IsValid = false
+                        });
+                }
+            }
+            else
+            {
+                destinationAddress = baseAddress;
+            }
 
             var addressValidationResult = await _blockchainCashoutPreconditionsCheckClient.ValidateCashoutAsync(
-                new CashoutValidateModel
+                new CheckCashoutValidityModel()
                 {
                     AssetId = assetId,
                     DestinationAddress = destinationAddress
@@ -190,7 +209,7 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("swift/last")]
-        [ProducesResponseType(typeof(SwiftLastResponse), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(SwiftLastResponse), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetLastSwift()
         {
             return Ok(new SwiftLastResponse());
