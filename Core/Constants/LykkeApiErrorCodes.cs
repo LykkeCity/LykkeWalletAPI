@@ -76,7 +76,19 @@ namespace Core.Constants
             ///     Two factor authentication should be enabled.
             /// </summary>
             public static readonly ILykkeApiErrorCode TwoFactorRequired =
-                new LykkeApiErrorCode(nameof(InconsistentState), "The action requires 2fa enabled.");
+                new LykkeApiErrorCode(nameof(TwoFactorRequired), "The action requires 2fa enabled.");
+
+            /// <summary>
+            ///     Two factor authentication should be enabled.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode SecondFactorCodeIncorrect =
+                new LykkeApiErrorCode(nameof(SecondFactorCodeIncorrect), "The provided code for 2FA is incorrect.");
+
+            /// <summary>
+            ///     Two factor authentication should be enabled.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode SecondFactorDisabled =
+                new LykkeApiErrorCode(nameof(SecondFactorDisabled), "2FA scheme is disabled for security reasons.");
         }
 
         /// <summary>

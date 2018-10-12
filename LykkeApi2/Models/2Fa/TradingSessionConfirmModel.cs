@@ -3,6 +3,5 @@
     public class TradingSessionConfirmModel
     {
         public string Confirmation { set; get; }
-        public string SessionId { set; get; }
     }
 }
