@@ -117,14 +117,8 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> ConfirmTradingSession([FromBody] TradingSessionConfirmModel model)
         {
             var bearer = _lykkePrincipal.GetToken();
-            
-            var tradingSessionTask = _clientSessionsClient.GetTradingSession(bearer);
-            var sessionTask = _clientSessionsClient.GetAsync(bearer);
 
-            await Task.WhenAll(tradingSessionTask, sessionTask);
-
-            var tradingSession = tradingSessionTask.Result;
-            var session = sessionTask.Result;
+            var tradingSession = await _clientSessionsClient.GetTradingSession(bearer);
             
             if(tradingSession == null)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
@@ -140,6 +134,8 @@ namespace LykkeApi2.Controllers
 
                 if (codeIsValid)
                 {
+                    var session = await _clientSessionsClient.GetAsync(bearer);
+                    
                     await _clientSessionsClient.ConfirmTradingSession(_requestContext.ClientId, session.AuthId.ToString());
                 }
                 else
