@@ -3,16 +3,18 @@ using System.Net;
 using System.Threading.Tasks;
 using Core.Constants;
 using Core.Exceptions;
+using Core.Identity;
 using Lykke.Cqrs;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.ConfirmationCodes.Client.Models.Request;
 using Lykke.Service.Operations.Contracts;
 using Lykke.Service.Operations.Contracts.Commands;
+using Lykke.Service.Session.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models._2Fa;
 using Microsoft.AspNetCore.Mvc;
-using Polly;
 using Refit;
+using StackExchange.Redis;
 
 namespace LykkeApi2.Controllers
 {
@@ -22,15 +24,21 @@ namespace LykkeApi2.Controllers
     {
         private readonly IConfirmationCodesClient _confirmationCodesClient;
         private readonly IRequestContext _requestContext;
+        private readonly IClientSessionsClient _clientSessionsClient;
+        private readonly ILykkePrincipal _lykkePrincipal;
         private readonly ICqrsEngine _cqrsEngine;
 
         public SecondFactorAuthController(
             IConfirmationCodesClient confirmationCodesClient,
             IRequestContext requestContext,
+            IClientSessionsClient clientSessionsClient,
+            ILykkePrincipal lykkePrincipal,
             ICqrsEngine cqrsEngine)
         {
             _confirmationCodesClient = confirmationCodesClient;
             _requestContext = requestContext;
+            _clientSessionsClient = clientSessionsClient;
+            _lykkePrincipal = lykkePrincipal;
             _cqrsEngine = cqrsEngine;
         }
 
@@ -40,7 +48,7 @@ namespace LykkeApi2.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost("operation")]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         public IActionResult ConfirmOperation([FromBody] OperationConfirmationModel model)
         {
             var command = new ConfirmCommand
@@ -56,24 +64,24 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(string[]), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(string[]), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailable()
         {
             return await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId)
-                ? Ok(new string[] { "google" })
+                ? Ok(new string[] {"google"})
                 : Ok(new string[] { });
         }
 
         [HttpGet("setup/google")]
-        [ProducesResponseType(typeof(GoogleSetupRequestResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GoogleSetupRequestResponse), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> SetupGoogle2FaRequest()
         {
             try
             {
                 var resp = await _confirmationCodesClient.Google2FaRequestSetupAsync(
-                    new RequestSetupGoogle2FaRequest { ClientId = _requestContext.ClientId });
+                    new RequestSetupGoogle2FaRequest {ClientId = _requestContext.ClientId});
 
-                return Ok(new GoogleSetupRequestResponse { ManualEntryKey = resp.ManualEntryKey });
+                return Ok(new GoogleSetupRequestResponse {ManualEntryKey = resp.ManualEntryKey});
             }
             catch (ApiException e)
             {
@@ -85,20 +93,67 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpPost("setup/google")]
-        [ProducesResponseType(typeof(GoogleSetupVerifyResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GoogleSetupVerifyResponse), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> SetupGoogle2FaVerify([FromBody] GoogleSetupVerifyRequest model)
         {
             try
             {
                 var resp = await _confirmationCodesClient.Google2FaVerifySetupAsync(
-                    new VerifySetupGoogle2FaRequest { ClientId = _requestContext.ClientId, Code = model.Code });
+                    new VerifySetupGoogle2FaRequest {ClientId = _requestContext.ClientId, Code = model.Code});
 
-                return Ok(new GoogleSetupVerifyResponse { IsValid = resp.IsValid });
+                return Ok(new GoogleSetupVerifyResponse {IsValid = resp.IsValid});
             }
             catch (ApiException e)
             {
                 if (e.StatusCode == HttpStatusCode.BadRequest)
                     throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
+
+                throw;
+            }
+        }
+
+        [HttpPost("session")]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> ConfirmTradingSession([FromBody] TradingSessionConfirmModel model)
+        {
+            var bearer = _lykkePrincipal.GetToken();
+
+            var tradingSession = await _clientSessionsClient.GetTradingSession(bearer);
+            
+            if(tradingSession == null)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
+
+            if (tradingSession.Confirmed.HasValue && tradingSession.Confirmed.Value)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
+            
+            try
+            {
+                var codeIsValid =
+                    await _confirmationCodesClient.Google2FaCheckCodeAsync(_requestContext.ClientId,
+                        model.Confirmation);
+
+                if (codeIsValid)
+                {
+                    var session = await _clientSessionsClient.GetAsync(bearer);
+                    
+                    await _clientSessionsClient.ConfirmTradingSession(_requestContext.ClientId, session.AuthId.ToString());
+                }
+                else
+                {
+                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorCodeIncorrect);
+                }
+
+                return Ok();
+            }
+            catch (ApiException e)
+            {
+                switch (e.StatusCode)
+                {
+                    case HttpStatusCode.BadRequest:
+                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.TwoFactorRequired);
+                    case HttpStatusCode.Forbidden:
+                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorCheckForbiden);
+                }
 
                 throw;
             }
