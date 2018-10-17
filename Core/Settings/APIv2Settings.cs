@@ -34,7 +34,20 @@ namespace Core.Settings
         public SwiftCredentialsServiceClientSettings SwiftCredentialsServiceClient { set; get; }
         public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { set; get; }
         public SagasRabbitMq SagasRabbitMq { set; get; }
+        public SwaggerSettings SwaggerSettings { get; set; }
     }
+
+    public class SwaggerSettings
+    {
+        public SwaggerSecuritySettings Security { get; set; }
+    }
+
+    public class SwaggerSecuritySettings
+    {
+        public string OAuthClientId { get; set; }
+        public string AuthorizeEndpoint { get; set; }
+    }
+
 
     public class OAuthSettings
     {

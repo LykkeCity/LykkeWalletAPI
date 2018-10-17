@@ -129,6 +129,9 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("Auth")]
         [ProducesResponseType(typeof(AuthResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [Obsolete(@"In order to get access to an api, you should go through OAuth. 
+                    It's accessible through 'Autorize' button from the right-top corner of this page.
+                    If you need to get access tokens for your client app, then you should build an integration with Lykke OAuth server.")]
         public async Task<IActionResult> Auth([FromBody]AuthRequestModel model)
         {
             if (!ModelState.IsValid)
