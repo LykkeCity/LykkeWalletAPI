@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace LykkeApi2.Models._2Fa
@@ -13,12 +14,15 @@ namespace LykkeApi2.Models._2Fa
 
     public enum SecondFactorType
     {
+        [EnumMember(Value = "google")]
         Google
     }
 
     public enum SecondFactorStatus
     {
+        [EnumMember(Value = "active")]
         Active,
+        [EnumMember(Value = "forbidden")]
         Forbidden
     }
 }

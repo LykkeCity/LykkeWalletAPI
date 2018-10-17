@@ -64,7 +64,7 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(string[]), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(SecondFactorDetailsModel[]), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailable()
         {
             return await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId)
