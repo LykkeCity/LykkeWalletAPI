@@ -152,7 +152,7 @@ namespace LykkeApi2.Controllers
                     case HttpStatusCode.BadRequest:
                         throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.TwoFactorRequired);
                     case HttpStatusCode.Forbidden:
-                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorDisabled);
+                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorCheckForbiden);
                 }
 
                 throw;

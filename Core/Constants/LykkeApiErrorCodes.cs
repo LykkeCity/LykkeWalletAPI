@@ -87,8 +87,8 @@ namespace Core.Constants
             /// <summary>
             ///     Two factor authentication should be enabled.
             /// </summary>
-            public static readonly ILykkeApiErrorCode SecondFactorDisabled =
-                new LykkeApiErrorCode(nameof(SecondFactorDisabled), "2FA scheme is disabled for security reasons.");
+            public static readonly ILykkeApiErrorCode SecondFactorCheckForbiden =
+                new LykkeApiErrorCode(nameof(SecondFactorCheckForbiden), "2FA check forbidden.");
         }
 
         /// <summary>
