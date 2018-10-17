@@ -19,14 +19,14 @@ using Lykke.Service.Operations.Contracts.Cashout;
 using Lykke.Service.Operations.Contracts.SwiftCashout;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Operations;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Rest;
+using Refit;
 using OperationModel = Lykke.Service.Operations.Contracts.OperationModel;
 
 namespace LykkeApi2.Controllers
 {
-    [Authorize]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     [Route("api/operations")]
     [ApiController]
     public class OperationsController : Controller
@@ -173,11 +173,21 @@ namespace LykkeApi2.Controllers
             var balance = await _balancesClient.GetClientBalanceByAssetId(new ClientBalanceByAssetIdModel(cmd.AssetId, _requestContext.ClientId));
             var cashoutSettings = await _clientAccountClient.GetCashOutBlockAsync(_requestContext.ClientId);
             var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
-            var clientHasGoogle2Fa = await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId);
 
-            if (_baseSettings.EnableTwoFactor && !clientHasGoogle2Fa)
-                throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.TwoFactorRequired);
-
+            if (_baseSettings.EnableTwoFactor)
+            {
+                try
+                {
+                    if ((await _confirmationCodesClient.Google2FaIsClientBlacklistedAsync(_requestContext.ClientId)).IsClientBlacklisted)
+                        throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.SecondFactorCheckForbiden);
+                }
+                catch (ApiException e)
+                {
+                    if (e.StatusCode == HttpStatusCode.BadRequest)
+                        throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.TwoFactorRequired);
+                }
+            }
+            
             var operationId = id ?? Guid.NewGuid();
 
             var cashoutCommand = new CreateCashoutCommand

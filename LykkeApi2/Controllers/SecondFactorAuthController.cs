@@ -68,8 +68,17 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> GetAvailable()
         {
             return await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId)
-                ? Ok(new string[] {"google"})
-                : Ok(new string[] { });
+                ? Ok(new []
+                {
+                    new SecondFactorDetailsModel
+                    {
+                        Type = SecondFactorType.Google,
+                        Status = (await _confirmationCodesClient.Google2FaIsClientBlacklistedAsync(_requestContext.ClientId)).IsClientBlacklisted
+                            ? SecondFactorStatus.Forbidden
+                            : SecondFactorStatus.Active 
+                    } 
+                })
+                : Ok(new SecondFactorDetailsModel[] {});
         }
 
         [HttpGet("setup/google")]
