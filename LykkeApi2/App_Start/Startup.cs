@@ -28,11 +28,13 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace LykkeApi2
 {
     public class Startup
     {
+        private IReloadingManagerWithConfiguration<APIv2Settings> _appSettings;
         public const string ApiVersion = "v2";
         public const string ApiTitle = "Lykke Wallet API v2";
         public const string ComponentName = "WalletApiV2";
@@ -50,6 +52,12 @@ namespace LykkeApi2
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
+            _appSettings = Configuration.LoadSettings<APIv2Settings>(options =>
+            {
+                options.SetConnString(x => x.SlackNotifications.AzureQueue.ConnectionString);
+                options.SetQueueName(x => x.SlackNotifications.AzureQueue.QueueName);
+                options.SenderName = $"{AppEnvironment.Name} {AppEnvironment.Version}";
+            });
 
             Environment = env;
         }
@@ -58,13 +66,6 @@ namespace LykkeApi2
         {
             try
             {
-                 var appSettings = Configuration.LoadSettings<APIv2Settings>(options =>
-	                {
-	                    options.SetConnString(x => x.SlackNotifications.AzureQueue.ConnectionString);
-	                    options.SetQueueName(x => x.SlackNotifications.AzureQueue.QueueName);
-	                    options.SenderName = $"{AppEnvironment.Name} {AppEnvironment.Version}";
-	                });
-
                 services.AddMvc()
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
                     .AddJsonOptions(options =>
@@ -78,14 +79,24 @@ namespace LykkeApi2
                     options.DefaultLykkeConfiguration(ApiVersion, ApiTitle);
 
                     options.OperationFilter<ApiKeyHeaderOperationFilter>();
+                    options.OperationFilter<ObsoleteOperationFilter>();
+
+                    options.DocumentFilter<SecurityRequirementsDocumentFilter>();
+
+                    options.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                    {
+                        Type = "oauth2",
+                        Flow = "implicit",
+                        AuthorizationUrl = _appSettings.CurrentValue.SwaggerSettings.Security.AuthorizeEndpoint
+                    });
                 });
 
                 services.AddAuthentication(OAuth2IntrospectionDefaults.AuthenticationScheme)
                     .AddOAuth2Introspection(options =>
                 {
-                    options.Authority = appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
-                    options.ClientId = appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
-                    options.ClientSecret = appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientSecret;
+                    options.Authority = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
+                    options.ClientId = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
+                    options.ClientSecret = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientSecret;
                     options.NameClaimType = "sub";
                 }).CustomizeServerAuthentication();
 
@@ -98,14 +109,13 @@ namespace LykkeApi2
                     });
 
                 var builder = new ContainerBuilder();
-
-                Log = CreateLogWithSlack(services, appSettings);
+                Log = CreateLogWithSlack(services, _appSettings);
                 builder.Populate(services);
-                builder.RegisterModule(new Api2Module(appSettings, Log));
-                builder.RegisterModule(new CqrsModule(appSettings.CurrentValue, Log));
-                builder.RegisterModule(new ClientsModule(appSettings, Log));
+                builder.RegisterModule(new Api2Module(_appSettings, Log));
+                builder.RegisterModule(new ClientsModule(_appSettings, Log));
                 builder.RegisterModule(new AspNetCoreModule());
-                builder.RegisterModule(new RepositoriesModule(appSettings.Nested(x => x.WalletApiv2.Db), Log));
+                builder.RegisterModule(new CqrsModule(_appSettings.CurrentValue, Log));
+                builder.RegisterModule(new RepositoriesModule(_appSettings.Nested(x => x.WalletApiv2.Db), Log));
 
                 ApplicationContainer = builder.Build();
 
@@ -167,6 +177,7 @@ namespace LykkeApi2
                 {
                     o.RoutePrefix = "swagger/ui";
                     o.SwaggerEndpoint($"/swagger/{ApiVersion}/swagger.json", ApiVersion);
+                    o.ConfigureOAuth2(_appSettings.CurrentValue.SwaggerSettings.Security.OAuthClientId, "", "", "");
                 });
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());

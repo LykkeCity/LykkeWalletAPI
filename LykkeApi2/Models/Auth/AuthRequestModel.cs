@@ -9,6 +9,7 @@ namespace LykkeApi2.Models.Auth
         [Required]
         public string Password { get; set; }
         public string ClientInfo { get; set; }
+        [Required]
         public string PartnerId { get; set; }
     }
 }

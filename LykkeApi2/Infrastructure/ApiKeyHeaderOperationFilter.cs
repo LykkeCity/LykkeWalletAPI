@@ -22,8 +22,8 @@ namespace LykkeApi2.Infrastructure
                 {
                     Name = "Authorization",
                     In = "header",
-                    Description = "access token",
-                    Required = true,
+                    Description = "Old Lykke access token. *It's not required for request, you can use embed 'Authorization' option to use a new one under the hood.",
+                    Required = false,
                     Type = "string"
                 });
             }
