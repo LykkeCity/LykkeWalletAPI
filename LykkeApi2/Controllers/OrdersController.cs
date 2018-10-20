@@ -117,7 +117,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CancelLimitOrder(string orderId)
         {
-            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
 
             var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
             if (confirmationRequired)
@@ -178,7 +178,7 @@ namespace LykkeApi2.Controllers
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
-            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
 
             var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
             if (confirmationRequired)
@@ -244,7 +244,7 @@ namespace LykkeApi2.Controllers
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
-            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
             var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
             if (confirmationRequired)
             {
@@ -305,7 +305,7 @@ namespace LykkeApi2.Controllers
             var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
             var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
 
-            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
             var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
             if (confirmationRequired)
             {
@@ -363,7 +363,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CancelMultipleLimitOrders([FromBody]LimitOrderCancelMultipleRequest model)
         {
-            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
 
             var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
             if (confirmationRequired)

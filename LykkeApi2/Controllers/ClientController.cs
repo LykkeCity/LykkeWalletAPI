@@ -164,9 +164,7 @@ namespace LykkeApi2.Controllers
         [HttpPost("logout")]
         public async Task<IActionResult> LogOut()
         {
-            var token = _lykkePrincipal.GetToken();
-            
-            var session = await _clientSessionsClient.GetAsync(token);
+            var session = await _clientSessionsClient.GetAsync(_requestContext.SessionId);
             
             if (session != null)
                 await _clientSessionsClient.DeleteSessionIfExistsAsync(session.SessionToken);
@@ -181,7 +179,7 @@ namespace LykkeApi2.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.GetErrorMessage());
 
-            await _clientSessionsClient.CreateTradingSession(_lykkePrincipal.GetToken(), TimeSpan.FromMilliseconds(request.Ttl));
+            await _clientSessionsClient.CreateTradingSession(_requestContext.SessionId, TimeSpan.FromMilliseconds(request.Ttl));
 
             return Ok();
         }
@@ -193,7 +191,7 @@ namespace LykkeApi2.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.GetErrorMessage());
 
-            await _clientSessionsClient.ExtendTradingSession(_lykkePrincipal.GetToken(), TimeSpan.FromMilliseconds(request.Ttl));
+            await _clientSessionsClient.ExtendTradingSession(_requestContext.SessionId, TimeSpan.FromMilliseconds(request.Ttl));
 
             return Ok();
         }
@@ -234,7 +232,7 @@ namespace LykkeApi2.Controllers
         public async Task<FeaturesResponseModel> Features()
         {
             var features = await _clientAccountService.GetFeaturesAsync(_requestContext.ClientId);
-            var tradingSession = await _clientSessionsClient.GetTradingSession(_lykkePrincipal.GetToken());
+            var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
 
             return new FeaturesResponseModel
             {

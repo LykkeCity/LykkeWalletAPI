@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using Common;
 using Core.Constants;
+using Core.Identity;
 using LykkeApi2.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
 
@@ -14,7 +15,8 @@ namespace LykkeApi2.Infrastructure
         string ClientId { get; }
         string PartnerId { get; }
         bool IsIosDevice { get; }
-        double? Version { get; }
+        double? Version { get; }    
+        string SessionId { get; }
     }
 
     public class RequestContext : IRequestContext
@@ -59,6 +61,35 @@ namespace LykkeApi2.Infrastructure
                 var identity = (ClaimsIdentity) _httpContext?.User.Identity;
                 return identity?.Claims.FirstOrDefault(x => x.Type == LykkeConstants.PartnerId)?.Value;
             }
+        }
+
+        public string SessionId
+        {
+            get
+            {
+                var identity = (ClaimsIdentity) _httpContext?.User.Identity;
+                var sessionIdFromIdentity = identity?.Claims.FirstOrDefault(x => x.Type == SessionId);
+
+                return sessionIdFromIdentity != null ? sessionIdFromIdentity.Value : GetOldLykkeToken();
+            }
+        }
+
+        private string GetOldLykkeToken()
+        {
+            var header = _httpContext.Request.Headers["Authorization"].ToString();
+
+            if (string.IsNullOrEmpty(header))
+                return null;
+
+            var values = header.Split(' ');
+
+            if (values.Length != 2)
+                return null;
+
+            if (values[0] != "Bearer")
+                return null;
+
+            return values[1];
         }
 
         public bool IsIosDevice

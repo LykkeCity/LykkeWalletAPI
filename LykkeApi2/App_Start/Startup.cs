@@ -14,6 +14,7 @@ using LykkeApi2.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Core.Settings;
+using IdentityModel;
 using IdentityModel.AspNetCore.OAuth2Introspection;
 using IdentityServer4.AccessTokenValidation;
 using Lykke.Common;
@@ -93,12 +94,15 @@ namespace LykkeApi2
 
                 services.AddAuthentication(OAuth2IntrospectionDefaults.AuthenticationScheme)
                     .AddOAuth2Introspection(options =>
-                {
-                    options.Authority = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
-                    options.ClientId = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
-                    options.ClientSecret = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientSecret;
-                    options.NameClaimType = "sub";
-                }).CustomizeServerAuthentication();
+                    {
+                        options.Authority = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
+                        options.ClientId = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
+                        options.ClientSecret = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientSecret;
+                        options.NameClaimType = JwtClaimTypes.Subject;
+                        options.EnableCaching = true;
+                        options.CacheDuration = TimeSpan.FromMinutes(1);
+                        options.SkipTokensWithDots = true;
+                    }).CustomizeServerAuthentication();
 
 
                 services.Configure<ApiBehaviorOptions>(options =>
