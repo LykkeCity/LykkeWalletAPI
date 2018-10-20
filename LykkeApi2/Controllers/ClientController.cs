@@ -36,7 +36,6 @@ namespace LykkeApi2.Controllers
     {
         private readonly ILog _log;
         private readonly ILykkeRegistrationClient _lykkeRegistrationClient;
-        private readonly ILykkePrincipal _lykkePrincipal;
         private readonly IClientSessionsClient _clientSessionsClient;
         private readonly ClientAccountLogic _clientAccountLogic;
         private readonly IKycStatusService _kycStatusService;
@@ -47,7 +46,6 @@ namespace LykkeApi2.Controllers
 
         public ClientController(
             ILog log,
-            ILykkePrincipal lykkePrincipal,
             IClientSessionsClient clientSessionsClient,
             ILykkeRegistrationClient lykkeRegistrationClient,
             ClientAccountLogic clientAccountLogic,            
@@ -58,7 +56,6 @@ namespace LykkeApi2.Controllers
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
-            _lykkePrincipal = lykkePrincipal;
             _clientSessionsClient = clientSessionsClient;
             _clientAccountLogic = clientAccountLogic;
             _kycStatusService = kycStatusService;

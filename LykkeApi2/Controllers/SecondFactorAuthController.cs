@@ -25,20 +25,17 @@ namespace LykkeApi2.Controllers
         private readonly IConfirmationCodesClient _confirmationCodesClient;
         private readonly IRequestContext _requestContext;
         private readonly IClientSessionsClient _clientSessionsClient;
-        private readonly ILykkePrincipal _lykkePrincipal;
         private readonly ICqrsEngine _cqrsEngine;
 
         public SecondFactorAuthController(
             IConfirmationCodesClient confirmationCodesClient,
             IRequestContext requestContext,
             IClientSessionsClient clientSessionsClient,
-            ILykkePrincipal lykkePrincipal,
             ICqrsEngine cqrsEngine)
         {
             _confirmationCodesClient = confirmationCodesClient;
             _requestContext = requestContext;
             _clientSessionsClient = clientSessionsClient;
-            _lykkePrincipal = lykkePrincipal;
             _cqrsEngine = cqrsEngine;
         }
 

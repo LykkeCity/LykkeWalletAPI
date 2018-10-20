@@ -68,7 +68,7 @@ namespace LykkeApi2.Infrastructure
             get
             {
                 var identity = (ClaimsIdentity) _httpContext?.User.Identity;
-                var sessionIdFromIdentity = identity?.Claims.FirstOrDefault(x => x.Type == SessionId);
+                var sessionIdFromIdentity = identity?.Claims.FirstOrDefault(x => x.Type == LykkeConstants.SessionId);
 
                 return sessionIdFromIdentity != null ? sessionIdFromIdentity.Value : GetOldLykkeToken();
             }

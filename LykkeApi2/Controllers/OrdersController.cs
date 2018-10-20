@@ -36,7 +36,6 @@ namespace LykkeApi2.Controllers
     public class OrdersController : Controller
     {
         private readonly IRequestContext _requestContext;
-        private readonly ILykkePrincipal _lykkePrincipal;
         private readonly IClientSessionsClient _clientSessionsClient;
         private readonly IPersonalDataService _personalDataService;
         private readonly IKycStatusService _kycStatusService;
@@ -52,7 +51,6 @@ namespace LykkeApi2.Controllers
 
         public OrdersController(
             IRequestContext requestContext,
-            ILykkePrincipal lykkePrincipal,
             IClientSessionsClient clientSessionsClient,
             IPersonalDataService personalDataService,
             IKycStatusService kycStatusService,
@@ -67,7 +65,6 @@ namespace LykkeApi2.Controllers
             IHistoryClient historyClient)
         {
             _requestContext = requestContext;
-            _lykkePrincipal = lykkePrincipal;
             _clientSessionsClient = clientSessionsClient;
             _personalDataService = personalDataService;
             _kycStatusService = kycStatusService;
