@@ -103,13 +103,13 @@ namespace LykkeApi2.Controllers
             {
                 var candleValue = todayCandle.Value;
                 var priceChange24 =
-                    candleValue.Open > 0
-                    ? (decimal)((candleValue.Close - candleValue.Open) / candleValue.Open)
+                    candleValue.First().Open > 0
+                    ? (decimal)((candleValue.Last().Close - candleValue.First().Open) / candleValue.First().Open)
                     : 0;
 
                 if (result.TryGetValue(todayCandle.Key, out var existingAssetRecord))
                 {
-                    existingAssetRecord.Volume24H = (decimal)candleValue.TradingVolume;
+                    existingAssetRecord.Volume24H = (decimal)candleValue.Sum(x => x.TradingOppositeVolume);
                     existingAssetRecord.PriceChange24H = priceChange24;
                 }
                 else
@@ -117,7 +117,7 @@ namespace LykkeApi2.Controllers
                     result[todayCandle.Key] = new MarketSlice
                     {
                         AssetPair = todayCandle.Key,
-                        Volume24H = (decimal)candleValue.TradingVolume,
+                        Volume24H = (decimal)candleValue.Sum(x => x.TradingOppositeVolume),
                         PriceChange24H = priceChange24,
                     };
                 }
@@ -170,39 +170,36 @@ namespace LykkeApi2.Controllers
         /// <returns>A dictionary where the Key is the asset pair ID and the Value contains the today's Day Spot candle for the asset pair.</returns>
         /// <remarks>When there is no Day Spot Trade candle for some asset pair, it will not be presented in the resulting dictionary. Thus, if assetPairId parameter is specified
         /// but there is no a suitable candle for it, the method will return an empty dictionary.</remarks>
-        private async Task<Dictionary<string, Candle>> GetTodaySpotCandlesAsync(string assetPairId = null)
+        private async Task<Dictionary<string, IEnumerable<Candle>>> GetTodaySpotCandlesAsync(string assetPairId = null)
         {
             var historyService = _candlesHistoryProvider.Get(MarketType.Spot);
 
-            var todayCandles = new Dictionary<string, Candle>();
-
-            var dateFromInclusive = DateTime.UtcNow.Date;
-            var dateToExclusive = dateFromInclusive.AddDays(1);
+            var todayCandles = new Dictionary<string, IEnumerable<Candle>>();
+            
+            var now = DateTime.UtcNow;
+            var from = now - TimeSpan.FromHours(24);
+            // exclusive
+            var to = now;
 
             if (!string.IsNullOrWhiteSpace(assetPairId))
             {
                 var todayCandleHistory = await historyService.TryGetCandlesHistoryAsync(assetPairId,
-                    CandlePriceType.Trades, CandleTimeInterval.Day, dateFromInclusive, dateToExclusive);
+                    CandlePriceType.Trades, CandleTimeInterval.Hour, from, to);
 
                 if (todayCandleHistory?.History == null ||
                     !todayCandleHistory.History.Any())
                     return todayCandles;
-
-                if (todayCandleHistory.History.Count > 1) // The unbelievable case.
-                    throw new AmbiguousMatchException($"It seems like we have more than one today's Day Spot trade candle for asset pair {assetPairId}.");
-
+                
                 todayCandles.Add(
                     assetPairId,
                     todayCandleHistory
-                        .History
-                        .Single()
-                    );
+                        .History);
             }
             else
             {
                 var assetPairs = await historyService.GetAvailableAssetPairsAsync();
                 var todayCandleHistoryForPairs = await historyService.GetCandlesHistoryBatchAsync(assetPairs,
-                    CandlePriceType.Trades, CandleTimeInterval.Day, dateFromInclusive, dateToExclusive);
+                    CandlePriceType.Trades, CandleTimeInterval.Hour, from, to);
 
                 if (todayCandleHistoryForPairs == null) // Some technical issue has happened without an exception.
                     throw new InvalidOperationException("Could not obtain today's Day Spot trade candles at all.");
@@ -215,16 +212,11 @@ namespace LykkeApi2.Controllers
                     if (historyForPair.Value?.History == null ||
                         !historyForPair.Value.History.Any())
                         continue;
-
-                    if (historyForPair.Value.History.Count > 1) // The unbelievable case.
-                        throw new AmbiguousMatchException($"It seems like we have more than one today's Day Spot trade candle for asset pair {assetPairId}.");
-
+                    
                     todayCandles.Add(
                         historyForPair.Key,
                         historyForPair.Value
-                            .History
-                            .Single()
-                        );
+                            .History);
                 }
             }
 
