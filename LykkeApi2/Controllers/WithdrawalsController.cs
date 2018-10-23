@@ -121,10 +121,6 @@ namespace LykkeApi2.Controllers
             var blockchainCapabilities =
                 await _blockchainWalletsClient.GetCapabilititesAsync(asset.BlockchainIntegrationLayerId);
 
-            if (blockchainCapabilities.IsPublicAddressExtensionRequired &&
-                string.IsNullOrWhiteSpace(addressExtension))
-                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
-
             string destinationAddress = null;
 
             if (blockchainCapabilities.IsPublicAddressExtensionRequired)
