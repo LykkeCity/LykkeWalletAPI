@@ -231,7 +231,7 @@ namespace LykkeApi2.Controllers
             var assetsAvailableToClient =
                 await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
-            if (!assetsAvailableToClient.Contains(assetId) || assetId == "ETH") //temporary workaround for ETH until we can generate it through _blockchainWalletsClient.CreateWalletAsync 
+            if (!assetsAvailableToClient.Contains(assetId))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
 
             var pendingDialogs = await _clientDialogsClient.ClientDialogs.GetDialogsAsync(_requestContext.ClientId);
