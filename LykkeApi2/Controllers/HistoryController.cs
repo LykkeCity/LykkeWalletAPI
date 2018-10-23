@@ -13,7 +13,6 @@ using Lykke.Cqrs;
 using Lykke.Job.HistoryExportBuilder.Contract;
 using Lykke.Job.HistoryExportBuilder.Contract.Commands;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.History.Client;
 using Lykke.Service.History.Contracts.Enums;
 using Lykke.Service.History.Contracts.History;
@@ -160,56 +159,6 @@ namespace LykkeApi2.Controllers
                 assetPairId: assetPairId, offset: skip, limit: take);
 
             var result = await data.SelectAsync(x => x.ToTradeResponseModel(_assetsHelper));
-
-            return Ok(result.OrderByDescending(x => x.Timestamp));
-        }
-
-        /// <summary>
-        /// Getting trading wallet history for client
-        /// </summary>
-        /// <param name="take">How many maximum items have to be returned</param>
-        /// <param name="skip">How many items skip before returning</param>
-        /// <response code="200">List of trading operations</response>
-        [HttpGet("client/trades")]
-        [SwaggerOperation("GetTrades")]
-        [ProducesResponseType(typeof(IEnumerable<TradeResponseModel>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetTrades(
-            [FromQuery] int take,
-            [FromQuery] int skip)
-        {
-            var clientId = _requestContext.ClientId;
-
-            IEnumerable<BaseHistoryModel> data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(
-                Guid.Parse(clientId),
-                new[] { HistoryType.Trade },
-                offset: skip, limit: take);
-
-            var result = await data.SelectAsync(x => x.ToTradeResponseModel(_assetsHelper));
-
-            return Ok(result.OrderByDescending(x => x.Timestamp));
-        }
-
-        /// <summary>
-        /// Getting trading wallet deposits and withdrawals history for client
-        /// </summary>
-        /// <param name="take">How many maximum items have to be returned</param>
-        /// <param name="skip">How many items skip before returning</param>
-        /// <returns></returns>
-        [HttpGet("client/funds")]
-        [SwaggerOperation("GetFunds")]
-        [ProducesResponseType(typeof(IEnumerable<FundsResponseModel>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetFunds(
-            [FromQuery] int take,
-            [FromQuery] int skip)
-        {
-            var clientId = _requestContext.ClientId;
-
-            IEnumerable<BaseHistoryModel> data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(
-                Guid.Parse(clientId),
-                new[] {HistoryType.CashIn, HistoryType.CashOut},
-                offset: skip, limit: take);
-
-            var result = await data.SelectAsync(x => x.ToFundsResponseModel(_assetsHelper));
 
             return Ok(result.OrderByDescending(x => x.Timestamp));
         }
