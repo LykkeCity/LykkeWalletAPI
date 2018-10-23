@@ -132,6 +132,9 @@ namespace LykkeApi2.Controllers
         /// <param name="assetPairId">Asset pair identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
+        /// <param name="fromDt"></param>
+        /// <param name="toDt"></param>
+        /// <param name="tradeType"></param>
         /// <returns></returns>
         [HttpGet("{walletId}/trades")]
         [SwaggerOperation("GetTradesByWalletId")]
@@ -142,7 +145,10 @@ namespace LykkeApi2.Controllers
             string walletId,
             [FromQuery] string assetPairId,
             [FromQuery] int take,
-            [FromQuery] int skip)
+            [FromQuery] int skip,
+            [FromQuery] DateTime? fromDt = null,
+            [FromQuery] DateTime? toDt = null,
+            [FromQuery] TradeType? tradeType = null)
         {
             var clientId = _requestContext.ClientId;
 
@@ -155,8 +161,8 @@ namespace LykkeApi2.Controllers
             if (wallet.Type == "Trading")
                 walletId = clientId;
 
-            var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), new[] { HistoryType.Trade },
-                assetPairId: assetPairId, offset: skip, limit: take);
+            var data = await _historyClient.HistoryApi.GetTradesByWalletAsync(Guid.Parse(walletId),
+                assetPairId: assetPairId, offset: skip, limit: take, tradeType: tradeType);
 
             var result = await data.SelectAsync(x => x.ToTradeResponseModel(_assetsHelper));
 
@@ -171,6 +177,8 @@ namespace LykkeApi2.Controllers
         /// <param name="assetId">Asset identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
+        /// <param name="fromDt"></param>
+        /// <param name="toDt"></param>
         /// <returns></returns>
         [HttpGet("{walletId}/funds")]
         [SwaggerOperation("GetFundsByWalletId")]
@@ -182,7 +190,9 @@ namespace LykkeApi2.Controllers
             [FromQuery(Name = "operation")] FundsOperation[] operation,
             [FromQuery] string assetId,
             [FromQuery] int take,
-            [FromQuery] int skip)
+            [FromQuery] int skip,
+            [FromQuery] DateTime? fromDt = null,
+            [FromQuery] DateTime? toDt = null)
         {
             var clientId = _requestContext.ClientId;
 
@@ -199,7 +209,7 @@ namespace LykkeApi2.Controllers
                 operation = Enum.GetValues(typeof(FundsOperation)).Cast<FundsOperation>().ToArray();
 
             var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), operation.Select(x => x.ToHistoryType()).ToArray(),
-                assetId: assetId, offset: skip, limit: take);
+                assetId: assetId, offset: skip, limit: take, fromDt: fromDt, toDt: toDt);
 
             var result = await data.SelectAsync(x => x.ToFundsResponseModel(_assetsHelper));
 

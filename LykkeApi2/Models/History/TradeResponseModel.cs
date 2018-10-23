@@ -44,14 +44,11 @@ namespace LykkeApi2.Models.History
         /// <summary>
         /// Converts history trade models to API response
         /// </summary>
-        /// <param name="historyModel">Should be only of type TradeModel</param>
+        /// <param name="tradeModel"></param>
         /// <param name="assetsHelper"></param>
         /// <returns></returns>
-        public static async Task<TradeResponseModel> ToTradeResponseModel(this BaseHistoryModel historyModel, IAssetsHelper assetsHelper)
+        public static async Task<TradeResponseModel> ToTradeResponseModel(this TradeModel tradeModel, IAssetsHelper assetsHelper)
         {
-            if (!(historyModel is TradeModel tradeModel))
-                return null;
-
             var assetPair = await assetsHelper.GetAssetPairAsync(tradeModel.AssetPairId);
             var baseAsset = await assetsHelper.GetAssetAsync(assetPair.BaseAssetId);
             var quoteAsset = await assetsHelper.GetAssetAsync(assetPair.QuotingAssetId);
