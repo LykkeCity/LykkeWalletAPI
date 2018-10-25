@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -42,6 +43,8 @@ namespace LykkeApi2.Controllers
         private readonly IPersonalDataService _personalDataService;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly IRequestContext _requestContext;
+        private readonly ISrvBlockchainHelper _srvBlockchainHelper;
+        private readonly ISet<string> _coloredAssetIds;
 
         public DepositsController(
             IPaymentSystemClient paymentSystemService,
@@ -65,6 +68,13 @@ namespace LykkeApi2.Controllers
             _personalDataService = personalDataService;
             _limitationsServiceClient = limitationsServiceClient;
             _requestContext = requestContext;
+
+            _coloredAssetIds = new[]
+            {
+                LykkeConstants.LykkeAssetId,
+                LykkeConstants.LykkeForwardAssetId,
+                LykkeConstants.HcpAssetId
+            }.ToHashSet();
         }
 
         /// <summary>
@@ -309,12 +319,18 @@ namespace LykkeApi2.Controllers
                 throw LykkeApiErrorException.BadRequest(
                     LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
 
+            var baseAddress = depositInfo.BaseAddress;
+            if (_coloredAssetIds.Contains(asset.BlockchainIntegrationLayerAssetId))
+            {
+                baseAddress = _srvBlockchainHelper.GenerateColoredAddress(depositInfo.BaseAddress);
+            }
+
             return Ok(new CryptoDepositAddressRespModel
                 {
                     Address = depositInfo.Address,
                     AddressExtension = depositInfo.AddressExtension,
-                    BaseAddress = depositInfo.BaseAddress
-                });
+                    BaseAddress = baseAddress
+            });
         }
     }
 }

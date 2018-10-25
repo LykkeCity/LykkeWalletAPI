@@ -23,6 +23,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using LkeServices.Blockchain;
 
 namespace LykkeApi2.Modules
 {
@@ -88,6 +89,8 @@ namespace LykkeApi2.Modules
             builder.RegisterType<CountryPhoneCodeService>().As<ICountryPhoneCodeService>();
 
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
+
+            builder.RegisterType<SrvBlockchainHelper>().As<ISrvBlockchainHelper>().SingleInstance();
 
             BindServices(builder, _settings);
             builder.Populate(_services);
