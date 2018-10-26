@@ -321,17 +321,17 @@ namespace LykkeApi2.Controllers
                 throw LykkeApiErrorException.BadRequest(
                     LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
 
-            var baseAddress = depositInfo.BaseAddress;
+            var depositAddress = depositInfo.Address;
             if (_coloredAssetIds.Contains(asset.BlockchainIntegrationLayerAssetId))
             {
-                baseAddress = _srvBlockchainHelper.GenerateColoredAddress(depositInfo.BaseAddress);
+                depositAddress = _srvBlockchainHelper.GenerateColoredAddress(depositInfo.Address);
             }
 
             return Ok(new CryptoDepositAddressRespModel
                 {
-                    Address = depositInfo.Address,
+                    Address = depositAddress,
                     AddressExtension = depositInfo.AddressExtension,
-                    BaseAddress = baseAddress
+                    BaseAddress = depositInfo.BaseAddress
             });
         }
     }
