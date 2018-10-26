@@ -56,7 +56,8 @@ namespace LykkeApi2.Controllers
             IKycStatusService kycStatusService,
             IPersonalDataService personalDataService,
             ILimitationsServiceClient limitationsServiceClient,
-            IRequestContext requestContext)
+            IRequestContext requestContext, 
+            ISrvBlockchainHelper srvBlockchainHelper)
         {
             _paymentSystemService = paymentSystemService;
             _feeCalculatorClient = feeCalculatorClient;
@@ -68,6 +69,7 @@ namespace LykkeApi2.Controllers
             _personalDataService = personalDataService;
             _limitationsServiceClient = limitationsServiceClient;
             _requestContext = requestContext;
+            _srvBlockchainHelper = srvBlockchainHelper;
 
             _coloredAssetIds = new[]
             {

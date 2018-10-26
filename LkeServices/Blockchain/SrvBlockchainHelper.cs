@@ -1,4 +1,5 @@
-﻿using Core.Services;
+﻿using System;
+using Core.Services;
 using NBitcoin;
 
 namespace LkeServices.Blockchain
@@ -9,7 +10,15 @@ namespace LkeServices.Blockchain
         {
             if (baseAddress == null)
                 return null;
-            return BitcoinAddress.Create(baseAddress).ToColoredAddress().ToString();
+            try
+            {
+                return BitcoinAddress.Create(baseAddress).ToColoredAddress().ToString();
+            }
+            //unable to convert to colored address
+            catch (Exception)
+            {
+                return baseAddress;
+            }
         }
     }
 }
