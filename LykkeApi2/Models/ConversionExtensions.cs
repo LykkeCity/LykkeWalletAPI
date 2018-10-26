@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
+using LykkeApi2.Models.ClientAccountModels;
 
 namespace LykkeApi2.Models
 {
@@ -92,19 +94,27 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static KycStatus ToApiModel(this KycStatus status)
+        public static ApiKycStatus ToApiModel(this KycStatus kycStatus)
         {
-            switch (status)
+            switch (kycStatus)
             {
                 case KycStatus.NeedToFillData:
-                    return KycStatus.NeedToFillData;
-                case KycStatus.Ok:
+                    return ApiKycStatus.NeedToFillData;
+                case KycStatus.Pending:
+                case KycStatus.Complicated:
                 case KycStatus.ReviewDone:
-                    return KycStatus.Ok;
+                case KycStatus.JumioOk:
+                case KycStatus.JumioInProgress:
+                case KycStatus.JumioFailed:
+                    return ApiKycStatus.Pending;
+                case KycStatus.Ok:
+                    return ApiKycStatus.Ok;
+                case KycStatus.Rejected:
+                    return ApiKycStatus.Rejected;
                 case KycStatus.RestrictedArea:
-                    return KycStatus.RestrictedArea;
+                    return ApiKycStatus.RestrictedArea;
                 default:
-                    return KycStatus.Pending;
+                    throw new ArgumentOutOfRangeException(nameof(kycStatus), kycStatus, null);
             }
         }
 
