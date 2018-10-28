@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -42,6 +43,8 @@ namespace LykkeApi2.Controllers
         private readonly IPersonalDataService _personalDataService;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly IRequestContext _requestContext;
+        private readonly ISrvBlockchainHelper _srvBlockchainHelper;
+        private readonly ISet<string> _coloredAssetIds;
 
         public DepositsController(
             IPaymentSystemClient paymentSystemService,
@@ -53,7 +56,8 @@ namespace LykkeApi2.Controllers
             IKycStatusService kycStatusService,
             IPersonalDataService personalDataService,
             ILimitationsServiceClient limitationsServiceClient,
-            IRequestContext requestContext)
+            IRequestContext requestContext, 
+            ISrvBlockchainHelper srvBlockchainHelper)
         {
             _paymentSystemService = paymentSystemService;
             _feeCalculatorClient = feeCalculatorClient;
@@ -65,6 +69,14 @@ namespace LykkeApi2.Controllers
             _personalDataService = personalDataService;
             _limitationsServiceClient = limitationsServiceClient;
             _requestContext = requestContext;
+            _srvBlockchainHelper = srvBlockchainHelper;
+
+            _coloredAssetIds = new[]
+            {
+                LykkeConstants.LykkeAssetId,
+                LykkeConstants.LykkeForwardAssetId,
+                LykkeConstants.HcpAssetId
+            }.ToHashSet();
         }
 
         /// <summary>
@@ -309,12 +321,18 @@ namespace LykkeApi2.Controllers
                 throw LykkeApiErrorException.BadRequest(
                     LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
 
+            var depositAddress = depositInfo.Address;
+            if (_coloredAssetIds.Contains(asset.BlockchainIntegrationLayerAssetId))
+            {
+                depositAddress = _srvBlockchainHelper.GenerateColoredAddress(depositInfo.Address);
+            }
+
             return Ok(new CryptoDepositAddressRespModel
                 {
-                    Address = depositInfo.Address,
+                    Address = depositAddress,
                     AddressExtension = depositInfo.AddressExtension,
                     BaseAddress = depositInfo.BaseAddress
-                });
+            });
         }
     }
 }

@@ -8,6 +8,8 @@ namespace Core.Constants
 
         public const string BitcoinAssetId = "BTC";
         public const string LykkeAssetId = "LKK";
+        public const string LykkeForwardAssetId = "LKK1Y";
+        public const string HcpAssetId = "HCP";
 
         public const string UsdAssetId = "USD";
         public const string EurAssetId = "EUR";
