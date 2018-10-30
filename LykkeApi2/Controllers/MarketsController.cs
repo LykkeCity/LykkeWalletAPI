@@ -176,10 +176,10 @@ namespace LykkeApi2.Controllers
 
             var todayCandles = new Dictionary<string, IEnumerable<Candle>>();
             
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             var from = now - TimeSpan.FromHours(24);
             // exclusive
-            var to = now;
+            var to = now + TimeSpan.FromHours(1);
 
             if (!string.IsNullOrWhiteSpace(assetPairId))
             {
