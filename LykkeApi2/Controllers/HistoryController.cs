@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Core.Constants;
+using Core.Exceptions;
 using Core.Repositories;
 using Core.Services;
 using Lykke.Cqrs;
@@ -150,6 +152,9 @@ namespace LykkeApi2.Controllers
             [FromQuery] DateTime? toDt = null,
             [FromQuery] TradeType? tradeType = null)
         {
+            if (fromDt >= toDt)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, "fromDt value should be less than toDt value");
+
             var clientId = _requestContext.ClientId;
 
             var wallet = await _clientAccountService.GetWalletAsync(walletId);
@@ -162,7 +167,7 @@ namespace LykkeApi2.Controllers
                 walletId = clientId;
 
             var data = await _historyClient.HistoryApi.GetTradesByWalletAsync(Guid.Parse(walletId),
-                assetPairId: assetPairId, offset: skip, limit: take, tradeType: tradeType);
+                assetPairId: assetPairId, offset: skip, limit: take, tradeType: tradeType, fromDt: fromDt, toDt: toDt);
 
             var result = await data.SelectAsync(x => x.ToTradeResponseModel(_assetsHelper));
 
@@ -194,6 +199,9 @@ namespace LykkeApi2.Controllers
             [FromQuery] DateTime? fromDt = null,
             [FromQuery] DateTime? toDt = null)
         {
+            if (fromDt >= toDt)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, "fromDt value should be less than toDt value");
+
             var clientId = _requestContext.ClientId;
 
             var wallet = await _clientAccountService.GetWalletAsync(walletId);
