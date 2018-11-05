@@ -21,7 +21,7 @@
     <PackageReference Include="Lykke.Common.ApiLibrary" Version="1.10.1" />
     <PackageReference Include="Lykke.Contracts" Version="1.0.51" />
     <PackageReference Include="Lykke.Cqrs" Version="5.0.1" />
-    <PackageReference Include="Lykke.MatchingEngineConnector" Version="8.1.6" />
+    <PackageReference Include="Lykke.MatchingEngineConnector" Version="8.3.1" />
     <PackageReference Include="Lykke.Messaging" Version="6.0.1" />
     <PackageReference Include="Lykke.Messaging.RabbitMq" Version="2.1.0" />
     <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.7" />
