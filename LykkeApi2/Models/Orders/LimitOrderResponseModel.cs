@@ -12,7 +12,7 @@ namespace LykkeApi2.Models.Orders
         public decimal? LowerPrice { get; set; }
         public decimal? UpperLimitPrice { get; set; }
         public decimal? UpperPrice { get; set; }
-        public DateTime CreateDateTime { set; get; }
+        public string CreateDateTime { set; get; }
         public string OrderAction { set; get; }
         public string Status { set; get; }
         public string Type { set; get; }

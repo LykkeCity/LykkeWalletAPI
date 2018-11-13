@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Core.Constants;
 using Core.Services;
 using Lykke.Service.History.Contracts.History;
 using Newtonsoft.Json;
@@ -36,7 +35,7 @@ namespace LykkeApi2.Models.History
 
         public decimal QuoteVolume { get; set; }
 
-        public DateTime Timestamp { get; set; }
+        public string Timestamp { get; set; }
     }
 
     public static class TradeModelExtensions
@@ -67,7 +66,7 @@ namespace LykkeApi2.Models.History
                 QuoteVolume = Math.Abs(tradeModel.QuotingVolume),
                 Direction = tradeModel.BaseVolume > 0 ? Direction.Buy : Direction.Sell,
                 Price = tradeModel.Price,
-                Timestamp = tradeModel.Timestamp
+                Timestamp = tradeModel.Timestamp.ToString(LykkeConstants.IsoDateTimeFormat),
             };
         }
     }

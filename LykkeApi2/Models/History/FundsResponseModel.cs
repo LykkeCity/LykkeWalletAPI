@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Core.Constants;
 using Core.Services;
 using Lykke.Service.History.Contracts.Enums;
 using Lykke.Service.History.Contracts.History;
@@ -48,7 +47,7 @@ namespace LykkeApi2.Models.History
         [JsonConverter(typeof(StringEnumConverter))]
         public FundsStatus Status { get; set; }
 
-        public DateTime Timestamp { get; set; }
+        public string Timestamp { get; set; }
 
         public string BlockchainHash { get; set; }
     }
@@ -77,7 +76,7 @@ namespace LykkeApi2.Models.History
                             Operation = FundsOperation.Deposit,
                             Status = FundsStatus.Completed,
                             Type = FundsType.Undefined,
-                            Timestamp = cashin.Timestamp,
+                            Timestamp = cashin.Timestamp.ToString(LykkeConstants.IsoDateTimeFormat),
                             BlockchainHash = cashin.BlockchainHash
                         };
                     }
@@ -93,7 +92,7 @@ namespace LykkeApi2.Models.History
                             Operation = FundsOperation.Withdraw,
                             Status = FundsStatus.Completed,
                             Type = FundsType.Undefined,
-                            Timestamp = cashout.Timestamp,
+                            Timestamp = cashout.Timestamp.ToString(LykkeConstants.IsoDateTimeFormat),
                             BlockchainHash = cashout.BlockchainHash
                         };
                     }

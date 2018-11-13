@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace LykkeApi2.Models.AssetPairRates
+﻿namespace LykkeApi2.Models.AssetPairRates
 {
     public class AssetPairRateModel
     {
@@ -8,7 +6,7 @@ namespace LykkeApi2.Models.AssetPairRates
         public double BidPrice { get; set; }
         public double AskPrice { get; set; }
 
-        public DateTime BidPriceTimestamp { get; set; }
-        public DateTime AskPriceTimestamp { get; set; } 
+        public string BidPriceTimestamp { get; set; }
+        public string AskPriceTimestamp { get; set; } 
     }
 }

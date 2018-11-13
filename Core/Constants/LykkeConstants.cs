@@ -38,7 +38,7 @@ namespace Core.Constants
         public const string PartnerId = "http://lykke.com/oauth/partner_id";
         public const string SessionId = "http://lykke.com/oauth/sessionid";
 
-
+        public const string IsoDateTimeFormat = "yyyy-MM-ddTHH:mm:ss.fffZ";
 
         #region Cache keys
 
