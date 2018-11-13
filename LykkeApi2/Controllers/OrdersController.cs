@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
-using Core.Constants;
 using Core.Settings;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.MatchingEngine.Connector.Models.Api;
@@ -92,7 +91,7 @@ namespace LykkeApi2.Controllers
             return Ok(orders.Select(x => new LimitOrderResponseModel
             {
                 AssetPairId = x.AssetPairId,
-                CreateDateTime = x.CreateDt.ToString(LykkeConstants.IsoDateTimeFormat),
+                CreateDateTime = x.CreateDt,
                 Id = x.Id,
                 Price = x.Price.GetValueOrDefault(0),
                 LowerLimitPrice = x.LowerLimitPrice,

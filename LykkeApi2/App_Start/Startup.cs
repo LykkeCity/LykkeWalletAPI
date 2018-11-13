@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -27,6 +28,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
@@ -74,6 +76,14 @@ namespace LykkeApi2
                         options.SerializerSettings.ContractResolver =
                             new Newtonsoft.Json.Serialization.DefaultContractResolver();
                     });
+                services.Configure<MvcOptions>(opts =>
+                {
+                    opts.OutputFormatters.RemoveType<JsonOutputFormatter>();
+                    var formatterSettings = JsonSerializerSettingsProvider.CreateSerializerSettings();
+                    formatterSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ";
+                    JsonOutputFormatter jsonOutputFormatter = new JsonOutputFormatter(formatterSettings, ArrayPool<char>.Create());
+                    opts.OutputFormatters.Insert(0, jsonOutputFormatter);
+                });
 
                 services.AddSwaggerGen(options =>
                 {

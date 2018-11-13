@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Core.Constants;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using LykkeApi2.Models.AssetPairRates;
@@ -84,10 +83,10 @@ namespace LykkeApi2.Models
             return new AssetPairRateModel
             {
                 AskPrice = src.AskPrice,
-                AskPriceTimestamp = src.AskPriceTimestamp.ToString(LykkeConstants.IsoDateTimeFormat),
+                AskPriceTimestamp = src.AskPriceTimestamp,
                 AssetPair = src.AssetPair,
                 BidPrice = src.BidPrice,
-                BidPriceTimestamp = src.BidPriceTimestamp.ToString(LykkeConstants.IsoDateTimeFormat),
+                BidPriceTimestamp = src.BidPriceTimestamp,
             };
         }
 

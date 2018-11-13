@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Core.Constants;
 using Lykke.Service.CandlesHistory.Client.Models;
 
 namespace LykkeApi2.Models
@@ -13,7 +12,7 @@ namespace LykkeApi2.Models
 
     public class CandleStickHistoryItem
     {
-        public string DateTime { set; get; }
+        public DateTime DateTime { set; get; }
         public double Open { get; set; }
         public double Close { get; set; }
         public double High { get; set; }
@@ -30,7 +29,7 @@ namespace LykkeApi2.Models
 
             resp.History = model.History.Select(x => new CandleStickHistoryItem
             {
-                DateTime = x.DateTime.ToString(LykkeConstants.IsoDateTimeFormat),
+                DateTime = x.DateTime,
                 Open = x.Open,
                 Close = x.Close,
                 High = x.High,
