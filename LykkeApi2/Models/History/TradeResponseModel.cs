@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Core.Services;
 using Lykke.Service.History.Contracts.History;
@@ -67,7 +65,7 @@ namespace LykkeApi2.Models.History
                 QuoteVolume = Math.Abs(tradeModel.QuotingVolume),
                 Direction = tradeModel.BaseVolume > 0 ? Direction.Buy : Direction.Sell,
                 Price = tradeModel.Price,
-                Timestamp = tradeModel.Timestamp
+                Timestamp = tradeModel.Timestamp,
             };
         }
     }

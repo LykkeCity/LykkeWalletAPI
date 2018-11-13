@@ -8,8 +8,6 @@ namespace LykkeApi2.Models
 {
     public static class ConversionExtensions
     {
-        private static string DateTimeFormat = "yyyy-MM-dd HH:mm:ss.fff";
-
         public static AssetModel ToApiModel(this Asset src)
         {
             return new AssetModel
@@ -88,7 +86,7 @@ namespace LykkeApi2.Models
                 AskPriceTimestamp = src.AskPriceTimestamp,
                 AssetPair = src.AssetPair,
                 BidPrice = src.BidPrice,
-                BidPriceTimestamp = src.BidPriceTimestamp
+                BidPriceTimestamp = src.BidPriceTimestamp,
             };
         }
 
