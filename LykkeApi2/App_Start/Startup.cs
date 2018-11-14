@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -78,8 +79,13 @@ namespace LykkeApi2
                     });
                 services.Configure<MvcOptions>(opts =>
                 {
-                    opts.OutputFormatters.RemoveType<JsonOutputFormatter>();
-                    var formatterSettings = JsonSerializerSettingsProvider.CreateSerializerSettings();
+                    var formatter = opts.OutputFormatters.FirstOrDefault(i => i.GetType() == typeof(JsonOutputFormatter));
+                    var jsonFormatter = formatter as JsonOutputFormatter;
+                    var formatterSettings = jsonFormatter == null
+                        ? JsonSerializerSettingsProvider.CreateSerializerSettings()
+                        : jsonFormatter.PublicSerializerSettings;
+                    if (formatter != null)
+                        opts.OutputFormatters.RemoveType<JsonOutputFormatter>();
                     formatterSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ";
                     JsonOutputFormatter jsonOutputFormatter = new JsonOutputFormatter(formatterSettings, ArrayPool<char>.Create());
                     opts.OutputFormatters.Insert(0, jsonOutputFormatter);
