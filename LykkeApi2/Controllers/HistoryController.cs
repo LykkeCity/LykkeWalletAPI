@@ -134,8 +134,8 @@ namespace LykkeApi2.Controllers
         /// <param name="assetPairId">Asset pair identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
-        /// <param name="fromDt"></param>
-        /// <param name="toDt"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
         /// <param name="tradeType"></param>
         /// <returns></returns>
         [HttpGet("{walletId}/trades")]
@@ -148,11 +148,11 @@ namespace LykkeApi2.Controllers
             [FromQuery] string assetPairId,
             [FromQuery] int take,
             [FromQuery] int skip,
-            [FromQuery] DateTime? fromDt = null,
-            [FromQuery] DateTime? toDt = null,
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null,
             [FromQuery] TradeType? tradeType = null)
         {
-            if (fromDt >= toDt)
+            if (from >= to)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, "fromDt value should be less than toDt value");
 
             var clientId = _requestContext.ClientId;
@@ -166,8 +166,8 @@ namespace LykkeApi2.Controllers
             if (wallet.Type == "Trading")
                 walletId = clientId;
 
-            var data = await _historyClient.HistoryApi.GetTradesByWalletAsync(Guid.Parse(walletId),
-                assetPairId: assetPairId, offset: skip, limit: take, tradeType: tradeType, fromDt: fromDt, toDt: toDt);
+            var data = await _historyClient.TradesApi.GetTradesByWalletAsync(Guid.Parse(walletId),
+                assetPairId: assetPairId, offset: skip, limit: take, tradeType: tradeType, from: from, to: to);
 
             var result = await data.SelectAsync(x => x.ToTradeResponseModel(_assetsHelper));
 
@@ -182,8 +182,8 @@ namespace LykkeApi2.Controllers
         /// <param name="assetId">Asset identifier</param>
         /// <param name="take">How many maximum items have to be returned</param>
         /// <param name="skip">How many items skip before returning</param>
-        /// <param name="fromDt"></param>
-        /// <param name="toDt"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
         /// <returns></returns>
         [HttpGet("{walletId}/funds")]
         [SwaggerOperation("GetFundsByWalletId")]
@@ -196,10 +196,10 @@ namespace LykkeApi2.Controllers
             [FromQuery] string assetId,
             [FromQuery] int take,
             [FromQuery] int skip,
-            [FromQuery] DateTime? fromDt = null,
-            [FromQuery] DateTime? toDt = null)
+            [FromQuery] DateTime? from = null,
+            [FromQuery] DateTime? to = null)
         {
-            if (fromDt >= toDt)
+            if (from >= to)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, "fromDt value should be less than toDt value");
 
             var clientId = _requestContext.ClientId;
@@ -217,7 +217,7 @@ namespace LykkeApi2.Controllers
                 operation = Enum.GetValues(typeof(FundsOperation)).Cast<FundsOperation>().ToArray();
 
             var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), operation.Select(x => x.ToHistoryType()).ToArray(),
-                assetId: assetId, offset: skip, limit: take, fromDt: fromDt, toDt: toDt);
+                assetId: assetId, offset: skip, limit: take, from: from, to: to);
 
             var result = await data.SelectAsync(x => x.ToFundsResponseModel(_assetsHelper));
 

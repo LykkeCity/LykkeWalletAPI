@@ -34,7 +34,7 @@
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
     <PackageReference Include="Lykke.Service.ConfirmationCodes.Client" Version="1.1.3" />
     <PackageReference Include="Lykke.Service.FeeCalculator.Client" Version="2.1.4" />
-    <PackageReference Include="Lykke.Service.History.Client" Version="1.3.0" />
+    <PackageReference Include="Lykke.Service.History.Client" Version="1.4.0" />
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.220" />
     <PackageReference Include="Lykke.Service.Kyc.Abstractions" Version="1.0.221" />
     <PackageReference Include="Lykke.Service.Operations.Client" Version="2.9.1" />
