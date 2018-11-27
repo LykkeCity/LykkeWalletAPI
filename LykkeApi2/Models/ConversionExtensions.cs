@@ -15,7 +15,7 @@ namespace LykkeApi2.Models
                 Id = src.Id,
                 Name = src.Name,
                 DisplayId = src.DisplayId,
-                Accuracy = src.Accuracy,
+                Accuracy = src.DisplayAccuracy ?? src.Accuracy,
                 KycNeeded = src.KycNeeded,
                 BankCardsDepositEnabled = src.BankCardsDepositEnabled,
                 SwiftDepositEnabled = src.SwiftDepositEnabled,
