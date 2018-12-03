@@ -9,6 +9,7 @@
     <None Remove="Setthings\**" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Lykke.Common.ApiLibrary" Version="2.1.0-beta" />
     <PackageReference Include="Lykke.Payments.Client" Version="1.0.8" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.1.2" />
     <PackageReference Include="Lykke.Service.ClientAccount.Client" Version="1.3.0" />

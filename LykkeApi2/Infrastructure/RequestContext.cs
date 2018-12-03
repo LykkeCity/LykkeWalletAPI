@@ -2,8 +2,9 @@
 using System.Security.Claims;
 using Common;
 using Core.Constants;
-using Core.Identity;
+using Lykke.Common.ApiLibrary.Authentication;
 using LykkeApi2.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
 namespace LykkeApi2.Infrastructure
@@ -52,7 +53,20 @@ namespace LykkeApi2.Infrastructure
 
         public string UserAgent => _httpContext.Request.GetUserAgent();
 
-        public string ClientId => _httpContext.User?.Identity?.Name;
+        public string ClientId
+        {
+            get
+            {
+                var ironCladUser = _httpContext.AuthenticateAsync(AuthentcationSchemes.Ironclad).Result;
+
+                var lsub = ironCladUser.Principal.Claims.FirstOrDefault(x => x.Type == "lsub")?.Value;
+
+                if (lsub != null) return lsub;
+
+                _httpContext.AuthenticateAsync(AuthentcationSchemes.Bearer).Wait();
+                return _httpContext.User?.Identity?.Name;
+            }
+        }
 
         public string PartnerId
         {
