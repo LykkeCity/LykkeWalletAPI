@@ -115,6 +115,7 @@ namespace LykkeApi2
                         options.EnableCaching = true;
                         options.CacheDuration = TimeSpan.FromMinutes(1);
                         options.SkipTokensWithDots = true;
+                        options.DiscoveryPolicy.ValidateIssuerName = false;
                     })
 
                     .AddLykkeAuthentication(AuthentcationSchemes.Bearer, options =>
