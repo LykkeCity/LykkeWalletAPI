@@ -18,7 +18,7 @@ using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.History.Client;
 using Lykke.Service.History.Contracts.Enums;
 using Lykke.Service.History.Contracts.History;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Annotations;
 using LykkeApi2.Models.History;
 using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 

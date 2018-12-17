@@ -3,7 +3,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Core.Constants;
 using Core.Exceptions;
-using Core.Identity;
 using Lykke.Cqrs;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.ConfirmationCodes.Client.Models.Request;

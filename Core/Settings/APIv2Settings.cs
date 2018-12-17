@@ -101,6 +101,7 @@ namespace Core.Settings
         public bool EnableFees { get; set; }
         public bool EnableSessionValidation { get; set; }
         public OAuthSettings OAuthSettings { get; set; }
+        public OAuthSettings IroncladSettings { get; set; }
         public bool EnableTwoFactor { get; set; }
         public int MaxTwoFactorConfirmationAttempts { get; set; }
     }
