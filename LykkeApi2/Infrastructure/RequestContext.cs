@@ -58,6 +58,7 @@ namespace LykkeApi2.Infrastructure
         {
             get
             {
+                //todo: @mkobzev. Switch to async/await
                 var lykkeUser = _httpContext.AuthenticateAsync(AuthentcationSchemes.Bearer).Result;
 
                 if (lykkeUser != null)
