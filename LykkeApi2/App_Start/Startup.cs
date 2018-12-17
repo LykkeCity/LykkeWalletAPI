@@ -106,6 +106,17 @@ namespace LykkeApi2
 
                 services.AddAuthentication(AuthentcationSchemes.Bearer)
 
+                    .AddLykkeAuthentication(AuthentcationSchemes.Bearer, options =>
+                    {
+                        options.Authority = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
+                        options.ClientId = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
+                        options.ClientSecret = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientSecret;
+                        options.NameClaimType = JwtClaimTypes.Subject;
+                        options.EnableCaching = true;
+                        options.CacheDuration = TimeSpan.FromMinutes(1);
+                        options.SkipTokensWithDots = true;
+                    })
+
                     .AddOAuth2Introspection(AuthentcationSchemes.Ironclad, options =>
                     {
                         options.Authority = _appSettings.CurrentValue.WalletApiv2.IroncladSettings.Authority;
@@ -118,16 +129,6 @@ namespace LykkeApi2
                         options.DiscoveryPolicy.ValidateIssuerName = false;
                     })
 
-                    .AddLykkeAuthentication(AuthentcationSchemes.Bearer, options =>
-                    {
-                        options.Authority = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
-                        options.ClientId = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
-                        options.ClientSecret = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientSecret;
-                        options.NameClaimType = JwtClaimTypes.Subject;
-                        options.EnableCaching = true;
-                        options.CacheDuration = TimeSpan.FromMinutes(1);
-                        options.SkipTokensWithDots = true;
-                    })
                     ;
 
                 services.Configure<ApiBehaviorOptions>(options =>

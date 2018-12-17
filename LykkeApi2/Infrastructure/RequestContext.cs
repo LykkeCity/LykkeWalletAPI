@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Security.Claims;
 using Common;
 using Core.Constants;
@@ -57,14 +58,18 @@ namespace LykkeApi2.Infrastructure
         {
             get
             {
+                var lykkeUser = _httpContext.AuthenticateAsync(AuthentcationSchemes.Bearer).Result;
+
+                if (lykkeUser != null)
+                {
+                    return _httpContext.User?.Identity?.Name;
+                }
+
                 var ironCladUser = _httpContext.AuthenticateAsync(AuthentcationSchemes.Ironclad).Result;
 
                 var lsub = ironCladUser.Principal.Claims.FirstOrDefault(x => x.Type == "lsub")?.Value;
 
-                if (lsub != null) return lsub;
-
-                _httpContext.AuthenticateAsync(AuthentcationSchemes.Bearer).Wait();
-                return _httpContext.User?.Identity?.Name;
+                return lsub;
             }
         }
 
