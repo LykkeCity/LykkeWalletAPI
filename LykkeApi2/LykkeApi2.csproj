@@ -90,6 +90,5 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Infrastructure\Authentication\" />
-    <Folder Include="Services" />
   </ItemGroup>
 </Project>
