@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
+using Core.Constants;
 using Core.Settings;
+using Lykke.Common.ApiLibrary.Contract;
+using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
 using LykkeApi2.Credentials;
@@ -247,11 +250,18 @@ namespace LykkeApi2.Controllers
         [Authorize]
         [HttpGet("dob")]
         [SwaggerOperation("GetDateOfBirth")]
-        [ProducesResponseType(typeof(DateOfBirthModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(DateOfBirthResponseModel), (int) HttpStatusCode.OK)]
         [ProducesResponseType(typeof(LykkeApiErrorResponse), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetDateOfBirth()
         {
-            throw new NotImplementedException();
+            var clientId = _requestContext.ClientId;
+
+            var personalData = await _personalDataService.GetAsync(clientId);
+
+            if (personalData == null)
+                throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.ClientNotFound);
+
+            return Ok(new DateOfBirthResponseModel {DateOfBirth = personalData.DateOfBirth});
         }
 
         /// <summary>
@@ -276,11 +286,18 @@ namespace LykkeApi2.Controllers
         [Authorize]
         [HttpGet("address")]
         [SwaggerOperation("GetAddress")]
-        [ProducesResponseType(typeof(AddressModel), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(AddressResponseModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int) HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetAddress()
         {
-            throw new NotImplementedException();
+            var clientId = _requestContext.ClientId;
+
+            var personalData = await _personalDataService.GetAsync(clientId);
+
+            if (personalData == null)
+                throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.ClientNotFound);
+
+            return Ok(new AddressResponseModel {Address = personalData.Address});
         }
 
         /// <summary>
@@ -305,11 +322,18 @@ namespace LykkeApi2.Controllers
         [Authorize]
         [HttpGet("zip")]
         [SwaggerOperation("GetZipCode")]
-        [ProducesResponseType(typeof(ZipCodeModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ZipCodeResponseModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> GetZipCode()
         {
-            throw new NotImplementedException();
+            var clientId = _requestContext.ClientId;
+
+            var personalData = await _personalDataService.GetAsync(clientId);
+
+            if (personalData == null)
+                throw LykkeApiErrorException.NotFound(LykkeApiErrorCodes.Service.ClientNotFound);
+
+            return Ok(new ZipCodeResponseModel {Zip = personalData.Zip});
         }
 
         /// <summary>
