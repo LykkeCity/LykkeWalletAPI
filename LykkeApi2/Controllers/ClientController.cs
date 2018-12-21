@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Common.Log;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Strings;
@@ -8,7 +9,6 @@ using System.Threading.Tasks;
 using Common;
 using Core.Constants;
 using Core.Settings;
-using Lykke.Common.ApiLibrary.Contract;
 using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Service.Registration;
 using Lykke.Service.Registration.Models;
@@ -23,7 +23,10 @@ using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.Session.Client;
 using LykkeApi2.Models.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Kyc.Abstractions.Services.Models;
 using LykkeApi2.Models;
+using LykkeApi2.Services;
+using Newtonsoft.Json.Linq;
 using LykkeApiErrorResponse = Lykke.Common.ApiLibrary.Contract.LykkeApiErrorResponse;
 
 namespace LykkeApi2.Controllers
@@ -43,6 +46,8 @@ namespace LykkeApi2.Controllers
         private readonly IPersonalDataService _personalDataService;
         private readonly IClientAccountClient _clientAccountService;
         private readonly BaseSettings _baseSettings;
+        private readonly KycStatusValidator _kycStatusValidator;
+        private readonly IKycProfileService _kycProfileService;
 
         public ClientController(
             ILog log,
@@ -52,7 +57,10 @@ namespace LykkeApi2.Controllers
             IRequestContext requestContext,
             IPersonalDataService personalDataService,
             IKycStatusService kycStatusService,
-            IClientAccountClient clientAccountService, BaseSettings baseSettings)
+            IClientAccountClient clientAccountService, 
+            BaseSettings baseSettings, 
+            KycStatusValidator kycStatusValidator, 
+            IKycProfileService kycProfileService)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
@@ -63,6 +71,8 @@ namespace LykkeApi2.Controllers
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
             _clientAccountService = clientAccountService;
             _baseSettings = baseSettings;
+            _kycStatusValidator = kycStatusValidator;
+            _kycProfileService = kycProfileService;
         }
 
         /// <summary>
@@ -276,7 +286,18 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateDateOfBirth([FromBody] DateOfBirthModel model)
         {
-            throw new NotImplementedException();
+            var kycStatusValid = await _kycStatusValidator.ValidatePersonalDataUpdateAsync();
+
+            if (!kycStatusValid) 
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
+
+            var changes = new KycPersonalDataChanges { Changer = Startup.ComponentName, Items = new Dictionary<string, JToken>() };
+
+            changes.Items.Add(nameof(model.DateOfBirth), model.DateOfBirth);
+           
+            await _kycProfileService.UpdatePersonalDataAsync(_requestContext.ClientId, changes);
+
+            return Ok();
         }
 
         /// <summary>
@@ -312,7 +333,18 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateAddress([FromBody] AddressModel model)
         {
-            throw new NotImplementedException();
+            var kycStatusValid = await _kycStatusValidator.ValidatePersonalDataUpdateAsync();
+
+            if (!kycStatusValid)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
+
+            var changes = new KycPersonalDataChanges { Changer = Startup.ComponentName, Items = new Dictionary<string, JToken>() };
+
+            changes.Items.Add(nameof(model.Address), model.Address);
+
+            await _kycProfileService.UpdatePersonalDataAsync(_requestContext.ClientId, changes);
+
+            return Ok();
         }
 
         /// <summary>
@@ -348,7 +380,18 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateZipCode([FromBody] ZipCodeModel model)
         {
-            throw new NotImplementedException();
+            var kycStatusValid = await _kycStatusValidator.ValidatePersonalDataUpdateAsync();
+
+            if (!kycStatusValid)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
+
+            var changes = new KycPersonalDataChanges { Changer = Startup.ComponentName, Items = new Dictionary<string, JToken>() };
+
+            changes.Items.Add(nameof(model.Zip), model.Zip);
+
+            await _kycProfileService.UpdatePersonalDataAsync(_requestContext.ClientId, changes);
+
+            return Ok();
         }
     }
 }

@@ -111,7 +111,10 @@ namespace LykkeApi2.Modules
                 .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
                 .SingleInstance();
 
-            builder.RegisterType<KycAdditionalDataValidator>()
+            builder.RegisterType<KycStatusValidator>()
+                .AsSelf();
+
+            builder.RegisterType<KycCountryValidator>()
                 .AsSelf();
         }
     }
