@@ -38,11 +38,11 @@ namespace LykkeApi2.Models.ValidationModels
 
             RuleFor(x => x.Address)
                 .NotEmpty()
-                .WithMessage("Street is required");
+                .WithMessage("Address is required");
 
             RuleFor(x => x.Zip)
                 .NotEmpty()
-                .WithMessage("Postal code is required");
+                .WithMessage("Zip code is required");
 
             RuleFor(x => x.KycStatus)
                 .Must(x => AcceptedKycStatuses.Contains(x))
