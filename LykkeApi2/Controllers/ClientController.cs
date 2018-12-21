@@ -240,6 +240,25 @@ namespace LykkeApi2.Controllers
             };
         }
 
+        /// <summary>
+        /// Get date of birth
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("dob")]
+        [SwaggerOperation("GetDateOfBirth")]
+        [ProducesResponseType(typeof(DateOfBirthModel), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int) HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetDateOfBirth()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Update date of birth
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost("dob")]
         [SwaggerOperation("UpdateDateOfBirth")]
@@ -250,6 +269,25 @@ namespace LykkeApi2.Controllers
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Get address
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("address")]
+        [SwaggerOperation("GetAddress")]
+        [ProducesResponseType(typeof(AddressModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetAddress()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Update address
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost("address")]
         [SwaggerOperation("UpdateAddress")]
@@ -260,6 +298,25 @@ namespace LykkeApi2.Controllers
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Get zip code
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("zip")]
+        [SwaggerOperation("GetZipCode")]
+        [ProducesResponseType(typeof(ZipCodeModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetZipCode()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Update zip/postal code
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost("zip")]
         [SwaggerOperation("UpdateZipCode")]
