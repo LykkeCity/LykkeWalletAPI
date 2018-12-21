@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using Common.Log;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Strings;
@@ -15,15 +14,14 @@ using LykkeApi2.Models.Auth;
 using LykkeApi2.Models.ClientAccountModels;
 using Microsoft.AspNetCore.Authorization;
 using Lykke.Service.PersonalData.Contract;
-using Lykke.Service.PersonalData.Contract.Models;
 using LykkeApi2.Infrastructure.Extensions;
 using Swashbuckle.AspNetCore.Annotations;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Session.Client;
 using LykkeApi2.Models.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using LykkeApi2.Models;
+using LykkeApiErrorResponse = Lykke.Common.ApiLibrary.Contract.LykkeApiErrorResponse;
 
 namespace LykkeApi2.Controllers
 {
@@ -240,6 +238,36 @@ namespace LykkeApi2.Controllers
                     Ttl = tradingSession?.Ttl?.TotalMilliseconds
                 }
             };
-        }               
+        }
+
+        [Authorize]
+        [HttpPost("dob")]
+        [SwaggerOperation("UpdateDateOfBirth")]
+        [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateDateOfBirth([FromBody] DateOfBirthModel model)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Authorize]
+        [HttpPost("address")]
+        [SwaggerOperation("UpdateAddress")]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateAddress([FromBody] AddressModel model)
+        {
+            throw new NotImplementedException();
+        }
+
+        [Authorize]
+        [HttpPost("zip")]
+        [SwaggerOperation("UpdateZipCode")]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> UpdateZipCode([FromBody] ZipCodeModel model)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
