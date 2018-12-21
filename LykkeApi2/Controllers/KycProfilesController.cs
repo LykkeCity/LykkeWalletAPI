@@ -6,14 +6,17 @@ using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
+using Lykke.Common.ApiLibrary.Contract;
+using Lykke.Common.ApiLibrary.Extensions;
 using Lykke.Common.ApiLibrary.Validation;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Abstractions.Services.Models;
 using LykkeApi2.Infrastructure;
-using LykkeApi2.Models;
 using LykkeApi2.Services;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json.Linq;
+using LykkeApiErrorResponse = Lykke.Common.ApiLibrary.Contract.LykkeApiErrorResponse;
+using Lykke.Common.ApiLibrary.Exceptions;
 
 namespace LykkeApi2.Controllers
 {
@@ -48,7 +51,7 @@ namespace LykkeApi2.Controllers
         [Route("additionalPersonalInfo")]
         [SwaggerOperation("PostAdditionalPersonalInfo")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.Created)]
-        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
         [ValidateModel]
         public async Task<IActionResult> SubmitAdditionalPersonalInfo([FromBody] KycAdditionalInfoModel model)
         {
@@ -60,9 +63,9 @@ namespace LykkeApi2.Controllers
 
                 validationResult.AddToModelState(modelState, null);
 
-                var errorResponse = ErrorResponse.Create(modelState);
-
-                return BadRequest(errorResponse);
+                throw LykkeApiErrorException.BadRequest(
+                    new LykkeApiErrorCode("InvalidInput", "One of the provided values was not valid."),
+                    modelState.GetErrorMessage());
             }
 
             var changes = new KycPersonalDataChanges { Changer = Changer, Items = new Dictionary<string, JToken>() };
