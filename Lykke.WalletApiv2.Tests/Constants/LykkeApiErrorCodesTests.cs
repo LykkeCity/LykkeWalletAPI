@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Core.Constants;
-using Core.Domain.LykkeApiError;
+using Lykke.Common.ApiLibrary.Contract;
 using NUnit.Framework;
 
 namespace Lykke.WalletApiv2.Tests.Constants
@@ -22,7 +22,10 @@ namespace Lykke.WalletApiv2.Tests.Constants
             "DepositLimitReached",
             "ModelValidationFailed",
             "InvalidInput",
-            "InconsistentState"
+            "InconsistentState",
+            "TwoFactorRequired",
+            "SecondFactorCodeIncorrect",
+            "SecondFactorCheckForbiden"
         };
 
         /// <summary>
