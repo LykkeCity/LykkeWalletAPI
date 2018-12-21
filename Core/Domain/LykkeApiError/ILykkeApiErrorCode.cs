@@ -1,5 +1,5 @@
 ﻿using Core.Constants;
-using Core.Exceptions;
+using Lykke.Common.ApiLibrary.Exceptions;
 
 namespace Core.Domain.LykkeApiError
 {
