@@ -23,7 +23,7 @@ using LykkeApi2.Models.Orders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Rest;
 using Newtonsoft.Json.Linq;
-using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using LimitOrderCancelMultipleRequest = LykkeApi2.Models.Orders.LimitOrderCancelMultipleRequest;
 using OrderAction = LykkeApi2.Models.Orders.OrderAction;
 

@@ -1,7 +1,8 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Core.Constants;
-using Lykke.Common.ApiLibrary.Authentication;
+using Core.Identity;
 using Lykke.Service.Session.Client;
 using Microsoft.AspNetCore.Http;
 
