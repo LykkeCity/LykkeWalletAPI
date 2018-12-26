@@ -11,15 +11,19 @@ using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
 using Lykke.Logs;
 using LykkeApi2.Infrastructure;
+using LykkeApi2.Infrastructure.Authentication;
 using LykkeApi2.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
 using Core.Settings;
 using IdentityModel;
+using IdentityModel.AspNetCore.OAuth2Introspection;
+using IdentityServer4.AccessTokenValidation;
 using Lykke.Common;
-using Lykke.Common.ApiLibrary.Authentication;
 using LykkeApi2.Infrastructure.LykkeApiError;
 using LykkeApi2.Middleware;
+using LykkeApi2.Middleware.LykkeApiError;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Internal;
@@ -104,9 +108,8 @@ namespace LykkeApi2
                     });
                 });
 
-                services.AddAuthentication(AuthentcationSchemes.Bearer)
-
-                    .AddLykkeAuthentication(AuthentcationSchemes.Bearer, options =>
+                services.AddAuthentication(OAuth2IntrospectionDefaults.AuthenticationScheme)
+                    .AddOAuth2Introspection(options =>
                     {
                         options.Authority = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
                         options.ClientId = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
@@ -115,21 +118,8 @@ namespace LykkeApi2
                         options.EnableCaching = true;
                         options.CacheDuration = TimeSpan.FromMinutes(1);
                         options.SkipTokensWithDots = true;
-                    })
+                    }).CustomizeServerAuthentication();
 
-                    .AddOAuth2Introspection(AuthentcationSchemes.Ironclad, options =>
-                    {
-                        options.Authority = _appSettings.CurrentValue.WalletApiv2.IroncladSettings.Authority;
-                        options.ClientId = _appSettings.CurrentValue.WalletApiv2.IroncladSettings.ClientId;
-                        options.ClientSecret = _appSettings.CurrentValue.WalletApiv2.IroncladSettings.ClientSecret;
-                        options.NameClaimType = JwtClaimTypes.Subject;
-                        options.EnableCaching = true;
-                        options.CacheDuration = TimeSpan.FromMinutes(1);
-                        options.SkipTokensWithDots = true;
-                        options.DiscoveryPolicy.ValidateIssuerName = false;
-                    })
-
-                    ;
 
                 services.Configure<ApiBehaviorOptions>(options =>
                     {
@@ -207,7 +197,7 @@ namespace LykkeApi2
                 {
                     o.RoutePrefix = "swagger/ui";
                     o.SwaggerEndpoint($"/swagger/{ApiVersion}/swagger.json", ApiVersion);
-                    o.OAuthClientId(_appSettings.CurrentValue.SwaggerSettings.Security.OAuthClientId);
+                    o.ConfigureOAuth2(_appSettings.CurrentValue.SwaggerSettings.Security.OAuthClientId, "", "", "");
                 });
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());

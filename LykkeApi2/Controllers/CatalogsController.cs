@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 using Core.Countries;
+using LykkeApi2.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
 {

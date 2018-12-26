@@ -23,7 +23,7 @@ using LykkeApi2.Models.Deposits;
 using LykkeApi2.Models.Fees;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Controllers
 {

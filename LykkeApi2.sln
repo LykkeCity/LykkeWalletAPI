@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2. Tests", "2. Tests", "{F92247DB-2265-43BB-9F04-BD94A4C8EF06}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.WalletApiv2.Tests", "Lykke.WalletApiv2.Tests\Lykke.WalletApiv2.Tests.csproj", "{EEC9EE2E-28A2-434F-8D37-A87F241367D8}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LkeServices", "LkeServices\LkeServices.csproj", "{F013FA52-4048-463C-A931-20C386ECCFA5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{7C487841-111E-4AFC-993A-B055DA51CBA1}"
@@ -20,9 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3. Repositories", "3. Repositories", "{518D8885-F8A1-438B-91E1-102F7D000F70}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Repositories", "Repositories\Repositories.csproj", "{242B1E48-9C41-45AC-8D9D-60445A1ACF7B}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lykke.WalletApiv2.Tests", "Lykke.WalletApiv2.Tests\Lykke.WalletApiv2.Tests.csproj", "{B17BB8CD-0CA0-460A-AC0E-7FFCC3F1F422}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repositories", "Repositories\Repositories.csproj", "{242B1E48-9C41-45AC-8D9D-60445A1ACF7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,6 +38,10 @@ Global
 		{B6ADDBDB-541F-49C5-B96E-3C0968E9D4B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6ADDBDB-541F-49C5-B96E-3C0968E9D4B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6ADDBDB-541F-49C5-B96E-3C0968E9D4B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEC9EE2E-28A2-434F-8D37-A87F241367D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEC9EE2E-28A2-434F-8D37-A87F241367D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEC9EE2E-28A2-434F-8D37-A87F241367D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEC9EE2E-28A2-434F-8D37-A87F241367D8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F013FA52-4048-463C-A931-20C386ECCFA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -46,19 +50,15 @@ Global
 		{242B1E48-9C41-45AC-8D9D-60445A1ACF7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{242B1E48-9C41-45AC-8D9D-60445A1ACF7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{242B1E48-9C41-45AC-8D9D-60445A1ACF7B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B17BB8CD-0CA0-460A-AC0E-7FFCC3F1F422}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B17BB8CD-0CA0-460A-AC0E-7FFCC3F1F422}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B17BB8CD-0CA0-460A-AC0E-7FFCC3F1F422}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B17BB8CD-0CA0-460A-AC0E-7FFCC3F1F422}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B6ADDBDB-541F-49C5-B96E-3C0968E9D4B4} = {7E25EA3D-F2C3-466A-8300-49CA73CB4432}
+		{EEC9EE2E-28A2-434F-8D37-A87F241367D8} = {F92247DB-2265-43BB-9F04-BD94A4C8EF06}
 		{F013FA52-4048-463C-A931-20C386ECCFA5} = {7E25EA3D-F2C3-466A-8300-49CA73CB4432}
 		{242B1E48-9C41-45AC-8D9D-60445A1ACF7B} = {518D8885-F8A1-438B-91E1-102F7D000F70}
-		{B17BB8CD-0CA0-460A-AC0E-7FFCC3F1F422} = {F92247DB-2265-43BB-9F04-BD94A4C8EF06}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1385F3E1-C385-4E6D-8CBB-C867C7802C6F}
