@@ -7,14 +7,9 @@ using Moq;
 using System.Linq;
 using Core.Settings;
 using Lykke.Service.Affiliate.Client;
-using Lykke.Service.AssetDisclaimers.Client;
-using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
-using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.Kyc.Client;
-using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
-using Lykke.Service.SwiftCredentials.Client;
 using Lykke.SettingsReader.ReloadingManager;
 using NUnit.Framework;
 
@@ -51,14 +46,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},
                 PersonalDataServiceSettings = new PersonalDataServiceClientSettings{ServiceUri = MockUrl},
                 MatchingEngineClient = new MatchingEngineSettings{IpEndpoint = new IpEndpointSettings{Host = "127.0.0.1", Port = 80}},
-                AssetDisclaimersServiceClient = new AssetDisclaimersServiceClientSettings { ServiceUrl = MockUrl },
-                PaymentSystemServiceClient = new PaymentSystemServiceClientSettings { ServiceUrl = MockUrl },
-                LimitationServiceClient = new LimitationServiceSettings { ServiceUrl = MockUrl },
-                ClientDialogsServiceClient = new ClientDialogsServiceClientSettings { ServiceUrl = MockUrl },
-                SwiftCredentialsServiceClient = new SwiftCredentialsServiceClientSettings { ServiceUrl = MockUrl },
-                BlockchainCashoutPreconditionsCheckServiceClient =
-                    new BlockchainCashoutPreconditionsCheckServiceClientSettings { ServiceUrl = MockUrl }
-
+                
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
 
