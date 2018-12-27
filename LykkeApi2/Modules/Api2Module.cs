@@ -110,12 +110,6 @@ namespace LykkeApi2.Modules
                 .As<IOrderBooksService>()
                 .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
                 .SingleInstance();
-
-            builder.RegisterType<KycStatusValidator>()
-                .AsSelf();
-
-            builder.RegisterType<KycCountryValidator>()
-                .AsSelf();
         }
     }
 }
