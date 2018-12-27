@@ -80,11 +80,5 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="Strings\Phrases.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Phrases.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
   </ItemGroup>
 </Project>
