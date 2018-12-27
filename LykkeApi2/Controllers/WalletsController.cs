@@ -185,6 +185,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get all wallets balances.
         /// </summary>
+        [Authorize]
         [HttpGet("balances")]
         [SwaggerOperation("GetBalances")]
         [ProducesResponseType(typeof(IEnumerable<WalletBalancesModel>), (int)HttpStatusCode.OK)]
@@ -217,6 +218,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get trading wallet balances.
         /// </summary>
+        [Authorize]
         [HttpGet("trading/balances")]
         [SwaggerOperation("GetTradingWalletBalances")]
         [ProducesResponseType(typeof(IEnumerable<ClientBalanceResponseModel>), (int)HttpStatusCode.OK)]
@@ -232,6 +234,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get specified wallet balances.
         /// </summary>
+        [Authorize]
         [HttpGet("{walletId}/balances")]
         [SwaggerOperation("GetWalletBalances")]
         [ProducesResponseType(typeof(IEnumerable<ClientBalanceResponseModel>), (int)HttpStatusCode.OK)]
@@ -242,7 +245,7 @@ namespace LykkeApi2.Controllers
             var wallet = await GetClientWallet(walletId);
             if (wallet == null)
                 return NotFound();
-            
+
             var clientBalances = await _balancesClient.GetClientBalances(walletId);
             
             var availableAssets = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
@@ -253,6 +256,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get balances by asset id.
         /// </summary>
+        [Authorize]
         [HttpGet("balances/{assetId}")]
         [SwaggerOperation("GetBalancesByAssetId")]
         [ProducesResponseType(typeof(IEnumerable<WalletAssetBalanceModel>), (int)HttpStatusCode.OK)]
@@ -294,6 +298,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get trading wallet balances by asset id.
         /// </summary>
+        [Authorize]
         [HttpGet("trading/balances/{assetId}")]
         [SwaggerOperation("GetTradindWalletBalanceByAssetId")]
         [ProducesResponseType(typeof(ClientBalanceResponseModel), (int)HttpStatusCode.OK)]
@@ -323,6 +328,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get specified wallet balances by asset id.
         /// </summary>
+        [Authorize]
         [HttpGet("{walletId}/balances/{assetId}")]
         [SwaggerOperation("GetWalletBalanceByAssetId")]
         [ProducesResponseType(typeof(ClientBalanceResponseModel), (int)HttpStatusCode.OK)]

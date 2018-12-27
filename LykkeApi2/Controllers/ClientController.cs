@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
+using Core.Identity;
 using Core.Constants;
 using Core.Settings;
 using Lykke.Common.ApiLibrary.Exceptions;
