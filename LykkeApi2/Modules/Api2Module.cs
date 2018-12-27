@@ -5,7 +5,6 @@ using Common.Log;
 using Core.Candles;
 using Core.Countries;
 using Core.Enumerators;
-using Core.Identity;
 using Core.Services;
 using Core.Settings;
 using LkeServices;
@@ -24,6 +23,7 @@ using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using LkeServices.Blockchain;
+using Lykke.Common.ApiLibrary.Authentication;
 
 namespace LykkeApi2.Modules
 {
@@ -110,12 +110,6 @@ namespace LykkeApi2.Modules
                 .As<IOrderBooksService>()
                 .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
                 .SingleInstance();
-
-            builder.RegisterType<KycStatusValidator>()
-                .AsSelf();
-
-            builder.RegisterType<KycCountryValidator>()
-                .AsSelf();
         }
     }
 }
