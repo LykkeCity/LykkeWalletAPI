@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using Core.Constants;
-using Core.Exceptions;
+using Lykke.Common.ApiLibrary.Exceptions;
 using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;

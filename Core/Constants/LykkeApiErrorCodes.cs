@@ -1,5 +1,5 @@
-﻿using Core.Domain.LykkeApiError;
-using Core.Exceptions;
+﻿using Lykke.Common.ApiLibrary.Contract;
+using Lykke.Common.ApiLibrary.Exceptions;
 
 namespace Core.Constants
 {
@@ -7,7 +7,7 @@ namespace Core.Constants
     ///     Class for storing all possible error codes that may happen in Api.
     ///     Use it with <see cref="LykkeApiErrorException" />.
     /// </summary>
-    public static partial class LykkeApiErrorCodes
+    public static class LykkeApiErrorCodes
     {
         /// <summary>
         ///     Group for client and service related error codes.

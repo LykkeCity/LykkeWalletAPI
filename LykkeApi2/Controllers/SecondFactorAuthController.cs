@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Core.Constants;
-using Core.Exceptions;
+using Lykke.Common.ApiLibrary.Exceptions;
 using Core.Identity;
 using Lykke.Cqrs;
 using Lykke.Service.ConfirmationCodes.Client;
@@ -14,7 +14,6 @@ using LykkeApi2.Infrastructure;
 using LykkeApi2.Models._2Fa;
 using Microsoft.AspNetCore.Mvc;
 using Refit;
-using StackExchange.Redis;
 
 namespace LykkeApi2.Controllers
 {

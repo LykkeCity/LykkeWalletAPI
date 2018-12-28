@@ -4,8 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Core.Constants;
-using Core.Exceptions;
 using Core.Services;
+using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.ClientDialogs.Client.Models;
@@ -23,7 +23,7 @@ using LykkeApi2.Models.Deposits;
 using LykkeApi2.Models.Fees;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace LykkeApi2.Controllers
 {

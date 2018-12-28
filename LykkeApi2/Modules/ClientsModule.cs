@@ -72,7 +72,13 @@ namespace LykkeApi2.Modules
             
             builder.RegisterInstance(
                 new KycStatusServiceClient(_apiSettings.CurrentValue.KycServiceClient, _log))
-                .As<IKycStatusService>().SingleInstance();
+                .As<IKycStatusService>()
+                .SingleInstance();
+
+            builder.RegisterInstance(
+                new KycProfileServiceClient(_apiSettings.CurrentValue.KycServiceClient, _log))
+                .As<IKycProfileService>()
+                .SingleInstance();
 
             builder.RegisterInstance<IAssetDisclaimersClient>(
                 new AssetDisclaimersClient(_apiSettings.CurrentValue.AssetDisclaimersServiceClient));

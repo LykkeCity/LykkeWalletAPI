@@ -8,7 +8,7 @@ using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace LykkeApi2.Controllers
 {
