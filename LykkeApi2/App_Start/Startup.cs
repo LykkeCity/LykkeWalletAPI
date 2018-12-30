@@ -158,12 +158,6 @@ namespace LykkeApi2
 
                 app.UseMiddleware<LykkeApiErrorMiddleware>();
 
-                app.UseCors(builder =>
-                {
-                    builder.AllowAnyOrigin();
-                    builder.AllowAnyHeader();
-                    builder.AllowAnyMethod();
-                });
                 app.Use(next => context =>
                 {
                     context.Request.EnableRewind();
