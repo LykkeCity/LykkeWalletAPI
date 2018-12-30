@@ -1,4 +1,4 @@
-using Autofac;
+﻿using Autofac;
 using Common.Log;
 using LykkeApi2.Controllers;
 using LykkeApi2.Modules;
@@ -56,6 +56,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 LimitationServiceClient = new LimitationServiceSettings { ServiceUrl = MockUrl },
                 ClientDialogsServiceClient = new ClientDialogsServiceClientSettings { ServiceUrl = MockUrl },
                 SwiftCredentialsServiceClient = new SwiftCredentialsServiceClientSettings { ServiceUrl = MockUrl },
+                CryptoIndexServiceClient = new CryptoIndexInstances(),
                 BlockchainCashoutPreconditionsCheckServiceClient =
                     new BlockchainCashoutPreconditionsCheckServiceClientSettings { ServiceUrl = MockUrl }
                 
