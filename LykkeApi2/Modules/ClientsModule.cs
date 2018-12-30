@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Lykke.MarketProfileService.Client;
@@ -115,7 +116,10 @@ namespace LykkeApi2.Modules
             builder.RegisterConfirmationCodesClient(_apiSettings.Nested(r => r.ConfirmationCodesClient).CurrentValue);
             
             builder.RegisterBlockchainCashoutPreconditionsCheckClient(_apiSettings.CurrentValue.BlockchainCashoutPreconditionsCheckServiceClient.ServiceUrl);
-            
+
+            var cryptoIndexInstances = _apiSettings.CurrentValue.CryptoIndexServiceClient;
+            builder.RegisterInstance(cryptoIndexInstances).SingleInstance();
+
             builder.Populate(_services);
         }
     }
