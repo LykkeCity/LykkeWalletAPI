@@ -35,7 +35,7 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get crypto indices names.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>All crypto indices names</returns>
         [HttpGet("indicesNames")]
         [ProducesResponseType(typeof(ICollection<string>), (int)HttpStatusCode.OK)]
         public IActionResult GetCryptoIndicesNames()
@@ -48,8 +48,8 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get last index history element.
         /// </summary>
-        /// <param name="indexName"></param>
-        /// <returns></returns>
+        /// <param name="indexName">Name of the index</param>
+        /// <returns>Details about last index calculation</returns>
         [HttpGet("{indexName}/last")]
         [ProducesResponseType(typeof(PublicIndexHistory), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -70,17 +70,18 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
-        /// Get chart data for the last 24 hours by index name.
+        /// Get chart data by index name and time interval.
         /// </summary>
-        /// <param name="indexName"></param>
-        /// <returns></returns>
-        [HttpGet("{indexName}/history24h")]
+        /// <param name="indexName">Name of the index</param>
+        /// <param name="timeInterval">Time interval</param>
+        /// <returns>Set of points for line chart</returns>
+        [HttpGet("{indexName}/history")]
         [ProducesResponseType(typeof(IDictionary<DateTime, decimal>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetIndexHistory24H(string indexName)
+        public async Task<IActionResult> GetIndexHistory(string indexName, TimeInterval timeInterval)
         {
-            if (string.IsNullOrWhiteSpace(indexName))
+            if (string.IsNullOrWhiteSpace(indexName) || timeInterval == TimeInterval.Unspecified)
                 return BadRequest();
 
             if (!_clients.Keys.Contains(indexName))
@@ -88,55 +89,7 @@ namespace LykkeApi2.Controllers
 
             var publicApi = _clients[indexName];
 
-            var result = await publicApi.GetIndexHistory24H();
-
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Get chart data for the last 5 days by index name.
-        /// </summary>
-        /// <param name="indexName"></param>
-        /// <returns></returns>
-        [HttpGet("{indexName}/history5d")]
-        [ProducesResponseType(typeof(IDictionary<DateTime, decimal>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetIndexHistory5D(string indexName)
-        {
-            if (string.IsNullOrWhiteSpace(indexName))
-                return BadRequest();
-
-            if (!_clients.Keys.Contains(indexName))
-                return NotFound();
-
-            var publicApi = _clients[indexName];
-
-            var result = await publicApi.GetIndexHistory5D();
-
-            return Ok(result);
-        }
-
-        /// <summary>
-        /// Get chart data for the last 5 days by index name.
-        /// </summary>
-        /// <param name="indexName"></param>
-        /// <returns></returns>
-        [HttpGet("{indexName}/history30d")]
-        [ProducesResponseType(typeof(IDictionary<DateTime, decimal>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> GetIndexHistory30D(string indexName)
-        {
-            if (string.IsNullOrWhiteSpace(indexName))
-                return BadRequest();
-
-            if (!_clients.Keys.Contains(indexName))
-                return NotFound();
-
-            var publicApi = _clients[indexName];
-
-            var result = await publicApi.GetIndexHistory30D();
+            var result = await publicApi.GetIndexHistory(timeInterval);
 
             return Ok(result);
         }
@@ -144,8 +97,8 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Get key numbers by index name.
         /// </summary>
-        /// <param name="indexName"></param>
-        /// <returns></returns>
+        /// <param name="indexName">Name of the index</param>
+        /// <returns>Key numbers</returns>
         [HttpGet("{indexName}/keyNumbers")]
         [ProducesResponseType(typeof(KeyNumbers), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
@@ -177,6 +130,5 @@ namespace LykkeApi2.Controllers
 
             return client;
         }
-
     }
 }
