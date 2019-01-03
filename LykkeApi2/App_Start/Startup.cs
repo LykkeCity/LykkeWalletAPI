@@ -23,6 +23,7 @@ using LykkeApi2.Infrastructure.LykkeApiError;
 using LykkeApi2.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
@@ -149,6 +150,19 @@ namespace LykkeApi2
         {
             try
             {
+                app.Use(async (context, next) =>
+                {
+                    if (context.Request.Method == "OPTIONS")
+                    {
+                        context.Response.StatusCode = 200;
+                        await context.Response.WriteAsync("");
+                    }
+                    else
+                    {
+                        await next.Invoke();
+                    }
+                });
+                
                 app.UseLykkeMiddleware(ComponentName, ex => new { message = "Technical problem" });
 
                 if (env.IsDevelopment())
