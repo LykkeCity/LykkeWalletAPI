@@ -67,6 +67,7 @@ namespace LykkeApi2
         {
             try
             {
+                services.AddResponseCaching();
                 services.AddMvc()
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
                     .AddJsonOptions(options =>
@@ -174,6 +175,8 @@ namespace LykkeApi2
                 app.UseAuthentication();
 
                 app.UseMiddleware<ClientBansMiddleware>();
+
+                app.UseResponseCaching();
 
                 app.UseMvc(routes =>
                 {

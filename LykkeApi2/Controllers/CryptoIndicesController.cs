@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
@@ -15,12 +14,12 @@ namespace LykkeApi2.Controllers
 {
     [Route("api/cryptoIndices")]
     [ApiController]
-    public class CryptoIndiciesController : Controller
+    public class CryptoIndicesController : Controller
     {
         private readonly CryptoIndexInstances _cryptoIndexInstances;
         private readonly Dictionary<string, IPublicApi> _clients = new Dictionary<string, IPublicApi>();
 
-        public CryptoIndiciesController(
+        public CryptoIndicesController(
             CryptoIndexInstances cryptoIndexInstances)
         {
             _cryptoIndexInstances = cryptoIndexInstances;
@@ -38,6 +37,7 @@ namespace LykkeApi2.Controllers
         /// <returns>All crypto indices names</returns>
         [HttpGet("indicesNames")]
         [ProducesResponseType(typeof(ICollection<string>), (int)HttpStatusCode.OK)]
+        [ResponseCache(Duration = 60, VaryByQueryKeys = new[] { "*" })]
         public IActionResult GetCryptoIndicesNames()
         {
             var cryptoIndicesNames = _cryptoIndexInstances.Instances.Select(x => x.DisplayName).ToList();
@@ -54,6 +54,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(PublicIndexHistory), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "*" })]
         public async Task<IActionResult> GetLast(string indexName)
         {
             if (string.IsNullOrWhiteSpace(indexName))
@@ -79,6 +80,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(IDictionary<DateTime, decimal>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "*" })]
         public async Task<IActionResult> GetIndexHistory(string indexName, TimeInterval timeInterval)
         {
             if (string.IsNullOrWhiteSpace(indexName) || timeInterval == TimeInterval.Unspecified)
@@ -103,6 +105,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(KeyNumbers), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "*" })]
         public async Task<IActionResult> GetKeyNumbers(string indexName)
         {
             if (string.IsNullOrWhiteSpace(indexName))
