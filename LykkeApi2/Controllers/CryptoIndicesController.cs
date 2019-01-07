@@ -46,7 +46,7 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
-        /// Get last index history element.
+        /// Get last index details by index name.
         /// </summary>
         /// <param name="indexName">Name of the index</param>
         /// <returns>Details about last index calculation</returns>
