@@ -24,7 +24,7 @@ namespace LykkeApi2.Services
 
             var personalData = _personalDataService.GetAsync(clientId).Result;
 
-            return personalData.Country == UnitedKingdomIso3Code;
+            return personalData.CountryFromPOA == UnitedKingdomIso3Code;
         }
     }
 }
