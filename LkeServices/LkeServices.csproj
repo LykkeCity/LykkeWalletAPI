@@ -17,7 +17,6 @@
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.220" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
     <PackageReference Include="NBitcoin" Version="4.1.1.66" />
-    <PackageReference Include="Refit" Version="4.6.58" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
