@@ -33,7 +33,6 @@ namespace Core.Settings
         public ClientDialogsServiceClientSettings ClientDialogsServiceClient { set; get; }
         public SwiftCredentialsServiceClientSettings SwiftCredentialsServiceClient { set; get; }
         public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { set; get; }
-        public CryptoIndexInstances CryptoIndexServiceClient { get; set; }
         public SagasRabbitMq SagasRabbitMq { set; get; }
         public SwaggerSettings SwaggerSettings { get; set; }
     }
@@ -133,6 +132,7 @@ namespace Core.Settings
         public string OperationsUrl { get; set; }
         public string HistoryServiceUrl { get; set; }
         public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
+        public string IndicesFacadeServiceUrl { get; set; }
     }
 
     public class MatchingEngineSettings
@@ -204,18 +204,5 @@ namespace Core.Settings
             return string.Format(settings.OrderBooksCacheKeyPattern, assetPairId, isBuy);
         }
     }
-
-    public class CryptoIndexInstances
-    {
-        public CryptoIndexClient[] Instances { get; set; }
-    }
-
-    public class CryptoIndexClient
-    {
-        public string DisplayName { get; set; }
-
-        public string ServiceUrl { get; set; }
-    }
-
 }
 

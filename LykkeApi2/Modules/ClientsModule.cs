@@ -28,6 +28,7 @@ using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.BlockchainWallets.Client.ClientGenerator;
 using Lykke.Service.History.Client;
 using Lykke.Service.ConfirmationCodes.Client;
+using Lykke.Service.IndicesFacade.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.SwiftCredentials.Client;
 
@@ -97,6 +98,8 @@ namespace LykkeApi2.Modules
 
             builder.RegisterAffiliateClient(_settings.AffiliateServiceClient.ServiceUrl, _log);
 
+            builder.RegisterIndicesFacadeClient(new IndicesFacadeServiceClientSettings { ServiceUrl = _settings.IndicesFacadeServiceUrl }, null);
+
             builder.RegisterInstance<IAssetDisclaimersClient>(new AssetDisclaimersClient(_apiSettings.CurrentValue.AssetDisclaimersServiceClient));
 
             builder.RegisterPaymentSystemClient(_apiSettings.CurrentValue.PaymentSystemServiceClient.ServiceUrl, _log);
@@ -116,9 +119,6 @@ namespace LykkeApi2.Modules
             builder.RegisterConfirmationCodesClient(_apiSettings.Nested(r => r.ConfirmationCodesClient).CurrentValue);
             
             builder.RegisterBlockchainCashoutPreconditionsCheckClient(_apiSettings.CurrentValue.BlockchainCashoutPreconditionsCheckServiceClient.ServiceUrl);
-
-            var cryptoIndexInstances = _apiSettings.CurrentValue.CryptoIndexServiceClient;
-            builder.RegisterInstance(cryptoIndexInstances).SingleInstance();
 
             builder.Populate(_services);
         }
