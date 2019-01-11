@@ -56,7 +56,6 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 LimitationServiceClient = new LimitationServiceSettings { ServiceUrl = MockUrl },
                 ClientDialogsServiceClient = new ClientDialogsServiceClientSettings { ServiceUrl = MockUrl },
                 SwiftCredentialsServiceClient = new SwiftCredentialsServiceClientSettings { ServiceUrl = MockUrl },
-                CryptoIndexServiceClient = new CryptoIndexInstances(),
                 BlockchainCashoutPreconditionsCheckServiceClient =
                     new BlockchainCashoutPreconditionsCheckServiceClientSettings { ServiceUrl = MockUrl }
                 
