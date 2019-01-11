@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
 using Lykke.Common.ApiLibrary.Exceptions;
-using Lykke.Service.CryptoIndex.Client.Models;
 using Lykke.Service.IndicesFacade.Client;
-using Lykke.Service.IndicesFacade.Client.Models;
+using Lykke.Service.IndicesFacade.Contract;
 using LykkeApi2.Strings;
 
 namespace LykkeApi2.Controllers
