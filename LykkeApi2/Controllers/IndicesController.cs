@@ -22,7 +22,6 @@ namespace LykkeApi2.Controllers
 
         [HttpGet("")]
         [ProducesResponseType(typeof(IList<Index>), (int)HttpStatusCode.OK)]
-        [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "*" })]
         public async Task<IActionResult> GetAllAsync()
         {
             var result = await _indicesFacadeClient.Api.GetAllAsync();
@@ -34,7 +33,6 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(Index), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "*" })]
         public async Task<IActionResult> GetAsync(string assetId)
         {
             if (string.IsNullOrWhiteSpace(assetId))
@@ -57,7 +55,6 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(IList<HistoryElement>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [ResponseCache(Duration = 10, VaryByQueryKeys = new[] { "*" })]
         public async Task<IActionResult> GetHistoryAsync(string assetId, TimeInterval timeInterval)
         {
             if (string.IsNullOrWhiteSpace(assetId))
