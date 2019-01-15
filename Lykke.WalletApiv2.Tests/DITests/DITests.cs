@@ -1,4 +1,4 @@
-using Autofac;
+﻿using Autofac;
 using Common.Log;
 using LykkeApi2.Controllers;
 using LykkeApi2.Modules;

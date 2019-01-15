@@ -132,6 +132,7 @@ namespace Core.Settings
         public string OperationsUrl { get; set; }
         public string HistoryServiceUrl { get; set; }
         public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
+        public string IndicesFacadeServiceUrl { get; set; }
     }
 
     public class MatchingEngineSettings
