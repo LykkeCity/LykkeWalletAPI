@@ -12,6 +12,7 @@ using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Common.Log;
 using Core.Settings;
+using Lykke.MatchingEngine.Connector.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -92,7 +93,10 @@ namespace LykkeApi2.Modules
 
             builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);
 
-            builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog: null, ignoreErrors: true);
+            var socketLog = new SocketLogDynamic(
+                i => { },
+                s => _log.WriteInfo("MeClient", null, s));
+            builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog, ignoreErrors: true);
 
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 

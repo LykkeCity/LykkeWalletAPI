@@ -36,7 +36,7 @@ namespace LykkeApi2.Middleware
             }
             catch (Exception ex)
             {
-                await _log.WriteErrorAsync(nameof(ClientBansMiddleware), nameof(Invoke), clientId, ex);
+                _log.WriteError(nameof(ClientBansMiddleware), clientId, ex);
             }
             finally
             {

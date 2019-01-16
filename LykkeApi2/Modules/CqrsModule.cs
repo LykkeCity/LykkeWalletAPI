@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Autofac;
 using Common.Log;
 using Core.Settings;
@@ -52,7 +52,7 @@ namespace LykkeApi2.Modules
                     const string defaultPipeline = "commands";
                     const string defaultRoute = "self";
 
-                    return new CqrsEngine(_log,
+                    var engine = new CqrsEngine(_log,
                         ctx.Resolve<IDependencyResolver>(),
                         messagingEngine,
                         new DefaultEndpointProvider(),
@@ -74,11 +74,12 @@ namespace LykkeApi2.Modules
                             .PublishingCommands(typeof(ConfirmCommand))
                                 .To(OperationsBoundedContext.Name).With(defaultPipeline),
 
-
                         Register.DefaultRouting
                             .PublishingCommands(typeof(ExportClientHistoryCommand))
                             .To(HistoryExportBuilderBoundedContext.Name).With(defaultPipeline)
                     );
+                    engine.StartPublishers();
+                    return engine;
                 })
                 .As<ICqrsEngine>()
                 .SingleInstance()
