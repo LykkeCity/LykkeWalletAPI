@@ -19,6 +19,7 @@ using Core.Settings;
 using IdentityModel;
 using IdentityModel.AspNetCore.OAuth2Introspection;
 using Lykke.Common;
+using Lykke.Cqrs;
 using LykkeApi2.Infrastructure.LykkeApiError;
 using LykkeApi2.Middleware;
 using Microsoft.AspNetCore.Builder;
@@ -50,10 +51,10 @@ namespace LykkeApi2
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
+
             Configuration = builder.Build();
+
             _appSettings = Configuration.LoadSettings<APIv2Settings>(options =>
             {
                 options.SetConnString(x => x.SlackNotifications.AzureQueue.ConnectionString);
@@ -118,7 +119,6 @@ namespace LykkeApi2
                         options.SkipTokensWithDots = true;
                     }).CustomizeServerAuthentication();
 
-
                 services.Configure<ApiBehaviorOptions>(options =>
                     {
                         // Wrap failed model state into LykkeApiErrorResponse.
@@ -141,7 +141,7 @@ namespace LykkeApi2
             }
             catch (Exception ex)
             {
-                Log?.WriteFatalErrorAsync(nameof(Startup), nameof(ConfigureServices), "", ex).Wait();
+                Log?.WriteFatalError(nameof(Startup), nameof(ConfigureServices), ex);
                 throw;
             }
         }
@@ -205,12 +205,12 @@ namespace LykkeApi2
                     o.OAuthClientId(_appSettings.CurrentValue.SwaggerSettings.Security.OAuthClientId);
                 });
 
-                appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
-                appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());
+                appLifetime.ApplicationStarted.Register(() => StartApplication().GetAwaiter().GetResult());
+                appLifetime.ApplicationStopped.Register(CleanUp);
             }
             catch (Exception ex)
             {
-                Log?.WriteFatalErrorAsync(nameof(Startup), nameof(Configure), "", ex).Wait();
+                Log?.WriteFatalError(nameof(Startup), nameof(Configure), ex);
                 throw;
             }
         }
@@ -220,26 +220,24 @@ namespace LykkeApi2
             try
             {
                 // NOTE: Service not yet receive and process requests here
+                ApplicationContainer.Resolve<ICqrsEngine>().StartSubscribers();
 
-                await Log.WriteMonitorAsync("", "", "Started");
+                Log.WriteMonitor("", AppEnvironment.EnvInfo, "Started");
             }
             catch (Exception ex)
             {
-                await Log.WriteFatalErrorAsync(nameof(Startup), nameof(StartApplication), "", ex);
+                Log.WriteFatalError(nameof(Startup), nameof(StartApplication), ex);
                 throw;
             }
         }
 
-        private async Task CleanUp()
+        private void CleanUp()
         {
             try
             {
                 // NOTE: Service can't receive and process requests here, so you can destroy all resources
 
-                if (Log != null)
-                {
-                    await Log.WriteMonitorAsync("", "", "Terminating");
-                }
+                Log?.WriteMonitor("", AppEnvironment.EnvInfo, "Terminating");
 
                 ApplicationContainer.Dispose();
             }
@@ -247,7 +245,7 @@ namespace LykkeApi2
             {
                 if (Log != null)
                 {
-                    await Log.WriteFatalErrorAsync(nameof(Startup), nameof(CleanUp), "", ex);
+                    Log.WriteFatalError(nameof(Startup), nameof(CleanUp), ex);
                     (Log as IDisposable)?.Dispose();
                 }
                 throw;
