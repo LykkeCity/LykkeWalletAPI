@@ -1,33 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using Common.Log;
-using LykkeApi2.Infrastructure;
-using LykkeApi2.Strings;
-using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
 using Common;
-using Core.Identity;
+using Common.Log;
 using Core.Constants;
 using Core.Settings;
+using LykkeApi2.Infrastructure;
+using LykkeApi2.Strings;
 using Lykke.Common.ApiLibrary.Exceptions;
-using Lykke.Service.Registration;
-using Lykke.Service.Registration.Models;
-using LykkeApi2.Credentials;
-using LykkeApi2.Models.Auth;
-using LykkeApi2.Models.ClientAccountModels;
-using Microsoft.AspNetCore.Authorization;
-using Lykke.Service.PersonalData.Contract;
-using LykkeApi2.Infrastructure.Extensions;
-using Swashbuckle.AspNetCore.Annotations;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.Session.Client;
-using LykkeApi2.Models.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Kyc.Abstractions.Services.Models;
+using Lykke.Service.PersonalData.Contract;
+using Lykke.Service.Registration;
+using Lykke.Service.Registration.Models;
+using Lykke.Service.Session.Client;
+using LykkeApi2.Credentials;
+using LykkeApi2.Infrastructure.Extensions;
 using LykkeApi2.Models;
+using LykkeApi2.Models.Auth;
+using LykkeApi2.Models.Client;
+using LykkeApi2.Models.ClientAccountModels;
 using LykkeApi2.Services;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json.Linq;
+using Swashbuckle.AspNetCore.Annotations;
 using LykkeApiErrorResponse = Lykke.Common.ApiLibrary.Contract.LykkeApiErrorResponse;
 
 namespace LykkeApi2.Controllers
@@ -225,8 +224,7 @@ namespace LykkeApi2.Controllers
             }
             catch (Exception e)
             {
-                await _log.WriteErrorAsync(nameof(ClientController), nameof(UserInfo),
-                    $"clientId = {_requestContext.ClientId}", e);
+                _log.WriteError(nameof(UserInfo), $"clientId = {_requestContext.ClientId}", e);
 
                 return StatusCode((int) HttpStatusCode.InternalServerError);
             }

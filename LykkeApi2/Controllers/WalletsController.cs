@@ -200,14 +200,17 @@ namespace LykkeApi2.Controllers
             
             foreach (var wallet in wallets)
             {
-                var balances = await _balancesClient.GetClientBalances(wallet.Type == TradingWalletType ? _requestContext.ClientId : wallet.Id);
+                var walletBalances = await _balancesClient.GetClientBalances(wallet.Type == TradingWalletType ? _requestContext.ClientId : wallet.Id);
+                var balancesToShow = walletBalances?
+                    .Where(x => availableAssets.Contains(x.AssetId) && x.Balance > 0)
+                    .Select(ClientBalanceResponseModel.Create);
                 result.Add(new WalletBalancesModel
                 {
                     Id = wallet.Id,
                     Type = wallet.Type,
                     Name = wallet.Name,
                     Description = wallet.Description,
-                    Balances = balances?.Where(x => availableAssets.Contains(x.AssetId)).Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0],
+                    Balances = balancesToShow ?? new ClientBalanceResponseModel[0],
                     ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
                 });
             }
@@ -225,10 +228,14 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> GetTradingWalletBalances()
         {
             var clientBalances = await _balancesClient.GetClientBalances(_requestContext.ClientId);
-            
+
             var availableAssets = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
-            return Ok(clientBalances?.Where(x => availableAssets.Contains(x.AssetId)).Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]);
+            var balancesToShow = clientBalances?
+                .Where(x => availableAssets.Contains(x.AssetId) && x.Balance > 0)
+                .Select(ClientBalanceResponseModel.Create);
+
+            return Ok(balancesToShow ?? new ClientBalanceResponseModel[0]);
         }
 
         /// <summary>
@@ -247,10 +254,14 @@ namespace LykkeApi2.Controllers
                 return NotFound();
 
             var clientBalances = await _balancesClient.GetClientBalances(walletId);
-            
+
             var availableAssets = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
-            return Ok(clientBalances?.Where(x => availableAssets.Contains(x.AssetId)).Select(ClientBalanceResponseModel.Create) ?? new ClientBalanceResponseModel[0]);
+            var balancesToShow = clientBalances?
+                .Where(x => availableAssets.Contains(x.AssetId) && x.Balance > 0)
+                .Select(ClientBalanceResponseModel.Create);
+
+            return Ok(balancesToShow ?? new ClientBalanceResponseModel[0]);
         }
 
         /// <summary>

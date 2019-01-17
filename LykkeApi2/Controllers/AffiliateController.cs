@@ -50,10 +50,8 @@ namespace LykkeApi2.Controllers
                     RedirectUrl = link.RedirectUrl
                 });
             }
-            else
-            {
-                return NotFound();
-            }
+
+            return NotFound();
         }
 
         [HttpPost]
@@ -66,8 +64,7 @@ namespace LykkeApi2.Controllers
 
             var link = await _affiliateClient.RegisterLink(_requestContext.ClientId, redirectUrl);
 
-            await _log.WriteInfoAsync(nameof(AffiliateController), nameof(CreateLink),
-                $"ClientId: {_requestContext.ClientId}. Url: {link.Url}. RedirectUrl: {link.RedirectUrl}");
+            _log.WriteInfo(nameof(AffiliateController), nameof(CreateLink), $"ClientId: {_requestContext.ClientId}. Url: {link.Url}. RedirectUrl: {link.RedirectUrl}");
 
             return Ok(new AffiliateLinkResponse
             {
@@ -75,7 +72,6 @@ namespace LykkeApi2.Controllers
                 RedirectUrl = link.RedirectUrl
             });
         }
-
 
         [HttpGet]
         [Route("stats")]
@@ -98,7 +94,6 @@ namespace LykkeApi2.Controllers
             });
         }
 
-
         private async Task<double> GetAmountInBtc(IReadOnlyDictionary<string, decimal> values)
         {
             var data = await _rateCalculatorClient.GetMarketAmountInBaseAsync(
@@ -112,6 +107,5 @@ namespace LykkeApi2.Controllers
 
             return result;
         }
-
     }
 }
