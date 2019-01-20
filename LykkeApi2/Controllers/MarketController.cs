@@ -30,6 +30,9 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Convert([FromBody] ConvertionRequest request)
         {
+            if (request == null)
+                return BadRequest("Request can't be empty");
+
             var orderAction = BaseOrderExt.GetOrderAction(request.OrderAction);
             if (orderAction == null)
             {
