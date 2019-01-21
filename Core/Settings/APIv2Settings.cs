@@ -107,7 +107,7 @@ namespace Core.Settings
 
     public class IcoSettings
     {
-        public string LKK2YAssetId;
+        public string LKK2YAssetId { get; set; }
         public string[] RestrictedCountriesIso3 { get; set; }
     }
 
