@@ -11,7 +11,7 @@
     <PackageReference Include="Lykke.Service.CandlesHistory.Client" Version="2.1.1" />
     <PackageReference Include="Lykke.Service.ClientDialogs.Client" Version="1.0.1" />
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
-    <PackageReference Include="Lykke.Service.IndicesFacade.Client" Version="1.0.0" />
+    <PackageReference Include="Lykke.Service.IndicesFacade.Client" Version="1.0.5" />
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.0.220" />
     <PackageReference Include="Lykke.Service.Balances.Client" Version="1.1.2" />
     <PackageReference Include="Lykke.Service.Limitations.Client" Version="1.1.1.40" />
