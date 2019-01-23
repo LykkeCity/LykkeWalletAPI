@@ -40,7 +40,9 @@ namespace LykkeApi2.Controllers
                 return BadRequest(ModelState);
             }
 
-            var result = await _rateCalculator.GetMarketAmountInBaseAsync(request.AssetsFrom, request.BaseAssetId,
+            var result = await _rateCalculator.GetMarketAmountInBaseAsync(
+                request.AssetsFrom,
+                request.BaseAssetId,
                 orderAction.Value.ToRateCalculatorDomain());
 
             return Ok(new ConvertionResponse {Converted = result.ToArray()});
