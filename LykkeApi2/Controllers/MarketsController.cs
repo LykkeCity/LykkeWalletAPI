@@ -152,13 +152,15 @@ namespace LykkeApi2.Controllers
             if (!string.IsNullOrWhiteSpace(assetPairId))
             {
                 var marketProfile = await _marketProfileService.TryGetAssetPairAsync(assetPairId);
-                if (marketProfile == null)
-                    throw new InvalidOperationException($"Asset pair {assetPairId} is is not registered.");
-
-                marketProfiles.Add(await _marketProfileService.GetAssetPairAsync(assetPairId));
+                marketProfiles.Add(
+                    marketProfile == null
+                        ? new AssetPairModel { AssetPair = assetPairId }
+                        : await _marketProfileService.GetAssetPairAsync(assetPairId));
             }
             else
+            {
                 marketProfiles.AddRange(await _marketProfileService.ApiMarketProfileGetAsync());
+            }
 
             return marketProfiles;
         }
