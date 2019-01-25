@@ -61,9 +61,6 @@ namespace LykkeApi2.Modules
             builder.RegisterRateCalculatorClient(_settings.Services.RateCalculatorServiceApiUrl, _log);
             builder.RegisterBalancesClient(_settings.Services.BalancesServiceUrl, _log);
 
-            builder.RegisterInstance(_settings).SingleInstance();
-            builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
-            builder.RegisterInstance(_log).As<ILog>().SingleInstance();
             builder.RegisterInstance(new DeploymentSettings());
             builder.RegisterInstance(_settings.DeploymentSettings);
             builder.RegisterInstance<IAssetsService>(
@@ -93,6 +90,7 @@ namespace LykkeApi2.Modules
             builder.RegisterType<SrvBlockchainHelper>().As<ISrvBlockchainHelper>().SingleInstance();
 
             BindServices(builder, _settings);
+
             builder.Populate(_services);
         }
 
