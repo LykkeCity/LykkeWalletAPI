@@ -15,7 +15,6 @@ using LykkeApi2.Infrastructure.Authentication;
 using LykkeApi2.Modules;
 using Lykke.SettingsReader;
 using Lykke.SlackNotification.AzureQueue;
-using Core.Settings;
 using IdentityModel;
 using IdentityModel.AspNetCore.OAuth2Introspection;
 using Lykke.Common;

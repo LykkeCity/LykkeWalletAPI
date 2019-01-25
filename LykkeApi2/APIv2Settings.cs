@@ -11,7 +11,7 @@ using Lykke.Service.PersonalData.Settings;
 using Lykke.Service.SwiftCredentials.Client;
 using Lykke.SettingsReader.Attributes;
 
-namespace Core.Settings
+namespace LykkeApi2
 {
     public class APIv2Settings
     {
@@ -103,6 +103,8 @@ namespace Core.Settings
         public OAuthSettings OAuthSettings { get; set; }
         public bool EnableTwoFactor { get; set; }
         public int MaxTwoFactorConfirmationAttempts { get; set; }
+        [Optional]
+        public bool? IsMtDisabled { get; set; }
     }
 
     public class IcoSettings

@@ -5,7 +5,6 @@ using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
-using Core.Settings;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
@@ -16,6 +15,7 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.Service.SwiftCredentials.Client;
 using Lykke.SettingsReader.ReloadingManager;
+using LykkeApi2;
 using NUnit.Framework;
 
 namespace Lykke.WalletApiv2.Tests.DITests

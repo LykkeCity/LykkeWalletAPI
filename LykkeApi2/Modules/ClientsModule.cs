@@ -11,7 +11,6 @@ using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Common.Log;
-using Core.Settings;
 using Lykke.MatchingEngine.Connector.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;

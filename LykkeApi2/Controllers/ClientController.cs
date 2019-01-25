@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Common;
 using Common.Log;
 using Core.Constants;
-using Core.Settings;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Strings;
 using Lykke.Common.ApiLibrary.Exceptions;
