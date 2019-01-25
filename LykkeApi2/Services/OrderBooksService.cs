@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Common;
 using Core.Domain.Orderbook;
 using Core.Services;
-using Core.Settings;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace LykkeApi2.Services

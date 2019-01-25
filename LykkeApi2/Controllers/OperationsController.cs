@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Core.Constants;
-using Core.Settings;
 using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Cqrs;
 using Lykke.Service.Assets.Client;

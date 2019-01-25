@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Autofac;
 using Common.Log;
-using Core.Settings;
 using Lykke.Cqrs;
 using Lykke.Cqrs.Configuration;
 using Lykke.Job.HistoryExportBuilder.Contract;

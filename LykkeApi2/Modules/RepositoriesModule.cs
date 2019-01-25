@@ -1,7 +1,6 @@
 ﻿using Autofac;
 using Common.Log;
 using Repositories;
-using Core.Settings;
 using AzureStorage.Tables;
 using Core.Repositories;
 using Lykke.SettingsReader;

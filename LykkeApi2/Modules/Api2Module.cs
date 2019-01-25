@@ -1,4 +1,5 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Cache;
 using Common.Log;
@@ -7,8 +8,8 @@ using Core.Countries;
 using Core.Enumerators;
 using Core.Identity;
 using Core.Services;
-using Core.Settings;
 using LkeServices;
+using LkeServices.Blockchain;
 using LkeServices.Candles;
 using LkeServices.Countries;
 using LkeServices.Identity;
@@ -22,8 +23,6 @@ using LykkeApi2.Services;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using LkeServices.Blockchain;
 
 namespace LykkeApi2.Modules
 {
@@ -32,12 +31,12 @@ namespace LykkeApi2.Modules
         private readonly ILog _log;
         private readonly IServiceCollection _services;
         private readonly IReloadingManager<APIv2Settings> _apiSettings;
-        private readonly IReloadingManager<BaseSettings> _settings;
+        private readonly BaseSettings _settings;
 
         public Api2Module(IReloadingManager<APIv2Settings> settings, ILog log)
         {
             _apiSettings = settings;
-            _settings = settings.Nested(x => x.WalletApiv2);
+            _settings = settings.Nested(x => x.WalletApiv2).CurrentValue;
             _log = log;
             _services = new ServiceCollection();
         }
@@ -51,7 +50,7 @@ namespace LykkeApi2.Modules
                 .AsSelf()
                 .SingleInstance();
 
-            builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
+            builder.RegisterInstance(_settings).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.IcoSettings).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.GlobalSettings).SingleInstance();
@@ -59,16 +58,13 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance(_log).As<ILog>().SingleInstance();
 
-            builder.RegisterRateCalculatorClient(_settings.CurrentValue.Services.RateCalculatorServiceApiUrl, _log);
-            builder.RegisterBalancesClient(_settings.CurrentValue.Services.BalancesServiceUrl, _log);
+            builder.RegisterRateCalculatorClient(_settings.Services.RateCalculatorServiceApiUrl, _log);
+            builder.RegisterBalancesClient(_settings.Services.BalancesServiceUrl, _log);
 
-            builder.RegisterInstance(_settings.CurrentValue).SingleInstance();
-            builder.RegisterInstance(_apiSettings.CurrentValue.FeeSettings).SingleInstance();
-            builder.RegisterInstance(_log).As<ILog>().SingleInstance();
             builder.RegisterInstance(new DeploymentSettings());
-            builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
+            builder.RegisterInstance(_settings.DeploymentSettings);
             builder.RegisterInstance<IAssetsService>(
-                new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
+                new AssetsService(new Uri(_settings.Services.AssetsServiceUrl)));
 
             _services.AddSingleton<ClientAccountLogic>();
 
@@ -76,8 +72,9 @@ namespace LykkeApi2.Modules
             {
                 var provider = new CandlesHistoryServiceProvider();
 
-                provider.RegisterMarket(MarketType.Spot, _settings.CurrentValue.Services.CandleHistorySpotUrl);
-                provider.RegisterMarket(MarketType.Mt, _settings.CurrentValue.Services.CandleHistoryMtUrl);
+                provider.RegisterMarket(MarketType.Spot, _settings.Services.CandleHistorySpotUrl);
+                if (!_settings.IsMtDisabled.HasValue || !_settings.IsMtDisabled.Value)
+                    provider.RegisterMarket(MarketType.Mt, _settings.Services.CandleHistoryMtUrl);
 
                 return provider;
             });
@@ -93,22 +90,23 @@ namespace LykkeApi2.Modules
             builder.RegisterType<SrvBlockchainHelper>().As<ISrvBlockchainHelper>().SingleInstance();
 
             BindServices(builder, _settings);
+
             builder.Populate(_services);
         }
 
-        private static void BindServices(ContainerBuilder builder, IReloadingManager<BaseSettings> settings)
+        private static void BindServices(ContainerBuilder builder, BaseSettings settings)
         {
             var redis = new RedisCache(new RedisCacheOptions
             {
-                Configuration = settings.CurrentValue.CacheSettings.RedisConfiguration,
-                InstanceName = settings.CurrentValue.CacheSettings.FinanceDataCacheInstance
+                Configuration = settings.CacheSettings.RedisConfiguration,
+                InstanceName = settings.CacheSettings.FinanceDataCacheInstance
             });
 
             builder.RegisterInstance(redis).As<IDistributedCache>().SingleInstance();
 
             builder.RegisterType<OrderBooksService>()
                 .As<IOrderBooksService>()
-                .WithParameter(TypedParameter.From(settings.CurrentValue.CacheSettings))
+                .WithParameter(TypedParameter.From(settings.CacheSettings))
                 .SingleInstance();
 
             builder.RegisterType<KycStatusValidator>()
