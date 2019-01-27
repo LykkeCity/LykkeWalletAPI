@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Common.Log;
 using Core.Constants;
 using Core.Services;
 using Lykke.Common.ApiLibrary.Exceptions;
@@ -23,6 +24,7 @@ namespace LykkeApi2.Controllers
     [Route("api/withdrawals")]
     public class WithdrawalsController : Controller
     {
+        private readonly ILog _log;
         private readonly IAssetsHelper _assetsHelper;
         private readonly IBlockchainWalletsClient _blockchainWalletsClient;
         private readonly IBlockchainCashoutPreconditionsCheckClient _blockchainCashoutPreconditionsCheckClient;
@@ -30,12 +32,14 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
 
         public WithdrawalsController(
+            ILog log,
             IAssetsHelper assetsHelper,
             IBlockchainWalletsClient blockchainWalletsClient,
             IBlockchainCashoutPreconditionsCheckClient blockchainCashoutPreconditionsCheckClient,
             IFeeCalculatorClient feeCalculatorClient,
             IRequestContext requestContext)
         {
+            _log = log;
             _assetsHelper = assetsHelper;
             _blockchainWalletsClient = blockchainWalletsClient;
             _blockchainCashoutPreconditionsCheckClient = blockchainCashoutPreconditionsCheckClient;
@@ -118,10 +122,9 @@ namespace LykkeApi2.Controllers
                 });
             }
 
-            var blockchainCapabilities =
-                await _blockchainWalletsClient.GetCapabilititesAsync(asset.BlockchainIntegrationLayerId);
+            var blockchainCapabilities = await _blockchainWalletsClient.GetCapabilititesAsync(asset.BlockchainIntegrationLayerId);
 
-            string destinationAddress = null;
+            string destinationAddress;
 
             if (blockchainCapabilities.IsPublicAddressExtensionRequired)
             {
@@ -134,6 +137,7 @@ namespace LykkeApi2.Controllers
                 }
                 catch (Exception e)
                 {
+                    _log.WriteWarning(nameof(WithdrawalsController), nameof(ValidateCryptoAddress), e.Message);
                     return Ok(
                         new WithdrawalCryptoAddressValidationModel
                         {
@@ -146,11 +150,14 @@ namespace LykkeApi2.Controllers
                 destinationAddress = baseAddress;
             }
 
+            var clientId = _requestContext.ClientId;
+
             var addressValidationResult = await _blockchainCashoutPreconditionsCheckClient.ValidateCashoutAsync(
                 new CheckCashoutValidityModel()
                 {
                     AssetId = assetId,
-                    DestinationAddress = destinationAddress
+                    DestinationAddress = destinationAddress,
+                    ClientId = Guid.Parse(clientId),
                 });
 
             return Ok(
