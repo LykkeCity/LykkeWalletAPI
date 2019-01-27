@@ -84,5 +84,30 @@ namespace LykkeApi2.Controllers
 
             return Ok(result);
         }
+
+        /// <summary>
+        /// Returns exchange prices by asset identifier
+        /// </summary>
+        [HttpGet("{assetId}/prices")]
+        [ProducesResponseType(typeof(AssetPrices[]), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetPricesAsync(string assetId)
+        {
+            if (string.IsNullOrWhiteSpace(assetId))
+                return BadRequest(string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(assetId)));
+
+            IList<AssetPrices> result;
+            try
+            {
+                result = await _indicesFacadeClient.Api.GetPricesAsync(assetId);
+            }
+            catch (ClientApiException)
+            {
+                return StatusCode((int)HttpStatusCode.InternalServerError);
+            }
+
+            return Ok(result);
+        }
     }
 }
