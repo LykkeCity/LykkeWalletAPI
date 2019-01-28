@@ -86,7 +86,7 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
-        /// Returns exchange prices by asset identifier
+        /// Returns raw prices from external exchanges for assets that are used for index calculation
         /// </summary>
         [HttpGet("{assetId}/prices")]
         [ProducesResponseType(typeof(AssetPrices[]), (int)HttpStatusCode.OK)]
