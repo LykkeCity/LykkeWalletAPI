@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common;
+using Core.Blockchain;
 using Core.Constants;
 using Core.Repositories;
 using Core.Services;
@@ -17,6 +18,7 @@ using Lykke.Job.HistoryExportBuilder.Contract.Commands;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.History.Client;
 using Lykke.Service.History.Contracts.Enums;
+using LykkeApi2.Models.Blockchain;
 using Swashbuckle.AspNetCore.Annotations;
 using LykkeApi2.Models.History;
 using ErrorResponse = LykkeApi2.Models.ErrorResponse;
@@ -34,6 +36,7 @@ namespace LykkeApi2.Controllers
         private readonly IHistoryExportsRepository _historyExportsRepository;
         private readonly IHistoryClient _historyClient;
         private readonly IAssetsHelper _assetsHelper;
+        private readonly IBlockchainExplorersProvider _blockchainExplorersProvider;
 
         public HistoryController(
             IRequestContext requestContext,
@@ -41,7 +44,8 @@ namespace LykkeApi2.Controllers
             ICqrsEngine cqrsEngine,
             IHistoryExportsRepository historyExportsRepository,
             IHistoryClient historyClient,
-            IAssetsHelper assetsHelper)
+            IAssetsHelper assetsHelper,
+            IBlockchainExplorersProvider blockchainExplorersProvider)
         {
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _clientAccountService = clientAccountService ?? throw new ArgumentNullException(nameof(clientAccountService));
@@ -49,6 +53,7 @@ namespace LykkeApi2.Controllers
             _historyExportsRepository = historyExportsRepository;
             _historyClient = historyClient;
             _assetsHelper = assetsHelper;
+            _blockchainExplorersProvider = blockchainExplorersProvider;
         }
 
         [HttpPost("client/csv")]
@@ -221,6 +226,36 @@ namespace LykkeApi2.Controllers
             var result = await data.SelectAsync(x => x.ToFundsResponseModel(_assetsHelper));
 
             return Ok(result.OrderByDescending(x => x.Timestamp));
+        }
+
+        /// <summary>
+        /// Getting explorer url links for the given blockchain type and txHash
+        /// </summary>
+        /// <param name="blockchainType">Wallet identifier</param>
+        /// <param name="transactionHash"></param>
+        /// <returns></returns>
+        [HttpGet("crypto/{blockchainType}/transactions/{transactionHash}/links")]
+        [SwaggerOperation("GetFundsByWalletId")]
+        [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(BlockchainExplorersCollection), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetExplorerLinks(
+            [FromRoute] string blockchainType, 
+            [FromRoute] string transactionHash)
+        {
+            if (string.IsNullOrEmpty(blockchainType))
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, "blockchainType should not null");
+
+            if (string.IsNullOrEmpty(transactionHash))
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, "transactionHash should not null");
+
+            var explorersLink = await _blockchainExplorersProvider.GetAsync(blockchainType, transactionHash);
+            var response = new BlockchainExplorersCollection()
+            {
+                Links = explorersLink?.Select(x => x.ExplorerUrlTemplateFormatted)
+            };
+
+            return Ok(response);
         }
     }
 }

@@ -35,6 +35,7 @@ namespace LykkeApi2
         public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { set; get; }
         public SagasRabbitMq SagasRabbitMq { set; get; }
         public SwaggerSettings SwaggerSettings { get; set; }
+        public Lykke.Service.BlockchainSettings.Client.BlockchainSettingsServiceClientSettings BlockchainSettingsServiceClient { get; set; }
     }
 
     public class SwaggerSettings

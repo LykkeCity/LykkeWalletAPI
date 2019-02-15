@@ -11,6 +11,9 @@ using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.PersonalData.Client;
 using Lykke.Service.PersonalData.Contract;
 using Common.Log;
+using Core.Blockchain;
+using LkeServices.Blockchain;
+using Lykke.HttpClientGenerator.Caching;
 using Lykke.MatchingEngine.Connector.Services;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
@@ -23,6 +26,7 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.Session.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
+using Lykke.Service.BlockchainSettings.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.BlockchainWallets.Client.ClientGenerator;
@@ -37,6 +41,7 @@ namespace LykkeApi2.Modules
     public class ClientsModule : Module
     {
         private readonly ServiceSettings _settings;
+        private readonly BlockchainSettingsServiceClientSettings _blockchainSettingsServiceClient;
         private readonly IServiceCollection _services;
         private readonly IReloadingManager<APIv2Settings> _apiSettings;
         private readonly ILog _log;
@@ -45,6 +50,7 @@ namespace LykkeApi2.Modules
         {
             _apiSettings = settings;
             _settings = settings.Nested(x => x.WalletApiv2.Services).CurrentValue;
+            _blockchainSettingsServiceClient = settings.Nested(x => x.BlockchainSettingsServiceClient).CurrentValue;
             _services = new ServiceCollection();
             _log = log;
         }
@@ -122,6 +128,30 @@ namespace LykkeApi2.Modules
             builder.RegisterConfirmationCodesClient(_apiSettings.Nested(r => r.ConfirmationCodesClient).CurrentValue);
             
             builder.RegisterBlockchainCashoutPreconditionsCheckClient(_apiSettings.CurrentValue.BlockchainCashoutPreconditionsCheckServiceClient.ServiceUrl);
+
+            #region BlockchainSettings
+
+            var settings = _blockchainSettingsServiceClient;
+
+            var cacheManager = new ClientCacheManager();
+            var factory =
+                new Lykke.Service.BlockchainSettings.Client.HttpClientGenerator.BlockchainSettingsClientFactory();
+            var client = factory.CreateNew(settings.ServiceUrl, settings.ApiKey, true, cacheManager);
+            builder.RegisterInstance(client)
+                .As<IBlockchainSettingsClient>();
+            builder.RegisterInstance(client)
+                .As<IBlockchainSettingsClient>()
+                .SingleInstance();
+
+            builder.RegisterInstance(cacheManager)
+                .As<IClientCacheManager>()
+                .SingleInstance();
+
+            builder.RegisterType<BlockchainExplorersProvider>()
+                .As<IBlockchainExplorersProvider>()
+                .SingleInstance();
+
+            #endregion
 
             builder.Populate(_services);
         }
