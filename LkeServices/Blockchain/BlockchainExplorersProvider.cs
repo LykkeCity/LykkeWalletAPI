@@ -42,10 +42,5 @@ namespace LkeServices.Blockchain
 
             return mapped;
         }
-
-        public async Task InvalidateCacheAsync()
-        {
-            await _clientCacheManager.InvalidateCacheAsync();
-        }
     }
 }

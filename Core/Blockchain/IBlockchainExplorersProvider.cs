@@ -6,7 +6,5 @@ namespace Core.Blockchain
     public interface IBlockchainExplorersProvider
     {
         Task<IEnumerable<BlockchainExplorerLink>> GetAsync(string blockchainType, string hash);
-
-        Task InvalidateCacheAsync();
     }
 }
