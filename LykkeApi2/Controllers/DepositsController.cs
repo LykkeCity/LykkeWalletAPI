@@ -258,21 +258,28 @@ namespace LykkeApi2.Controllers
 
             var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
 
-            if (isFirstGeneration)
+            try
             {
-                await _blockchainWalletsClient.CreateWalletAsync(
-                    "first-generation-blockchain",
-                    assetId,
-                    Guid.Parse(_requestContext.ClientId));
+                if (isFirstGeneration)
+                {
+                    await _blockchainWalletsClient.CreateWalletAsync(
+                        "first-generation-blockchain",
+                        assetId,
+                        Guid.Parse(_requestContext.ClientId));
+                }
+                else
+                {
+                    await _blockchainWalletsClient.CreateWalletAsync(
+                        asset.BlockchainIntegrationLayerId,
+                        asset.BlockchainIntegrationLayerAssetId,
+                        Guid.Parse(_requestContext.ClientId));
+                }
             }
-            else
+            catch (DuplicationWalletException)
             {
-                await _blockchainWalletsClient.CreateWalletAsync(
-                    asset.BlockchainIntegrationLayerId,
-                    asset.BlockchainIntegrationLayerAssetId,
-                    Guid.Parse(_requestContext.ClientId));
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressAlreadyGenerated);
             }
-
+            
             return Ok();
         }
 
