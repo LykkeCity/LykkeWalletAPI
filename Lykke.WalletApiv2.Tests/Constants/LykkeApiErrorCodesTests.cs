@@ -25,7 +25,10 @@ namespace Lykke.WalletApiv2.Tests.Constants
             "InconsistentState",
             "TwoFactorRequired",
             "SecondFactorCodeIncorrect",
-            "SecondFactorCheckForbiden"
+            "SecondFactorCheckForbiden",
+            "SecondFactorSetupInProgress",
+            "SecondFactorAlreadySetup",
+            "MaxAttemptsReached"
         };
 
         /// <summary>
