@@ -25,7 +25,7 @@ using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 
 namespace LykkeApi2.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HistoryController : Controller
@@ -252,7 +252,11 @@ namespace LykkeApi2.Controllers
             var explorersLink = await _blockchainExplorersProvider.GetAsync(blockchainType, transactionHash);
             var response = new BlockchainExplorersCollection()
             {
-                Links = explorersLink?.Select(x => x.ExplorerUrlTemplateFormatted)
+                Links = explorersLink?.Select(x => new BlockchainExplorerLinkResponse()
+                {
+                    Name = x.Name,
+                    Url = x.ExplorerUrlTemplateFormatted
+                })
             };
 
             return Ok(response);
