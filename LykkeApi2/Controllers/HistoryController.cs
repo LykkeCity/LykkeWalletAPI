@@ -15,6 +15,7 @@ using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Cqrs;
 using Lykke.Job.HistoryExportBuilder.Contract;
 using Lykke.Job.HistoryExportBuilder.Contract.Commands;
+using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.History.Client;
 using Lykke.Service.History.Contracts.Enums;
@@ -25,7 +26,7 @@ using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 
 namespace LykkeApi2.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HistoryController : Controller
@@ -234,20 +235,37 @@ namespace LykkeApi2.Controllers
         /// <param name="blockchainType">Wallet identifier</param>
         /// <param name="transactionHash"></param>
         /// <returns></returns>
-        [HttpGet("crypto/{blockchainType}/transactions/{transactionHash}/links")]
+        [HttpGet("crypto/{assetId}/transactions/{transactionHash}/links")]
         [SwaggerOperation("GetFundsByWalletId")]
         [ProducesResponseType(typeof(ErrorResponse), (int)HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(BlockchainExplorersCollection), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetExplorerLinks(
-            [FromRoute] string blockchainType, 
+            [FromRoute] string assetId,
             [FromRoute] string transactionHash)
         {
-            if (string.IsNullOrEmpty(blockchainType))
-                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, "blockchainType should not null");
+            if (string.IsNullOrEmpty(assetId))
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, $"{nameof(assetId)} should not null");
 
             if (string.IsNullOrEmpty(transactionHash))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, "transactionHash should not null");
+
+            var asset = await _assetsHelper.GetAssetAsync(assetId);
+            string blockchainType = null;
+
+            if (!string.IsNullOrEmpty(asset.BlockchainIntegrationLayerId))
+            {
+                blockchainType = asset.BlockchainIntegrationLayerId;
+            }
+            else if (asset.Type == AssetType.Erc20Token)
+            {
+                //HARDCODE
+                blockchainType = "Ethereum";
+            }
+            else
+            {
+                return NoContent();
+            }
 
             var explorersLink = await _blockchainExplorersProvider.GetAsync(blockchainType, transactionHash);
             var response = new BlockchainExplorersCollection()
