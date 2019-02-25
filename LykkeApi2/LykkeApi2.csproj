@@ -57,7 +57,7 @@
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
-    <PackageReference Include="Lykke.Service.Assets.Client" Version="4.0.1" />
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="4.4.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="4.0.1" />
   </ItemGroup>
   <ItemGroup>
