@@ -26,7 +26,7 @@ using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 
 namespace LykkeApi2.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HistoryController : Controller
