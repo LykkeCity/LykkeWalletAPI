@@ -34,7 +34,8 @@ namespace LkeServices.Blockchain
                     {
                         ExplorerUrlTemplateFormatted = x
                             .ExplorerUrlTemplate
-                            ?.Replace(Lykke.Service.BlockchainSettings.Contract.Constants.TxHashTemplate, txHash)
+                            ?.Replace(Lykke.Service.BlockchainSettings.Contract.Constants.TxHashTemplate, txHash),
+                        Name = x.Name
                     };
 
                     return explorer;
