@@ -26,7 +26,7 @@ using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 
 namespace LykkeApi2.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class HistoryController : Controller
@@ -251,6 +251,10 @@ namespace LykkeApi2.Controllers
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, "transactionHash should not null");
 
             var asset = await _assetsHelper.GetAssetAsync(assetId);
+
+            if (asset == null)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, $"{nameof(assetId)} should exist");
+
             string blockchainType = null;
 
             if (!string.IsNullOrEmpty(asset.BlockchainIntegrationLayerId))
