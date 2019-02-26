@@ -133,34 +133,6 @@ namespace LykkeApi2.Controllers
             }
         }
         
-        [HttpPost("setup/google/check")]
-        [ProducesResponseType(typeof(GoogleSetupCodeCheckResponse), (int) HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(LykkeApiErrorResponse), (int) HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> CheckGoogle2FaCode([FromBody] GoogleSetupCodeCheckRequest model)
-        {
-            try
-            {
-                if (await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId))
-                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorAlreadySetup);
-                
-                bool isValidCode = await _confirmationCodesClient.Google2FaCheckCodeForSetupAsync(_requestContext.ClientId, model.Code);
-                
-                return Ok(new GoogleSetupCodeCheckResponse {IsValid = isValidCode});
-            }
-            catch (ApiException e)
-            {
-                switch (e.StatusCode)
-                {
-                    case HttpStatusCode.BadRequest:
-                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
-                    case HttpStatusCode.Forbidden:
-                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorCheckForbiden);
-                }
-
-                throw;
-            }
-        }
-        
         [HttpPost("setup/google/confirmRequest")]
         [ProducesResponseType(typeof(SmsConfirmationResponse), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> ConfirmGoogle2FaSetup()
