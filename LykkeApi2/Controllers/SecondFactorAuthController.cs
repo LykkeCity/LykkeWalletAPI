@@ -113,21 +113,36 @@ namespace LykkeApi2.Controllers
         }
 
         [HttpPost("setup/google")]
-        [Obsolete("Use setup/google/bySms instead with sms confirmation")]
         [ProducesResponseType(typeof(GoogleSetupVerifyResponse), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> SetupGoogle2FaVerify([FromBody] GoogleSetupVerifyRequest model)
         {
             try
             {
-                var resp = await _confirmationCodesClient.Google2FaVerifySetupAsync(
-                    new VerifySetupGoogle2FaRequest {ClientId = _requestContext.ClientId, Code = model.Code});
+                if (await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId))
+                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorAlreadySetup);
+                
+                var pd = await _personalDataService.GetAsync(_requestContext.ClientId);
+                
+                var resp = await _confirmationCodesClient.Google2FaVerifySetupBySmsAsync(
+                    new VerifySetupGoogle2FaBySmsRequest
+                    {
+                        ClientId = _requestContext.ClientId, 
+                        Phone = pd.ContactPhone,
+                        SmsCode = model.Code,
+                        GaCode = model.GaCode
+                    });
 
                 return Ok(new GoogleSetupVerifyResponse {IsValid = resp.IsValid});
             }
             catch (ApiException e)
             {
-                if (e.StatusCode == HttpStatusCode.BadRequest)
-                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
+                switch (e.StatusCode)
+                {
+                    case HttpStatusCode.BadRequest:
+                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
+                    case HttpStatusCode.Forbidden:
+                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.MaxAttemptsReached);
+                }
 
                 throw;
             }
@@ -168,42 +183,6 @@ namespace LykkeApi2.Controllers
             }
         }
         
-        [HttpPost("setup/google/bySms")]
-        [ProducesResponseType(typeof(GoogleSetupVerifyResponse), (int) HttpStatusCode.OK)]
-        public async Task<IActionResult> ConfirmSetupGoogle2FaBySms([FromBody] GoogleSetupVerifyBySmsRequest model)
-        {
-            try
-            {
-                if (await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId))
-                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorAlreadySetup);
-                
-                var pd = await _personalDataService.GetAsync(_requestContext.ClientId);
-                
-                var resp = await _confirmationCodesClient.Google2FaVerifySetupBySmsAsync(
-                    new VerifySetupGoogle2FaBySmsRequest
-                    {
-                        ClientId = _requestContext.ClientId, 
-                        Phone = pd.ContactPhone,
-                        SmsCode = model.SmsCode,
-                        GaCode = model.GaCode
-                    });
-
-                return Ok(new GoogleSetupVerifyResponse {IsValid = resp.IsValid});
-            }
-            catch (ApiException e)
-            {
-                switch (e.StatusCode)
-                {
-                    case HttpStatusCode.BadRequest:
-                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
-                    case HttpStatusCode.Forbidden:
-                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.MaxAttemptsReached);
-                }
-
-                throw;
-            }
-        }
-
         [HttpPost("session")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> ConfirmTradingSession([FromBody] TradingSessionConfirmModel model)
