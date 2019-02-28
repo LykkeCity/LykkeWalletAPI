@@ -74,7 +74,7 @@ namespace LykkeApi2.Middleware
                         Console.WriteLine(ex);
                         Console.WriteLine("==============");
                     }
-
+                    Console.WriteLine($"Query: {request.QueryString.ToString()}");
                     Console.WriteLine($"Body: {body}");
                     //Console.WriteLine($"ResponceBody: {bodyResp.Substring(0, 30)}");
                 }
