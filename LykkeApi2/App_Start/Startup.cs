@@ -184,8 +184,12 @@ namespace LykkeApi2
                     o.ConfigureOAuth2(_appSettings.CurrentValue.SwaggerSettings.Security.OAuthClientId, "", "", "");
                 });
 
+                app.UseMiddleware<ApiTraceMiddleware>();
+
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());
+
+
             }
             catch (Exception ex)
             {
