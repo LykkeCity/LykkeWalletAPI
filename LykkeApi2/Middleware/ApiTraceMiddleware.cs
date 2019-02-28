@@ -40,26 +40,31 @@ namespace LykkeApi2.Middleware
                 var responce = context.Response;
                 var body = "";
 
-                if (request.Method == "POST")
+                if (!request.Path.ToString().Contains("isalive")
+                    && !request.Path.ToString().Contains("Swagger"))
                 {
-                    context.Request.Body.Seek(0, SeekOrigin.Begin);
-                    var reader = new StreamReader(context.Request.Body);
-                    body = reader.ReadToEnd();
-                }
+                    if (request.Method == "POST")
+                    {
+                        context.Request.Body.Seek(0, SeekOrigin.Begin);
+                        var reader = new StreamReader(context.Request.Body);
+                        body = reader.ReadToEnd();
+                    }
 
-                Console.WriteLine("--------------------------");
-                Console.WriteLine($"Path: {request.Path}");
-                Console.WriteLine($"Method: {request.Method}");
-                Console.WriteLine($"StatusCode: {responce.StatusCode}");
-                Console.WriteLine($"ExecuteTime: {sw.ElapsedMilliseconds} ms");
-                Console.WriteLine($"ClientId: {context.User?.Identity?.Name}");
-                if (ex != null)
-                {
-                    Console.WriteLine("==============");
-                    Console.WriteLine(ex);
-                    Console.WriteLine("==============");
+                    Console.WriteLine("--------------------------");
+                    Console.WriteLine($"Path: {request.Path}");
+                    Console.WriteLine($"Method: {request.Method}");
+                    Console.WriteLine($"StatusCode: {responce.StatusCode}");
+                    Console.WriteLine($"ExecuteTime: {sw.ElapsedMilliseconds} ms");
+                    Console.WriteLine($"ClientId: {context.User?.Identity?.Name}");
+                    if (ex != null)
+                    {
+                        Console.WriteLine("==============");
+                        Console.WriteLine(ex);
+                        Console.WriteLine("==============");
+                    }
+
+                    Console.WriteLine($"Body: {body}");
                 }
-                Console.WriteLine($"Body: {body}");
             }
         }
     }
