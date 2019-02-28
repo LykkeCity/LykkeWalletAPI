@@ -50,12 +50,24 @@ namespace LykkeApi2.Middleware
                         body = reader.ReadToEnd();
                     }
 
+                    responce.Body.Seek(0, SeekOrigin.Begin);
+                    var readerResp = new StreamReader(context.Request.Body);
+                    var bodyResp = readerResp.ReadToEnd();
+                    responce.Body.Seek(0, SeekOrigin.Begin);
+
+                    var authstr = "";
+                    if (context.Request.Headers.TryGetValue("Authorization", out var auth) && auth.Any())
+                    {
+                        authstr = auth.First();
+                    }
+
                     Console.WriteLine("--------------------------");
                     Console.WriteLine($"Path: {request.Path}");
                     Console.WriteLine($"Method: {request.Method}");
                     Console.WriteLine($"StatusCode: {responce.StatusCode}");
                     Console.WriteLine($"ExecuteTime: {sw.ElapsedMilliseconds} ms");
                     Console.WriteLine($"ClientId: {context.User?.Identity?.Name}");
+                    Console.WriteLine($"AuthToken: {authstr}");
                     if (ex != null)
                     {
                         Console.WriteLine("==============");
@@ -64,6 +76,7 @@ namespace LykkeApi2.Middleware
                     }
 
                     Console.WriteLine($"Body: {body}");
+                    Console.WriteLine($"ResponceBody: {bodyResp.Substring(0, 30)}");
                 }
             }
         }
