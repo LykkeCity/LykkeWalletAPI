@@ -2,13 +2,13 @@
 using System.Net;
 using System.Threading.Tasks;
 using Core.Constants;
-using Lykke.Common.ApiLibrary.Contract;
 using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Cqrs;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.ConfirmationCodes.Client.Models.Request;
 using Lykke.Service.ConfirmationCodes.Client.Models.Response;
 using Lykke.Service.ConfirmationCodes.Contract;
+using Lykke.Service.ConfirmationCodes.Contract.Models;
 using Lykke.Service.Operations.Contracts;
 using Lykke.Service.Operations.Contracts.Commands;
 using Lykke.Service.PersonalData.Contract;
@@ -70,6 +70,24 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(SecondFactorDetailsModel[]), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailable()
         {
+            var status = await _confirmationCodesClient.CheckCallsLimitAsync(new CheckOperationLimitRequest
+            {
+                ClientId = _requestContext.ClientId,
+                Operation = ConfirmOperations.Google2FaSmsConfirm
+            });
+
+            if (status == CallLimitStatus.LimitExceed)
+            {
+                return Ok(new[]
+                {
+                    new SecondFactorDetailsModel
+                    {
+                        Type = SecondFactorType.Google,
+                        Status = SecondFactorStatus.Forbidden
+                    }
+                });
+            }
+            
             return await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId)
                 ? Ok(new []
                 {
