@@ -50,10 +50,10 @@ namespace LykkeApi2.Middleware
                         body = reader.ReadToEnd();
                     }
 
-                    responce.Body.Seek(0, SeekOrigin.Begin);
-                    var readerResp = new StreamReader(context.Request.Body);
-                    var bodyResp = readerResp.ReadToEnd();
-                    responce.Body.Seek(0, SeekOrigin.Begin);
+                    //responce.Body.Seek(0, SeekOrigin.Begin);
+                    //var readerResp = new StreamReader(context.Request.Body);
+                    //var bodyResp = readerResp.ReadToEnd();
+                    //responce.Body.Seek(0, SeekOrigin.Begin);
 
                     var authstr = "";
                     if (context.Request.Headers.TryGetValue("Authorization", out var auth) && auth.Any())
@@ -76,7 +76,7 @@ namespace LykkeApi2.Middleware
                     }
 
                     Console.WriteLine($"Body: {body}");
-                    Console.WriteLine($"ResponceBody: {bodyResp.Substring(0, 30)}");
+                    //Console.WriteLine($"ResponceBody: {bodyResp.Substring(0, 30)}");
                 }
             }
         }
