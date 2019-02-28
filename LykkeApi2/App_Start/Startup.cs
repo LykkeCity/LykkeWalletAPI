@@ -162,6 +162,8 @@ namespace LykkeApi2
 
                 app.UseMiddleware<ClientBansMiddleware>();
 
+                app.UseMiddleware<ApiTraceMiddleware>();
+
                 app.UseMvc(routes =>
                 {
                     routes.MapRoute(
@@ -183,8 +185,6 @@ namespace LykkeApi2
                     o.SwaggerEndpoint($"/swagger/{ApiVersion}/swagger.json", ApiVersion);
                     o.ConfigureOAuth2(_appSettings.CurrentValue.SwaggerSettings.Security.OAuthClientId, "", "", "");
                 });
-
-                app.UseMiddleware<ApiTraceMiddleware>();
 
                 appLifetime.ApplicationStarted.Register(() => StartApplication().Wait());
                 appLifetime.ApplicationStopped.Register(() => CleanUp().Wait());
