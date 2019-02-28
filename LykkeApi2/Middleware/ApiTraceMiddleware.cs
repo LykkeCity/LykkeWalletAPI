@@ -41,7 +41,7 @@ namespace LykkeApi2.Middleware
                 var body = "";
 
                 if (!request.Path.ToString().Contains("isalive")
-                    && !request.Path.ToString().Contains("Swagger"))
+                    && !request.Path.ToString().Contains("wagger"))
                 {
                     if (request.Method == "POST")
                     {
