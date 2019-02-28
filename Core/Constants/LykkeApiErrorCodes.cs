@@ -79,16 +79,34 @@ namespace Core.Constants
                 new LykkeApiErrorCode(nameof(TwoFactorRequired), "The action requires 2fa enabled.");
 
             /// <summary>
-            ///     Two factor authentication should be enabled.
+            ///     Two factor authentication code is incorrect.
             /// </summary>
             public static readonly ILykkeApiErrorCode SecondFactorCodeIncorrect =
                 new LykkeApiErrorCode(nameof(SecondFactorCodeIncorrect), "The provided code for 2FA is incorrect.");
 
             /// <summary>
-            ///     Two factor authentication should be enabled.
+            ///     Two factor authentication check forbidden.
             /// </summary>
             public static readonly ILykkeApiErrorCode SecondFactorCheckForbiden =
                 new LykkeApiErrorCode(nameof(SecondFactorCheckForbiden), "2FA check forbidden.");
+            
+            /// <summary>
+            ///     Two factor verification is already in the progress should be enabled.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode SecondFactorSetupInProgress =
+                new LykkeApiErrorCode(nameof(SecondFactorSetupInProgress), "2FA setup is in progress.");
+            
+            /// <summary>
+            ///     Two factor authentication already setup.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode SecondFactorAlreadySetup =
+                new LykkeApiErrorCode(nameof(SecondFactorAlreadySetup), "2FA already setup.");
+            
+            /// <summary>
+            ///     Max number of attempts reached
+            /// </summary>
+            public static readonly ILykkeApiErrorCode MaxAttemptsReached =
+                new LykkeApiErrorCode(nameof(MaxAttemptsReached), "Maximum attempts reached for this call.");
         }
 
         /// <summary>

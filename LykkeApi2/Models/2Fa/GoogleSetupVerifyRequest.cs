@@ -3,5 +3,6 @@
     public class GoogleSetupVerifyRequest
     {
         public string Code { set; get; }
+        public string GaCode { set; get; }
     }
 }
