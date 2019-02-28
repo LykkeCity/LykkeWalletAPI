@@ -123,8 +123,8 @@ namespace LykkeApi2.Controllers
                 
                 var pd = await _personalDataService.GetAsync(_requestContext.ClientId);
                 
-                var resp = await _confirmationCodesClient.Google2FaVerifySetupBySmsAsync(
-                    new VerifySetupGoogle2FaBySmsRequest
+                var resp = await _confirmationCodesClient.Google2FaVerifySetupAsync(
+                    new VerifySetupGoogle2FaRequest
                     {
                         ClientId = _requestContext.ClientId, 
                         Phone = pd.ContactPhone,
