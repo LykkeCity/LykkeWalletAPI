@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using Common;
 using Common.Log;
 using Core.Candles;
 using Core.Enumerators;
@@ -13,6 +15,7 @@ using Lykke.Service.CandlesHistory.Client;
 using Lykke.Service.CandlesHistory.Client.Models;
 using LykkeApi2.Models.Markets;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson.IO;
 
 namespace LykkeApi2.Controllers
 {
@@ -45,6 +48,29 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> Get()
         {
             var result = await GetSpotMarketSnapshotAsync();
+            var lykke = await GetFromLykke();
+            foreach (var slice in result)
+            {
+                slice.LastPrice = (slice.Ask + slice.Bid) / 2;
+
+                if (slice.AssetPair == "BTCUSD" || slice.AssetPair == "BTCEMAAR")
+                {
+                    var p = lykke?.FirstOrDefault(e => e.AssetPair == "BTCUSD");
+                    if (p != null)
+                    {
+                        slice.PriceChange24H = p.PriceChange24H;
+                    }
+                }
+
+                if (slice.AssetPair == "ETHUSD" || slice.AssetPair == "ETHEMAAR")
+                {
+                    var p = lykke?.FirstOrDefault(e => e.AssetPair == "ETHUSD");
+                    if (p != null)
+                    {
+                        slice.PriceChange24H = p.PriceChange24H;
+                    }
+                }
+            }
 
             return Ok(result);
         }
@@ -67,6 +93,26 @@ namespace LykkeApi2.Controllers
 
             if (marketState == null)
                 return BadRequest("Market state is missing for given asset pair.");
+
+            var lykke = await GetFromLykke();
+            marketState.LastPrice = (marketState.Ask + marketState.Bid) / 2;
+            if (marketState.AssetPair == "BTCUSD" || marketState.AssetPair == "BTCEMAAR")
+            {
+                var p = lykke?.FirstOrDefault(e => e.AssetPair == "BTCUSD");
+                if (p != null)
+                {
+                    marketState.PriceChange24H = p.PriceChange24H;
+                }
+            }
+
+            if (marketState.AssetPair == "ETHUSD" || marketState.AssetPair == "ETHEMAAR")
+            {
+                var p = lykke?.FirstOrDefault(e => e.AssetPair == "ETHUSD");
+                if (p != null)
+                {
+                    marketState.PriceChange24H = p.PriceChange24H;
+                }
+            }
 
             return Ok(marketState);
         }
@@ -139,6 +185,26 @@ namespace LykkeApi2.Controllers
             }
 
             return result.Values.ToList();
+        }
+
+        private static readonly HttpClient _client = new HttpClient();
+        private static List<MarketSlice> _data = null;
+        private static DateTime _dataTs = DateTime.UtcNow;
+
+        private async Task<List<MarketSlice>> GetFromLykke()
+        {
+            if ((DateTime.UtcNow - _dataTs).TotalMinutes > 2 || _data == null)
+            {
+                var resp = await _client.GetAsync("https://apiv2.lykke.com/api/markets");
+                if (resp.StatusCode == HttpStatusCode.OK)
+                {
+                    string json = await resp.Content.ReadAsStringAsync();
+                    _data = json.DeserializeJson<List<MarketSlice>>();
+                    _dataTs = DateTime.UtcNow;
+                }
+            }
+
+            return _data;
         }
 
         /// <summary>
