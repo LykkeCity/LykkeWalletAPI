@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Common;
+using Common.Log;
 using LykkeApi2.Infrastructure.ApiTrace;
 using LykkeApi2.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
@@ -14,11 +16,13 @@ namespace LykkeApi2.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly IApiTraceSender _sender;
+        private readonly ILog _log;
 
-        public ApiTraceMiddleware(RequestDelegate next, IApiTraceSender sender)
+        public ApiTraceMiddleware(RequestDelegate next, IApiTraceSender sender, ILog log)
         {
             _next = next;
             _sender = sender;
+            _log = log;
         }
 
         public async Task Invoke(HttpContext context)
@@ -59,7 +63,7 @@ namespace LykkeApi2.Middleware
                         authstr = auth.First();
                     }
 
-                    await _sender.LogMethodCall(new
+                    var data = new
                     {
                         DateTime = DateTime.UtcNow,
                         Level = "apitrace",
@@ -74,7 +78,11 @@ namespace LykkeApi2.Middleware
                         Type = ex != null ? ex.GetType().Name : "",
                         Stack = ex != null ? ex.StackTrace : "",
                         Msg = ex != null ? ex.Message : "",
-                    });
+                    };
+
+                    await _sender.LogMethodCall(data);
+
+                    await _log.WriteInfoAsync("Api", "ApiTrace", data.ToJson(), "trace log");
                 }
             }
         }
