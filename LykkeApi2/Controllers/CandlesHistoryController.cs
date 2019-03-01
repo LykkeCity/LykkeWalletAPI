@@ -9,6 +9,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Core.Candles;
 using Core.Services;
+using Lykke.Service.CandlesHistory.Client.Models;
 using LykkeApi2.Models.CandleSticks;
 
 namespace LykkeApi2.Controllers
@@ -55,6 +56,7 @@ namespace LykkeApi2.Controllers
         {
             try
             {
+                request.PriceType = CandlePriceType.Mid;
                 var assetPair = await _assetsHelper.GetAssetPairAsync(request.AssetPairId);
 
                 if (assetPair == null)
