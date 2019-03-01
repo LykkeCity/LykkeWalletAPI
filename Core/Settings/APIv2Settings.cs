@@ -35,6 +35,7 @@ namespace Core.Settings
         public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { set; get; }
         public SagasRabbitMq SagasRabbitMq { set; get; }
         public SwaggerSettings SwaggerSettings { get; set; }
+        public ApiTraceLogStashClientSettings ApiTraceLogStashClientSettings { get; set; }
     }
 
     public class SwaggerSettings
@@ -46,6 +47,13 @@ namespace Core.Settings
     {
         public string OAuthClientId { get; set; }
         public string AuthorizeEndpoint { get; set; }
+    }
+
+    public class ApiTraceLogStashClientSettings
+    {
+        public bool UseApiTrace { get; set; }
+        public string Host { get; set; }
+        public int Port { get; set; }
     }
 
 

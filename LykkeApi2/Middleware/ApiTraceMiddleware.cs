@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using LykkeApi2.Infrastructure.ApiTrace;
 using LykkeApi2.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
 
@@ -12,10 +13,12 @@ namespace LykkeApi2.Middleware
     public class ApiTraceMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly IApiTraceSender _sender;
 
-        public ApiTraceMiddleware(RequestDelegate next)
+        public ApiTraceMiddleware(RequestDelegate next, IApiTraceSender sender)
         {
             _next = next;
+            _sender = sender;
         }
 
         public async Task Invoke(HttpContext context)
@@ -50,33 +53,28 @@ namespace LykkeApi2.Middleware
                         body = reader.ReadToEnd();
                     }
 
-                    //responce.Body.Seek(0, SeekOrigin.Begin);
-                    //var readerResp = new StreamReader(context.Request.Body);
-                    //var bodyResp = readerResp.ReadToEnd();
-                    //responce.Body.Seek(0, SeekOrigin.Begin);
-
                     var authstr = "";
                     if (context.Request.Headers.TryGetValue("Authorization", out var auth) && auth.Any())
                     {
                         authstr = auth.First();
                     }
 
-                    Console.WriteLine("--------------------------");
-                    Console.WriteLine($"Path: {request.Path}");
-                    Console.WriteLine($"Method: {request.Method}");
-                    Console.WriteLine($"StatusCode: {responce.StatusCode}");
-                    Console.WriteLine($"ExecuteTime: {sw.ElapsedMilliseconds} ms");
-                    Console.WriteLine($"ClientId: {context.User?.Identity?.Name}");
-                    Console.WriteLine($"AuthToken: {authstr}");
-                    if (ex != null)
+                    await _sender.LogMethodCall(new
                     {
-                        Console.WriteLine("==============");
-                        Console.WriteLine(ex);
-                        Console.WriteLine("==============");
-                    }
-                    Console.WriteLine($"Query: {request.QueryString.ToString()}");
-                    Console.WriteLine($"Body: {body}");
-                    //Console.WriteLine($"ResponceBody: {bodyResp.Substring(0, 30)}");
+                        DateTime = DateTime.UtcNow,
+                        Level = "apitrace",
+                        Path = request.Path,
+                        Method = request.Method,
+                        StatusCode = responce.StatusCode,
+                        ExecuteTimeMs = sw.ElapsedMilliseconds,
+                        AuthToken = authstr,
+                        ClientId = context.User?.Identity?.Name,
+                        Query = request.QueryString.ToString(),
+                        Body = body,
+                        Type = ex != null ? ex.GetType().Name : "",
+                        Stack = ex != null ? ex.StackTrace : "",
+                        Msg = ex != null ? ex.Message : "",
+                    });
                 }
             }
         }

@@ -24,6 +24,7 @@ using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using LkeServices.Blockchain;
+using LykkeApi2.Infrastructure.ApiTrace;
 
 namespace LykkeApi2.Modules
 {
@@ -69,6 +70,12 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_settings.CurrentValue.DeploymentSettings);
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
+
+            builder.RegisterInstance(new ApiTraceSender(
+                    _apiSettings.CurrentValue.ApiTraceLogStashClientSettings.UseApiTrace,
+                    _apiSettings.CurrentValue.ApiTraceLogStashClientSettings.Host,
+                    _apiSettings.CurrentValue.ApiTraceLogStashClientSettings.Port))
+                .As<IApiTraceSender>();
 
             _services.AddSingleton<ClientAccountLogic>();
 
