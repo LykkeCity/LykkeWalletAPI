@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Common;
 
 namespace LykkeApi2.Infrastructure.ApiTrace
 {
@@ -82,13 +83,13 @@ namespace LykkeApi2.Infrastructure.ApiTrace
             {
                 while (_logs.TryDequeue(out var item))
                 {
-                    SendData(item);
+                    SendData(item.ToJson());
                 }
                 Thread.Sleep(10);
             }
         }
 
-        private void SendData(object json)
+        private void SendData(string json)
         {
             while (true)
             {
