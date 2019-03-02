@@ -71,6 +71,8 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance<IAssetsService>(
                 new AssetsService(new Uri(_settings.CurrentValue.Services.AssetsServiceUrl)));
 
+            builder.RegisterType<MarketsCache>().SingleInstance();
+
             builder.RegisterInstance(new ApiTraceSender(
                     _apiSettings.CurrentValue.ApiTraceLogStashClientSettings.UseApiTrace,
                     _apiSettings.CurrentValue.ApiTraceLogStashClientSettings.Host,
