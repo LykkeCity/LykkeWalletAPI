@@ -21,7 +21,8 @@ namespace LykkeApi2.Models.History
         Undefined,
         Card,
         Bank,
-        Blockchain
+        Blockchain,
+        Transfer
     }
 
     public enum FundsStatus
