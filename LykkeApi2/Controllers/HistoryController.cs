@@ -201,7 +201,12 @@ namespace LykkeApi2.Controllers
             var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), operation.Select(x => x.ToHistoryType()).ToArray(),
                 assetId: assetId, offset: skip, limit: take);
 
-            var result = await data.SelectAsync(x => x.ToFundsResponseModel(_assetsHelper));
+            var result = (await data.SelectAsync(x => x.ToFundsResponseModel(_assetsHelper))).ToList();
+
+            foreach (var item in result)
+            {
+                item.Type = FundsType.Transfer;
+            }
 
             return Ok(result.OrderByDescending(x => x.Timestamp));
         }
