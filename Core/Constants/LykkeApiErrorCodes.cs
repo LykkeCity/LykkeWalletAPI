@@ -53,6 +53,10 @@ namespace Core.Constants
                 new LykkeApiErrorCode(nameof(BlockchainWalletDepositAddressNotGenerated),
                     "The deposit address is not generated.");
 
+            public static readonly ILykkeApiErrorCode BlockchainWalletDepositAddressAlreadyGenerated =
+                new LykkeApiErrorCode(nameof(BlockchainWalletDepositAddressAlreadyGenerated),
+                    "The address is already generated.");
+            
             /// <summary>
             ///     The client's KYC level is insufficient for the current action.
             /// </summary>

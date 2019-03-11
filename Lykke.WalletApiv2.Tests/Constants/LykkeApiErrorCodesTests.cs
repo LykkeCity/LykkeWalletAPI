@@ -18,6 +18,7 @@ namespace Lykke.WalletApiv2.Tests.Constants
             "AssetUnavailable",
             "PendingDialogs",
             "BlockchainWalletDepositAddressNotGenerated",
+            "BlockchainWalletDepositAddressAlreadyGenerated",
             "KycRequired",
             "DepositLimitReached",
             "ModelValidationFailed",
