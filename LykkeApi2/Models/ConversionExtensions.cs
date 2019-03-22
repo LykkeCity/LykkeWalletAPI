@@ -78,7 +78,7 @@ namespace LykkeApi2.Models
         }
 
         public static AssetPairRateModel ToApiModel(
-            this Lykke.MarketProfileService.Client.Models.AssetPairModel src)
+            this Lykke.Service.MarketProfile.Client.Models.AssetPairModel src)
         {
             return new AssetPairRateModel
             {

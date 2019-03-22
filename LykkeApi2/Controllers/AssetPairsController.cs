@@ -2,18 +2,12 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Common;
-using Common.Log;
 using Core.Services;
-using LkeServices;
-using Lykke.MarketProfileService.Client;
-using Lykke.Service.Assets.Client;
-using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.MarketProfile.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
-using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,12 +17,12 @@ namespace LykkeApi2.Controllers
     [ApiController]
     public class AssetPairsController : Controller
     {
-        private readonly ILykkeMarketProfileServiceAPI _marketProfileService;
+        private readonly ILykkeMarketProfile _marketProfileService;
         private readonly IAssetsHelper _assetsHelper;
         private readonly IRequestContext _requestContext;
 
         public AssetPairsController(
-            ILykkeMarketProfileServiceAPI marketProfile,
+            ILykkeMarketProfile marketProfile,
             IAssetsHelper assetsHelper,
             IRequestContext requestContext)
         {
