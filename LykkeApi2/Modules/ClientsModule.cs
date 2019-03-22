@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Lykke.MarketProfileService.Client;
 using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Registration;
@@ -34,6 +32,7 @@ using Lykke.Service.History.Client;
 using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.IndicesFacade.Client;
 using Lykke.Service.Limitations.Client;
+using Lykke.Service.MarketProfile.Client;
 using Lykke.Service.SwiftCredentials.Client;
 
 namespace LykkeApi2.Modules
@@ -63,9 +62,7 @@ namespace LykkeApi2.Modules
                 .As<IHftInternalServiceAPI>()
                 .WithParameter("baseUri", new Uri(_settings.HftInternalServiceUrl));
 
-            builder.RegisterType<LykkeMarketProfileServiceAPI>()
-                .As<ILykkeMarketProfileServiceAPI>()
-                .WithParameter("baseUri", new Uri(_settings.MarketProfileUrl));
+            builder.RegisterMarketProfileClient(_settings.MarketProfileUrl);
 
             builder.RegisterOperationsClient(_settings.OperationsUrl);
 
