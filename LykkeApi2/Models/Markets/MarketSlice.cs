@@ -10,15 +10,15 @@
         /// </summary>
         public string AssetPair { get; set; }
         /// <summary>
-        /// Trading volume for the current day. Is obtained from asset pair's Day Trade candle for today.
+        /// Trading volume for the current day. Is obtained from asset pair's Hour Trade candles for today.
         /// </summary>
         public decimal Volume24H { get; set; }
         /// <summary>
-        /// Trade price change for the current day. Is calculated by the formula: (Close - Open) / Open, where Open and Close are the corresponding prices for today's Day Trade candle.
+        /// Trade price change for the current day. Is calculated by the formula: (Close - Open) / Open, where Open and Close are the corresponding prices for today's first/last Hour Trade candles.
         /// </summary>
         public decimal PriceChange24H { get; set; }
         /// <summary>
-        /// The last trade price. Is obtained from asset pair's Day Trade candle for today and is equal to its Close price.
+        /// The last trade price. Is obtained from asset pair's Hour Trade candles for today and is equal to the latest candle Close price.
         /// </summary>
         public decimal LastPrice { get; set; }
         /// <summary>
