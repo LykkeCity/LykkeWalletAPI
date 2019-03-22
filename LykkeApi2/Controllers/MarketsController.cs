@@ -216,7 +216,7 @@ namespace LykkeApi2.Controllers
 
                     var marketSlice = new MarketSlice
                     {
-                        AssetPair = assetPairId,
+                        AssetPair = historyForPair.Key,
                         Volume24H = (decimal) historyForPair.Value.History.Sum(c => c.TradingOppositeVolume),
                         PriceChange24H = firstCandle.Open > 0
                             ? (decimal) ((lastCandle.Close - firstCandle.Open) / firstCandle.Open)
