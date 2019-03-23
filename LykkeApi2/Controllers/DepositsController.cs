@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Common.Log;
 using Core.Constants;
 using Core.Services;
 using Lykke.Common.ApiLibrary.Exceptions;
@@ -45,6 +46,7 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
         private readonly ISrvBlockchainHelper _srvBlockchainHelper;
         private readonly ISet<string> _coloredAssetIds;
+        private readonly ILog _log;
 
         public DepositsController(
             IPaymentSystemClient paymentSystemService,
@@ -57,8 +59,10 @@ namespace LykkeApi2.Controllers
             IPersonalDataService personalDataService,
             ILimitationsServiceClient limitationsServiceClient,
             IRequestContext requestContext, 
-            ISrvBlockchainHelper srvBlockchainHelper)
+            ISrvBlockchainHelper srvBlockchainHelper,
+            ILog log)
         {
+            _log = log;
             _paymentSystemService = paymentSystemService;
             _feeCalculatorClient = feeCalculatorClient;
             _assetsHelper = assetsHelper;
@@ -101,6 +105,8 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(FxPaygateFeeModel), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetFxPaygateFee()
         {
+            await _log.WriteWarningAsync("Test log", "", "Incoming fee request");
+
             return Ok(
                 new FxPaygateFeeModel
                 {
@@ -119,6 +125,8 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(FxPaygatePaymentUrlResponseModel), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> PostFxPaygate([FromBody] FxPaygatePaymentUrlRequestModel input)
         {
+            await _log.WriteWarningAsync("Test log", "", "Incoming payment form url request");
+
             var result = await _paymentSystemService.GetUrlDataAsync(
                 _requestContext.ClientId,
                 input.Amount,
