@@ -17,7 +17,7 @@
     <PackageReference Include="Lykke.Service.Limitations.Client" Version="1.1.1.40" />
     <PackageReference Include="Lykke.Service.Assets.Client" Version="4.4.0" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="1.0.79" />
-    <PackageReference Include="Lykke.Service.PaymentSystem.Client" Version="1.0.22" />
+    <PackageReference Include="Lykke.Service.PaymentSystem.Client" Version="1.0.23" />
     <PackageReference Include="Lykke.Service.SwiftCredentials.Client" Version="1.0.0.8" />
     <PackageReference Include="Lykke.Service.ConfirmationCodes.Client" Version="1.7.0" />
   </ItemGroup>
