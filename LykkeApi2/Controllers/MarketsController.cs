@@ -103,6 +103,8 @@ namespace LykkeApi2.Controllers
                 {
                     existingAssetRecord.Volume24H = todayCandle.Volume24H;
                     existingAssetRecord.PriceChange24H = todayCandle.PriceChange24H;
+                    existingAssetRecord.High = todayCandle.High;
+                    existingAssetRecord.Low = todayCandle.Low;
                 }
                 else
                 {
@@ -173,7 +175,7 @@ namespace LykkeApi2.Controllers
             if (!string.IsNullOrWhiteSpace(assetPairId))
             {
                 var todayCandleHistory = await historyService.TryGetCandlesHistoryAsync(assetPairId,
-                    CandlePriceType.Trades, CandleTimeInterval.Hour, from, to);
+                    CandlePriceType.Trades, CandleTimeInterval.Min5, from, to);
 
                 if (todayCandleHistory?.History == null ||
                     !todayCandleHistory.History.Any())
@@ -185,10 +187,12 @@ namespace LykkeApi2.Controllers
                 var marketSlice = new MarketSlice
                 {
                     AssetPair = assetPairId,
-                    Volume24H = (decimal) todayCandleHistory.History.Sum(c => c.TradingOppositeVolume),
+                    Volume24H = (decimal) todayCandleHistory.History.Sum(c => c.TradingVolume),
                     PriceChange24H = firstCandle.Open > 0
                         ? (decimal) ((lastCandle.Close - firstCandle.Open) / firstCandle.Open)
-                        : 0
+                        : 0,
+                    High = (decimal)todayCandleHistory.History.Max(c => c.High),
+                    Low = (decimal)todayCandleHistory.History.Min(c => c.Low),
                 };
 
                 todayCandles.Add(marketSlice);
@@ -197,7 +201,7 @@ namespace LykkeApi2.Controllers
             {
                 var assetPairs = await historyService.GetAvailableAssetPairsAsync();
                 var todayCandleHistoryForPairs = await historyService.GetCandlesHistoryBatchAsync(assetPairs,
-                    CandlePriceType.Trades, CandleTimeInterval.Hour, from, to);
+                    CandlePriceType.Trades, CandleTimeInterval.Min5, from, to);
 
                 if (todayCandleHistoryForPairs == null) // Some technical issue has happened without an exception.
                     throw new InvalidOperationException("Could not obtain today's Hour Spot trade candles at all.");
@@ -217,10 +221,12 @@ namespace LykkeApi2.Controllers
                     var marketSlice = new MarketSlice
                     {
                         AssetPair = historyForPair.Key,
-                        Volume24H = (decimal) historyForPair.Value.History.Sum(c => c.TradingOppositeVolume),
+                        Volume24H = (decimal) historyForPair.Value.History.Sum(c => c.TradingVolume),
                         PriceChange24H = firstCandle.Open > 0
                             ? (decimal) ((lastCandle.Close - firstCandle.Open) / firstCandle.Open)
-                            : 0
+                            : 0,
+                        High = (decimal)historyForPair.Value.History.Max(c => c.High),
+                        Low = (decimal)historyForPair.Value.History.Min(c => c.Low),
                     };
 
                     todayCandles.Add(marketSlice);
