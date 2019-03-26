@@ -170,7 +170,7 @@ namespace LykkeApi2.Controllers
             // inclusive
             var from = now - TimeSpan.FromHours(24);
             // exclusive
-            var to = now; 
+            var to = now.AddMinutes(5); 
 
             if (!string.IsNullOrWhiteSpace(assetPairId))
             {
