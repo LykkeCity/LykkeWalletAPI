@@ -196,12 +196,6 @@ namespace LykkeApi2.Strings {
             }
         }
         
-        public static string BackupErrorMsg {
-            get {
-                return ResourceManager.GetString("BackupErrorMsg", resourceCulture);
-            }
-        }
-        
         public static string BackupWarningMsg {
             get {
                 return ResourceManager.GetString("BackupWarningMsg", resourceCulture);

@@ -192,9 +192,6 @@
   <data name="AssetShouldBeEqualToBaseAssetFromAssetPair" xml:space="preserve">
     <value>Asset should be equal to base asset from asset pair</value>
   </data>
-  <data name="BackupErrorMsg" xml:space="preserve">
-    <value>To ensure the safety of your funds, you must back up your private key before proceeding</value>
-  </data>
   <data name="BackupWarningMsg" xml:space="preserve">
     <value>To ensure the safety of your funds, we recommend that you make a backup of your private key</value>
   </data>
