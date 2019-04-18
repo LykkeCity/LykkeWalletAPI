@@ -136,9 +136,6 @@ namespace LykkeApi2.Models.ValidationModels
             RuleFor(reg => reg.WalletId).MustAsync(IsDepositViaCreditCardNotBlocked)
                 .WithMessage(x => Phrases.OperationProhibited);
 
-            RuleFor(reg => reg.WalletId).MustAsync(IsBackupNotRequired)
-                .WithMessage(x => Phrases.BackupErrorMsg);
-
             RuleFor(reg => reg.WalletId).MustAsync(IsAllowedToCashInViaBankCardAsync)
                 .WithMessage(x => Phrases.OperationProhibited);
         }
