@@ -33,6 +33,7 @@ using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.IndicesFacade.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.MarketProfile.Client;
+using Lykke.Service.PushNotifications.Client;
 using Lykke.Service.SwiftCredentials.Client;
 
 namespace LykkeApi2.Modules
@@ -74,7 +75,7 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));
-            
+
             builder.RegisterInstance(
                 new KycStatusServiceClient(_apiSettings.CurrentValue.KycServiceClient, _log))
                 .As<IKycStatusService>()
@@ -123,7 +124,7 @@ namespace LykkeApi2.Modules
             builder.RegisterHistoryClient(new HistoryServiceClientSettings { ServiceUrl = _settings.HistoryServiceUrl });
 
             builder.RegisterConfirmationCodesClient(_apiSettings.Nested(r => r.ConfirmationCodesClient).CurrentValue);
-            
+
             builder.RegisterBlockchainCashoutPreconditionsCheckClient(_apiSettings.CurrentValue.BlockchainCashoutPreconditionsCheckServiceClient.ServiceUrl);
 
             #region BlockchainSettings
@@ -149,6 +150,8 @@ namespace LykkeApi2.Modules
                 .SingleInstance();
 
             #endregion
+
+            builder.RegisterPushNotificationsClient(_apiSettings.CurrentValue.PushNotificationsServiceClient.ServiceUrl);
 
             builder.Populate(_services);
         }
