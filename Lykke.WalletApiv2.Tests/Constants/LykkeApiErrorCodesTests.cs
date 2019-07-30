@@ -29,7 +29,8 @@ namespace Lykke.WalletApiv2.Tests.Constants
             "SecondFactorCheckForbiden",
             "SecondFactorSetupInProgress",
             "SecondFactorAlreadySetup",
-            "MaxAttemptsReached"
+            "MaxAttemptsReached",
+            "InstallationNotFound"
         };
 
         /// <summary>
@@ -87,7 +88,7 @@ namespace Lykke.WalletApiv2.Tests.Constants
                     Assert.Fail($"Error code: \"{errorCodeKey}\" name should match field name!");
 
                 if(!errorCodeNames.Add(errorCodeName))
-                    Assert.Fail($"Error code: \"{errorCodeName}\" should have unique name!"); 
+                    Assert.Fail($"Error code: \"{errorCodeName}\" should have unique name!");
             }
 
             var typeGroups = type.GetNestedTypes();
