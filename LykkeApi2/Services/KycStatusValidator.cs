@@ -15,7 +15,7 @@ namespace LykkeApi2.Services
             {KycStatus.NeedToFillData, KycStatus.Pending};
 
         public KycStatusValidator(
-            IKycStatusService kycStatusService, 
+            IKycStatusService kycStatusService,
             IRequestContext requestContext)
         {
             _kycStatusService = kycStatusService;
@@ -27,6 +27,14 @@ namespace LykkeApi2.Services
             var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             return AcceptedKycStatusesForPersonalDataUpdate.Contains(kycStatus);
+        }
+
+        public async Task<bool> ValidatePersonalDataUpdateForFieldAsync(string value)
+        {
+            var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
+            return kycStatus == KycStatus.Ok && string.IsNullOrEmpty(value) ||
+                   AcceptedKycStatusesForPersonalDataUpdate.Contains(kycStatus);
         }
     }
 }

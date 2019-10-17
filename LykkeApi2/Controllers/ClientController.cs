@@ -344,7 +344,9 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateAddress([FromBody] AddressModel model)
         {
-            var kycStatusValid = await _kycStatusValidator.ValidatePersonalDataUpdateAsync();
+            var pd = await _personalDataService.GetAsync(_requestContext.ClientId);
+
+            var kycStatusValid = await _kycStatusValidator.ValidatePersonalDataUpdateForFieldAsync(pd.Address);
 
             if (!kycStatusValid)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
@@ -391,7 +393,9 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(LykkeApiErrorResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> UpdateZipCode([FromBody] ZipCodeModel model)
         {
-            var kycStatusValid = await _kycStatusValidator.ValidatePersonalDataUpdateAsync();
+            var pd = await _personalDataService.GetAsync(_requestContext.ClientId);
+
+            var kycStatusValid = await _kycStatusValidator.ValidatePersonalDataUpdateForFieldAsync(pd.Zip);
 
             if (!kycStatusValid)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
