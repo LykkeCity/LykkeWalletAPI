@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Common;
@@ -9,8 +7,8 @@ using Core.Services;
 using FluentValidation;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.Assets.Client;
-using Lykke.Service.Balances.Client;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Limitations.Client;
@@ -18,8 +16,6 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.PersonalData.Contract.Models;
-using LykkeApi2.Infrastructure;
-using LykkeApi2.Infrastructure.Extensions;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Http;
 
@@ -32,12 +28,10 @@ namespace LykkeApi2.Models.ValidationModels
         private readonly PaymentLimitsResponse _paymentLimitsResponse;
         private readonly IPersonalData _personalData;
         private readonly IClientAccountClient _clientAccountService;
-        private readonly IBalancesClient _balancesClient;
         private readonly IAssetsService _assetsService;
         private readonly IKycStatusService _kycStatusService;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly string _clientId;
-        private readonly PaymentMethodsResponse _paymentMethods;
 
         public FxPaygatePaymentUrlInputValidationModel(
             IHttpContextAccessor httpContextAccessor,
@@ -46,7 +40,6 @@ namespace LykkeApi2.Models.ValidationModels
             IPaymentSystemClient paymentSystemClient,
             IPersonalDataService personalDataService,
             IClientAccountClient clientAccountService,
-            IBalancesClient balancesClient,
             IAssetsService assetsService,
             IKycStatusService kycStatusService,
             ILimitationsServiceClient limitationsServiceClient)
@@ -54,7 +47,6 @@ namespace LykkeApi2.Models.ValidationModels
             _assetsHelper = assetHelper;
             _assetDisclaimersClient = assetDisclaimersClient;
             _clientAccountService = clientAccountService;
-            _balancesClient = balancesClient;
             _assetsService = assetsService;
             _kycStatusService = kycStatusService;
             _limitationsServiceClient = limitationsServiceClient;
@@ -62,8 +54,6 @@ namespace LykkeApi2.Models.ValidationModels
             _clientId = httpContextAccessor.HttpContext.User?.Identity?.Name;
             _paymentLimitsResponse = paymentSystemClient.GetPaymentLimitsAsync().GetAwaiter().GetResult();
             _personalData = personalDataService.GetAsync(_clientId).GetAwaiter().GetResult();
-
-            _paymentMethods = paymentSystemClient.GetPaymentMethodsAsync(_clientId).GetAwaiter().GetResult();
 
             RegisterRules();
         }
@@ -180,13 +170,6 @@ namespace LykkeApi2.Models.ValidationModels
             return !(await _clientAccountService.ClientSettings.GetDepositBlockSettingsAsync(_clientId)).DepositViaCreditCardBlocked;
         }
 
-        private async Task<bool> IsBackupNotRequired(string value, CancellationToken cancellationToken)
-        {
-            var backupSettings = await _clientAccountService.ClientSettings.GetBackupSettingsAsync(_clientId);
-            var wallets = await _balancesClient.GetClientBalances(_clientId);
-            return wallets.All(x => x.Balance <= 0) || backupSettings.BackupDone;
-        }
-
         private async Task<bool> IsAllowedToCashInViaBankCardAsync(string value, CancellationToken cancellationToken)
         {
             return (await _assetsService.ClientIsAllowedToCashInViaBankCardAsync(_clientId, false, cancellationToken)).Value;
@@ -194,11 +177,12 @@ namespace LykkeApi2.Models.ValidationModels
 
         private async Task<bool> IsKycNotNeeded(string value, CancellationToken cancellationToken)
         {
-            var asset = await _assetsHelper.GetAssetAsync(value);
+            var clientTask = _clientAccountService.ClientAccountInformation.GetByIdAsync(_clientId);
+            var kycStatusTask = _kycStatusService.GetKycStatusAsync(_clientId);
 
-            var userKycStatus = await _kycStatusService.GetKycStatusAsync(_clientId);
+            await Task.WhenAll(clientTask, kycStatusTask);
 
-            return asset?.KycNeeded != true || userKycStatus.IsKycOkOrReviewDone();
+            return !(clientTask.Result.Tier == AccountTier.Beginner && kycStatusTask.Result != KycStatus.Ok);
         }
 
         private async Task<bool> IsValidLimitation(FxPaygatePaymentUrlRequestModel model, double value,
