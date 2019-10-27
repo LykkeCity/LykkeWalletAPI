@@ -4,18 +4,18 @@ using System.Threading.Tasks;
 namespace LykkeApi2.Credentials
 {
     public class ClientAccountLogic
-    {        
+    {
         private readonly IClientAccountClient _clientAccountService;
 
         public ClientAccountLogic(IClientAccountClient clientAccountService)
-        {            
+        {
             _clientAccountService = clientAccountService;
         }
 
         public async Task<bool> IsTraderWithEmailExistsForPartnerAsync(string email, string partnerId = null)
         {
             string partnerIdAccordingToPolicy = await GetPartnerIdAccordingToSettings(partnerId);
-            var result = await _clientAccountService.GetClientByEmailAndPartnerIdAsync(email, partnerIdAccordingToPolicy);
+            var result = await _clientAccountService.ClientAccountInformation.GetClientByEmailAndPartnerIdAsync(email, partnerIdAccordingToPolicy);
             return result != null;
         }
 
@@ -29,7 +29,7 @@ namespace LykkeApi2.Credentials
             bool usePartnerCredentials = false;
             if (!string.IsNullOrEmpty(partnerPublicId))
             {
-                var policy = await _clientAccountService.GetPartnerAccountPolicyAsync(partnerPublicId);
+                var policy = await _clientAccountService.PartnerAccountPolicy.GetPartnerAccountPolicyAsync(partnerPublicId);
                 usePartnerCredentials = policy?.UseDifferentCredentials ?? false;
             }
 

@@ -8,7 +8,6 @@ using Lykke.Common.ApiLibrary.Contract;
 using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Common.Log;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.PushNotifications.Client;
 using Lykke.Service.PushNotifications.Client.Models;
 using LykkeApi2.Infrastructure;
@@ -55,7 +54,7 @@ namespace LykkeApi2.Controllers
         {
             var clientId = _requestContext.ClientId;
 
-            ClientAccountInformationModel client = await _clientAccountClient.GetClientByIdAsync(clientId);
+            var client = await _clientAccountClient.ClientAccountInformation.GetClientByIdAsync(clientId);
 
             try
             {
@@ -88,7 +87,7 @@ namespace LykkeApi2.Controllers
         {
             var clientId = _requestContext.ClientId;
 
-            ClientAccountInformationModel client = await _clientAccountClient.GetClientByIdAsync(clientId);
+            var client = await _clientAccountClient.ClientAccountInformation.GetClientByIdAsync(clientId);
 
             var installation =
                 (await _pushNotificationsClient.Installations.GetByNotificationIdAsync(client.NotificationsId))

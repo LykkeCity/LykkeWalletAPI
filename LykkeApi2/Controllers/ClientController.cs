@@ -52,13 +52,13 @@ namespace LykkeApi2.Controllers
             ILog log,
             IClientSessionsClient clientSessionsClient,
             ILykkeRegistrationClient lykkeRegistrationClient,
-            ClientAccountLogic clientAccountLogic,            
+            ClientAccountLogic clientAccountLogic,
             IRequestContext requestContext,
             IPersonalDataService personalDataService,
             IKycStatusService kycStatusService,
-            IClientAccountClient clientAccountService, 
-            BaseSettings baseSettings, 
-            KycStatusValidator kycStatusValidator, 
+            IClientAccountClient clientAccountService,
+            BaseSettings baseSettings,
+            KycStatusValidator kycStatusValidator,
             IKycProfileService kycProfileService)
         {
             _log = log ?? throw new ArgumentNullException(nameof(log));
@@ -88,7 +88,7 @@ namespace LykkeApi2.Controllers
 
             if (!model.Email.IsValidEmailAndRowKey())
                 return BadRequest(Phrases.InvalidEmailFormat);
-            
+
             if (await _clientAccountLogic.IsTraderWithEmailExistsForPartnerAsync(model.Email, model.PartnerId))
                 return BadRequest(Phrases.ClientWithEmailIsRegistered);
 
@@ -145,7 +145,7 @@ namespace LykkeApi2.Controllers
 
             if (!model.Email.IsValidEmailAndRowKey())
                 return BadRequest(Phrases.InvalidEmailFormat);
-            
+
             var authResult = await _lykkeRegistrationClient.AuthorizeAsync(new AuthModel
             {
                 ClientInfo = model.ClientInfo,
@@ -171,10 +171,10 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> LogOut()
         {
             var session = await _clientSessionsClient.GetAsync(_requestContext.SessionId);
-            
+
             if (session != null)
                 await _clientSessionsClient.DeleteSessionIfExistsAsync(session.SessionToken);
-            
+
             return Ok();
         }
 
@@ -236,7 +236,7 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<FeaturesResponseModel> Features()
         {
-            var features = await _clientAccountService.GetFeaturesAsync(_requestContext.ClientId);
+            var features = await _clientAccountService.ClientSettings.GetFeaturesSettingsAsync(_requestContext.ClientId);
             var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
 
             return new FeaturesResponseModel
@@ -286,13 +286,13 @@ namespace LykkeApi2.Controllers
         {
             var kycStatusValid = await _kycStatusValidator.ValidatePersonalDataUpdateAsync();
 
-            if (!kycStatusValid) 
+            if (!kycStatusValid)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
 
             var changes = new KycPersonalDataChanges { Changer = Startup.ComponentName, Items = new Dictionary<string, JToken>() };
 
             changes.Items.Add(nameof(model.DateOfBirth), model.DateOfBirth);
-           
+
             await _kycProfileService.UpdatePersonalDataAsync(_requestContext.ClientId, changes);
 
             return Ok();

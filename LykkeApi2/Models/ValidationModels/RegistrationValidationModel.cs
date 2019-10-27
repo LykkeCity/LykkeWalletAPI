@@ -7,13 +7,13 @@ using LykkeApi2.Strings;
 namespace LykkeApi2.Models.ValidationModels
 {
     public class RegistrationValidationModel : AbstractValidator<AccountRegistrationModel>
-    {        
+    {
         private readonly IClientAccountClient _clientAccountService;
-        
+
         public RegistrationValidationModel(IClientAccountClient clientAccountService)
-        {            
+        {
             _clientAccountService = clientAccountService;
-            
+
             RuleFor(reg => reg.Email).NotNull();
             RuleFor(reg => reg.Hint).ValidHintValue();
             RuleFor(reg => reg.Email).Must(IsEmaiVerified).WithMessage(Phrases.EmailNotVerified);
@@ -23,7 +23,8 @@ namespace LykkeApi2.Models.ValidationModels
 
         private bool IsEmaiVerified(AccountRegistrationModel instance, string value)
         {
-            return _clientAccountService.IsEmailVerifiedAsync(instance.Email, instance.PartnerId).Result ?? false;
+            return _clientAccountService.ClientAccountInformation.GetClientByEmailAndPartnerIdAsync(instance.Email, instance.PartnerId)
+                       .Result?.IsEmailVerified ?? false;
         }
 
         //private bool IsTraderWithEmailExistsForPartner(AccountRegistrationModel instance, string foo)

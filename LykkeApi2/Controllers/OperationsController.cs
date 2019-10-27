@@ -170,7 +170,7 @@ namespace LykkeApi2.Controllers
             }
 
             var balance = await _balancesClient.GetClientBalanceByAssetId(new ClientBalanceByAssetIdModel(cmd.AssetId, _requestContext.ClientId));
-            var cashoutSettings = await _clientAccountClient.GetCashOutBlockAsync(_requestContext.ClientId);
+            var cashoutSettings = await _clientAccountClient.ClientSettings.GetCashOutBlockSettingsAsync(_requestContext.ClientId);
             var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             if (_baseSettings.EnableTwoFactor)
@@ -186,7 +186,7 @@ namespace LykkeApi2.Controllers
                         throw LykkeApiErrorException.Forbidden(LykkeApiErrorCodes.Service.TwoFactorRequired);
                 }
             }
-            
+
             var operationId = id ?? Guid.NewGuid();
 
             var cashoutCommand = new CreateCashoutCommand

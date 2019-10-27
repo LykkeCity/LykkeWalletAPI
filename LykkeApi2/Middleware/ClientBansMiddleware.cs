@@ -31,7 +31,7 @@ namespace LykkeApi2.Middleware
 
                 if (!string.IsNullOrEmpty(clientId))
                 {
-                    clientBanned = await _clientAccountClient.IsClientBannedAsync(clientId);
+                    clientBanned = await _clientAccountClient.BannedClients.IsClientBannedAsync(clientId);
                 }
             }
             catch (Exception ex)

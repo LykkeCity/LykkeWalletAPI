@@ -62,7 +62,7 @@ namespace LykkeApi2.Models.ValidationModels
             _clientId = httpContextAccessor.HttpContext.User?.Identity?.Name;
             _paymentLimitsResponse = paymentSystemClient.GetPaymentLimitsAsync().GetAwaiter().GetResult();
             _personalData = personalDataService.GetAsync(_clientId).GetAwaiter().GetResult();
-            
+
             _paymentMethods = paymentSystemClient.GetPaymentMethodsAsync(_clientId).GetAwaiter().GetResult();
 
             RegisterRules();
@@ -79,14 +79,14 @@ namespace LykkeApi2.Models.ValidationModels
                 .WithMessage((x, y) =>
                 {
                     var asset = _assetsHelper.GetAssetAsync(x.AssetId).GetAwaiter().GetResult();
-                    
+
                     return string.Format(Phrases.PaymentIsLessThanMinLimit, _paymentLimitsResponse.FxpaygateMinValue, asset.DisplayId ?? asset.Id);
                 });
             RuleFor(reg => reg.Amount).Must(x => x <= _paymentLimitsResponse.FxpaygateMaxValue)
                 .WithMessage((x, y) =>
                 {
                     var asset = _assetsHelper.GetAssetAsync(x.AssetId).GetAwaiter().GetResult();
-                    
+
                     return string.Format(Phrases.PaymentIsMoreThanMaxLimit, _paymentLimitsResponse.FxpaygateMaxValue, asset.DisplayId ?? asset.Id);
                 });
             RuleFor(reg => reg.Amount).MustAsync(IsValidLimitation).WithMessage(Phrases.LimitIsExceeded);
@@ -177,12 +177,12 @@ namespace LykkeApi2.Models.ValidationModels
 
         private async Task<bool> IsDepositViaCreditCardNotBlocked(string value, CancellationToken cancellationToken)
         {
-            return !(await _clientAccountService.GetDepositBlockAsync(_clientId)).DepositViaCreditCardBlocked;
+            return !(await _clientAccountService.ClientSettings.GetDepositBlockSettingsAsync(_clientId)).DepositViaCreditCardBlocked;
         }
 
         private async Task<bool> IsBackupNotRequired(string value, CancellationToken cancellationToken)
         {
-            var backupSettings = await _clientAccountService.GetBackupAsync(_clientId);
+            var backupSettings = await _clientAccountService.ClientSettings.GetBackupSettingsAsync(_clientId);
             var wallets = await _balancesClient.GetClientBalances(_clientId);
             return wallets.All(x => x.Balance <= 0) || backupSettings.BackupDone;
         }

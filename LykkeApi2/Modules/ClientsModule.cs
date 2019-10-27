@@ -57,7 +57,7 @@ namespace LykkeApi2.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterLykkeServiceClient(_settings.ClientAccountServiceUrl);
+            builder.RegisterClientAccountClient(_settings.ClientAccountServiceUrl);
 
             builder.RegisterType<HftInternalServiceAPI>()
                 .As<IHftInternalServiceAPI>()
