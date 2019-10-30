@@ -114,6 +114,10 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<KycCountryValidator>()
                 .AsSelf();
+
+            builder.RegisterType<KycCheckService>()
+                .As<IKycCheckService>()
+                .SingleInstance();
         }
     }
 }

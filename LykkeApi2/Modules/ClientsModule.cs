@@ -35,6 +35,7 @@ using Lykke.Service.Limitations.Client;
 using Lykke.Service.MarketProfile.Client;
 using Lykke.Service.PushNotifications.Client;
 using Lykke.Service.SwiftCredentials.Client;
+using Lykke.Service.Tier.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -152,6 +153,8 @@ namespace LykkeApi2.Modules
             #endregion
 
             builder.RegisterPushNotificationsClient(_apiSettings.CurrentValue.PushNotificationsServiceClient.ServiceUrl);
+
+            builder.RegisterTierClient(_apiSettings.CurrentValue.TierServiceClient);
 
             builder.Populate(_services);
         }
