@@ -16,6 +16,7 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.Service.PushNotifications.Client;
 using Lykke.Service.SwiftCredentials.Client;
+using Lykke.Service.Tier.Client;
 using Lykke.SettingsReader.ReloadingManager;
 using LykkeApi2;
 using NUnit.Framework;
@@ -61,7 +62,8 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 BlockchainCashoutPreconditionsCheckServiceClient =
                     new BlockchainCashoutPreconditionsCheckServiceClientSettings { ServiceUrl = MockUrl },
                 BlockchainSettingsServiceClient = new BlockchainSettingsServiceClientSettings() { ServiceUrl = MockUrl, ApiKey = "123"},
-                PushNotificationsServiceClient = new PushNotificationsServiceClientSettings {ServiceUrl = MockUrl}
+                PushNotificationsServiceClient = new PushNotificationsServiceClientSettings {ServiceUrl = MockUrl},
+                TierServiceClient = new TierServiceClientSettings {ServiceUrl = MockUrl}
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
 
