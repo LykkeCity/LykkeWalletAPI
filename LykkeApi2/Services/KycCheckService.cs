@@ -32,11 +32,11 @@ namespace LykkeApi2.Services
                 case KycStatus.JumioInProgress:
                 case KycStatus.JumioOk:
                 case KycStatus.JumioFailed:
+                case KycStatus.ReviewDone:
                     return true;
                 case KycStatus.Pending:
                     var tierInfo = await _tierClient.Tiers.GetClientTierInfoAsync(clientId);
                     return tierInfo.CurrentTier.Current > tierInfo.CurrentTier.MaxLimit;
-                case KycStatus.ReviewDone:
                 case KycStatus.Ok:
                     return false;
                 default:
