@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Core.Services;
+using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Tier.Client;
@@ -36,7 +37,7 @@ namespace LykkeApi2.Services
                     return true;
                 case KycStatus.Pending:
                     var tierInfo = await _tierClient.Tiers.GetClientTierInfoAsync(clientId);
-                    return tierInfo.CurrentTier.Current > tierInfo.CurrentTier.MaxLimit;
+                    return tierInfo.CurrentTier.Tier == AccountTier.Beginner || tierInfo.CurrentTier.Current > tierInfo.CurrentTier.MaxLimit;
                 case KycStatus.Ok:
                     return false;
                 default:
