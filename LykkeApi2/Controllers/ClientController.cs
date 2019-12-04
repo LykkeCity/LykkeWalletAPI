@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Common;
 using Common.Log;
 using Core.Constants;
-using Core.Services;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Strings;
 using Lykke.Common.ApiLibrary.Exceptions;
+using Lykke.Common.Log;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using Lykke.Service.Kyc.Abstractions.Services;
@@ -43,7 +43,7 @@ namespace LykkeApi2.Controllers
         private readonly ILykkeRegistrationClient _lykkeRegistrationClient;
         private readonly IClientSessionsClient _clientSessionsClient;
         private readonly ClientAccountLogic _clientAccountLogic;
-        private readonly IKycCheckService _kycCheckService;
+        private readonly IKycStatusService _kycStatusService;
         private readonly IRequestContext _requestContext;
         private readonly IPersonalDataService _personalDataService;
         private readonly IClientAccountClient _clientAccountService;
@@ -58,7 +58,7 @@ namespace LykkeApi2.Controllers
             ClientAccountLogic clientAccountLogic,
             IRequestContext requestContext,
             IPersonalDataService personalDataService,
-            IKycCheckService kycCheckService,
+            IKycStatusService kycStatusService,
             IClientAccountClient clientAccountService,
             BaseSettings baseSettings,
             KycStatusValidator kycStatusValidator,
@@ -68,7 +68,7 @@ namespace LykkeApi2.Controllers
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
             _clientSessionsClient = clientSessionsClient;
             _clientAccountLogic = clientAccountLogic;
-            _kycCheckService = kycCheckService;
+            _kycStatusService = kycStatusService;
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
             _personalDataService = personalDataService ?? throw new ArgumentNullException(nameof(personalDataService));
             _clientAccountService = clientAccountService;
@@ -215,7 +215,7 @@ namespace LykkeApi2.Controllers
             try
             {
                 var personalDataTask = _personalDataService.GetAsync(_requestContext.ClientId);
-                var isKycNeededTask = _kycCheckService.IsKycNeededAsync(_requestContext.ClientId);
+                var isKycNeededTask = _kycStatusService.IsKycNeededAsync(_requestContext.ClientId);
 
                 await Task.WhenAll(personalDataTask, isKycNeededTask);
 
@@ -234,7 +234,7 @@ namespace LykkeApi2.Controllers
             }
             catch (Exception e)
             {
-                _log.WriteError(nameof(UserInfo), $"clientId = {_requestContext.ClientId}", e);
+                _log.Error(e, $"clientId = {_requestContext.ClientId}");
 
                 return StatusCode((int) HttpStatusCode.InternalServerError);
             }

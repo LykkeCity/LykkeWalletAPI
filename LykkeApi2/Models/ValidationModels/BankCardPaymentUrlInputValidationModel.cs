@@ -8,6 +8,7 @@ using FluentValidation;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
@@ -26,7 +27,7 @@ namespace LykkeApi2.Models.ValidationModels
         private readonly IPersonalData _personalData;
         private readonly IClientAccountClient _clientAccountService;
         private readonly IAssetsService _assetsService;
-        private readonly IKycCheckService _kycCheckService;
+        private readonly IKycStatusService _kycStatusService;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly string _clientId;
 
@@ -38,14 +39,14 @@ namespace LykkeApi2.Models.ValidationModels
             IPersonalDataService personalDataService,
             IClientAccountClient clientAccountService,
             IAssetsService assetsService,
-            IKycCheckService kycCheckService,
+            IKycStatusService kycStatusService,
             ILimitationsServiceClient limitationsServiceClient)
         {
             _assetsHelper = assetHelper;
             _assetDisclaimersClient = assetDisclaimersClient;
             _clientAccountService = clientAccountService;
             _assetsService = assetsService;
-            _kycCheckService = kycCheckService;
+            _kycStatusService = kycStatusService;
             _limitationsServiceClient = limitationsServiceClient;
 
             _clientId = httpContextAccessor.HttpContext.User?.Identity?.Name;
@@ -174,7 +175,7 @@ namespace LykkeApi2.Models.ValidationModels
 
         private async Task<bool> IsKycNotNeeded(string value, CancellationToken cancellationToken)
         {
-            var isKycNeeded = await _kycCheckService.IsKycNeededAsync(_clientId);
+            var isKycNeeded = await _kycStatusService.IsKycNeededAsync(_clientId);
             return !isKycNeeded;
         }
 

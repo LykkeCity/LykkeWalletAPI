@@ -10,6 +10,7 @@ using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.ClientDialogs.Client.Models;
 using Lykke.Service.FeeCalculator.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
@@ -37,7 +38,7 @@ namespace LykkeApi2.Controllers
         private readonly IAssetsHelper _assetsHelper;
         private readonly IClientDialogsClient _clientDialogsClient;
         private readonly ISwiftCredentialsClient _swiftCredentialsClient;
-        private readonly IKycCheckService _kycCheckService;
+        private readonly IKycStatusService _kycStatusService;
         private readonly IPersonalDataService _personalDataService;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
         private readonly IRequestContext _requestContext;
@@ -51,7 +52,7 @@ namespace LykkeApi2.Controllers
             IBlockchainWalletsClient blockchainWalletsClient,
             IClientDialogsClient clientDialogsClient,
             ISwiftCredentialsClient swiftCredentialsClient,
-            IKycCheckService kycCheckService,
+            IKycStatusService kycStatusService,
             IPersonalDataService personalDataService,
             ILimitationsServiceClient limitationsServiceClient,
             IRequestContext requestContext,
@@ -63,7 +64,7 @@ namespace LykkeApi2.Controllers
             _blockchainWalletsClient = blockchainWalletsClient;
             _clientDialogsClient = clientDialogsClient;
             _swiftCredentialsClient = swiftCredentialsClient;
-            _kycCheckService = kycCheckService;
+            _kycStatusService = kycStatusService;
             _personalDataService = personalDataService;
             _limitationsServiceClient = limitationsServiceClient;
             _requestContext = requestContext;
@@ -164,7 +165,7 @@ namespace LykkeApi2.Controllers
             if(model.Amount <= 0 || model.Amount != decimal.Round(model.Amount, asset.Accuracy))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
 
-            var isKycNeeded = await _kycCheckService.IsKycNeededAsync(_requestContext.ClientId);
+            var isKycNeeded = await _kycStatusService.IsKycNeededAsync(_requestContext.ClientId);
 
             if (isKycNeeded)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
@@ -205,7 +206,7 @@ namespace LykkeApi2.Controllers
             if(!asset.SwiftDepositEnabled || !assetsAvailableToClient.Contains(assetId))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
 
-            var isKycNeeded = await _kycCheckService.IsKycNeededAsync(_requestContext.ClientId);
+            var isKycNeeded = await _kycStatusService.IsKycNeededAsync(_requestContext.ClientId);
 
             if (isKycNeeded)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
@@ -249,7 +250,7 @@ namespace LykkeApi2.Controllers
             if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.PendingDialogs);
 
-            var isKycNeded = await _kycCheckService.IsKycNeededAsync(_requestContext.ClientId);
+            var isKycNeded = await _kycStatusService.IsKycNeededAsync(_requestContext.ClientId);
 
             if (isKycNeded)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
@@ -304,7 +305,7 @@ namespace LykkeApi2.Controllers
             if (pendingDialogs.Any(dialog => dialog.ConditionType == DialogConditionType.Predeposit))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.PendingDialogs);
 
-            var isKycNeeded = await _kycCheckService.IsKycNeededAsync(_requestContext.ClientId);
+            var isKycNeeded = await _kycStatusService.IsKycNeededAsync(_requestContext.ClientId);
 
             if (isKycNeeded)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
