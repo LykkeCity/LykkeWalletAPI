@@ -90,7 +90,7 @@ namespace LykkeApi2.Controllers
             var client = await _clientAccountClient.ClientAccountInformation.GetClientByIdAsync(clientId);
 
             var installation =
-                (await _pushNotificationsClient.Installations.GetByNotificationIdAsync(client.NotificationsId))
+                (await _pushNotificationsClient.Installations.GetByClientIdAsync(clientId))
                 .FirstOrDefault(x => x.PushChannel == pushChannel);
 
             if (installation == null)
@@ -98,7 +98,7 @@ namespace LykkeApi2.Controllers
 
             await _pushNotificationsClient.Installations.RemoveAsync(new InstallationRemoveModel
             {
-                NotificationId = client.NotificationsId,
+                ClientId = client.NotificationsId,
                 InstallationId = installation.InstallationId
             });
 
