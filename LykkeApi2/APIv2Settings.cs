@@ -8,6 +8,7 @@ using Lykke.Service.ConfirmationCodes.Client;
 using Lykke.Service.Kyc.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
+using Lykke.Service.PushNotifications.Client;
 using Lykke.Service.SwiftCredentials.Client;
 using Lykke.SettingsReader.Attributes;
 
@@ -33,6 +34,7 @@ namespace LykkeApi2
         public ClientDialogsServiceClientSettings ClientDialogsServiceClient { set; get; }
         public SwiftCredentialsServiceClientSettings SwiftCredentialsServiceClient { set; get; }
         public ConfirmationCodesServiceClientSettings ConfirmationCodesClient { set; get; }
+        public PushNotificationsServiceClientSettings PushNotificationsServiceClient { get; set; }
         public SagasRabbitMq SagasRabbitMq { set; get; }
         public SwaggerSettings SwaggerSettings { get; set; }
         public Lykke.Service.BlockchainSettings.Client.BlockchainSettingsServiceClientSettings BlockchainSettingsServiceClient { get; set; }
