@@ -24,7 +24,8 @@ namespace LykkeApi2.Models.ValidationModels.RegistrationValidations
         private bool IsEmaiVerified(AccountRegistrationModel instance, string value)
         {
             return !_deploymentSettings.IsProduction ||
-                   (_clientAccountService.IsEmailVerifiedAsync(instance.Email, instance.PartnerId).Result ?? false);
+                   (_clientAccountService.ClientAccountInformation.GetClientByEmailAndPartnerIdAsync(instance.Email, instance.PartnerId)
+                        .Result?.IsEmailVerified ?? false);
         }
 
         private void RegisterRules()
