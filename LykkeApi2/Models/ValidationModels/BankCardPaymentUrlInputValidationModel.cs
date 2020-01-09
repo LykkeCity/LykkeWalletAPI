@@ -1,25 +1,22 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Common;
 using Core.Constants;
 using Core.Services;
 using FluentValidation;
+using FluentValidation.Validators;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.Assets.Client;
-using Lykke.Service.Balances.Client;
+using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using Lykke.Service.Kyc.Abstractions.Services;
-using Lykke.Service.Limitations.Client;
 using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.PersonalData.Contract.Models;
-using LykkeApi2.Infrastructure;
-using LykkeApi2.Infrastructure.Extensions;
+using Lykke.Service.RateCalculator.Client;
+using Lykke.Service.Tier.Client;
 using LykkeApi2.Strings;
 using Microsoft.AspNetCore.Http;
 
@@ -32,12 +29,11 @@ namespace LykkeApi2.Models.ValidationModels
         private readonly PaymentLimitsResponse _paymentLimitsResponse;
         private readonly IPersonalData _personalData;
         private readonly IClientAccountClient _clientAccountService;
-        private readonly IBalancesClient _balancesClient;
         private readonly IAssetsService _assetsService;
         private readonly IKycStatusService _kycStatusService;
-        private readonly ILimitationsServiceClient _limitationsServiceClient;
+        private readonly ITierClient _tierClient;
+        private readonly IRateCalculatorClient _rateCalculatorClient;
         private readonly string _clientId;
-        private readonly PaymentMethodsResponse _paymentMethods;
 
         public FxPaygatePaymentUrlInputValidationModel(
             IHttpContextAccessor httpContextAccessor,
@@ -46,25 +42,27 @@ namespace LykkeApi2.Models.ValidationModels
             IPaymentSystemClient paymentSystemClient,
             IPersonalDataService personalDataService,
             IClientAccountClient clientAccountService,
-            IBalancesClient balancesClient,
             IAssetsService assetsService,
             IKycStatusService kycStatusService,
-            ILimitationsServiceClient limitationsServiceClient)
+            ITierClient tierClient,
+            IRateCalculatorClient rateCalculatorClient)
         {
             _assetsHelper = assetHelper;
             _assetDisclaimersClient = assetDisclaimersClient;
             _clientAccountService = clientAccountService;
-            _balancesClient = balancesClient;
             _assetsService = assetsService;
             _kycStatusService = kycStatusService;
-            _limitationsServiceClient = limitationsServiceClient;
+            _tierClient = tierClient;
+            _rateCalculatorClient = rateCalculatorClient;
 
             _clientId = httpContextAccessor.HttpContext.User?.Identity?.Name;
-            _paymentLimitsResponse = paymentSystemClient.GetPaymentLimitsAsync().GetAwaiter().GetResult();
-            _personalData = personalDataService.GetAsync(_clientId).GetAwaiter().GetResult();
-            
-            _paymentMethods = paymentSystemClient.GetPaymentMethodsAsync(_clientId).GetAwaiter().GetResult();
+            var paymentLimitsTask = paymentSystemClient.GetPaymentLimitsAsync();
+            var pdTask = personalDataService.GetAsync(_clientId);
 
+            Task.WhenAll(paymentLimitsTask, pdTask).GetAwaiter().GetResult();
+
+            _paymentLimitsResponse = paymentLimitsTask.Result;
+            _personalData = pdTask.Result;
             RegisterRules();
         }
 
@@ -75,21 +73,16 @@ namespace LykkeApi2.Models.ValidationModels
 
             RuleFor(reg => reg.Amount).Must(x => x > 0)
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Amount)));
+
             RuleFor(reg => reg.Amount).Must(x => x >= _paymentLimitsResponse.FxpaygateMinValue)
                 .WithMessage((x, y) =>
                 {
                     var asset = _assetsHelper.GetAssetAsync(x.AssetId).GetAwaiter().GetResult();
-                    
+
                     return string.Format(Phrases.PaymentIsLessThanMinLimit, _paymentLimitsResponse.FxpaygateMinValue, asset.DisplayId ?? asset.Id);
                 });
-            RuleFor(reg => reg.Amount).Must(x => x <= _paymentLimitsResponse.FxpaygateMaxValue)
-                .WithMessage((x, y) =>
-                {
-                    var asset = _assetsHelper.GetAssetAsync(x.AssetId).GetAwaiter().GetResult();
-                    
-                    return string.Format(Phrases.PaymentIsMoreThanMaxLimit, _paymentLimitsResponse.FxpaygateMaxValue, asset.DisplayId ?? asset.Id);
-                });
-            RuleFor(reg => reg.Amount).MustAsync(IsValidLimitation).WithMessage(Phrases.LimitIsExceeded);
+
+            RuleFor(reg => reg).CustomAsync(IsMaxAmountValidAsync);
 
             RuleFor(reg => reg.FirstName).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.FirstName)));
@@ -177,14 +170,7 @@ namespace LykkeApi2.Models.ValidationModels
 
         private async Task<bool> IsDepositViaCreditCardNotBlocked(string value, CancellationToken cancellationToken)
         {
-            return !(await _clientAccountService.GetDepositBlockAsync(_clientId)).DepositViaCreditCardBlocked;
-        }
-
-        private async Task<bool> IsBackupNotRequired(string value, CancellationToken cancellationToken)
-        {
-            var backupSettings = await _clientAccountService.GetBackupAsync(_clientId);
-            var wallets = await _balancesClient.GetClientBalances(_clientId);
-            return wallets.All(x => x.Balance <= 0) || backupSettings.BackupDone;
+            return !(await _clientAccountService.ClientSettings.GetDepositBlockSettingsAsync(_clientId)).DepositViaCreditCardBlocked;
         }
 
         private async Task<bool> IsAllowedToCashInViaBankCardAsync(string value, CancellationToken cancellationToken)
@@ -194,22 +180,51 @@ namespace LykkeApi2.Models.ValidationModels
 
         private async Task<bool> IsKycNotNeeded(string value, CancellationToken cancellationToken)
         {
-            var asset = await _assetsHelper.GetAssetAsync(value);
-
-            var userKycStatus = await _kycStatusService.GetKycStatusAsync(_clientId);
-
-            return asset?.KycNeeded != true || userKycStatus.IsKycOkOrReviewDone();
+            var isKycNeeded = await _kycStatusService.IsKycNeededAsync(_clientId);
+            return !isKycNeeded;
         }
 
-        private async Task<bool> IsValidLimitation(FxPaygatePaymentUrlRequestModel model, double value,
-            CancellationToken cancellationToken)
+        private async Task IsMaxAmountValidAsync(FxPaygatePaymentUrlRequestModel model, CustomContext context, CancellationToken cancellationToken)
         {
-            var checkResult = await _limitationsServiceClient.CheckAsync(
-                _clientId,
-                model.AssetId,
-                value,
-                CurrencyOperationType.CardCashIn);
-            return checkResult.IsValid;
+            var tierInfo = await _tierClient.Tiers.GetClientTierInfoAsync(_clientId);
+
+            var maxLimitTask = GetAmountInOperationAssetAsync(tierInfo.CurrentTier.Asset, model.AssetId, tierInfo.CurrentTier.MaxLimit);
+            var currentDepositTask = GetAmountInOperationAssetAsync(tierInfo.CurrentTier.Asset, model.AssetId, tierInfo.CurrentTier.Current);
+            var assetTask = _assetsHelper.GetAssetAsync(model.AssetId);
+
+            await Task.WhenAll(maxLimitTask, currentDepositTask, assetTask);
+
+            double maxLimit = maxLimitTask.Result;
+            double currentDeposit = currentDepositTask.Result;
+            Asset asset = assetTask.Result;
+            double allowedToMax = maxLimit - currentDeposit;
+            double maxAmountPerTransaction = 0;
+
+            maxAmountPerTransaction = maxLimit < _paymentLimitsResponse.CreditVouchersMaxValue
+                ? maxLimit
+                : _paymentLimitsResponse.CreditVouchersMaxValue;
+
+            if (model.Amount > maxAmountPerTransaction)
+            {
+                context.AddFailure(nameof(model.Amount), $"Per transaction, you can deposit up to {maxAmountPerTransaction:F2} {asset.DisplayId ?? asset.Id}");
+                return;
+            }
+
+            string upgradeAccountText = tierInfo.NextTier != null
+                ? "If you wish to increase limit, just upgrade your account"
+                : string.Empty;
+
+            if (allowedToMax > 0 && model.Amount > allowedToMax)
+            {
+                context.AddFailure(nameof(model.Amount), $"You can deposit up to {allowedToMax:F2} {asset.DisplayId ?? asset.Id}. {upgradeAccountText}");
+            }
+        }
+
+        private async Task<double> GetAmountInOperationAssetAsync(string tierAssetId, string assetId, double amount)
+        {
+            return tierAssetId == assetId
+                ? amount
+                : await _rateCalculatorClient.GetAmountInBaseAsync(tierAssetId, amount, assetId);
         }
     }
 }

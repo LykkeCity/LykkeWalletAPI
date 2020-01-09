@@ -36,6 +36,7 @@ using Lykke.Service.IndicesFacade.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.PushNotifications.Client;
 using Lykke.Service.SwiftCredentials.Client;
+using Lykke.Service.Tier.Client;
 
 namespace LykkeApi2.Modules
 {
@@ -58,7 +59,7 @@ namespace LykkeApi2.Modules
 
         protected override void Load(ContainerBuilder builder)
         {
-            builder.RegisterLykkeServiceClient(_settings.ClientAccountServiceUrl);
+            builder.RegisterClientAccountClient(_settings.ClientAccountServiceUrl);
 
             builder.RegisterType<HftInternalServiceAPI>()
                 .As<IHftInternalServiceAPI>()
@@ -155,6 +156,8 @@ namespace LykkeApi2.Modules
             #endregion
 
             builder.RegisterPushNotificationsClient(_apiSettings.CurrentValue.PushNotificationsServiceClient.ServiceUrl);
+
+            builder.RegisterTierClient(_apiSettings.CurrentValue.TierServiceClient);
 
             builder.Populate(_services);
         }

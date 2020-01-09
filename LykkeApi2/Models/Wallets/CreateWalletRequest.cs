@@ -1,4 +1,4 @@
-﻿using Lykke.Service.ClientAccount.Client.AutorestClient.Models;
+﻿using Lykke.Service.ClientAccount.Client.Models;
 
 namespace LykkeApi2.Models.Wallets
 {

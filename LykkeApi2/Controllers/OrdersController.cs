@@ -277,7 +277,7 @@ namespace LykkeApi2.Controllers
                 throw;
             }
 
-            return Created(Url.Action("Get", "Operations", new { id }), id);                  
+            return Created(Url.Action("Get", "Operations", new { id }), id);
         }
 
         [HttpPost("stoplimit")]
@@ -416,14 +416,21 @@ namespace LykkeApi2.Controllers
 
         private async Task<ClientModel> GetClientModel()
         {
-            var personalData = await _personalDataService.GetAsync(_requestContext.ClientId);
+            var personalDataTask = _personalDataService.GetAsync(_requestContext.ClientId);
+            var cashoutBlockTask = _clientAccountClient.ClientSettings.GetCashOutBlockSettingsAsync(_requestContext.ClientId);
+            var backupDoneTask = _clientAccountClient.ClientSettings.GetBackupSettingsAsync(_requestContext.ClientId);
+            var kycStatusTask = _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
+
+            await Task.WhenAll(personalDataTask, cashoutBlockTask, backupDoneTask, kycStatusTask);
+
+            var personalData = personalDataTask.Result;
 
             return new ClientModel
             {
                 Id = new Guid(_requestContext.ClientId),
-                TradesBlocked = (await _clientAccountClient.GetCashOutBlockAsync(personalData.Id)).TradesBlocked,
-                BackupDone = (await _clientAccountClient.GetBackupAsync(personalData.Id)).BackupDone,
-                KycStatus = (await _kycStatusService.GetKycStatusAsync(personalData.Id)).ToString(),
+                TradesBlocked = cashoutBlockTask.Result.TradesBlocked,
+                BackupDone = backupDoneTask.Result.BackupDone,
+                KycStatus = kycStatusTask.Result.ToString(),
                 PersonalData = new PersonalDataModel
                 {
                     Country = personalData.Country,

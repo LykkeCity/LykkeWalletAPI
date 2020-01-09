@@ -17,6 +17,8 @@ using Lykke.Job.HistoryExportBuilder.Contract;
 using Lykke.Job.HistoryExportBuilder.Contract.Commands;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientAccount.Client.Models;
+using Lykke.Service.ClientAccount.Client.Models.Response.Wallets;
 using Lykke.Service.History.Client;
 using Lykke.Service.History.Contracts.Enums;
 using LykkeApi2.Models.Blockchain;
@@ -117,13 +119,13 @@ namespace LykkeApi2.Controllers
                     types.Add(result);
             }
 
-            var wallet = await _clientAccountService.GetWalletAsync(walletId);
+            var wallet = await _clientAccountService.Wallets.GetWalletAsync(walletId);
 
             if (wallet == null || wallet.ClientId != clientId)
                 return NotFound();
 
             // TODO: remove after migration to wallet id
-            if (wallet.Type == "Trading")
+            if (wallet.Type == WalletType.Trading)
                 walletId = clientId;
 
             var data = await _historyClient.HistoryApi.GetHistoryByWalletAsync(Guid.Parse(walletId), types.ToArray(),
@@ -162,13 +164,13 @@ namespace LykkeApi2.Controllers
 
             var clientId = _requestContext.ClientId;
 
-            var wallet = await _clientAccountService.GetWalletAsync(walletId);
+            var wallet = await _clientAccountService.Wallets.GetWalletAsync(walletId);
 
             if (wallet == null || wallet.ClientId != clientId)
                 return NotFound();
 
             // TODO: remove after migration to wallet id
-            if (wallet.Type == "Trading")
+            if (wallet.Type == WalletType.Trading)
                 walletId = clientId;
 
             var data = await _historyClient.TradesApi.GetTradesByWalletAsync(Guid.Parse(walletId),
@@ -209,13 +211,13 @@ namespace LykkeApi2.Controllers
 
             var clientId = _requestContext.ClientId;
 
-            var wallet = await _clientAccountService.GetWalletAsync(walletId);
+            var wallet = await _clientAccountService.Wallets.GetWalletAsync(walletId);
 
             if (wallet == null || wallet.ClientId != clientId)
                 return NotFound();
 
             // TODO: remove after migration to wallet id
-            if (wallet.Type == "Trading")
+            if (wallet.Type == WalletType.Trading)
                 walletId = clientId;
 
             if (operation.Length == 0)
