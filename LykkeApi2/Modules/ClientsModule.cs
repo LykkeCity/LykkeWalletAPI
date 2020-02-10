@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Lykke.MarketProfileService.Client;
@@ -13,6 +12,7 @@ using Lykke.Service.PersonalData.Contract;
 using Common.Log;
 using Core.Blockchain;
 using LkeServices.Blockchain;
+using Lykke.Exchange.Api.MarketData.Contract;
 using Lykke.HttpClientGenerator.Caching;
 using Lykke.MatchingEngine.Connector.Services;
 using Lykke.Service.Assets.Client;
@@ -158,6 +158,8 @@ namespace LykkeApi2.Modules
             builder.RegisterPushNotificationsClient(_apiSettings.CurrentValue.PushNotificationsServiceClient.ServiceUrl);
 
             builder.RegisterTierClient(_apiSettings.CurrentValue.TierServiceClient);
+
+            builder.RegisterMarketDataClient(_apiSettings.CurrentValue.MarketDataServiceClient);
 
             builder.Populate(_services);
         }

@@ -29,5 +29,7 @@
         /// The actual Ask price for the asset pair.
         /// </summary>
         public decimal Ask { get; set; }
+        public decimal High { get; set; }
+        public decimal Low { get; set; }
     }
 }
