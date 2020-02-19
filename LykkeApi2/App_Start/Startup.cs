@@ -161,7 +161,7 @@ namespace LykkeApi2
                         await next.Invoke();
                     }
                 });
-                
+
                 app.UseLykkeMiddleware(ComponentName, ex => new { message = "Technical problem" });
 
                 if (env.IsDevelopment())
