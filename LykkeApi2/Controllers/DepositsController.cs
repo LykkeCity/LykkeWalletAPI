@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Core.Constants;
 using Core.Services;
 using Lykke.Common.ApiLibrary.Exceptions;
+using Lykke.Payments.Link4Pay;
 using Lykke.Service.BlockchainWallets.Client;
+using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.ClientDialogs.Client.Models;
 using Lykke.Service.FeeCalculator.Client;
@@ -33,6 +35,7 @@ namespace LykkeApi2.Controllers
     public class DepositsController : Controller
     {
         private readonly IPaymentSystemClient _paymentSystemService;
+        private readonly Link4PayService.Link4PayServiceClient _link4PayServiceClient;
         private readonly IFeeCalculatorClient _feeCalculatorClient;
         private readonly IBlockchainWalletsClient _blockchainWalletsClient;
         private readonly IAssetsHelper _assetsHelper;
@@ -41,12 +44,14 @@ namespace LykkeApi2.Controllers
         private readonly IKycStatusService _kycStatusService;
         private readonly IPersonalDataService _personalDataService;
         private readonly ILimitationsServiceClient _limitationsServiceClient;
+        private readonly IClientAccountClient _clientAccountClient;
         private readonly IRequestContext _requestContext;
         private readonly ISrvBlockchainHelper _srvBlockchainHelper;
         private readonly ISet<string> _coloredAssetIds;
 
         public DepositsController(
             IPaymentSystemClient paymentSystemService,
+            Link4PayService.Link4PayServiceClient link4PayServiceClient,
             IFeeCalculatorClient feeCalculatorClient,
             IAssetsHelper assetsHelper,
             IBlockchainWalletsClient blockchainWalletsClient,
@@ -55,10 +60,12 @@ namespace LykkeApi2.Controllers
             IKycStatusService kycStatusService,
             IPersonalDataService personalDataService,
             ILimitationsServiceClient limitationsServiceClient,
+            IClientAccountClient clientAccountClient,
             IRequestContext requestContext,
             ISrvBlockchainHelper srvBlockchainHelper)
         {
             _paymentSystemService = paymentSystemService;
+            _link4PayServiceClient = link4PayServiceClient;
             _feeCalculatorClient = feeCalculatorClient;
             _assetsHelper = assetsHelper;
             _blockchainWalletsClient = blockchainWalletsClient;
@@ -67,6 +74,7 @@ namespace LykkeApi2.Controllers
             _kycStatusService = kycStatusService;
             _personalDataService = personalDataService;
             _limitationsServiceClient = limitationsServiceClient;
+            _clientAccountClient = clientAccountClient;
             _requestContext = requestContext;
             _srvBlockchainHelper = srvBlockchainHelper;
 
@@ -118,27 +126,50 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(FxPaygatePaymentUrlResponseModel), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> PostFxPaygate([FromBody] FxPaygatePaymentUrlRequestModel input)
         {
-            var result = await _paymentSystemService.GetUrlDataAsync(
-                _requestContext.ClientId,
-                input.Amount,
-                input.AssetId,
-                input.WalletId,
-                input.FirstName,
-                input.LastName,
-                input.City,
-                input.Zip,
-                input.Address,
-                input.Country,
-                input.Email,
-                input.Phone,
-                DepositOption.BankCard,
-                input.OkUrl,
-                input.FailUrl,
-                input.CancelUrl);
+            var clientInfo = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(_requestContext.ClientId);
+
+            var result = await _link4PayServiceClient.GetPaymentUrlAsync(new PaymentUrlRequest
+            {
+                Transaction = new Transaction
+                {
+                    TransactionId = Guid.NewGuid().ToString(),
+                    Amount = input.Amount,
+                    AssetId = input.AssetId,
+                    ClientId = _requestContext.ClientId,
+                    ExternalClientId = clientInfo.ExternalId
+                },
+                Details = new DetailsInfo
+                {
+                    FirstName = input.FirstName,
+                    LastName = input.LastName,
+                    Email = input.Email,
+                    Phone = input.Phone,
+                    CountryIso3 = input.Country
+                },
+                Urls = new UrlsInfo
+                {
+                    OkUrl = input.OkUrl,
+                    CancelUrl = input.CancelUrl,
+                    FailUrl = input.FailUrl
+                }
+            });
+
+            if (result.Error != null)
+            {
+                if (result.Error.ErrorType == ErrorDetails.Types.ErrorType.CurrencyNotSupported)
+                {
+                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
+                }
+
+                if (result.Error.ErrorType == ErrorDetails.Types.ErrorType.CountryNotSupported)
+                {
+                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.CountryUnavailable);
+                }
+            }
 
             var resp = new FxPaygatePaymentUrlResponseModel
             {
-                Url = result.Url,
+                Url = result.PaymentUrl,
                 CancelUrl = result.CancelUrl,
                 FailUrl = result.FailUrl,
                 OkUrl = result.OkUrl

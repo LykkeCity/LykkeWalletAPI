@@ -16,6 +16,7 @@ namespace Lykke.WalletApiv2.Tests.Constants
             "ClientNotFound",
             "AssetNotFound",
             "AssetUnavailable",
+            "CountryUnavailable",
             "PendingDialogs",
             "BlockchainWalletDepositAddressNotGenerated",
             "BlockchainWalletDepositAddressAlreadyGenerated",
@@ -87,7 +88,7 @@ namespace Lykke.WalletApiv2.Tests.Constants
                     Assert.Fail($"Error code: \"{errorCodeKey}\" name should match field name!");
 
                 if(!errorCodeNames.Add(errorCodeName))
-                    Assert.Fail($"Error code: \"{errorCodeName}\" should have unique name!"); 
+                    Assert.Fail($"Error code: \"{errorCodeName}\" should have unique name!");
             }
 
             var typeGroups = type.GetNestedTypes();

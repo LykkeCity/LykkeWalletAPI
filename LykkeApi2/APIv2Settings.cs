@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Lykke.Exchange.Api.MarketData.Contract;
+using Lykke.Payments.Link4Pay.Contract;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
@@ -42,6 +43,7 @@ namespace LykkeApi2
         public SwaggerSettings SwaggerSettings { get; set; }
         public Lykke.Service.BlockchainSettings.Client.BlockchainSettingsServiceClientSettings BlockchainSettingsServiceClient { get; set; }
         public MarketDataServiceClientSettings MarketDataServiceClient { get; set; }
+        public Link4PayServiceClientSettings Link4PayServiceClient { get; set; }
     }
 
     public class SwaggerSettings
