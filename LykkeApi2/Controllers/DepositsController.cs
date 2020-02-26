@@ -100,6 +100,27 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
+        /// Get transaction information
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("fxpaygate/{transactionId}")]
+        [ProducesResponseType(typeof(TransactionInfoResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> GetTransactionInfo(string transactionId)
+        {
+            TransactionInfoResponse result =
+                await _link4PayServiceClient.GetTransactionInfoAsync(new TransactionRequest
+                {
+                    TransactionId = transactionId
+                });
+
+            return string.IsNullOrEmpty(result.AssetId)
+                ? (IActionResult) NotFound()
+                : Ok(result);
+        }
+
+        /// <summary>
         /// Get fee amount
         /// </summary>
         /// <returns>Fee amount</returns>
