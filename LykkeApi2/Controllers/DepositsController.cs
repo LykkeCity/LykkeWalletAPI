@@ -92,8 +92,21 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("fxpaygate/last")]
+        [Obsolete("use /api/deposits/last")]
         [ProducesResponseType(typeof(PaymentTransactionResponse), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetLastFxPaygate()
+        public Task<IActionResult> GetLastFxPaygate()
+        {
+            return GetLastTransaction();
+        }
+
+        /// <summary>
+        /// Get last PaymentTransaction
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("last")]
+        [ProducesResponseType(typeof(PaymentTransactionResponse), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetLastTransaction()
         {
             var result = await _paymentSystemService.GetLastByDateAsync(_requestContext.ClientId);
             return Ok(result);
@@ -104,7 +117,7 @@ namespace LykkeApi2.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("fxpaygate/{transactionId}")]
+        [Route("{transactionId}")]
         [ProducesResponseType(typeof(TransactionInfoResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetTransactionInfo(string transactionId)
@@ -126,11 +139,24 @@ namespace LykkeApi2.Controllers
         /// <returns>Fee amount</returns>
         [HttpGet]
         [Route("fxpaygate/fee")]
-        [ProducesResponseType(typeof(FxPaygateFeeModel), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetFxPaygateFee()
+        [Obsolete("use /api/deposits/bankCard/fee")]
+        [ProducesResponseType(typeof(BankCardFeeModel), (int)HttpStatusCode.OK)]
+        public Task<IActionResult> GetFxPaygateFee()
+        {
+            return GetBankCardFee();
+        }
+
+        /// <summary>
+        /// Get fee amount
+        /// </summary>
+        /// <returns>Fee amount</returns>
+        [HttpGet]
+        [Route("bankCard/fee")]
+        [ProducesResponseType(typeof(BankCardFeeModel), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetBankCardFee()
         {
             return Ok(
-                new FxPaygateFeeModel
+                new BankCardFeeModel
                 {
                     Amount = (await _feeCalculatorClient.GetBankCardFees()).Percentage
                 });
@@ -143,9 +169,24 @@ namespace LykkeApi2.Controllers
         /// <returns>Returns with Url for PaymentSystem</returns>
         [HttpPost]
         [Route("fxpaygate")]
+        [Obsolete("use /api/deposits/paymentUrl")]
         [SwaggerOperation("Post")]
-        [ProducesResponseType(typeof(FxPaygatePaymentUrlResponseModel), (int) HttpStatusCode.OK)]
-        public async Task<IActionResult> PostFxPaygate([FromBody] FxPaygatePaymentUrlRequestModel input)
+        [ProducesResponseType(typeof(PaymentUrlResponseModel), (int) HttpStatusCode.OK)]
+        public Task<IActionResult> PostFxPaygate([FromBody] PaymentUrlRequestModel input)
+        {
+            return GetPaymentUrl(input);
+        }
+
+        /// <summary>
+        /// Get Url for PaymentSystem
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns>Returns with Url for PaymentSystem</returns>
+        [HttpPost]
+        [Route("paymentUrl")]
+        [SwaggerOperation("GetPaymentUrl")]
+        [ProducesResponseType(typeof(PaymentUrlResponseModel), (int) HttpStatusCode.OK)]
+        public async Task<IActionResult> GetPaymentUrl([FromBody] PaymentUrlRequestModel input)
         {
             var clientInfo = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(_requestContext.ClientId);
 
@@ -188,7 +229,7 @@ namespace LykkeApi2.Controllers
                 }
             }
 
-            var resp = new FxPaygatePaymentUrlResponseModel
+            var resp = new PaymentUrlResponseModel
             {
                 Url = result.PaymentUrl,
                 CancelUrl = result.CancelUrl,

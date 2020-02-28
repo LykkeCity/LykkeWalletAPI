@@ -110,7 +110,7 @@ namespace LykkeApi2.Controllers
                 {
                     model.PaymentMethods.Add(new PaymentMethod
                      {
-                         Assets = availableToClient.ToList(),
+                         Assets = availableToClient,
                          Available = method.Available,
                          Name = method.Name
                      });

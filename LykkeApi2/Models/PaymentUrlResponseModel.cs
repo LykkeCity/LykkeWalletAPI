@@ -1,6 +1,6 @@
 ﻿namespace LykkeApi2.Models
 {
-    public class FxPaygatePaymentUrlResponseModel
+    public class PaymentUrlResponseModel
     {
         public string Url { get; set; }
         public string OkUrl { get; set; }
