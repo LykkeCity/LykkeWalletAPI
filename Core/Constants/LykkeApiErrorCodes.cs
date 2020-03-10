@@ -40,6 +40,13 @@ namespace Core.Constants
                     " The requested asset is unavailable for the current action.");
 
             /// <summary>
+            ///     The requested country is unavailable for the current action.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode CountryUnavailable =
+                new LykkeApiErrorCode(nameof(CountryUnavailable),
+                    " The requested country is unavailable for the current action.");
+
+            /// <summary>
             ///     One or more dialogs need to be confirmed before the current action.
             /// </summary>
             public static readonly ILykkeApiErrorCode
@@ -56,7 +63,7 @@ namespace Core.Constants
             public static readonly ILykkeApiErrorCode BlockchainWalletDepositAddressAlreadyGenerated =
                 new LykkeApiErrorCode(nameof(BlockchainWalletDepositAddressAlreadyGenerated),
                     "The address is already generated.");
-            
+
             /// <summary>
             ///     The client's KYC level is insufficient for the current action.
             /// </summary>
@@ -93,19 +100,19 @@ namespace Core.Constants
             /// </summary>
             public static readonly ILykkeApiErrorCode SecondFactorCheckForbiden =
                 new LykkeApiErrorCode(nameof(SecondFactorCheckForbiden), "2FA check forbidden.");
-            
+
             /// <summary>
             ///     Two factor verification is already in the progress should be enabled.
             /// </summary>
             public static readonly ILykkeApiErrorCode SecondFactorSetupInProgress =
                 new LykkeApiErrorCode(nameof(SecondFactorSetupInProgress), "2FA setup is in progress.");
-            
+
             /// <summary>
             ///     Two factor authentication already setup.
             /// </summary>
             public static readonly ILykkeApiErrorCode SecondFactorAlreadySetup =
                 new LykkeApiErrorCode(nameof(SecondFactorAlreadySetup), "2FA already setup.");
-            
+
             /// <summary>
             ///     Max number of attempts reached
             /// </summary>

@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace LykkeApi2.Models
 {
-    public class FxPaygatePaymentUrlRequestModel
+    public class PaymentUrlRequestModel
     {
         /// <summary>
         /// Amount in currency defined by CurrencyCode

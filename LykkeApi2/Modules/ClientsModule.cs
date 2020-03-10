@@ -15,6 +15,7 @@ using LkeServices.Blockchain;
 using Lykke.Exchange.Api.MarketData.Contract;
 using Lykke.HttpClientGenerator.Caching;
 using Lykke.MatchingEngine.Connector.Services;
+using Lykke.Payments.Link4Pay.Contract;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.FeeCalculator.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -160,6 +161,7 @@ namespace LykkeApi2.Modules
             builder.RegisterTierClient(_apiSettings.CurrentValue.TierServiceClient);
 
             builder.RegisterMarketDataClient(_apiSettings.CurrentValue.MarketDataServiceClient);
+            builder.RegisterLink4PayClient(_apiSettings.CurrentValue.Link4PayServiceClient);
 
             builder.Populate(_services);
         }

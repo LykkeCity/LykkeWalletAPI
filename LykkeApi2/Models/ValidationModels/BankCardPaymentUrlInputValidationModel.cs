@@ -22,7 +22,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace LykkeApi2.Models.ValidationModels
 {
-    public class FxPaygatePaymentUrlInputValidationModel : AbstractValidator<FxPaygatePaymentUrlRequestModel>
+    public class FxPaygatePaymentUrlInputValidationModel : AbstractValidator<PaymentUrlRequestModel>
     {
         private readonly IAssetsHelper _assetsHelper;
         private readonly IAssetDisclaimersClient _assetDisclaimersClient;
@@ -184,7 +184,7 @@ namespace LykkeApi2.Models.ValidationModels
             return !isKycNeeded;
         }
 
-        private async Task IsMaxAmountValidAsync(FxPaygatePaymentUrlRequestModel model, CustomContext context, CancellationToken cancellationToken)
+        private async Task IsMaxAmountValidAsync(PaymentUrlRequestModel model, CustomContext context, CancellationToken cancellationToken)
         {
             var tierInfo = await _tierClient.Tiers.GetClientTierInfoAsync(_clientId);
 
