@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
@@ -77,7 +78,7 @@ namespace LykkeApi2.Controllers
 
         private decimal GetValue(string value)
         {
-            return decimal.TryParse(value, out var result) ? result : 0m;
+            return decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : 0m;
         }
     }
 }
