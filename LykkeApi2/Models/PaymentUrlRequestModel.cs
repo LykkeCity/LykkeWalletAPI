@@ -15,8 +15,11 @@ namespace LykkeApi2.Models
         public string WalletId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
+        [CanBeNull]
         public string City { get; set; }
+        [CanBeNull]
         public string Zip { get; set; }
+        [CanBeNull]
         public string Address { get; set; }
         public string Country { get; set; }
         public string Email { get; set; }
