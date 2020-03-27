@@ -92,18 +92,12 @@ namespace LykkeApi2.Models.ValidationModels
             RuleFor(reg => reg.LastName).Must(x => !string.IsNullOrEmpty(x))
                 .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.LastName)));
 
-            RuleFor(reg => reg.City).Must(x => !string.IsNullOrEmpty(x))
-                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.City)));
             RuleFor(reg => reg.City).MaximumLength(LykkeConstants.MaxCityLength)
                 .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxCityLength));
 
-            RuleFor(reg => reg.Zip).Must(x => !string.IsNullOrEmpty(x))
-                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Zip)));
             RuleFor(reg => reg.Zip).MaximumLength(LykkeConstants.MaxZipLength)
                 .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxZipLength));
 
-            RuleFor(reg => reg.Address).Must(x => !string.IsNullOrEmpty(x))
-                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Address)));
             RuleFor(reg => reg.Address).MaximumLength(LykkeConstants.MaxAddressLength)
                 .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxAddressLength));
 
