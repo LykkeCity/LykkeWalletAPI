@@ -188,7 +188,12 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(PaymentUrlResponseModel), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> GetPaymentUrl([FromBody] PaymentUrlRequestModel input)
         {
-            var clientInfo = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(_requestContext.ClientId);
+            var clientInfoTask = _clientAccountClient.ClientAccountInformation.GetByIdAsync(_requestContext.ClientId);
+            var pdTask = _personalDataService.GetAsync(_requestContext.ClientId);
+
+            await Task.WhenAll(clientInfoTask, pdTask);
+
+            var pd = pdTask.Result;
 
             var result = await _link4PayServiceClient.GetPaymentUrlAsync(new PaymentUrlRequest
             {
@@ -198,15 +203,15 @@ namespace LykkeApi2.Controllers
                     Amount = input.Amount,
                     AssetId = input.AssetId,
                     ClientId = _requestContext.ClientId,
-                    ExternalClientId = clientInfo.ExternalId
+                    ExternalClientId = clientInfoTask.Result.ExternalId
                 },
                 Details = new DetailsInfo
                 {
-                    FirstName = input.FirstName,
-                    LastName = input.LastName,
-                    Email = input.Email,
-                    Phone = input.Phone,
-                    CountryIso3 = input.Country
+                    FirstName = pd.FirstName,
+                    LastName = pd.LastName,
+                    Email = pd.Email,
+                    Phone = pd.ContactPhone,
+                    CountryIso3 = pd.CountryFromPOA
                 },
                 Urls = new UrlsInfo
                 {

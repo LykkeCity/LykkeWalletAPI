@@ -84,42 +84,6 @@ namespace LykkeApi2.Models.ValidationModels
 
             RuleFor(reg => reg).CustomAsync(IsMaxAmountValidAsync);
 
-            RuleFor(reg => reg.FirstName).Must(x => !string.IsNullOrEmpty(x))
-                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.FirstName)));
-            RuleFor(reg => reg.FirstName).Must((x, y) => x.FirstName.Length + x.LastName.Length < LykkeConstants.MaxFullNameLength)
-                .WithMessage(x => string.Format(Phrases.FullNameLengthFormat, LykkeConstants.MaxFullNameLength));
-
-            RuleFor(reg => reg.LastName).Must(x => !string.IsNullOrEmpty(x))
-                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.LastName)));
-
-            RuleFor(reg => reg.City).MaximumLength(LykkeConstants.MaxCityLength)
-                .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxCityLength));
-
-            RuleFor(reg => reg.Zip).MaximumLength(LykkeConstants.MaxZipLength)
-                .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxZipLength));
-
-            RuleFor(reg => reg.Address).MaximumLength(LykkeConstants.MaxAddressLength)
-                .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxAddressLength));
-
-            RuleFor(reg => reg.Country).Must(x => !string.IsNullOrEmpty(x))
-                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Country)));
-
-            RuleFor(reg => reg.Email).Must(x => !string.IsNullOrEmpty(x))
-                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Email)));
-            RuleFor(reg => reg.Email).MaximumLength(LykkeConstants.MaxEmailLength)
-                .WithMessage(x => string.Format(Phrases.MaxLength, LykkeConstants.MaxEmailLength));
-            RuleFor(reg => reg.Email).EmailAddress().Must(IsValidPartitionOrRowKey)
-                .WithMessage(x => Phrases.InvalidEmailFormat);
-            RuleFor(reg => reg.Email).Must(IsValidPersonalEmail)
-                .WithMessage(x => string.Format(Phrases.NotMatchWithPersonalData, nameof(x.Email)));
-
-            RuleFor(reg => reg.Phone).Must(x => !string.IsNullOrEmpty(x))
-                .WithMessage(x => string.Format(Phrases.FieldShouldNotBeEmptyFormat, nameof(x.Phone)));
-            RuleFor(reg => reg.Phone).Must(IsValidPhoneNumberE164)
-                .WithMessage(x => Phrases.InvalidNumberFormat);
-            RuleFor(reg => reg.Phone).Must(IsValidPersonalContactPhone)
-                .WithMessage(x => string.Format(Phrases.NotMatchWithPersonalData, nameof(x.Phone)));
-
             RuleFor(reg => reg.WalletId).MustAsync(IsDepositViaCreditCardNotBlocked)
                 .WithMessage(x => Phrases.OperationProhibited);
 
