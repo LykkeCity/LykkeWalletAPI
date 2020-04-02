@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -129,9 +130,9 @@ namespace LykkeApi2.Controllers
                 {
                     AssetId = asset.Id,
                     AssetDisplayId = asset.DisplayId,
-                    FeeSize = fee.Size.ToString($"F{asset.Accuracy}").TrimEnd('0'),
+                    FeeSize = ((decimal)fee.Size).ToString(CultureInfo.InvariantCulture),
                     FeeType = fee.Type,
-                    MinCashoutAmount = asset.CashoutMinimalAmount.ToString($"F{asset.Accuracy}").TrimEnd('0'),
+                    MinCashoutAmount = ((decimal)asset.CashoutMinimalAmount).ToString(CultureInfo.InvariantCulture),
                 });
             }
 
