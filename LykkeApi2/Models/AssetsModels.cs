@@ -64,7 +64,7 @@ namespace LykkeApi2.Models
     public class AssetDescriptionsModel
     {
         public IEnumerable<AssetDescriptionModel> Descriptions { get; set; }
-        
+
         public static AssetDescriptionsModel Create(IEnumerable<AssetDescriptionModel> descriptions)
         {
             return new AssetDescriptionsModel
@@ -97,5 +97,12 @@ namespace LykkeApi2.Models
                 AssetIds = assetIds
             };
         }
+    }
+
+    public class AssetMinOrderAmountModel
+    {
+        public string AssetId { get; set; }
+        public string AssetDisplayId { get; set; }
+        public double MinOrderAmount { get; set; }
     }
 }

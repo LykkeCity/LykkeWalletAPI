@@ -11,6 +11,15 @@ namespace LykkeApi2.Models.Withdrawals
         public WithdrawalFeeType Type { set; get; }
     }
 
+    public class WithdrawalCashoutFeeModel
+    {
+        public string AssetId { get; set; }
+        public string AssetDisplayId { get; set; }
+        public string FeeSize { set; get; }
+        public FeeType FeeType { set; get; }
+        public string MinCashoutAmount { set; get; }
+    }
+
     [JsonConverter(typeof (StringEnumConverter))]
     public enum WithdrawalFeeType
     {
@@ -24,7 +33,7 @@ namespace LykkeApi2.Models.Withdrawals
         {
             if (fee == null)
                 return null;
-            
+
             if(fee.Type == FeeType.Unknown)
                 throw new Exception($"{fee.AssetId} has fee type set to {fee.Type}");
 

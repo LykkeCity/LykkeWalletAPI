@@ -11,6 +11,7 @@ using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Contract.Requests;
 using Lykke.Service.BlockchainWallets.Client;
+using Lykke.Service.FeeCalculator.AutorestClient.Models;
 using Lykke.Service.FeeCalculator.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Withdrawals;
@@ -93,6 +94,48 @@ namespace LykkeApi2.Controllers
             var fee = await _feeCalculatorClient.GetCashoutFeeAsync(asset.Id);
 
             return Ok(fee.ToApiModel());
+        }
+
+        /// <summary>
+        /// Get fees for crypto withdrawal
+        /// </summary>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet("crypto/fees")]
+        [ProducesResponseType(typeof(List<WithdrawalCashoutFeeModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetCryptoFees()
+        {
+            var assetsTask = _assetsHelper.GetAllAssetsAsync();
+            var feesTask = _feeCalculatorClient.GetCashoutFeesAsync();
+
+            await Task.WhenAll(assetsTask, feesTask);
+
+            var assets = assetsTask.Result
+                .Where(x => !x.IsDisabled)
+                .ToList();
+
+            var cashoutFees = feesTask.Result;
+
+            var result = new List<WithdrawalCashoutFeeModel>();
+
+            foreach (var fee in cashoutFees)
+            {
+                var asset = assets.FirstOrDefault(x => x.Id == fee.AssetId);
+
+                if (asset == null)
+                    continue;
+
+                result.Add(new WithdrawalCashoutFeeModel
+                {
+                    AssetId = asset.Id,
+                    AssetDisplayId = asset.DisplayId,
+                    FeeSize = fee.Size.ToString($"F{asset.Accuracy}").TrimEnd('0'),
+                    FeeType = fee.Type,
+                    MinCashoutAmount = asset.CashoutMinimalAmount.ToString($"F{asset.Accuracy}").TrimEnd('0'),
+                });
+            }
+
+            return Ok(result);
         }
 
         /// <summary>

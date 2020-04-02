@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -47,6 +48,41 @@ namespace LykkeApi2.Controllers
                         .OrderBy(x => x.DisplayId == null)
                         .ThenBy(x => x.DisplayId)
                         .ToArray()));
+        }
+
+        /// <summary>
+        /// Get assets minimum order amount.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("minOrderAmount")]
+        [ProducesResponseType(typeof(List<AssetMinOrderAmountModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetAssetMinOrderAmount()
+        {
+            var assetPairsTask = _assetsHelper.GetAllAssetPairsAsync();
+            var assetsTask = _assetsHelper.GetAllAssetsAsync();
+
+            await Task.WhenAll(assetPairsTask, assetsTask);
+
+            var assetPairs = assetPairsTask.Result;
+            var assetIds = assetPairs.Where(x => !x.IsDisabled)
+                .Select(x => x.BaseAssetId)
+                .Distinct().ToList();
+
+            var assets = assetsTask.Result.Where(x => assetIds.Contains(x.Id)).ToList();
+
+            var result = new List<AssetMinOrderAmountModel>();
+
+            foreach (var asset in assets)
+            {
+                result.Add(new AssetMinOrderAmountModel
+                {
+                    AssetId = asset.Id,
+                    AssetDisplayId = asset.DisplayId,
+                    MinOrderAmount = assetPairs.First(x => x.BaseAssetId == asset.Id).MinVolume
+                });
+            }
+
+            return Ok(result);
         }
 
         /// <summary>
