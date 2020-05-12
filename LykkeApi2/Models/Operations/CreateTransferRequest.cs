@@ -8,5 +8,6 @@ namespace LykkeApi2.Models.Operations
         public decimal Amount { get; set; }
         public Guid SourceWalletId { get; set; }
         public Guid WalletId { get; set; }
+        public string Code2Fa { get; set; }
     }
 }
