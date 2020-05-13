@@ -37,22 +37,21 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Create new api-key for existing wallet.
         /// </summary>
-        /// <param name="walletId">wallet Id</param>
-        /// <param name="walletId">2Fa code</param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPut("{walletId}/{code}/regenerateKey")]
+        [HttpPut("regenerateKey")]
         [ProducesResponseType(typeof(CreateApiKeyResponse), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(Google2FaResultModel<CreateApiKeyResponse>), (int)HttpStatusCode.NotFound)]
         [SwaggerOperation("RegenerateKey")]
-        public async Task<IActionResult> RegenerateKey(string walletId, string code)
+        public async Task<IActionResult> RegenerateKey([FromBody]RegenerateKeyRequestModel request)
         {
-            var check2FaResult = await _google2FaService.Check2FaAsync<CreateApiKeyResponse>(_requestContext.ClientId, code);
+            var check2FaResult = await _google2FaService.Check2FaAsync<CreateApiKeyResponse>(_requestContext.ClientId, request.Code);
 
             if (check2FaResult != null)
                 return Ok(check2FaResult);
 
             var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
-            var existingApiKey = clientKeys.FirstOrDefault(x => x.Wallet == walletId);
+            var existingApiKey = clientKeys.FirstOrDefault(x => x.Wallet == request.Id);
 
             if (existingApiKey != null)
             {
