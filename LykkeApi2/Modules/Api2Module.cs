@@ -88,6 +88,7 @@ namespace LykkeApi2.Modules
             builder.RegisterType<AssetsHelper>().As<IAssetsHelper>().SingleInstance();
 
             builder.RegisterType<SrvBlockchainHelper>().As<ISrvBlockchainHelper>().SingleInstance();
+            builder.RegisterType<Google2FaService>().SingleInstance();
 
             BindServices(builder, _settings);
 

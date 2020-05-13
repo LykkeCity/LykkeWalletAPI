@@ -17,7 +17,9 @@ using Lykke.Service.Operations.Contracts.Commands;
 using Lykke.Service.Operations.Contracts.Cashout;
 using Lykke.Service.Operations.Contracts.SwiftCashout;
 using LykkeApi2.Infrastructure;
+using LykkeApi2.Models._2Fa;
 using LykkeApi2.Models.Operations;
+using LykkeApi2.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Rest;
 using Refit;
@@ -40,6 +42,7 @@ namespace LykkeApi2.Controllers
         private readonly ICqrsEngine _cqrsEngine;
         private readonly IRequestContext _requestContext;
         private readonly IConfirmationCodesClient _confirmationCodesClient;
+        private readonly Google2FaService _google2FaService;
 
         public OperationsController(
             IAssetsServiceWithCache assetsServiceWithCache,
@@ -51,7 +54,8 @@ namespace LykkeApi2.Controllers
             IOperationsClient operationsClient,
             ICqrsEngine cqrsEngine,
             IRequestContext requestContext,
-            IConfirmationCodesClient confirmationCodesClient)
+            IConfirmationCodesClient confirmationCodesClient,
+            Google2FaService google2FaService)
         {
             _assetsServiceWithCache = assetsServiceWithCache;
             _balancesClient = balancesClient;
@@ -63,6 +67,7 @@ namespace LykkeApi2.Controllers
             _cqrsEngine = cqrsEngine;
             _requestContext = requestContext;
             _confirmationCodesClient = confirmationCodesClient;
+            _google2FaService = google2FaService;
         }
 
         /// <summary>
@@ -95,31 +100,6 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
-        /// Create transfer operation (obsolete)
-        /// </summary>
-        /// <param name="cmd"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [Obsolete]
-        [HttpPost]
-        [Route("transfer/{id}")]
-        public async Task<IActionResult> TransferOld([FromBody]CreateTransferRequest cmd, Guid id)
-        {
-            await _operationsClient.Transfer(id,
-                new CreateTransferCommand
-                {
-                    ClientId = new Guid(_requestContext.ClientId),
-                    Amount = cmd.Amount,
-                    SourceWalletId =
-                    cmd.SourceWalletId,
-                    WalletId = cmd.WalletId,
-                    AssetId = cmd.AssetId
-                });
-
-            return Created(Url.Action("Get", new { id }), id);
-        }
-
-        /// <summary>
         /// Create transfer operation
         /// </summary>
         /// <param name="cmd"></param>
@@ -127,9 +107,14 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("transfer")]
-        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(Google2FaResultModel<string>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> Transfer([FromBody]CreateTransferRequest cmd, [FromQuery] Guid? id)
         {
+            var check2FaResult = await _google2FaService.Check2FaAsync<string>(_requestContext.ClientId, cmd.Code2Fa);
+
+            if (check2FaResult != null)
+                return Ok(check2FaResult);
+
             var operationId = id ?? Guid.NewGuid();
 
             await _operationsClient.Transfer(operationId,
@@ -143,7 +128,7 @@ namespace LykkeApi2.Controllers
                     AssetId = cmd.AssetId
                 });
 
-            return Created(Url.Action("Get", new { operationId }), operationId);
+            return Ok(Google2FaResultModel<string>.Success(id.ToString()));
         }
 
         /// <summary>
