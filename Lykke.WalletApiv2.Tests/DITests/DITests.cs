@@ -5,6 +5,7 @@ using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System.Linq;
+using Lykke.Exchange.Api.MarketData.Contract;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
@@ -63,7 +64,8 @@ namespace Lykke.WalletApiv2.Tests.DITests
                     new BlockchainCashoutPreconditionsCheckServiceClientSettings { ServiceUrl = MockUrl },
                 BlockchainSettingsServiceClient = new BlockchainSettingsServiceClientSettings() { ServiceUrl = MockUrl, ApiKey = "123"},
                 PushNotificationsServiceClient = new PushNotificationsServiceClientSettings {ServiceUrl = MockUrl},
-                TierServiceClient = new TierServiceClientSettings {ServiceUrl = MockUrl}
+                TierServiceClient = new TierServiceClientSettings {ServiceUrl = MockUrl},
+                MarketDataServiceClient = new MarketDataServiceClientSettings{ServiceUrl = MockUrl, GrpcServiceUrl = MockUrl}
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
 
