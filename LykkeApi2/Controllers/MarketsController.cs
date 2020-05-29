@@ -1,9 +1,6 @@
-﻿using System.Globalization;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
-using Lykke.Exchange.Api.MarketData;
+using LykkeApi2.Services;
 using Microsoft.AspNetCore.Mvc;
 using MarketSlice = LykkeApi2.Models.Markets.MarketSlice;
 
@@ -13,13 +10,13 @@ namespace LykkeApi2.Controllers
     [ApiController]
     public class MarketsController : Controller
     {
-        private readonly MarketDataService.MarketDataServiceClient _marketDataServiceClient;
+        private readonly MarketDataCacheService _marketDataService;
 
         public MarketsController(
-            MarketDataService.MarketDataServiceClient marketDataServiceClient
+            MarketDataCacheService marketDataService
             )
         {
-            _marketDataServiceClient = marketDataServiceClient;
+            _marketDataService = marketDataService;
         }
 
         /// <summary>
@@ -28,22 +25,10 @@ namespace LykkeApi2.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MarketSlice[]), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
-        public async Task<IActionResult> Get()
+        public IActionResult Get()
         {
-            MarketDataResponse response = await _marketDataServiceClient.GetMarketDataAsync(new Empty());
-            var result = response.Items.Select(x => new MarketSlice
-            {
-                AssetPair = x.AssetPairId,
-                PriceChange24H = GetValue(x.PriceChange),
-                Volume24H = GetValue(x.VolumeBase),
-                LastPrice = GetValue(x.LastPrice),
-                Bid = GetValue(x.Bid),
-                Ask = GetValue(x.Ask),
-                High = GetValue(x.High),
-                Low = GetValue(x.Low)
-            });
-
-            return Ok(result);
+            var marketData = _marketDataService.GetAll();
+            return Ok(marketData);
         }
 
         /// <summary>
@@ -58,27 +43,12 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(assetPairId))
                 return BadRequest("Please, specify the target asset pair id.");
 
-            var result = await _marketDataServiceClient.GetAssetPairMarketDataAsync(new MarketDataRequest{AssetPairId = assetPairId});
+            var result = _marketDataService.Get(assetPairId);
 
             if (result == null)
                 return BadRequest("Market state is missing for given asset pair.");
 
-            return Ok(new MarketSlice
-            {
-                AssetPair = result.AssetPairId,
-                PriceChange24H = GetValue(result.PriceChange),
-                Volume24H = GetValue(result.VolumeBase),
-                LastPrice = GetValue(result.LastPrice),
-                Bid = GetValue(result.Bid),
-                Ask = GetValue(result.Ask),
-                High = GetValue(result.High),
-                Low = GetValue(result.Low)
-            });
-        }
-
-        private decimal GetValue(string value)
-        {
-            return decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : 0m;
+            return Ok(result);
         }
     }
 }

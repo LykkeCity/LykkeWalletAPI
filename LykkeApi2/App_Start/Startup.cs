@@ -21,6 +21,7 @@ using Lykke.Common;
 using Lykke.Cqrs;
 using LykkeApi2.Infrastructure.LykkeApiError;
 using LykkeApi2.Middleware;
+using LykkeApi2.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -235,7 +236,7 @@ namespace LykkeApi2
             try
             {
                 // NOTE: Service can't receive and process requests here, so you can destroy all resources
-
+                ApplicationContainer.Resolve<MarketDataCacheService>().Stop();
                 Log?.WriteMonitor("", AppEnvironment.EnvInfo, "Terminating");
 
                 ApplicationContainer.Dispose();
