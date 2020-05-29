@@ -26,9 +26,8 @@ namespace LykkeApi2.Services
             )
         {
             _marketDataServiceClient = marketDataServiceClient;
-            _timerTrigger = new TimerTrigger(nameof(MarketDataCacheService), TimeSpan.FromSeconds(10), log);
+            _timerTrigger = new TimerTrigger(nameof(MarketDataCacheService), TimeSpan.FromSeconds(1), log);
             _timerTrigger.Triggered += Execute;
-
         }
 
         public void Start()
