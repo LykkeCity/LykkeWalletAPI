@@ -115,6 +115,12 @@ namespace LykkeApi2.Modules
 
             builder.RegisterType<KycCountryValidator>()
                 .AsSelf();
+
+            builder.RegisterType<MarketDataCacheService>()
+                .As<IStartable>()
+                .AsSelf()
+                .AutoActivate()
+                .SingleInstance();
         }
     }
 }
