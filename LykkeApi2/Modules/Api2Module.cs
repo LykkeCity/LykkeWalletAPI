@@ -121,6 +121,8 @@ namespace LykkeApi2.Modules
                 .AsSelf()
                 .AutoActivate()
                 .SingleInstance();
+
+            builder.RegisterInstance(settings.SessionCheck);
         }
     }
 }

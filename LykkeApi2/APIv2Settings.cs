@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
 using Lykke.Exchange.Api.MarketData.Contract;
 using Lykke.Payments.Link4Pay.Contract;
 using Lykke.Service.Affiliate.Client;
@@ -114,6 +116,8 @@ namespace LykkeApi2
         public int MaxTwoFactorConfirmationAttempts { get; set; }
         [Optional]
         public bool? IsMtDisabled { get; set; }
+
+        public SessionCheckSettings SessionCheck { get; set; }
     }
 
     public class IcoSettings
@@ -214,6 +218,11 @@ namespace LykkeApi2
         {
             return string.Format(settings.OrderBooksCacheKeyPattern, assetPairId, isBuy);
         }
+    }
+
+    public class SessionCheckSettings
+    {
+        public IReadOnlyList<string> SkipPaths { get; set; } = Array.Empty<string>();
     }
 }
 

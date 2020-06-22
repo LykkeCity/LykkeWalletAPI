@@ -76,7 +76,7 @@ namespace LykkeApi2.Modules
                 .As<ILykkeRegistrationClient>()
                 .WithParameter("serviceUrl", _settings.RegistrationUrl);
 
-            builder.RegisterClientSessionClient(_apiSettings.CurrentValue.WalletApiv2.Services.SessionUrl, _log);
+            builder.RegisterClientSessionClient(new SessionServiceClientSettings{ ServiceUrl = _apiSettings.CurrentValue.WalletApiv2.Services.SessionUrl });
 
             builder.RegisterType<PersonalDataService>().As<IPersonalDataService>()
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.PersonalDataServiceSettings));

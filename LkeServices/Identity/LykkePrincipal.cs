@@ -1,5 +1,4 @@
-﻿using System;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading.Tasks;
 using Core.Constants;
 using Core.Identity;
@@ -71,6 +70,8 @@ namespace LkeServices.Identity
             {
                 (result.Identity as ClaimsIdentity)?.AddClaim(new Claim("TokenType", "Pinned"));
             }
+
+            (result.Identity as ClaimsIdentity)?.AddClaim(new Claim(LykkeConstants.SessionConfirmed, session.IsSessionConfirmed.ToString()));
 
             _claimsCache.Set(token, result);
             return result;

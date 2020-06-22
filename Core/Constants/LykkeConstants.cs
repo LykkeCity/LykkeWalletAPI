@@ -35,6 +35,7 @@
         public const int DefaultRefundTimeoutDays = 30;
         public const string PartnerId = "http://lykke.com/oauth/partner_id";
         public const string SessionId = "http://lykke.com/oauth/sessionid";
+        public const string SessionConfirmed = "http://lykke.com/oauth/sessionconfirmed";
 
         #region Cache keys
 
