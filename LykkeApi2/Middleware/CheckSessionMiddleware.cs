@@ -64,13 +64,11 @@ namespace LykkeApi2.Middleware
             {
                 _log.WriteError(nameof(CheckSessionMiddleware), clientId, ex);
             }
-            finally
-            {
-                if (sessionConfirmed)
-                    await _next.Invoke(context);
-                else
-                    context.Response.StatusCode = 403;
-            }
+
+            if (sessionConfirmed)
+                await _next.Invoke(context);
+            else
+                context.Response.StatusCode = 403;
         }
     }
 }
