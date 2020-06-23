@@ -54,5 +54,10 @@ namespace LykkeApi2.Infrastructure.Extensions
             bool.TryParse(((ClaimsIdentity)identity)?.Claims.FirstOrDefault(c => c.Type == LykkeConstants.SessionConfirmed)?.Value, out var sessionConfirmed);
             return sessionConfirmed;
         }
+
+        public static string GetToken(this IIdentity identity)
+        {
+            return ((ClaimsIdentity)identity)?.Claims.FirstOrDefault(c => c.Type == LykkeConstants.SessionId)?.Value;
+        }
     }
 }
