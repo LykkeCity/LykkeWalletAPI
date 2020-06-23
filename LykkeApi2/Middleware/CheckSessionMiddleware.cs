@@ -51,7 +51,9 @@ namespace LykkeApi2.Middleware
 
                     if (!sessionConfirmed && !string.IsNullOrEmpty(token))
                     {
-                        sessionConfirmed = await _clientSessionsClient.IsSessionConfirmedAsync(token);
+                        var session = await _clientSessionsClient.GetAsync(token);
+                        sessionConfirmed = session.IsSessionConfirmed ||
+                                           session.Registered <= _sessionCheckSettings.AutoconfirmedDate;
 
                         if (sessionConfirmed)
                             await _lykkePrincipal.SetSessionConfirmedAsync();

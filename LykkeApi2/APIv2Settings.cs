@@ -222,6 +222,7 @@ namespace LykkeApi2
 
     public class SessionCheckSettings
     {
+        public DateTime AutoconfirmedDate { get; set; }
         public IReadOnlyList<string> SkipPaths { get; set; } = Array.Empty<string>();
     }
 }
