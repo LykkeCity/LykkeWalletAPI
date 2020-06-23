@@ -50,6 +50,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
                     },
                     DeploymentSettings = new DeploymentSettings(),
                     CacheSettings = new CacheSettings(),
+                    SessionCheck = new SessionCheckSettings()
                 },
                 ClientDictionariesServiceClient = new ClientDictionariesServiceClientSettings() { ServiceUrl = MockUrl },
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},

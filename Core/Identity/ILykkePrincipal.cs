@@ -9,5 +9,6 @@ namespace Core.Identity
     {
         Task<ClaimsPrincipal> GetCurrent();
         void InvalidateCache(string token);
+        Task SetSessionConfirmedAsync();
     }
 }

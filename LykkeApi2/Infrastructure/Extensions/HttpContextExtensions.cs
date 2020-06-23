@@ -1,4 +1,8 @@
 using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Security.Principal;
+using Core.Constants;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Primitives;
 
@@ -43,6 +47,17 @@ namespace LykkeApi2.Infrastructure.Extensions
                     return (T)Convert.ChangeType(values.ToString(), typeof(T));
             }
             return default(T);
+        }
+
+        public static bool IsSessionConfirmed(this IIdentity identity)
+        {
+            bool.TryParse(((ClaimsIdentity)identity)?.Claims.FirstOrDefault(c => c.Type == LykkeConstants.SessionConfirmed)?.Value, out var sessionConfirmed);
+            return sessionConfirmed;
+        }
+
+        public static string GetToken(this IIdentity identity)
+        {
+            return ((ClaimsIdentity)identity)?.Claims.FirstOrDefault(c => c.Type == LykkeConstants.SessionId)?.Value;
         }
     }
 }

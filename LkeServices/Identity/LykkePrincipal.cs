@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Core.Constants;
@@ -46,6 +46,27 @@ namespace LkeServices.Identity
             _claimsCache.Invalidate(token);
         }
 
+        public async Task SetSessionConfirmedAsync()
+        {
+            var result = await GetCurrent();
+
+            if (result != null)
+            {
+                var claim = result.Claims.FirstOrDefault(x => x.Type == LykkeConstants.SessionConfirmed);
+                var token = result.Claims.FirstOrDefault(x => x.Type == LykkeConstants.SessionId);
+
+                if (claim != null)
+                {
+                    ((ClaimsIdentity)result.Identity).RemoveClaim(claim);
+                }
+
+                ((ClaimsIdentity)result.Identity).AddClaim(new Claim(LykkeConstants.SessionConfirmed, true.ToString()));
+
+                if (token != null)
+                    _claimsCache.Set(token.Value, result);
+            }
+        }
+
         public async Task<ClaimsPrincipal> GetCurrent()
         {
             var token = GetToken();
@@ -71,6 +92,9 @@ namespace LkeServices.Identity
             {
                 (result.Identity as ClaimsIdentity)?.AddClaim(new Claim("TokenType", "Pinned"));
             }
+
+            (result.Identity as ClaimsIdentity)?.AddClaim(new Claim(LykkeConstants.SessionId, session.SessionToken));
+            (result.Identity as ClaimsIdentity)?.AddClaim(new Claim(LykkeConstants.SessionConfirmed, session.IsSessionConfirmed.ToString()));
 
             _claimsCache.Set(token, result);
             return result;

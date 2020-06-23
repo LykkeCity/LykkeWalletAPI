@@ -181,6 +181,7 @@ namespace LykkeApi2
 
                 app.UseAuthentication();
 
+                app.UseMiddleware<CheckSessionMiddleware>();
                 app.UseMiddleware<ClientBansMiddleware>();
 
                 app.UseMvc(routes =>
