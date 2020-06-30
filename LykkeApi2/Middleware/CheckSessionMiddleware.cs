@@ -42,11 +42,11 @@ namespace LykkeApi2.Middleware
             try
             {
                 clientId = context.User?.Identity?.Name;
+                var token = context.User?.Identity?.GetToken();
 
-                if (_checkMethods.Contains(context.Request.Method, StringComparer.InvariantCultureIgnoreCase) &&
+                if (!string.IsNullOrEmpty(token) && _checkMethods.Contains(context.Request.Method, StringComparer.InvariantCultureIgnoreCase) &&
                     !_sessionCheckSettings.SkipPaths.Any(x => context.Request.Path.StartsWithSegments(x, StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    var token = context.User?.Identity?.GetToken();
                     sessionConfirmed = context.User?.Identity?.IsSessionConfirmed() ?? false;
 
                     if (!sessionConfirmed && !string.IsNullOrEmpty(token))
