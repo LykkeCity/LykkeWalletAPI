@@ -46,7 +46,7 @@ namespace LykkeApi2.Controllers
         }
 
         /// <summary>
-        /// confirm operation with 2fa 
+        /// confirm operation with 2fa
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
@@ -87,7 +87,7 @@ namespace LykkeApi2.Controllers
                     }
                 });
             }
-            
+
             return await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId)
                 ? Ok(new []
                 {
@@ -96,8 +96,8 @@ namespace LykkeApi2.Controllers
                         Type = SecondFactorType.Google,
                         Status = (await _confirmationCodesClient.Google2FaIsClientBlacklistedAsync(_requestContext.ClientId)).IsClientBlacklisted
                             ? SecondFactorStatus.Forbidden
-                            : SecondFactorStatus.Active 
-                    } 
+                            : SecondFactorStatus.Active
+                    }
                 })
                 : Ok(new SecondFactorDetailsModel[] {});
         }
@@ -110,7 +110,7 @@ namespace LykkeApi2.Controllers
             {
                 if (await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId))
                     throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorAlreadySetup);
-                
+
                 var resp = await _confirmationCodesClient.Google2FaRequestSetupAsync(
                     new RequestSetupGoogle2FaRequest {ClientId = _requestContext.ClientId});
 
@@ -138,13 +138,13 @@ namespace LykkeApi2.Controllers
             {
                 if (await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId))
                     throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorAlreadySetup);
-                
+
                 var pd = await _personalDataService.GetAsync(_requestContext.ClientId);
-                
+
                 var resp = await _confirmationCodesClient.Google2FaVerifySetupAsync(
                     new VerifySetupGoogle2FaRequest
                     {
-                        ClientId = _requestContext.ClientId, 
+                        ClientId = _requestContext.ClientId,
                         Phone = pd.ContactPhone,
                         SmsCode = model.Code,
                         GaCode = model.GaCode
@@ -165,7 +165,7 @@ namespace LykkeApi2.Controllers
                 throw;
             }
         }
-        
+
         [HttpPost("setup/google/confirmRequest")]
         [ProducesResponseType(typeof(SmsConfirmationResponse), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> ConfirmGoogle2FaSetup()
@@ -174,7 +174,7 @@ namespace LykkeApi2.Controllers
             {
                 if (await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId))
                     throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorAlreadySetup);
-                
+
                 IPersonalData client = await _personalDataService.GetAsync(_requestContext.ClientId);
 
                 SmsConfirmationResponse smsRequestResult = await _confirmationCodesClient.SendSmsConfirmCodeAsync(
@@ -184,7 +184,7 @@ namespace LykkeApi2.Controllers
                         Phone = client.ContactPhone,
                         Operation = ConfirmOperations.Google2FaSendSms
                     });
-                    
+
                 return Ok(smsRequestResult);
             }
             catch (ApiException e)
@@ -196,11 +196,11 @@ namespace LykkeApi2.Controllers
                     case HttpStatusCode.Forbidden:
                         throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.MaxAttemptsReached);
                 }
-                
+
                 throw;
             }
         }
-        
+
         [HttpPost("session")]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> ConfirmTradingSession([FromBody] TradingSessionConfirmModel model)
@@ -208,13 +208,13 @@ namespace LykkeApi2.Controllers
             var sessionId = _requestContext.SessionId;
 
             var tradingSession = await _clientSessionsClient.GetTradingSession(sessionId);
-            
+
             if(tradingSession == null)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
 
             if (tradingSession.Confirmed.HasValue && tradingSession.Confirmed.Value)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
-            
+
             try
             {
                 var codeIsValid =
@@ -224,8 +224,9 @@ namespace LykkeApi2.Controllers
                 if (codeIsValid)
                 {
                     var session = await _clientSessionsClient.GetAsync(sessionId);
-                    
+
                     await _clientSessionsClient.ConfirmTradingSession(_requestContext.ClientId, session.AuthId.ToString());
+                    await _clientSessionsClient.ConfirmSessionAsync(sessionId);
                 }
                 else
                 {
