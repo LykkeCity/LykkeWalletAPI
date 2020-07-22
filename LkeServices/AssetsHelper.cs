@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Common;
+using Common.Cache;
 using Core.Services;
 using JetBrains.Annotations;
 using Lykke.Service.Assets.Client;
@@ -14,12 +14,19 @@ namespace LkeServices
     {
         private readonly IAssetsService _assetsService;
         private readonly IAssetsServiceWithCache _assetsServiceWithCache;
+        private readonly ICacheManager _memoryCache;
+        private const string AssetsExtendedInfoKey = "AssetsExtendedInfo";
+        private const int AssetsExtendedInfoCacheMins = 10;
 
         public AssetsHelper(
-            IAssetsService assetsService, IAssetsServiceWithCache assetsServiceWithCache)
+            IAssetsService assetsService,
+            IAssetsServiceWithCache assetsServiceWithCache,
+            ICacheManager memoryCache
+            )
         {
             _assetsService = assetsService;
             _assetsServiceWithCache = assetsServiceWithCache;
+            _memoryCache = memoryCache;
         }
 
         public Task<Asset> GetAssetAsync(string assetId)
@@ -52,9 +59,17 @@ namespace LkeServices
             return _assetsService.AssetAttributeGetAsync(assetId, key);
         }
 
-        public Task<IList<AssetExtendedInfo>> GetAssetsExtendedInfosAsync()
+        public async Task<IList<AssetExtendedInfo>> GetAssetsExtendedInfosAsync()
         {
-            return _assetsService.AssetExtendedInfoGetAllAsync();
+            var result = _memoryCache.Get<List<AssetExtendedInfo>>(AssetsExtendedInfoKey);
+
+            if (result != null)
+                return result;
+
+            var allInfo = await _assetsService.AssetExtendedInfoGetAllAsync();
+            _memoryCache.Set(AssetsExtendedInfoKey, allInfo, AssetsExtendedInfoCacheMins);
+
+            return allInfo;
         }
 
         public Task<AssetExtendedInfo> GetAssetExtendedInfoAsync(string assetId)
