@@ -8,5 +8,7 @@ namespace LykkeApi2.Models.ApiKey
         public string Id { get; set; }
         [Required]
         public string Code { get; set; }
+
+        public bool Apiv2Only { get; set; }
     }
 }
