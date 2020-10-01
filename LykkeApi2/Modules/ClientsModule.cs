@@ -2,7 +2,6 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Lykke.MarketProfileService.Client;
-using Lykke.Service.HftInternalService.Client.AutorestClient;
 using Lykke.Service.Operations.Client;
 using Lykke.Service.Registration;
 using Lykke.SettingsReader;
@@ -33,6 +32,7 @@ using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.BlockchainWallets.Client.ClientGenerator;
 using Lykke.Service.History.Client;
 using Lykke.Service.ConfirmationCodes.Client;
+using Lykke.Service.HftInternalService.Client;
 using Lykke.Service.IndicesFacade.Client;
 using Lykke.Service.Limitations.Client;
 using Lykke.Service.PushNotifications.Client;
@@ -62,9 +62,7 @@ namespace LykkeApi2.Modules
         {
             builder.RegisterClientAccountClient(_settings.ClientAccountServiceUrl);
 
-            builder.RegisterType<HftInternalServiceAPI>()
-                .As<IHftInternalServiceAPI>()
-                .WithParameter("baseUri", new Uri(_settings.HftInternalServiceUrl));
+            builder.RegisterHftInternalClient(_settings.HftInternalServiceUrl);
 
             builder.RegisterType<LykkeMarketProfileServiceAPI>()
                 .As<ILykkeMarketProfileServiceAPI>()

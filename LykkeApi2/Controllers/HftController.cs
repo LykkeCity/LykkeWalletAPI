@@ -2,8 +2,8 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Lykke.Service.HftInternalService.Client.AutorestClient;
-using Lykke.Service.HftInternalService.Client.AutorestClient.Models;
+using Lykke.Service.HftInternalService.Client;
+using Lykke.Service.HftInternalService.Client.Keys;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models._2Fa;
 using LykkeApi2.Models.ApiKey;
@@ -19,12 +19,12 @@ namespace LykkeApi2.Controllers
     [ApiController]
     public class HftController : Controller
     {
-        private readonly IHftInternalServiceAPI _hftInternalService;
+        private readonly IHftInternalClient _hftInternalService;
         private readonly IRequestContext _requestContext;
         private readonly Google2FaService _google2FaService;
 
         public HftController(
-            IHftInternalServiceAPI hftInternalService,
+            IHftInternalClient hftInternalService,
             IRequestContext requestContext,
             Google2FaService google2FaService
             )
@@ -50,13 +50,19 @@ namespace LykkeApi2.Controllers
             if (check2FaResult != null)
                 return Ok(check2FaResult);
 
-            var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
-            var existingApiKey = clientKeys.FirstOrDefault(x => x.Wallet == request.Id);
+            var clientKeys = await _hftInternalService.Keys.GetKeys(_requestContext.ClientId);
+            var existingApiKey = clientKeys.FirstOrDefault(x => x.WalletId == request.Id);
 
             if (existingApiKey != null)
             {
-                var apiKey = await _hftInternalService.RegenerateKeyAsync(new RegenerateKeyRequest { ClientId = _requestContext.ClientId, WalletId = existingApiKey.Wallet });
-                var result = new CreateApiKeyResponse {ApiKey = apiKey.Key, WalletId = apiKey.Wallet};
+                var apiKey = await _hftInternalService.Keys.UpdateKey(new UpdateApiKeyModel
+                {
+                    ClientId = _requestContext.ClientId,
+                    WalletId = existingApiKey.WalletId,
+                    Apiv2Only = request.Apiv2Only
+                });
+
+                var result = new CreateApiKeyResponse {ApiKey = apiKey.ApiKey, WalletId = apiKey.WalletId, Apiv2Only = request.Apiv2Only};
                 return Ok(Google2FaResultModel<CreateApiKeyResponse>.Success(result));
             }
 
