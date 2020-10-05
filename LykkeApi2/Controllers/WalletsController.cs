@@ -9,7 +9,8 @@ using Lykke.Service.Balances.Client;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models;
 using Lykke.Service.ClientAccount.Client.Models.Response.Wallets;
-using Lykke.Service.HftInternalService.Client.AutorestClient;
+using Lykke.Service.HftInternalService.Client;
+using Lykke.Service.HftInternalService.Client.Keys;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.ApiKey;
 using LykkeApi2.Models.ClientBalancesModels;
@@ -30,14 +31,14 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
         private readonly IBalancesClient _balancesClient;
         private readonly IClientAccountClient _clientAccountService;
-        private readonly IHftInternalServiceAPI _hftInternalService;
+        private readonly IHftInternalClient _hftInternalService;
         private readonly IAssetsHelper _assetsHelper;
 
         public WalletsController(
             IRequestContext requestContext,
             IClientAccountClient clientAccountService,
             IBalancesClient balancesClient,
-            IHftInternalServiceAPI hftInternalService,
+            IHftInternalClient hftInternalService,
             IAssetsHelper assetsHelper)
         {
             _requestContext = requestContext ?? throw new ArgumentNullException(nameof(requestContext));
@@ -86,13 +87,19 @@ namespace LykkeApi2.Controllers
         [SwaggerOperation("CreateApiWallet")]
         public async Task<IActionResult> CreateApiWallet([FromBody] CreateApiKeyRequest request)
         {
-            var apiKey = await _hftInternalService.CreateKeyAsync(
-                new Lykke.Service.HftInternalService.Client.AutorestClient.Models.CreateApiKeyRequest(_requestContext.ClientId, request.Name, request.Description));
+            var apiKey = await _hftInternalService.Keys.CreateKey(new CreateApiKeyModel
+            {
+
+                ClientId = _requestContext.ClientId,
+                Name = request.Name,
+                Description = request.Description,
+                Apiv2Only = request.Apiv2Only
+            });
 
             if (apiKey == null)
                 return BadRequest();
 
-            return Ok(new CreateApiKeyResponse { ApiKey = apiKey.Key, WalletId = apiKey.Wallet });
+            return Ok(new CreateApiKeyResponse { ApiKey = apiKey.ApiKey, WalletId = apiKey.WalletId, Name = request.Name, Description = request.Description, Apiv2Only = request.Apiv2Only});
         }
 
         /// <summary>
@@ -161,14 +168,15 @@ namespace LykkeApi2.Controllers
             if (wallets == null)
                 return NotFound();
 
-            var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
+            var clientKeys = await _hftInternalService.Keys.GetKeys(_requestContext.ClientId);
             return Ok(wallets.Select(wallet => new WalletModel
             {
                 Id = wallet.Id,
                 Name = wallet.Name,
                 Type = wallet.Type.ToString(),
                 Description = wallet.Description,
-                ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
+                ApiKey = clientKeys.FirstOrDefault(x => x.WalletId == wallet.Id)?.ApiKey,
+                Apiv2Only = clientKeys.FirstOrDefault(x => x.WalletId == wallet.Id)?.Apiv2Only ?? false
             }));
         }
 
@@ -186,14 +194,14 @@ namespace LykkeApi2.Controllers
             if (wallet == null)
                 return NotFound();
 
-            var clientKeys = await _hftInternalService.GetKeysAsync(_requestContext.ClientId);
+            var clientKeys = await _hftInternalService.Keys.GetKeys(_requestContext.ClientId);
             return Ok(new WalletModel
             {
                 Id = wallet.Id,
                 Name = wallet.Name,
                 Type = wallet.Type.ToString(),
                 Description = wallet.Description,
-                ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
+                ApiKey = clientKeys.FirstOrDefault(x => x.WalletId == wallet.Id)?.ApiKey
             });
         }
 
@@ -209,7 +217,7 @@ namespace LykkeApi2.Controllers
             var result = new List<WalletBalancesModel>();
 
             var walletsTask = _clientAccountService.Wallets.GetClientWalletsFilteredAsync(_requestContext.ClientId, owner: OwnerType.Spot);
-            var clientKeysTask = _hftInternalService.GetKeysAsync(_requestContext.ClientId);
+            var clientKeysTask = _hftInternalService.Keys.GetKeys(_requestContext.ClientId);
             var availableAssetsTask = _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
 
             await Task.WhenAll(walletsTask, clientKeysTask, availableAssetsTask);
@@ -231,7 +239,7 @@ namespace LykkeApi2.Controllers
                     Name = wallet.Name,
                     Description = wallet.Description,
                     Balances = balancesToShow ?? new ClientBalanceResponseModel[0],
-                    ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
+                    ApiKey = clientKeys.FirstOrDefault(x => x.WalletId == wallet.Id)?.ApiKey
                 });
             }
 
@@ -299,7 +307,7 @@ namespace LykkeApi2.Controllers
             var result = new List<WalletAssetBalanceModel>();
 
             var walletsTask = _clientAccountService.Wallets.GetClientWalletsFilteredAsync(_requestContext.ClientId, owner: OwnerType.Spot);
-            var clientKeysTask = _hftInternalService.GetKeysAsync(_requestContext.ClientId);
+            var clientKeysTask = _hftInternalService.Keys.GetKeys(_requestContext.ClientId);
             var availableAssetsTask = _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
             await Task.WhenAll(walletsTask, clientKeysTask);
 
@@ -318,6 +326,7 @@ namespace LykkeApi2.Controllers
                         ClientId = wallet.Type == WalletType.Trading ? _requestContext.ClientId : wallet.Id,
                         AssetId = assetId
                     });
+
                 result.Add(new WalletAssetBalanceModel
                 {
                     Id = wallet.Id,
@@ -325,7 +334,7 @@ namespace LykkeApi2.Controllers
                     Name = wallet.Name,
                     Description = wallet.Description,
                     Balances = balance != null ? ClientBalanceResponseModel.Create(balance) : new ClientBalanceResponseModel { AssetId = assetId, Balance = 0, Reserved = 0},
-                    ApiKey = clientKeys.FirstOrDefault(x => x.Wallet == wallet.Id)?.Key
+                    ApiKey = clientKeys.FirstOrDefault(x => x.WalletId == wallet.Id)?.ApiKey
                 });
             }
 
