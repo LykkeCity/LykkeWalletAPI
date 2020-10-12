@@ -1,11 +1,11 @@
 ﻿using Autofac;
-using Common.Log;
 using LykkeApi2.Controllers;
 using LykkeApi2.Modules;
 using Microsoft.AspNetCore.Mvc;
-using Moq;
 using System.Linq;
 using Lykke.Exchange.Api.MarketData.Contract;
+using Lykke.Logs;
+using Lykke.Logs.Loggers.LykkeConsole;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
@@ -33,8 +33,6 @@ namespace Lykke.WalletApiv2.Tests.DITests
         [SetUp]
         public void Init()
         {
-            var mockLog = new Mock<ILog>();
-
             var settings = new APIv2Settings
             {
                 GlobalSettings = new GlobalSettings(),
@@ -72,11 +70,13 @@ namespace Lykke.WalletApiv2.Tests.DITests
 
             var containerBuilder = new ContainerBuilder();
 
-            containerBuilder.RegisterModule(new Api2Module(ConstantReloadingManager.From(settings), mockLog.Object));
-            containerBuilder.RegisterModule(new ClientsModule(ConstantReloadingManager.From(settings), mockLog.Object));
+            containerBuilder.RegisterModule(new Api2Module(ConstantReloadingManager.From(settings)));
+            containerBuilder.RegisterModule(new ClientsModule(ConstantReloadingManager.From(settings)));
             containerBuilder.RegisterModule(new AspNetCoreModule());
 
             containerBuilder.RegisterType<AssetsController>();
+
+            containerBuilder.RegisterInstance(LogFactory.Create().AddConsole());
 
             //register your controller class here to test
             _container = containerBuilder.Build();

@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Autofac;
-using Common.Log;
+using Lykke.Common.Log;
 using Lykke.Cqrs;
 using Lykke.Cqrs.Configuration;
 using Lykke.Job.HistoryExportBuilder.Contract;
 using Lykke.Job.HistoryExportBuilder.Contract.Commands;
 using Lykke.Job.HistoryExportBuilder.Contract.Events;
 using Lykke.Messaging;
+using Lykke.Messaging.Contract;
 using Lykke.Messaging.RabbitMq;
 using Lykke.Messaging.Serialization;
 using Lykke.Service.Operations.Contracts;
@@ -18,12 +20,10 @@ namespace LykkeApi2.Modules
     public class CqrsModule : Module
     {
         private readonly APIv2Settings _settings;
-        private readonly ILog _log;
 
-        public CqrsModule(APIv2Settings settings, ILog log)
+        public CqrsModule(APIv2Settings settings)
         {
             _settings = settings;
-            _log = log;
         }
 
         protected override void Load(ContainerBuilder builder)
@@ -31,19 +31,24 @@ namespace LykkeApi2.Modules
             MessagePackSerializerFactory.Defaults.FormatterResolver = MessagePack.Resolvers.ContractlessStandardResolver.Instance;
             var rabbitMqSettings = new RabbitMQ.Client.ConnectionFactory
             {
-                Uri = _settings.SagasRabbitMq.RabbitConnectionString
+                Uri = new Uri(_settings.SagasRabbitMq.RabbitConnectionString)
             };
 
             builder.Register(context => new AutofacDependencyResolver(context)).As<IDependencyResolver>().SingleInstance();
 
-            builder.RegisterType<HistoryExportProjection>().SingleInstance();
-
-            var messagingEngine = new MessagingEngine(_log,
+            builder.Register(ctx => new MessagingEngine(ctx.Resolve<ILogFactory>(),
                 new TransportResolver(new Dictionary<string, TransportInfo>
                 {
-                    {"RabbitMq", new TransportInfo(rabbitMqSettings.Endpoint.ToString(), rabbitMqSettings.UserName, rabbitMqSettings.Password, "None", "RabbitMq")}
+                    {
+                        "RabbitMq",
+                        new TransportInfo(rabbitMqSettings.Endpoint.ToString(), rabbitMqSettings.UserName,
+                            rabbitMqSettings.Password, "None", "RabbitMq")
+                    }
                 }),
-                new RabbitMqTransportFactory());
+                new RabbitMqTransportFactory(ctx.Resolve<ILogFactory>()))).As<IMessagingEngine>().SingleInstance();
+
+
+            builder.RegisterType<HistoryExportProjection>().SingleInstance();
 
             builder
                 .Register(ctx =>
@@ -51,9 +56,9 @@ namespace LykkeApi2.Modules
                     const string defaultPipeline = "commands";
                     const string defaultRoute = "self";
 
-                    var engine = new CqrsEngine(_log,
+                    var engine = new CqrsEngine(ctx.Resolve<ILogFactory>(),
                         ctx.Resolve<IDependencyResolver>(),
-                        messagingEngine,
+                        ctx.Resolve<IMessagingEngine>(),
                         new DefaultEndpointProvider(),
                         true,
                         Register.DefaultEndpointResolver(new RabbitMqConventionEndpointResolver(

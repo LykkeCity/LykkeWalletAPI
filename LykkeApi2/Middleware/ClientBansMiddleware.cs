@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Common.Log;
+using Lykke.Common.Log;
 using Lykke.Service.ClientAccount.Client;
 using Microsoft.AspNetCore.Http;
 
@@ -13,10 +14,10 @@ namespace LykkeApi2.Middleware
         private readonly ILog _log;
 
         public ClientBansMiddleware(RequestDelegate next, IClientAccountClient clientAccountClient,
-            ILog log)
+            ILogFactory logFactory)
         {
             _clientAccountClient = clientAccountClient;
-            _log = log;
+            _log = logFactory.CreateLog(this);
             _next = next;
         }
 
@@ -36,7 +37,7 @@ namespace LykkeApi2.Middleware
             }
             catch (Exception ex)
             {
-                _log.WriteError(nameof(ClientBansMiddleware), clientId, ex);
+                _log.Error(ex, ex.Message, clientId);
             }
             finally
             {

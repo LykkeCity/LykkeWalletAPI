@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
 using Core.Identity;
+using Lykke.Common.Log;
 using Lykke.Service.Session.Client;
 using LykkeApi2.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
@@ -23,14 +24,14 @@ namespace LykkeApi2.Middleware
             SessionCheckSettings sessionCheckSettings,
             IClientSessionsClient clientSessionsClient,
             ILykkePrincipal lykkePrincipal,
-            ILog log
+            ILogFactory logFactory
         )
         {
             _next = next;
             _sessionCheckSettings = sessionCheckSettings;
             _clientSessionsClient = clientSessionsClient;
             _lykkePrincipal = lykkePrincipal;
-            _log = log;
+            _log = logFactory.CreateLog(this);
             _checkMethods = new[] {"POST", "PUT", "DELETE"};
         }
 
@@ -62,7 +63,7 @@ namespace LykkeApi2.Middleware
             }
             catch (Exception ex)
             {
-                _log.WriteError(nameof(CheckSessionMiddleware), clientId, ex);
+                _log.Error(ex, ex.Message, clientId);
             }
 
             if (sessionConfirmed)

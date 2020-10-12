@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Version>1.0.0</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Lykke.Common.ApiLibrary" Version="2.0.0" />
+    <PackageReference Include="Lykke.Common.ApiLibrary" Version="3.1.1" />
     <PackageReference Include="Lykke.Service.Affiliate.Client" Version="1.0.7" />
     <PackageReference Include="Lykke.Service.AssetDisclaimers.Client" Version="3.0.0" />
     <PackageReference Include="Lykke.Service.BlockchainCashoutPreconditionsCheck.Client" Version="1.5.6" />
@@ -13,9 +13,9 @@
     <PackageReference Include="Lykke.Service.ClientDictionaries.Client" Version="1.0.1" />
     <PackageReference Include="Lykke.Service.IndicesFacade.Client" Version="1.0.6" />
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.5.0" />
-    <PackageReference Include="Lykke.Service.Balances.Client" Version="1.1.2" />
+    <PackageReference Include="Lykke.Service.Balances.Client" Version="2.3.2" />
     <PackageReference Include="Lykke.Service.Limitations.Client" Version="1.1.1.40" />
-    <PackageReference Include="Lykke.Service.Assets.Client" Version="4.4.0" />
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="4.6.0" />
     <PackageReference Include="Lykke.Service.PersonalData" Version="2.2.0" />
     <PackageReference Include="Lykke.Service.PaymentSystem.Client" Version="1.0.22" />
     <PackageReference Include="Lykke.Service.SwiftCredentials.Client" Version="1.0.0.8" />

@@ -52,7 +52,7 @@ namespace LykkeApi2.Controllers
         private readonly IKycProfileService _kycProfileService;
 
         public ClientController(
-            ILog log,
+            ILogFactory logFactory,
             IClientSessionsClient clientSessionsClient,
             ILykkeRegistrationClient lykkeRegistrationClient,
             ClientAccountLogic clientAccountLogic,
@@ -64,7 +64,7 @@ namespace LykkeApi2.Controllers
             KycStatusValidator kycStatusValidator,
             IKycProfileService kycProfileService)
         {
-            _log = log ?? throw new ArgumentNullException(nameof(log));
+            _log = logFactory.CreateLog(this);
             _lykkeRegistrationClient = lykkeRegistrationClient ?? throw new ArgumentNullException(nameof(lykkeRegistrationClient));
             _clientSessionsClient = clientSessionsClient;
             _clientAccountLogic = clientAccountLogic;

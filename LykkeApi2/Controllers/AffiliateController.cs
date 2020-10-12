@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Common.Log;
 using Core.Constants;
+using Lykke.Common.Log;
 using Lykke.Service.Affiliate.Client;
 using Lykke.Service.RateCalculator.Client;
 using Lykke.Service.RateCalculator.Client.AutorestClient.Models;
@@ -25,12 +26,12 @@ namespace LykkeApi2.Controllers
         private readonly IRateCalculatorClient _rateCalculatorClient;
         private readonly ILog _log;
 
-        public AffiliateController(IAffiliateClient affiliateClient, IRequestContext requestContext, IRateCalculatorClient rateCalculatorClient, ILog log)
+        public AffiliateController(IAffiliateClient affiliateClient, IRequestContext requestContext, IRateCalculatorClient rateCalculatorClient, ILogFactory logFactory)
         {
             _affiliateClient = affiliateClient;
             _requestContext = requestContext;
             _rateCalculatorClient = rateCalculatorClient;
-            _log = log;
+            _log = logFactory.CreateLog(this);
         }
 
         [HttpGet]
@@ -64,7 +65,7 @@ namespace LykkeApi2.Controllers
 
             var link = await _affiliateClient.RegisterLink(_requestContext.ClientId, redirectUrl);
 
-            _log.WriteInfo(nameof(AffiliateController), nameof(CreateLink), $"ClientId: {_requestContext.ClientId}. Url: {link.Url}. RedirectUrl: {link.RedirectUrl}");
+            _log.Info($"ClientId: {_requestContext.ClientId}. Url: {link.Url}. RedirectUrl: {link.RedirectUrl}");
 
             return Ok(new AffiliateLinkResponse
             {

@@ -2,7 +2,6 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Cache;
-using Common.Log;
 using Core.Candles;
 using Core.Countries;
 using Core.Enumerators;
@@ -20,24 +19,20 @@ using Lykke.SettingsReader;
 using LykkeApi2.Credentials;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Services;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Caching.Redis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules
 {
     public class Api2Module : Module
     {
-        private readonly ILog _log;
         private readonly IServiceCollection _services;
         private readonly IReloadingManager<APIv2Settings> _apiSettings;
         private readonly BaseSettings _settings;
 
-        public Api2Module(IReloadingManager<APIv2Settings> settings, ILog log)
+        public Api2Module(IReloadingManager<APIv2Settings> settings)
         {
             _apiSettings = settings;
             _settings = settings.Nested(x => x.WalletApiv2).CurrentValue;
-            _log = log;
             _services = new ServiceCollection();
         }
 
@@ -56,10 +51,8 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance(_apiSettings.CurrentValue.GlobalSettings).SingleInstance();
             builder.RegisterInstance(_apiSettings.CurrentValue.KycServiceClient).SingleInstance();
 
-            builder.RegisterInstance(_log).As<ILog>().SingleInstance();
-
-            builder.RegisterRateCalculatorClient(_settings.Services.RateCalculatorServiceApiUrl, _log);
-            builder.RegisterBalancesClient(_settings.Services.BalancesServiceUrl, _log);
+            builder.RegisterRateCalculatorClient(_settings.Services.RateCalculatorServiceApiUrl);
+            builder.RegisterBalancesClient(_settings.Services.BalancesServiceUrl);
 
             builder.RegisterInstance(new DeploymentSettings());
             builder.RegisterInstance(_settings.DeploymentSettings);
@@ -95,15 +88,13 @@ namespace LykkeApi2.Modules
             builder.Populate(_services);
         }
 
-        private static void BindServices(ContainerBuilder builder, BaseSettings settings)
+        private void BindServices(ContainerBuilder builder, BaseSettings settings)
         {
-            var redis = new RedisCache(new RedisCacheOptions
+            _services.AddStackExchangeRedisCache(options =>
             {
-                Configuration = settings.CacheSettings.RedisConfiguration,
-                InstanceName = settings.CacheSettings.FinanceDataCacheInstance
+                options.Configuration = settings.CacheSettings.RedisConfiguration;
+                options.InstanceName = settings.CacheSettings.FinanceDataCacheInstance;
             });
-
-            builder.RegisterInstance(redis).As<IDistributedCache>().SingleInstance();
 
             builder.RegisterType<OrderBooksService>()
                 .As<IOrderBooksService>()

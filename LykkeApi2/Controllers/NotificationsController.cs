@@ -31,13 +31,13 @@ namespace LykkeApi2.Controllers
             IRequestContext requestContext,
             IClientAccountClient clientAccountClient,
             IPushNotificationsClient pushNotificationsClient,
-            ILog log
+            ILogFactory logFactory
             )
         {
             _requestContext = requestContext;
             _clientAccountClient = clientAccountClient;
             _pushNotificationsClient = pushNotificationsClient;
-            _log = log;
+            _log = logFactory.CreateLog(this);
         }
 
         /// <summary>

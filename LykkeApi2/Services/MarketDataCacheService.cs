@@ -7,8 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Common;
-using Common.Log;
 using Google.Protobuf.WellKnownTypes;
+using Lykke.Common.Log;
 using Lykke.Exchange.Api.MarketData;
 using MarketSlice = LykkeApi2.Models.Markets.MarketSlice;
 
@@ -22,11 +22,11 @@ namespace LykkeApi2.Services
 
         public MarketDataCacheService(
             MarketDataService.MarketDataServiceClient marketDataServiceClient,
-            ILog log
+            ILogFactory logFactory
             )
         {
             _marketDataServiceClient = marketDataServiceClient;
-            _timerTrigger = new TimerTrigger(nameof(MarketDataCacheService), TimeSpan.FromSeconds(1), log);
+            _timerTrigger = new TimerTrigger(nameof(MarketDataCacheService), TimeSpan.FromSeconds(1), logFactory);
             _timerTrigger.Triggered += Execute;
         }
 

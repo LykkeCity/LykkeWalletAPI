@@ -8,11 +8,11 @@ using Common.Log;
 using Core.Constants;
 using Core.Services;
 using Lykke.Common.ApiLibrary.Exceptions;
+using Lykke.Common.Log;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Contract.Requests;
 using Lykke.Service.BlockchainWallets.Client;
-using Lykke.Service.FeeCalculator.AutorestClient.Models;
 using Lykke.Service.FeeCalculator.Client;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Withdrawals;
@@ -34,14 +34,14 @@ namespace LykkeApi2.Controllers
         private readonly IRequestContext _requestContext;
 
         public WithdrawalsController(
-            ILog log,
+            ILogFactory logFactory,
             IAssetsHelper assetsHelper,
             IBlockchainWalletsClient blockchainWalletsClient,
             IBlockchainCashoutPreconditionsCheckClient blockchainCashoutPreconditionsCheckClient,
             IFeeCalculatorClient feeCalculatorClient,
             IRequestContext requestContext)
         {
-            _log = log;
+            _log = logFactory.CreateLog(this);
             _assetsHelper = assetsHelper;
             _blockchainWalletsClient = blockchainWalletsClient;
             _blockchainCashoutPreconditionsCheckClient = blockchainCashoutPreconditionsCheckClient;
@@ -181,7 +181,7 @@ namespace LykkeApi2.Controllers
                 }
                 catch (Exception e)
                 {
-                    _log.WriteWarning(nameof(WithdrawalsController), nameof(ValidateCryptoAddress), e.Message);
+                    _log.Warning(e.Message);
                     return Ok(
                         new WithdrawalCryptoAddressValidationModel
                         {
@@ -257,7 +257,7 @@ namespace LykkeApi2.Controllers
         /// <returns></returns>
         [HttpGet("swift/last")]
         [ProducesResponseType(typeof(SwiftLastResponse), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> GetLastSwift()
+        public IActionResult GetLastSwift()
         {
             return Ok(new SwiftLastResponse());
         }

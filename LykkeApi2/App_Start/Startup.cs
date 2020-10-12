@@ -1,36 +1,35 @@
 ﻿using System;
-using System.Buffers;
-using System.Linq;
+using System.Globalization;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using AzureStorage.Tables;
-using Common.Log;
 using FluentValidation.AspNetCore;
 using Lykke.Common.ApiLibrary.Middleware;
 using Lykke.Common.ApiLibrary.Swagger;
-using Lykke.Logs;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Infrastructure.Authentication;
 using LykkeApi2.Modules;
 using Lykke.SettingsReader;
-using Lykke.SlackNotification.AzureQueue;
 using IdentityModel;
 using IdentityModel.AspNetCore.OAuth2Introspection;
 using Lykke.Common;
 using Lykke.Cqrs;
+using Lykke.Logs;
 using LykkeApi2.Infrastructure.LykkeApiError;
 using LykkeApi2.Middleware;
 using LykkeApi2.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace LykkeApi2
@@ -42,19 +41,22 @@ namespace LykkeApi2
         public const string ApiTitle = "Lykke Wallet API v2";
         public const string ComponentName = "WalletApiV2";
 
-        public IHostingEnvironment Environment { get; }
-        public IContainer ApplicationContainer { get; private set; }
-        public IConfigurationRoot Configuration { get; set; }
-        public ILog Log { get; private set; }
+        private IWebHostEnvironment Environment { get; }
+        private ILifetimeScope ApplicationContainer { get; set; }
+        private IConfigurationRoot Configuration { get; set; }
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddEnvironmentVariables();
 
             Configuration = builder.Build();
+            Environment = env;
+        }
 
+        public void ConfigureServices(IServiceCollection services)
+        {
             _appSettings = Configuration.LoadSettings<APIv2Settings>(options =>
             {
                 options.SetConnString(x => x.SlackNotifications.AzureQueue.ConnectionString);
@@ -62,237 +64,161 @@ namespace LykkeApi2
                 options.SenderName = $"{AppEnvironment.Name} {AppEnvironment.Version}";
             });
 
-            Environment = env;
-        }
+            services.AddLykkeLogging(_appSettings.Nested(x => x.WalletApiv2.Db.LogsConnString),
+                "LogApiv2",
+                _appSettings.CurrentValue.SlackNotifications.AzureQueue.ConnectionString,
+                _appSettings.CurrentValue.SlackNotifications.AzureQueue.QueueName);
 
-        public IServiceProvider ConfigureServices(IServiceCollection services)
-        {
-            try
-            {
-                services.AddMvc()
-                    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
-                    .AddJsonOptions(options =>
-                    {
-                        options.SerializerSettings.ContractResolver =
-                            new Newtonsoft.Json.Serialization.DefaultContractResolver();
-                    });
-                services.Configure<MvcOptions>(opts =>
+            services
+                .AddControllers(options =>
                 {
-                    var formatter = opts.OutputFormatters.FirstOrDefault(i => i.GetType() == typeof(JsonOutputFormatter));
-                    var jsonFormatter = formatter as JsonOutputFormatter;
-                    var formatterSettings = jsonFormatter == null
-                        ? JsonSerializerSettingsProvider.CreateSerializerSettings()
-                        : jsonFormatter.PublicSerializerSettings;
-                    if (formatter != null)
-                        opts.OutputFormatters.RemoveType<JsonOutputFormatter>();
-                    formatterSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ";
-                    JsonOutputFormatter jsonOutputFormatter = new JsonOutputFormatter(formatterSettings, ArrayPool<char>.Create());
-                    opts.OutputFormatters.Insert(0, jsonOutputFormatter);
+                    options.Filters.Add(new ProducesAttribute("application/json"));
+                })
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.Converters.Add(new StringEnumConverter());
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Include;
+                    options.SerializerSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ";
+                    options.SerializerSettings.Culture = CultureInfo.InvariantCulture;
+                    options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+                    options.SerializerSettings.MissingMemberHandling = MissingMemberHandling.Error;
+                    options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 });
 
-                services.AddSwaggerGen(options =>
-                {
-                    options.DefaultLykkeConfiguration(ApiVersion, ApiTitle);
-
-                    options.OperationFilter<ApiKeyHeaderOperationFilter>();
-                    options.OperationFilter<ObsoleteOperationFilter>();
-
-                    options.DocumentFilter<SecurityRequirementsDocumentFilter>();
-
-                    options.AddSecurityDefinition("oauth2", new OAuth2Scheme
-                    {
-                        Type = "oauth2",
-                        Flow = "implicit",
-                        AuthorizationUrl = _appSettings.CurrentValue.SwaggerSettings.Security.AuthorizeEndpoint
-                    });
-                });
-
-                services.AddAuthentication(OAuth2IntrospectionDefaults.AuthenticationScheme)
-                    .AddOAuth2Introspection(options =>
-                    {
-                        options.Authority = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
-                        options.ClientId = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
-                        options.ClientSecret = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientSecret;
-                        options.NameClaimType = JwtClaimTypes.Subject;
-                        options.EnableCaching = true;
-                        options.CacheDuration = TimeSpan.FromMinutes(1);
-                        options.SkipTokensWithDots = true;
-                    }).CustomizeServerAuthentication();
-
-                services.Configure<ApiBehaviorOptions>(options =>
-                    {
-                        // Wrap failed model state into LykkeApiErrorResponse.
-                        options.InvalidModelStateResponseFactory =
-                            InvalidModelStateResponseFactory.CreateInvalidModelResponse;
-                    });
-
-                var builder = new ContainerBuilder();
-                Log = CreateLogWithSlack(services, _appSettings);
-                builder.Populate(services);
-                builder.RegisterModule(new Api2Module(_appSettings, Log));
-                builder.RegisterModule(new ClientsModule(_appSettings, Log));
-                builder.RegisterModule(new AspNetCoreModule());
-                builder.RegisterModule(new CqrsModule(_appSettings.CurrentValue, Log));
-                builder.RegisterModule(new RepositoriesModule(_appSettings.Nested(x => x.WalletApiv2.Db), Log));
-
-                ApplicationContainer = builder.Build();
-
-                return new AutofacServiceProvider(ApplicationContainer);
-            }
-            catch (Exception ex)
+            services.AddSwaggerGen(options =>
             {
-                Log?.WriteFatalError(nameof(Startup), nameof(ConfigureServices), ex);
-                throw;
-            }
-        }
+                options.DefaultLykkeConfiguration(ApiVersion, ApiTitle);
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifetime)
-        {
-            try
-            {
-                app.Use(async (context, next) =>
+                options.OperationFilter<ObsoleteOperationFilter>();
+                options.OperationFilter<SecurityRequirementsOperationFilter>();
+
+                options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                 {
-                    if (context.Request.Method == "OPTIONS")
+                    Type = SecuritySchemeType.OAuth2,
+                    Flows = new OpenApiOAuthFlows
                     {
-                        context.Response.StatusCode = 200;
-                        await context.Response.WriteAsync("");
-                    }
-                    else
-                    {
-                        await next.Invoke();
+                        Implicit = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = new Uri(_appSettings.CurrentValue.SwaggerSettings.Security.AuthorizeEndpoint)
+                        }
                     }
                 });
 
-                app.UseLykkeMiddleware(ComponentName, ex => new { message = "Technical problem" });
-
-                if (env.IsDevelopment())
+                options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                 {
-                    app.UseDeveloperExceptionPage();
+                    Type = SecuritySchemeType.Http,
+                    In = ParameterLocation.Header,
+                    Scheme = "Bearer",
+                    Description = "Old Lykke access token. *It's not required for request, you can use embed 'Authorization' option to use a new one under the hood."
+                });
+
+                options.CustomSchemaIds(x => x.FullName);
+            });
+
+            services.AddAuthentication(OAuth2IntrospectionDefaults.AuthenticationScheme)
+                .AddOAuth2Introspection(options =>
+                {
+                    options.Authority = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.Authority;
+                    options.ClientId = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientId;
+                    options.ClientSecret = _appSettings.CurrentValue.WalletApiv2.OAuthSettings.ClientSecret;
+                    options.NameClaimType = JwtClaimTypes.Subject;
+                    options.EnableCaching = true;
+                    options.CacheDuration = TimeSpan.FromMinutes(1);
+                    options.SkipTokensWithDots = true;
+                }).CustomizeServerAuthentication();
+
+            services.Configure<ApiBehaviorOptions>(options =>
+                {
+                    // Wrap failed model state into LykkeApiErrorResponse.
+                    options.InvalidModelStateResponseFactory =
+                        InvalidModelStateResponseFactory.CreateInvalidModelResponse;
+                });
+        }
+
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            builder.RegisterModule(new Api2Module(_appSettings));
+            builder.RegisterModule(new ClientsModule(_appSettings));
+            builder.RegisterModule(new AspNetCoreModule());
+            builder.RegisterModule(new CqrsModule(_appSettings.CurrentValue));
+            builder.RegisterModule(new RepositoriesModule(_appSettings.Nested(x => x.WalletApiv2.Db)));
+        }
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
+        {
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Method == "OPTIONS")
+                {
+                    context.Response.StatusCode = 200;
+                    await context.Response.WriteAsync("");
                 }
-
-                app.UseMiddleware<LykkeApiErrorMiddleware>();
-
-                app.Use(next => context =>
+                else
                 {
-                    context.Request.EnableRewind();
+                    await next.Invoke();
+                }
+            });
 
-                    return next(context);
-                });
+            app.UseLykkeMiddleware(ex => new { message = "Technical problem" });
 
-                app.UseAuthentication();
-
-                app.UseMiddleware<CheckSessionMiddleware>();
-                app.UseMiddleware<ClientBansMiddleware>();
-
-                app.UseMvc(routes =>
-                {
-                    routes.MapRoute(
-                        name: "default-to-swagger",
-                        template: "{controller=Swagger}");
-                });
-
-                app.UseForwardedHeaders(new ForwardedHeadersOptions
-                {
-                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-                });
-
-                app.UseDefaultFiles();
-
-                app.UseSwagger();
-                app.UseSwaggerUI(o =>
-                {
-                    o.RoutePrefix = "swagger/ui";
-                    o.SwaggerEndpoint($"/swagger/{ApiVersion}/swagger.json", ApiVersion);
-                    o.OAuthClientId(_appSettings.CurrentValue.SwaggerSettings.Security.OAuthClientId);
-                });
-
-                appLifetime.ApplicationStarted.Register(() => StartApplication().GetAwaiter().GetResult());
-                appLifetime.ApplicationStopped.Register(CleanUp);
-            }
-            catch (Exception ex)
+            if (env.IsDevelopment())
             {
-                Log?.WriteFatalError(nameof(Startup), nameof(Configure), ex);
-                throw;
+                app.UseDeveloperExceptionPage();
             }
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
+
+            app.UseMiddleware<LykkeApiErrorMiddleware>();
+
+            app.Use(next => context =>
+            {
+                context.Request.EnableBuffering();
+
+                return next(context);
+            });
+
+            app.UseMiddleware<CheckSessionMiddleware>();
+            app.UseMiddleware<ClientBansMiddleware>();
+
+            app.UseDefaultFiles();
+
+            app.UseRouting();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+
+            ApplicationContainer = app.ApplicationServices.GetAutofacRoot();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(o =>
+            {
+                o.RoutePrefix = "swagger/ui";
+                o.SwaggerEndpoint($"/swagger/{ApiVersion}/swagger.json", ApiVersion);
+                o.OAuthClientId(_appSettings.CurrentValue.SwaggerSettings.Security.OAuthClientId);
+            });
+
+            appLifetime.ApplicationStarted.Register(() => StartApplication().GetAwaiter().GetResult());
+            appLifetime.ApplicationStopped.Register(CleanUp);
         }
 
-        private async Task StartApplication()
+        private Task StartApplication()
         {
-            try
-            {
-                // NOTE: Service not yet receive and process requests here
-                ApplicationContainer.Resolve<ICqrsEngine>().StartSubscribers();
-
-                Log.WriteMonitor("", AppEnvironment.EnvInfo, "Started");
-            }
-            catch (Exception ex)
-            {
-                Log.WriteFatalError(nameof(Startup), nameof(StartApplication), ex);
-                throw;
-            }
+            ApplicationContainer.Resolve<ICqrsEngine>().StartSubscribers();
+            return Task.CompletedTask;
         }
 
         private void CleanUp()
         {
-            try
-            {
-                // NOTE: Service can't receive and process requests here, so you can destroy all resources
-                ApplicationContainer.Resolve<MarketDataCacheService>().Stop();
-                Log?.WriteMonitor("", AppEnvironment.EnvInfo, "Terminating");
-
-                ApplicationContainer.Dispose();
-            }
-            catch (Exception ex)
-            {
-                if (Log != null)
-                {
-                    Log.WriteFatalError(nameof(Startup), nameof(CleanUp), ex);
-                    (Log as IDisposable)?.Dispose();
-                }
-                throw;
-            }
-        }
-
-        private static ILog CreateLogWithSlack(IServiceCollection services, IReloadingManager<APIv2Settings> settings)
-        {
-            var consoleLogger = new LogToConsole();
-            var aggregateLogger = new AggregateLogger();
-
-            aggregateLogger.AddLog(consoleLogger);
-
-            //Creating slack notification service, which logs own azure queue processing messages to aggregate log
-            var slackService = services.UseSlackNotificationsSenderViaAzureQueue(
-                new Lykke.AzureQueueIntegration.AzureQueueSettings
-                {
-                    ConnectionString = settings.CurrentValue.SlackNotifications.AzureQueue.ConnectionString,
-                    QueueName = settings.CurrentValue.SlackNotifications.AzureQueue.QueueName
-                }, aggregateLogger);
-
-            var dbLogConnectionStringManager = settings.Nested(x => x.WalletApiv2.Db.LogsConnString);
-            var dbLogConnectionString = dbLogConnectionStringManager.CurrentValue;
-
-            // Creating azure storage logger, which logs own messages to console log
-            if (!string.IsNullOrEmpty(dbLogConnectionString) &&
-                !(dbLogConnectionString.StartsWith("${") && dbLogConnectionString.EndsWith("}")))
-            {
-                var persistenceManager = new LykkeLogToAzureStoragePersistenceManager(
-                    AzureTableStorage<LogEntity>.Create(dbLogConnectionStringManager, "LogApiv2", consoleLogger),
-                    consoleLogger);
-
-                var slackNotificationsManager =
-                    new LykkeLogToAzureSlackNotificationsManager(slackService, consoleLogger);
-
-                var azureStorageLogger = new LykkeLogToAzureStorage(
-                    persistenceManager,
-                    slackNotificationsManager,
-                    consoleLogger);
-
-                azureStorageLogger.Start();
-
-                aggregateLogger.AddLog(azureStorageLogger);
-            }
-
-            return aggregateLogger;
+            ApplicationContainer.Resolve<MarketDataCacheService>().Stop();
+            ApplicationContainer.Dispose();
         }
     }
 }
