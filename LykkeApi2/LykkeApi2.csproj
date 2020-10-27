@@ -63,8 +63,9 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.1.1" />
     <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="2.3.20" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
-    <PackageReference Include="Lykke.Service.Assets.Client" Version="4.4.0" />
+    <PackageReference Include="Lykke.Service.Assets.Client" Version="4.6.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="4.0.1" />
+    <PackageReference Include="Swisschain.Sirius.Api.ApiClient" Version="1.0.0-beta.4" />
     <PackageReference Include="Swisschain.Sdk.Metrics" Version="1.3.1" />
     <PackageReference Include="prometheus-net.AspNetCore" Version="4.1.1" />
   </ItemGroup>
