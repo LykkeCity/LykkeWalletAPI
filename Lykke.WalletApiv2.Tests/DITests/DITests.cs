@@ -66,7 +66,8 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 BlockchainSettingsServiceClient = new BlockchainSettingsServiceClientSettings() { ServiceUrl = MockUrl, ApiKey = "123"},
                 PushNotificationsServiceClient = new PushNotificationsServiceClientSettings {ServiceUrl = MockUrl},
                 TierServiceClient = new TierServiceClientSettings {ServiceUrl = MockUrl},
-                MarketDataServiceClient = new MarketDataServiceClientSettings{ServiceUrl = MockUrl, GrpcServiceUrl = MockUrl}
+                MarketDataServiceClient = new MarketDataServiceClientSettings{ServiceUrl = MockUrl, GrpcServiceUrl = MockUrl},
+                SiriusApiServiceClient = new SiriusApiServiceClientSettings{GrpcServiceUrl = MockUrl, ApiKey = "123", BrokerAccountId = 123}
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
 

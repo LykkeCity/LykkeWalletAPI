@@ -46,6 +46,7 @@ namespace LykkeApi2
         public Lykke.Service.BlockchainSettings.Client.BlockchainSettingsServiceClientSettings BlockchainSettingsServiceClient { get; set; }
         public MarketDataServiceClientSettings MarketDataServiceClient { get; set; }
         public Link4PayServiceClientSettings Link4PayServiceClient { get; set; }
+        public SiriusApiServiceClientSettings SiriusApiServiceClient { get; set; }
     }
 
     public class SwaggerSettings
@@ -224,6 +225,15 @@ namespace LykkeApi2
     {
         public DateTime AutoconfirmedDate { get; set; }
         public IReadOnlyList<string> SkipPaths { get; set; } = Array.Empty<string>();
+    }
+
+    public class SiriusApiServiceClientSettings
+    {
+        public string GrpcServiceUrl { get; set; }
+        public string ApiKey { get; set; }
+        public long BrokerAccountId { get; set; }
+        public int WalletsActiveRetryCount { get; set; } = 10;
+        public TimeSpan WaitForActiveWalletsTimeout { get; set; } = TimeSpan.FromSeconds(1);
     }
 }
 

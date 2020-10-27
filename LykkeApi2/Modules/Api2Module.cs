@@ -3,6 +3,7 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Cache;
 using Common.Log;
+using Core.Blockchain;
 using Core.Candles;
 using Core.Countries;
 using Core.Enumerators;
@@ -95,7 +96,7 @@ namespace LykkeApi2.Modules
             builder.Populate(_services);
         }
 
-        private static void BindServices(ContainerBuilder builder, BaseSettings settings)
+        private void BindServices(ContainerBuilder builder, BaseSettings settings)
         {
             var redis = new RedisCache(new RedisCacheOptions
             {
@@ -123,6 +124,13 @@ namespace LykkeApi2.Modules
                 .SingleInstance();
 
             builder.RegisterInstance(settings.SessionCheck);
+
+            builder.RegisterType<SiriusWalletsService>()
+                .As<ISiriusWalletsService>()
+                .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.SiriusApiServiceClient.BrokerAccountId))
+                .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.SiriusApiServiceClient.WalletsActiveRetryCount))
+                .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.SiriusApiServiceClient.WaitForActiveWalletsTimeout))
+                .SingleInstance();
         }
     }
 }
