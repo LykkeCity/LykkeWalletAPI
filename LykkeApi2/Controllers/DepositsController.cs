@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Blockchain;
 using Core.Constants;
 using Core.Services;
 using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Payments.Link4Pay;
+using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientDialogs.Client;
@@ -47,6 +49,7 @@ namespace LykkeApi2.Controllers
         private readonly IClientAccountClient _clientAccountClient;
         private readonly IRequestContext _requestContext;
         private readonly ISrvBlockchainHelper _srvBlockchainHelper;
+        private readonly ISiriusWalletsService _siriusWalletsService;
         private readonly ISet<string> _coloredAssetIds;
 
         public DepositsController(
@@ -62,7 +65,8 @@ namespace LykkeApi2.Controllers
             ILimitationsServiceClient limitationsServiceClient,
             IClientAccountClient clientAccountClient,
             IRequestContext requestContext,
-            ISrvBlockchainHelper srvBlockchainHelper)
+            ISrvBlockchainHelper srvBlockchainHelper,
+            ISiriusWalletsService siriusWalletsService)
         {
             _paymentSystemService = paymentSystemService;
             _link4PayServiceClient = link4PayServiceClient;
@@ -77,6 +81,7 @@ namespace LykkeApi2.Controllers
             _clientAccountClient = clientAccountClient;
             _requestContext = requestContext;
             _srvBlockchainHelper = srvBlockchainHelper;
+            _siriusWalletsService = siriusWalletsService;
 
             _coloredAssetIds = new[]
             {
@@ -353,6 +358,12 @@ namespace LykkeApi2.Controllers
             if (isKycNeded)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
 
+            if (asset.BlockchainIntegrationType == BlockchainIntegrationType.Sirius)
+            {
+                await _siriusWalletsService.CreateWalletsAsync(_requestContext.ClientId, true);
+                return Ok();
+            }
+
             var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
 
             try
@@ -408,6 +419,21 @@ namespace LykkeApi2.Controllers
             if (isKycNeeded)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.KycRequired);
 
+            if (asset.BlockchainIntegrationType == BlockchainIntegrationType.Sirius)
+            {
+                var address = await _siriusWalletsService.GetWalletAdderssAsync(_requestContext.ClientId, asset.SiriusAssetId);
+
+                if (address == null)
+                    throw LykkeApiErrorException.BadRequest(
+                        LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
+
+                return Ok(new CryptoDepositAddressRespModel
+                {
+                    Address = string.IsNullOrEmpty(address.Tag) ? address.Address : $"{address.Address}+{address.Tag}",
+                    BaseAddress = address.Address,
+                    AddressExtension = address.Tag
+                });
+            }
             var isFirstGeneration = string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId);
 
             var depositInfo =
