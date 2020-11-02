@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Common;
 using Common.Log;
 using Core.Blockchain;
 using Polly;
-using Polly.Retry;
 using Swisschain.Sirius.Api.ApiClient;
 using Swisschain.Sirius.Api.ApiContract.Account;
 using Swisschain.Sirius.Api.ApiContract.Common;
@@ -20,8 +18,6 @@ namespace LkeServices.Blockchain
         private readonly IApiClient _siriusApiClient;
         private readonly ILog _log;
 
-        private readonly RetryPolicy<AccountSearchResponse> _waitAccountCreationPolicy;
-
         public SiriusWalletsService(
             long brokerAccountId,
             int retryCount,
@@ -34,21 +30,6 @@ namespace LkeServices.Blockchain
             _retryTimeout = retryTimeout;
             _siriusApiClient = siriusApiClient;
             _log = log;
-
-            _waitAccountCreationPolicy = Policy
-                .HandleResult<AccountSearchResponse>(res =>
-                {
-                    if (res != null && res.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
-                    {
-                        _log.WriteInfo(nameof(CreateWalletsAsync), info: "Error getting account", context: $"error: {res.Error.ToJson()}");
-                        return true;
-                    }
-
-                    var hasAllActiveWallets = res != null && res.Body.Items.Count > 0 && res.Body.Items.All(x => x.State == AccountStateModel.Active);
-                    _log.WriteInfo(nameof(CreateWalletsAsync),info: !hasAllActiveWallets ? "Wallets not ready yet..." : "All wallets are active!", context: null);
-                    return !hasAllActiveWallets;
-                })
-                .WaitAndRetryAsync(_retryCount, retryAttempt => _retryTimeout);
         }
 
         public async Task CreateWalletsAsync(string clientId, bool waitForCreation)
@@ -61,44 +42,78 @@ namespace LkeServices.Blockchain
 
             if (accountResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
             {
-                _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error getting wallets from sirius", context: $"Error: {accountResponse.Error.ToJson()}");
+                _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error getting wallets from sirius", context: new { error = accountResponse.Error, clientId });
+                return;
             }
 
-            if (accountResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Body &&
-                accountResponse.Body.Items.Count == 0)
+            long? accountId = null;
+
+            if (accountResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Body)
             {
-                _log.WriteInfo(nameof(CreateWalletsAsync), info: "Creating wallets in sirius", context: clientId);
-
-                var createResponse = await _siriusApiClient.Accounts.CreateAsync(new AccountCreateRequest
+                if (accountResponse.Body.Items.Count == 0)
                 {
-                    RequestId = $"{_brokerAccountId}{clientId}",
-                    BrokerAccountId = _brokerAccountId,
-                    ReferenceId = clientId
-                });
+                    _log.WriteInfo(nameof(CreateWalletsAsync), info: "Creating wallets in sirius", context: new { clientId });
 
-                if (createResponse.ResultCase == AccountCreateResponse.ResultOneofCase.Error)
+                    string requestId = $"{_brokerAccountId}_{clientId}";
+                    var createResponse = await _siriusApiClient.Accounts.CreateAsync(new AccountCreateRequest
+                    {
+                        RequestId = requestId,
+                        BrokerAccountId = _brokerAccountId,
+                        ReferenceId = clientId
+                    });
+
+                    if (createResponse.ResultCase == AccountCreateResponse.ResultOneofCase.Error)
+                    {
+                        _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error creating wallets in sirius", context: new { error = createResponse.Error, clientId });
+                        return;
+                    }
+
+                    _log.WriteInfo(nameof(CreateWalletsAsync), info: "Wallets created in siruis", context: new { account = createResponse.Body.Account, clientId, requestId });
+
+                    accountId = createResponse.Body.Account.Id;
+                } else if (accountResponse.Body.Items.Any(x => x.State == AccountStateModel.Creating))
                 {
-                    _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error creating wallets in sirius", context: $"Error: {createResponse.Error.ToJson()}");
-                    return;
+                    waitForCreation = true;
                 }
+            }
 
-                _log.WriteInfo(nameof(CreateWalletsAsync), info: "Wallets created in siruis", context: $"Result: {createResponse.Body.Account.ToJson()}");
+            if (waitForCreation)
+            {
+                _log.WriteInfo(nameof(CreateWalletsAsync), info: $"Waiting for all wallets to be active ({_retryCount} retries with {_retryTimeout.TotalSeconds} sec. delay)", context: new { clientId });
 
-                if (waitForCreation)
-                {
-                    _log.WriteInfo(nameof(CreateWalletsAsync), info: $"Waiting for all wallets to be active ({_retryCount} retries with {_retryTimeout.TotalSeconds} sec. delay)", context: $"clientId: {clientId}");
+                var waitAccountCreationPolicy = Policy
+                    .HandleResult<AccountSearchResponse>(res =>
+                    {
+                        if (res != null && res.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
+                        {
+                            _log.WriteInfo(nameof(CreateWalletsAsync), info: "Error getting account", context: new { res.Error, clientId });
+                            return true;
+                        }
 
-                    await _waitAccountCreationPolicy.ExecuteAsync(async () =>
-                        await _siriusApiClient.Accounts.SearchAsync(new AccountSearchRequest
+                        var hasAllActiveWallets = res != null && res.Body.Items.Count > 0 && res.Body.Items.All(x => x.State == AccountStateModel.Active);
+                        _log.WriteInfo(nameof(CreateWalletsAsync),info: !hasAllActiveWallets ? "Wallets not ready yet..." : "All wallets are active!", context: new { clientId });
+                        return !hasAllActiveWallets;
+                    })
+                    .WaitAndRetryAsync(_retryCount, retryAttempt => _retryTimeout);
+
+                await waitAccountCreationPolicy.ExecuteAsync(async () =>
+                    {
+                        var request = new AccountSearchRequest
                         {
                             BrokerAccountId = _brokerAccountId,
-                            Id = createResponse.Body.Account.Id,
                             ReferenceId = clientId,
-                            Pagination = new PaginationInt64{Limit = 100}
-                        }));
+                            Pagination = new PaginationInt64 {Limit = 100}
+                        };
 
-                    _log.WriteInfo(nameof(CreateWalletsAsync), info: "All wallets are active!", context: $"clientId: {clientId}");
-                }
+                        if (accountId.HasValue)
+                        {
+                            request.Id = accountId.Value;
+                        }
+
+                        return await _siriusApiClient.Accounts.SearchAsync(request);
+                    });
+
+                _log.WriteInfo(nameof(CreateWalletsAsync), info: "All wallets are active!", context: new { clientId });
             }
         }
 
@@ -113,7 +128,7 @@ namespace LkeServices.Blockchain
 
             if (searchResponse.ResultCase == AccountDetailsSearchResponse.ResultOneofCase.Error)
             {
-                _log.WriteWarning(nameof(GetWalletAdderssAsync), info: "Error getting wallet from sirius", context: $"Error: {searchResponse.Error.ToJson()}, clientId: {clientId}, assetId: {assetId}");
+                _log.WriteWarning(nameof(GetWalletAdderssAsync), info: "Error getting wallet from sirius", context: new { error = searchResponse.Error, clientId, assetId });
             }
 
             return searchResponse.ResultCase == AccountDetailsSearchResponse.ResultOneofCase.Body
