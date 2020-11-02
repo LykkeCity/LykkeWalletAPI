@@ -235,7 +235,7 @@ namespace LykkeApi2
         public string GrpcServiceUrl { get; set; }
         public string ApiKey { get; set; }
         public long BrokerAccountId { get; set; }
-        public int WalletsActiveRetryCount { get; set; } = 10;
+        public int WalletsActiveRetryCount { get; set; } = 100;
         public TimeSpan WaitForActiveWalletsTimeout { get; set; } = TimeSpan.FromSeconds(1);
     }
 
