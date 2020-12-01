@@ -29,6 +29,14 @@ namespace LykkeApi2.Modules
                     _log)))
                 .As<IHistoryExportsRepository>()
                 .SingleInstance();
+            
+            builder.Register(ctx => 
+                new LkkInvestmentRequestRepository(AzureTableStorage<LkkInvestmentRequest>.Create(
+                    _dbSettings.ConnectionString(x => x.DataConnString),
+                    LkkInvestmentRequestRepository.TableName,
+                    _log)))
+                .As<ILkkInvestmentRequestRepository>()
+                .SingleInstance();
         }
     }
 }
