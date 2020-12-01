@@ -46,8 +46,11 @@ namespace LykkeApi2.Controllers
         /// <summary>
         /// Handles LKK investment requests
         /// </summary>
-        /// <param name="amount">Amount of LKK which client is willing to buy</param>
-        /// <param name="purchaseOption">The way in which it should be processed</param>
+
+        /// <param name="model">
+        /// Amount - amount of LKK which client is willing to buy
+        /// PurchaseOption - the way in which it should be processed
+        /// </param>
         /// <returns></returns>
         /// <exception cref="LykkeApiErrorException"></exception>
         [HttpPost]
@@ -55,23 +58,27 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(ErrorResponse), (int) HttpStatusCode.InternalServerError)]
         [ProducesResponseType(typeof(void), (int) HttpStatusCode.NotFound)]
         public async Task<IActionResult> Send(
-            [FromBody] string amount,
-            [FromBody] string purchaseOption)
+            [FromBody] LkkInvestmentRequestModel model)
         {
-            if (string.IsNullOrEmpty(amount))
-                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, $"{nameof(amount)} should not null");
+            if (string.IsNullOrEmpty(model.Amount))
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, $"{nameof(model.Amount)} should not null");
 
-            if (string.IsNullOrEmpty(purchaseOption))
-                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, $"{nameof(purchaseOption)} should not null");
+            if (string.IsNullOrEmpty(model.PurchaseOption))
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput, $"{nameof(model.PurchaseOption)} should not null");
 
             var clientId = _requestContext.ClientId;
 
             var requestId = Guid.NewGuid().ToString();
                 
-            await _lkkInvestmentRequestRepository.Add(clientId, requestId, amount, purchaseOption);
+            await _lkkInvestmentRequestRepository.Add(clientId, requestId, model.Amount, model.PurchaseOption);
             
             return Ok();
-
         }
+    }
+
+    public class LkkInvestmentRequestModel
+    {
+        public string Amount { get; set; }
+        public string PurchaseOption { get; set; }
     }
 }
