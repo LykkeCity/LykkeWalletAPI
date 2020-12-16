@@ -162,7 +162,7 @@ namespace LykkeApi2.Modules
             builder.RegisterLink4PayClient(_apiSettings.CurrentValue.Link4PayServiceClient);
 
             builder.RegisterInstance(
-                new Swisschain.Sirius.Api.ApiClient.ApiClient(_apiSettings.CurrentValue.SiriusApiServiceClient.GrpcServiceUrl, true, _apiSettings.CurrentValue.SiriusApiServiceClient.ApiKey)
+                new Swisschain.Sirius.Api.ApiClient.ApiClient(_apiSettings.CurrentValue.SiriusApiServiceClient.GrpcServiceUrl, _apiSettings.CurrentValue.SiriusApiServiceClient.ApiKey)
             ).As<Swisschain.Sirius.Api.ApiClient.IApiClient>();
 
             builder.Populate(_services);

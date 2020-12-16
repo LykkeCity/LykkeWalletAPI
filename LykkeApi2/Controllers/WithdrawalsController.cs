@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Common.Log;
+using Core.Blockchain;
 using Core.Constants;
 using Core.Services;
 using Lykke.Common.ApiLibrary.Exceptions;
@@ -36,6 +37,7 @@ namespace LykkeApi2.Controllers
         private readonly IPersonalDataService _personalDataService;
         private readonly BlockedWithdawalSettings _blockedWithdawalSettings;
         private readonly IRequestContext _requestContext;
+        private readonly ISiriusWalletsService _siriusWalletsService;
 
         public WithdrawalsController(
             ILog log,
@@ -45,7 +47,9 @@ namespace LykkeApi2.Controllers
             IFeeCalculatorClient feeCalculatorClient,
             IPersonalDataService personalDataService,
             BlockedWithdawalSettings blockedWithdawalSettings,
-            IRequestContext requestContext)
+            IRequestContext requestContext,
+            ISiriusWalletsService siriusWalletsService
+            )
         {
             _log = log;
             _assetsHelper = assetsHelper;
@@ -55,6 +59,7 @@ namespace LykkeApi2.Controllers
             _personalDataService = personalDataService;
             _blockedWithdawalSettings = blockedWithdawalSettings;
             _requestContext = requestContext;
+            _siriusWalletsService = siriusWalletsService;
         }
 
         /// <summary>
@@ -165,6 +170,14 @@ namespace LykkeApi2.Controllers
 
             if (string.IsNullOrWhiteSpace(baseAddress))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
+
+            if (asset.BlockchainIntegrationType == BlockchainIntegrationType.Sirius)
+            {
+                return Ok(new WithdrawalCryptoAddressValidationModel
+                {
+                    IsValid = await _siriusWalletsService.IsAddressValidAsync(asset.SiriusBlockchainId, baseAddress)
+                });
+            }
 
             if (string.IsNullOrWhiteSpace(asset.BlockchainIntegrationLayerId))
             {

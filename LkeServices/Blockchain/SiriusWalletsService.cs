@@ -6,6 +6,7 @@ using Core.Blockchain;
 using Polly;
 using Swisschain.Sirius.Api.ApiClient;
 using Swisschain.Sirius.Api.ApiContract.Account;
+using Swisschain.Sirius.Api.ApiContract.Address;
 using Swisschain.Sirius.Api.ApiContract.Common;
 
 namespace LkeServices.Blockchain
@@ -134,6 +135,17 @@ namespace LkeServices.Blockchain
             return searchResponse.ResultCase == AccountDetailsSearchResponse.ResultOneofCase.Body
                 ? searchResponse.Body.Items.FirstOrDefault()
                 : null;
+        }
+
+        public async Task<bool> IsAddressValidAsync(string blockchainId, string address)
+        {
+            var response = await _siriusApiClient.Addresses.IsValidAsync(new AddressIsValidRequest
+            {
+                Address = address,
+                BlockchainId = blockchainId
+            });
+
+            return response.ResultCase == AddressIsValidResponse.ResultOneofCase.Body && response.Body.IsValid;
         }
     }
 }

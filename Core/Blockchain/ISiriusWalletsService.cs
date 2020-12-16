@@ -7,5 +7,6 @@ namespace Core.Blockchain
     {
         Task CreateWalletsAsync(string clientId, bool waitForCreation);
         Task<AccountDetailsResponse> GetWalletAdderssAsync(string clientId, long assetId);
+        Task<bool> IsAddressValidAsync(string blockchainId, string address);
     }
 }
