@@ -196,7 +196,9 @@ namespace LykkeApi2.Controllers
                     BlockchainWithdrawal = asset.BlockchainWithdrawal,
                     CashoutMinimalAmount = (decimal)asset.CashoutMinimalAmount,
                     LowVolumeAmount = (decimal?)asset.LowVolumeAmount ?? 0,
-                    LykkeEntityId = asset.LykkeEntityId
+                    LykkeEntityId = asset.LykkeEntityId,
+                    SiriusAssetId = asset.SiriusAssetId,
+                    BlockchainIntegrationType = asset.BlockchainIntegrationType
                 },
                 Client = new ClientCashoutModel
                 {
