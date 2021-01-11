@@ -32,6 +32,7 @@ using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
+using Swisschain.Sdk.Metrics.Rest;
 
 namespace LykkeApi2
 {
@@ -180,6 +181,8 @@ namespace LykkeApi2
                 });
 
                 app.UseAuthentication();
+
+                app.UseMiddleware<PrometheusMetricsMiddleware>();
 
                 app.UseMiddleware<CheckSessionMiddleware>();
                 app.UseMiddleware<ClientBansMiddleware>();
