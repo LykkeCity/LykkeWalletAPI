@@ -50,7 +50,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
                     },
                     DeploymentSettings = new DeploymentSettings(),
                     CacheSettings = new CacheSettings(),
-                    SessionCheck = new SessionCheckSettings()
+                    SessionCheck = new SessionCheckSettings(),
                 },
                 ClientDictionariesServiceClient = new ClientDictionariesServiceClientSettings() { ServiceUrl = MockUrl },
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},
@@ -66,7 +66,8 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 BlockchainSettingsServiceClient = new BlockchainSettingsServiceClientSettings() { ServiceUrl = MockUrl, ApiKey = "123"},
                 PushNotificationsServiceClient = new PushNotificationsServiceClientSettings {ServiceUrl = MockUrl},
                 TierServiceClient = new TierServiceClientSettings {ServiceUrl = MockUrl},
-                MarketDataServiceClient = new MarketDataServiceClientSettings{ServiceUrl = MockUrl, GrpcServiceUrl = MockUrl}
+                MarketDataServiceClient = new MarketDataServiceClientSettings{ServiceUrl = MockUrl, GrpcServiceUrl = MockUrl},
+                BlockedWithdrawalSettings = new BlockedWithdawalSettings()
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
 

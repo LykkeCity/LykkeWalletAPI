@@ -14,6 +14,7 @@ using Lykke.Service.BlockchainCashoutPreconditionsCheck.Contract.Requests;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.FeeCalculator.AutorestClient.Models;
 using Lykke.Service.FeeCalculator.Client;
+using Lykke.Service.PersonalData.Contract;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Withdrawals;
 using Microsoft.AspNetCore.Authorization;
@@ -31,6 +32,8 @@ namespace LykkeApi2.Controllers
         private readonly IBlockchainWalletsClient _blockchainWalletsClient;
         private readonly IBlockchainCashoutPreconditionsCheckClient _blockchainCashoutPreconditionsCheckClient;
         private readonly IFeeCalculatorClient _feeCalculatorClient;
+        private readonly IPersonalDataService _personalDataService;
+        private readonly BlockedWithdawalSettings _blockedWithdawalSettings;
         private readonly IRequestContext _requestContext;
 
         public WithdrawalsController(
@@ -39,6 +42,8 @@ namespace LykkeApi2.Controllers
             IBlockchainWalletsClient blockchainWalletsClient,
             IBlockchainCashoutPreconditionsCheckClient blockchainCashoutPreconditionsCheckClient,
             IFeeCalculatorClient feeCalculatorClient,
+            IPersonalDataService personalDataService,
+            BlockedWithdawalSettings blockedWithdawalSettings,
             IRequestContext requestContext)
         {
             _log = log;
@@ -46,6 +51,8 @@ namespace LykkeApi2.Controllers
             _blockchainWalletsClient = blockchainWalletsClient;
             _blockchainCashoutPreconditionsCheckClient = blockchainCashoutPreconditionsCheckClient;
             _feeCalculatorClient = feeCalculatorClient;
+            _personalDataService = personalDataService;
+            _blockedWithdawalSettings = blockedWithdawalSettings;
             _requestContext = requestContext;
         }
 
@@ -219,7 +226,13 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(WithdrawalMethodsResponse), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailableMethods()
         {
-            var assets = (await _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId)).ToList();
+            var assetsTask = _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+            var pdTask = _personalDataService.GetAsync(_requestContext.ClientId);
+
+            await Task.WhenAll(assetsTask, pdTask);
+
+            var assets = assetsTask.Result.ToList();
+            var pd = pdTask.Result;
 
             var cryptos = new WithdrawalMethod
             {
@@ -234,7 +247,8 @@ namespace LykkeApi2.Controllers
             {
                 Name = "Swift",
                 Assets = assets
-                    .Where(x => x.SwiftWithdrawal)
+                    .Where(x => x.SwiftWithdrawal && (!_blockedWithdawalSettings.AssetByCountry.ContainsKey(x.Id) ||
+                                                      !_blockedWithdawalSettings.AssetByCountry[x.Id].Contains(pd.CountryFromPOA, StringComparer.InvariantCultureIgnoreCase)))
                     .Select(x => x.Id)
                     .ToList()
             };

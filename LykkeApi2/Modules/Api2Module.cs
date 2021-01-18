@@ -95,7 +95,7 @@ namespace LykkeApi2.Modules
             builder.Populate(_services);
         }
 
-        private static void BindServices(ContainerBuilder builder, BaseSettings settings)
+        private void BindServices(ContainerBuilder builder, BaseSettings settings)
         {
             var redis = new RedisCache(new RedisCacheOptions
             {
@@ -123,6 +123,7 @@ namespace LykkeApi2.Modules
                 .SingleInstance();
 
             builder.RegisterInstance(settings.SessionCheck);
+            builder.RegisterInstance(_apiSettings.CurrentValue.BlockedWithdrawalSettings);
         }
     }
 }
