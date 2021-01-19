@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Antares.Service.Assets.Client;
 using Core.Constants;
 using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Cqrs;
-using Lykke.Service.Assets.Client;
 using Lykke.Service.Balances.AutorestClient.Models;
 using Lykke.Service.Balances.Client;
 using Lykke.Service.ClientAccount.Client;
@@ -32,7 +32,7 @@ namespace LykkeApi2.Controllers
     [ApiController]
     public class OperationsController : Controller
     {
-        private readonly IAssetsServiceWithCache _assetsServiceWithCache;
+        private readonly IAssetsServiceClient _assetsServiceClient;
         private readonly IBalancesClient _balancesClient;
         private readonly IKycStatusService _kycStatusService;
         private readonly IClientAccountClient _clientAccountClient;
@@ -45,7 +45,7 @@ namespace LykkeApi2.Controllers
         private readonly Google2FaService _google2FaService;
 
         public OperationsController(
-            IAssetsServiceWithCache assetsServiceWithCache,
+            IAssetsServiceClient assetsServiceClient,
             IBalancesClient balancesClient,
             IKycStatusService kycStatusService,
             IClientAccountClient clientAccountClient,
@@ -57,7 +57,7 @@ namespace LykkeApi2.Controllers
             IConfirmationCodesClient confirmationCodesClient,
             Google2FaService google2FaService)
         {
-            _assetsServiceWithCache = assetsServiceWithCache;
+            _assetsServiceClient = assetsServiceClient;
             _balancesClient = balancesClient;
             _kycStatusService = kycStatusService;
             _clientAccountClient = clientAccountClient;
@@ -147,8 +147,8 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(cmd.DestinationAddress) || string.IsNullOrWhiteSpace(cmd.AssetId) || cmd.Volume == 0m)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
 
-            var asset = await _assetsServiceWithCache.TryGetAssetAsync(cmd.AssetId);
-
+            var asset = _assetsServiceClient.Assets.Get(cmd.AssetId);
+            
             if (asset == null)
             {
                 return NotFound($"Asset '{cmd.AssetId}' not found.");
@@ -242,7 +242,7 @@ namespace LykkeApi2.Controllers
             if (string.IsNullOrWhiteSpace(cmd.AssetId) || cmd.Volume == 0m)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
 
-            var asset = await _assetsServiceWithCache.TryGetAssetAsync(cmd.AssetId);
+            var asset = _assetsServiceClient.Assets.Get(cmd.AssetId);
 
             if (asset == null)
             {

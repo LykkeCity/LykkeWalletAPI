@@ -1,4 +1,5 @@
 ﻿using System;
+using Antares.Service.Assets.Client;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Lykke.MarketProfileService.Client;
@@ -92,9 +93,8 @@ namespace LykkeApi2.Modules
             builder.RegisterInstance<IAssetDisclaimersClient>(
                 new AssetDisclaimersClient(_apiSettings.CurrentValue.AssetDisclaimersServiceClient));
 
-            _services.RegisterAssetsClient(AssetServiceSettings.Create(
-                new Uri(_settings.AssetsServiceUrl),
-                TimeSpan.FromMinutes(60)),_log);
+            builder.RegisterAssetsServiceClient(_settings.AssetsServiceMyNoSqlReaderHostPort, _settings.AssetsServiceUrl);
+            builder.RegisterAssetsServiceUserDataClient(_settings.AssetsServiceMyNoSqlReaderHostPort, _settings.AssetsServiceUrl);
 
 
             builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);

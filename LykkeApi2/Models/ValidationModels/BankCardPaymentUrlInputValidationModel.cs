@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Antares.Service.Assets.Client;
 using Common;
 using Core.Constants;
 using Core.Services;
@@ -9,6 +10,7 @@ using FluentValidation.Validators;
 using Lykke.Service.AssetDisclaimers.Client;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Core.Domain;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
 using Lykke.Service.PaymentSystem.Client;
@@ -29,7 +31,7 @@ namespace LykkeApi2.Models.ValidationModels
         private readonly PaymentLimitsResponse _paymentLimitsResponse;
         private readonly IPersonalData _personalData;
         private readonly IClientAccountClient _clientAccountService;
-        private readonly IAssetsService _assetsService;
+        private readonly IAssetsServiceClient _assetsServiceClient;
         private readonly IKycStatusService _kycStatusService;
         private readonly ITierClient _tierClient;
         private readonly IRateCalculatorClient _rateCalculatorClient;
@@ -42,7 +44,7 @@ namespace LykkeApi2.Models.ValidationModels
             IPaymentSystemClient paymentSystemClient,
             IPersonalDataService personalDataService,
             IClientAccountClient clientAccountService,
-            IAssetsService assetsService,
+            IAssetsServiceClient assetsServiceClient,
             IKycStatusService kycStatusService,
             ITierClient tierClient,
             IRateCalculatorClient rateCalculatorClient)
@@ -50,7 +52,7 @@ namespace LykkeApi2.Models.ValidationModels
             _assetsHelper = assetHelper;
             _assetDisclaimersClient = assetDisclaimersClient;
             _clientAccountService = clientAccountService;
-            _assetsService = assetsService;
+            _assetsServiceClient = assetsServiceClient;
             _kycStatusService = kycStatusService;
             _tierClient = tierClient;
             _rateCalculatorClient = rateCalculatorClient;
@@ -133,7 +135,7 @@ namespace LykkeApi2.Models.ValidationModels
 
         private async Task<bool> IsAllowedToCashInViaBankCardAsync(string value, CancellationToken cancellationToken)
         {
-            return (await _assetsService.ClientIsAllowedToCashInViaBankCardAsync(_clientId, false, cancellationToken)).Value;
+            return (await _assetsServiceClient.HttpClient.ClientIsAllowedToCashInViaBankCardAsync(_clientId, false, cancellationToken)).Value;
         }
 
         private async Task<bool> IsKycNotNeeded(string value, CancellationToken cancellationToken)
@@ -154,7 +156,7 @@ namespace LykkeApi2.Models.ValidationModels
 
             double maxLimit = maxLimitTask.Result;
             double currentDeposit = currentDepositTask.Result;
-            Asset asset = assetTask.Result;
+            IAsset asset = assetTask.Result;
             double allowedToMax = maxLimit - currentDeposit;
             double maxAmountPerTransaction = 0;
 

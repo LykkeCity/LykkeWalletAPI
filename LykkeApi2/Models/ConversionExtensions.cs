@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Core.Domain;
 using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
@@ -8,7 +9,7 @@ namespace LykkeApi2.Models
 {
     public static class ConversionExtensions
     {
-        public static AssetModel ToApiModel(this Asset src)
+        public static AssetModel ToApiModel(this IAsset src)
         {
             return new AssetModel
             {
@@ -27,7 +28,7 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static AssetCategoryModel ToApiModel(this AssetCategory src)
+        public static AssetCategoryModel ToApiModel(this IAssetCategory src)
         {
             return new AssetCategoryModel
             {
@@ -37,7 +38,7 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static AssetAttributesModel ToApiModel(this AssetAttributes src)
+        public static AssetAttributesModel ToApiModel(this IAssetAttributes src)
         {
             return new AssetAttributesModel
             {
@@ -45,12 +46,12 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static IAssetAttributesKeyValue ToApiModel(this AssetAttribute src)
+        public static IAssetAttributesKeyValue ToApiModel(this IAssetAttribute src)
         {
             return new KeyValue {Key = src.Key, Value = src.Value};
         }
         
-        public static AssetDescriptionModel ToApiModel(this AssetExtendedInfo extendedInfo)
+        public static AssetDescriptionModel ToApiModel(this IAssetExtendedInfo extendedInfo)
         {
             return new AssetDescriptionModel
             {
@@ -64,7 +65,7 @@ namespace LykkeApi2.Models
             };
         }
 
-        public static AssetPairModel ToApiModel(this AssetPair src)
+        public static AssetPairModel ToApiModel(this IAssetPair src)
         {
             return new AssetPairModel
             {

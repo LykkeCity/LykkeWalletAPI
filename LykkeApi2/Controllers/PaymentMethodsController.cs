@@ -6,6 +6,7 @@ using Core.Services;
 using Google.Protobuf.WellKnownTypes;
 using Lykke.Payments.Link4Pay;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Core.Domain;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.PaymentSystem.Client.AutorestClient.Models;
 using LykkeApi2.Infrastructure;
@@ -56,7 +57,7 @@ namespace LykkeApi2.Controllers
 
             await Task.WhenAll(supportedCurrenciesTask, allAssetsTask, assetsAvailableToClientTask, depositBlockedTask);
 
-            IReadOnlyCollection<Asset> allAssts = allAssetsTask.Result;
+            IReadOnlyCollection<IAsset> allAssts = allAssetsTask.Result;
             HashSet<string> assetsAvailableToClient = assetsAvailableToClientTask.Result;
 
             var result = new PaymentMethodsResponse

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
 using Core.Services;
+using Lykke.Service.Assets.NoSql.Models;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models.Request.Settings;
 using LykkeApi2.Infrastructure;
@@ -203,10 +204,14 @@ namespace LykkeApi2.Controllers
             var extendedInfo = await _assetsHelper.GetAssetExtendedInfoAsync(assetId) ??
                                await _assetsHelper.GetDefaultAssetExtendedInfoAsync();
 
-            if (string.IsNullOrEmpty(extendedInfo.Id))
-                extendedInfo.Id = assetId;
+            var result = extendedInfo.ToApiModel();
 
-            return Ok(extendedInfo.ToApiModel());
+            if (string.IsNullOrEmpty(result.Id))
+            {
+                result.Id = assetId;
+            }
+
+            return Ok();
         }
 
         /// <summary>
