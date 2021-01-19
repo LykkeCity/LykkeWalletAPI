@@ -212,8 +212,7 @@ namespace LykkeApi2.Controllers
         private async Task<List<string>> GetAvailableAssetPairIdsAsync()
         {
             var assetPairIds =
-                await _assetsHelper.GetSetOfAssetPairsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId,
-                    true);
+                await _assetsHelper.GetSetOfAssetPairsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             return assetPairIds.ToList();
         }
