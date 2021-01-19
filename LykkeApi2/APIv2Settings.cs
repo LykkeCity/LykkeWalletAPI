@@ -46,6 +46,9 @@ namespace LykkeApi2
         public Lykke.Service.BlockchainSettings.Client.BlockchainSettingsServiceClientSettings BlockchainSettingsServiceClient { get; set; }
         public MarketDataServiceClientSettings MarketDataServiceClient { get; set; }
         public Link4PayServiceClientSettings Link4PayServiceClient { get; set; }
+        [Optional]
+        public BlockedWithdawalSettings BlockedWithdrawalSettings { get; set; } = new BlockedWithdawalSettings();
+
     }
 
     public class SwaggerSettings
@@ -224,6 +227,11 @@ namespace LykkeApi2
     {
         public DateTime AutoconfirmedDate { get; set; }
         public IReadOnlyList<string> SkipPaths { get; set; } = Array.Empty<string>();
+    }
+
+    public class BlockedWithdawalSettings
+    {
+        public Dictionary<string, string[]> AssetByCountry { get; set; } = new Dictionary<string, string[]>();
     }
 }
 
