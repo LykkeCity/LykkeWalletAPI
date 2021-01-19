@@ -8,6 +8,7 @@ using Common.Log;
 using Core.Constants;
 using Core.Services;
 using Lykke.Common.ApiLibrary.Exceptions;
+using Lykke.Common.Log;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Contract.Requests;
@@ -226,41 +227,59 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType(typeof(WithdrawalMethodsResponse), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailableMethods()
         {
-            var assetsTask = _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
-            var pdTask = _personalDataService.GetAsync(_requestContext.ClientId);
-
-            await Task.WhenAll(assetsTask, pdTask);
-
-            var assets = assetsTask.Result.ToList();
-            var pd = pdTask.Result;
-
-            var cryptos = new WithdrawalMethod
+            var model = new WithdrawalMethodsResponse();
+            try
             {
-                Name = "Cryptos",
-                Assets = assets
-                    .Where(x => x.BlockchainWithdrawal)
-                    .Select(x => x.Id)
-                    .ToList()
-            };
+                var assetsTask =
+                    _assetsHelper.GetAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId);
+                var pdTask = _personalDataService.GetAsync(_requestContext.ClientId);
 
-            var swift = new WithdrawalMethod
-            {
-                Name = "Swift",
-                Assets = assets
-                    .Where(x => x.SwiftWithdrawal && (!_blockedWithdawalSettings.AssetByCountry.ContainsKey(x.Id) ||
-                                                      !_blockedWithdawalSettings.AssetByCountry[x.Id].Contains(pd.CountryFromPOA, StringComparer.InvariantCultureIgnoreCase)))
-                    .Select(x => x.Id)
-                    .ToList()
-            };
+                await Task.WhenAll(assetsTask, pdTask);
 
-            var model = new WithdrawalMethodsResponse
-            {
-                WithdrawalMethods = new List<WithdrawalMethod>
+                var assets = assetsTask.Result.ToList();
+                var pd = pdTask.Result;
+
+                var cryptos = new WithdrawalMethod
                 {
-                    cryptos,
-                    swift
-                }
-            };
+                    Name = "Cryptos",
+                    Assets = assets
+                        .Where(x => x.BlockchainWithdrawal)
+                        .Select(x => x.Id)
+                        .ToList()
+                };
+
+                var swift = new WithdrawalMethod
+                {
+                    Name = "Swift",
+                    Assets = assets
+                        .Where(x => x.SwiftWithdrawal && (!_blockedWithdawalSettings.AssetByCountry.ContainsKey(x.Id) ||
+                                                          !_blockedWithdawalSettings.AssetByCountry[x.Id]
+                                                              .Contains(pd.CountryFromPOA,
+                                                                  StringComparer.InvariantCultureIgnoreCase)))
+                        .Select(x => x.Id)
+                        .ToList()
+                };
+
+                model.WithdrawalMethods = new List<WithdrawalMethod> {cryptos, swift};
+            }
+            catch (Exception ex)
+            {
+                _log.Error(ex, "Error getting available methods", context: $"clientId: {_requestContext.ClientId}, partnerId: {_requestContext.PartnerId}");
+                model.WithdrawalMethods = new List<WithdrawalMethod>
+                {
+
+                    new WithdrawalMethod
+                    {
+                        Name = "Cryptos",
+                        Assets = Array.Empty<string>()
+                    },
+                    new WithdrawalMethod
+                    {
+                        Name = "Swift",
+                        Assets = Array.Empty<string>()
+                    }
+                };
+            }
 
             return Ok(model);
         }
