@@ -69,15 +69,15 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> GetAvailable()
         {
             var availableAssetPairs =
-                await _assetsHelper.GetSetOfAssetPairsAvailableToClientAsync(_requestContext.ClientId,
+                await _assetsHelper.GetAssetPairsAvailableToClientAsync(_requestContext.ClientId,
                     _requestContext.PartnerId, true);
             
             return Ok(Models.AssetPairsModels.AssetPairResponseModel.Create(
-                (await _assetsHelper.GetAllAssetPairsAsync())
-                    .Where(x => availableAssetPairs.Contains(x.Id))
-                    .Select(x => x.ToApiModel())
-                    .OrderBy(x => x.Id)
-                    .ToArray()));
+                    availableAssetPairs
+                        .Select(x => x.ToApiModel())
+                        .OrderBy(x => x.Id)
+                        .ToArray()
+                ));
         }
 
         /// <summary>

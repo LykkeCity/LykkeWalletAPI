@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Antares.Service.Assets.Client;
 using Common;
 using Lykke.MatchingEngine.Connector.Abstractions.Services;
 using Lykke.MatchingEngine.Connector.Models.Api;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Core.Domain;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.History.Client;
 using Lykke.Service.Kyc.Abstractions.Services;
@@ -38,7 +40,7 @@ namespace LykkeApi2.Controllers
         private readonly IPersonalDataService _personalDataService;
         private readonly IKycStatusService _kycStatusService;
         private readonly IClientAccountClient _clientAccountClient;
-        private readonly IAssetsServiceWithCache _assetsServiceWithCache;
+        private readonly IAssetsServiceClient _assetsServiceClient;
         private readonly IMatchingEngineClient _matchingEngineClient;
         private readonly FeeSettings _feeSettings;
         private readonly IOperationsClient _operationsClient;
@@ -53,7 +55,7 @@ namespace LykkeApi2.Controllers
             IPersonalDataService personalDataService,
             IKycStatusService kycStatusService,
             IClientAccountClient clientAccountClient,
-            IAssetsServiceWithCache assetsServiceWithCache,
+            IAssetsServiceClient assetsServiceClient,
             IMatchingEngineClient matchingEngineClient,
             FeeSettings feeSettings,
             IOperationsClient operationsClient,
@@ -67,7 +69,7 @@ namespace LykkeApi2.Controllers
             _personalDataService = personalDataService;
             _kycStatusService = kycStatusService;
             _clientAccountClient = clientAccountClient;
-            _assetsServiceWithCache = assetsServiceWithCache;
+            _assetsServiceClient = assetsServiceClient;
             _matchingEngineClient = matchingEngineClient;
             _feeSettings = feeSettings;
             _operationsClient = operationsClient;
@@ -147,8 +149,8 @@ namespace LykkeApi2.Controllers
         {
             var id = Guid.NewGuid();
 
-            var asset = await _assetsServiceWithCache.TryGetAssetAsync(request.AssetId);
-            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
+            var asset = _assetsServiceClient.Assets.Get(request.AssetId);
+            var pair = _assetsServiceClient.AssetPairs.Get(request.AssetPairId);
 
             if (asset == null)
             {
@@ -170,8 +172,8 @@ namespace LykkeApi2.Controllers
                 return BadRequest();
             }
 
-            var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
-            var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
+            var baseAsset = _assetsServiceClient.Assets.Get(pair.BaseAssetId);
+            var quotingAsset = _assetsServiceClient.Assets.Get(pair.QuotingAssetId);
 
             var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
 
@@ -224,7 +226,7 @@ namespace LykkeApi2.Controllers
         {
             var id = Guid.NewGuid();
 
-            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
+            var pair = _assetsServiceClient.AssetPairs.Get(request.AssetPairId);
 
             if (pair == null)
             {
@@ -236,8 +238,8 @@ namespace LykkeApi2.Controllers
                 return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
             }
 
-            var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
-            var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
+            var baseAsset = _assetsServiceClient.Assets.Get(pair.BaseAssetId);
+            var quotingAsset = _assetsServiceClient.Assets.Get(pair.QuotingAssetId);
 
             var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
             var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
@@ -289,7 +291,7 @@ namespace LykkeApi2.Controllers
         {
             var id = Guid.NewGuid();
 
-            var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(request.AssetPairId);
+            var pair = _assetsServiceClient.AssetPairs.Get(request.AssetPairId);
 
             if (pair == null)
                 return NotFound($"Asset pair '{request.AssetPairId}' not found.");
@@ -297,8 +299,8 @@ namespace LykkeApi2.Controllers
             if (pair.IsDisabled)
                 return BadRequest($"Asset pair '{request.AssetPairId}' disabled.");
 
-            var baseAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.BaseAssetId);
-            var quotingAsset = await _assetsServiceWithCache.TryGetAssetAsync(pair.QuotingAssetId);
+            var baseAsset = _assetsServiceClient.Assets.Get(pair.BaseAssetId);
+            var quotingAsset = _assetsServiceClient.Assets.Get(pair.QuotingAssetId);
 
             var tradingSession = await _clientSessionsClient.GetTradingSession(_requestContext.SessionId);
             var confirmationRequired = _baseSettings.EnableSessionValidation && !(tradingSession?.Confirmed ?? false);
@@ -368,7 +370,7 @@ namespace LykkeApi2.Controllers
 
             if (!string.IsNullOrEmpty(model.AssetPairId))
             {
-                var pair = await _assetsServiceWithCache.TryGetAssetPairAsync(model.AssetPairId);
+                var pair = _assetsServiceClient.AssetPairs.Get(model.AssetPairId);
 
                 if (pair == null)
                 {
@@ -399,7 +401,7 @@ namespace LykkeApi2.Controllers
             return Ok();
         }
 
-        private AssetModel ConvertAssetToAssetModel(Asset asset)
+        private AssetModel ConvertAssetToAssetModel(IAsset asset)
         {
             return new AssetModel
             {

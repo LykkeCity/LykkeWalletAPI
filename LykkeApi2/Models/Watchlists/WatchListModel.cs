@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Core.Domain;
 
 namespace LykkeApi2.Models.Watchlists
 {
@@ -14,14 +15,14 @@ namespace LykkeApi2.Models.Watchlists
 
     public static class WatchListModelHelper
     {
-        public static WatchListModel ToApiModel(this WatchList watchList)
+        public static WatchListModel ToApiModel(this IWatchList watchList)
         {
             return new WatchListModel
             {
                 Id = watchList.Id,
                 Name = watchList.Name,
                 Order = watchList.Order,
-                ReadOnlyProperty = watchList.ReadOnlyProperty,
+                ReadOnlyProperty = watchList.ReadOnly,
                 AssetPairIds = watchList.AssetIds ?? new List<string>()
             };
         }

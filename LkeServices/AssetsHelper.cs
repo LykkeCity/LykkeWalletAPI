@@ -1,106 +1,111 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Antares.Service.Assets.Client;
+using Antares.Service.Assets.Client.Models;
 using Common.Cache;
 using Core.Services;
 using JetBrains.Annotations;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Core.Domain;
 
 namespace LkeServices
 {
     [UsedImplicitly]
     public class AssetsHelper : IAssetsHelper
     {
-        private readonly IAssetsService _assetsService;
-        private readonly IAssetsServiceWithCache _assetsServiceWithCache;
+        private readonly IAssetsServiceClient _assetsService;
+        private readonly IAssetsServiceUserDataClient _assetsServiceUserDataClient;
         private readonly ICacheManager _memoryCache;
         private const string AssetsExtendedInfoKey = "AssetsExtendedInfo";
         private const int AssetsExtendedInfoCacheMins = 10;
 
         public AssetsHelper(
-            IAssetsService assetsService,
-            IAssetsServiceWithCache assetsServiceWithCache,
+            IAssetsServiceClient assetsService,
+            IAssetsServiceUserDataClient assetsServiceUserDataClient,
             ICacheManager memoryCache
             )
         {
             _assetsService = assetsService;
-            _assetsServiceWithCache = assetsServiceWithCache;
+            _assetsServiceUserDataClient = assetsServiceUserDataClient;
             _memoryCache = memoryCache;
         }
 
-        public Task<Asset> GetAssetAsync(string assetId)
+        public Task<IAsset> GetAssetAsync(string assetId)
         {
-            return _assetsServiceWithCache.TryGetAssetAsync(assetId);
+            return Task.FromResult(_assetsService.Assets.Get(assetId));
         }
 
-        public Task<IReadOnlyCollection<Asset>> GetAllAssetsAsync()
+        public Task<IReadOnlyCollection<IAsset>> GetAllAssetsAsync()
         {
-            return _assetsServiceWithCache.GetAllAssetsAsync(true);
+            var data = _assetsService.Assets.GetAll(true);
+            return Task.FromResult((IReadOnlyCollection<IAsset>) data);
         }
 
-        public Task<AssetPair> GetAssetPairAsync(string assetPairId)
+        public Task<IAssetPair> GetAssetPairAsync(string assetPairId)
         {
-            return _assetsServiceWithCache.TryGetAssetPairAsync(assetPairId);
+            return Task.FromResult(_assetsService.AssetPairs.Get(assetPairId));
         }
 
-        public Task<IReadOnlyCollection<AssetPair>> GetAllAssetPairsAsync()
+        public Task<IReadOnlyCollection<IAssetPair>> GetAllAssetPairsAsync()
         {
-            return _assetsServiceWithCache.GetAllAssetPairsAsync();
+            var data = _assetsService.AssetPairs.GetAll();
+            return Task.FromResult((IReadOnlyCollection<IAssetPair>) data);
         }
 
-        public Task<AssetAttributes> GetAssetsAttributesAsync(string assetId)
+        public Task<IAssetAttributes> GetAssetsAttributesAsync(string assetId)
         {
-            return _assetsService.AssetAttributeGetAllForAssetAsync(assetId);
+            return Task.FromResult(_assetsService.AssetAttributes.GetAllForAsset(assetId));
         }
 
-        public Task<AssetAttribute> GetAssetAttributesAsync(string assetId, string key)
+        public Task<IAssetAttribute> GetAssetAttributesAsync(string assetId, string key)
         {
-            return _assetsService.AssetAttributeGetAsync(assetId, key);
+            return Task.FromResult(_assetsService.AssetAttributes.Get(assetId, key));
         }
 
-        public async Task<IList<AssetExtendedInfo>> GetAssetsExtendedInfosAsync()
+        public Task<IList<IAssetExtendedInfo>> GetAssetsExtendedInfosAsync()
         {
-            var result = _memoryCache.Get<List<AssetExtendedInfo>>(AssetsExtendedInfoKey);
-
-            if (result != null)
-                return result;
-
-            var allInfo = await _assetsService.AssetExtendedInfoGetAllAsync();
-            _memoryCache.Set(AssetsExtendedInfoKey, allInfo, AssetsExtendedInfoCacheMins);
-
-            return allInfo;
+            var data = _assetsService.AssetExtendedInfo.GetAll();
+            return Task.FromResult<IList<IAssetExtendedInfo>>(data);
         }
 
-        public Task<AssetExtendedInfo> GetAssetExtendedInfoAsync(string assetId)
+        public Task<IAssetExtendedInfo> GetAssetExtendedInfoAsync(string assetId)
         {
-            return _assetsService.AssetExtendedInfoGetAsync(assetId);
+            var data = _assetsService.AssetExtendedInfo.Get(assetId);
+            return Task.FromResult(data);
         }
 
-        public Task<AssetExtendedInfo> GetDefaultAssetExtendedInfoAsync()
+        public Task<IAssetExtendedInfo> GetDefaultAssetExtendedInfoAsync()
         {
-            return _assetsService.AssetExtendedInfoGetDefaultAsync();
+            var data = _assetsService.AssetExtendedInfo.GetDefault();
+            return Task.FromResult(data);
         }
 
-        public Task<IList<AssetCategory>> GetAssetCategoriesAsync()
+        public Task<IList<IAssetCategory>> GetAssetCategoriesAsync()
         {
-            return _assetsService.AssetCategoryGetAllAsync();
+            var data = _assetsService.AssetCategory.GetAll();
+            return Task.FromResult(data);
         }
 
-        public Task<AssetCategory> GetAssetCategoryAsync(string categoryId)
+        public Task<IAssetCategory> GetAssetCategoryAsync(string categoryId)
         {
-            return _assetsService.AssetCategoryGetAsync(categoryId);
+            var data = _assetsService.AssetCategory.Get(categoryId);
+            return Task.FromResult(data);
         }
 
-        public async Task<IEnumerable<Asset>> GetAssetsAvailableToClientAsync(
+        public async Task<IEnumerable<IAsset>> GetAssetsAvailableToClientAsync(
             string clientId,
             string partnerId,
             bool? tradable = default(bool?))
         {
+            var userAssetIds = await _assetsServiceUserDataClient.AvailableAssets.GetAssetIds(clientId, true);
+
             var allAssets = await GetAllAssetsAsync();
             var relevantAssets = allAssets.Where(x => !x.IsDisabled && (!tradable.HasValue || x.IsTradable == tradable));
 
-            var assetsAvailableToUser = new HashSet<string>(await _assetsService.ClientGetAssetIdsAsync(clientId, true));
+            var assetsAvailableToUser = new HashSet<string>(userAssetIds);
 
             return relevantAssets.Where(x =>
                     assetsAvailableToUser.Contains(x.Id) &&
@@ -118,7 +123,7 @@ namespace LkeServices
             return new HashSet<string>(availableAssets.Select(x => x.Id));
         }
 
-        public async Task<IEnumerable<AssetPair>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId, bool? tradable = default(bool?))
+        public async Task<IEnumerable<IAssetPair>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId, bool? tradable = default(bool?))
         {
             var allNondisabledAssetPairs = (await GetAllAssetPairsAsync()).Where(s => !s.IsDisabled);
 
@@ -135,34 +140,51 @@ namespace LkeServices
             return new HashSet<string>(availableAssetPairs.Select(x => x.Id));
         }
 
-        public Task<WatchList> AddCustomWatchListAsync(string clientId, WatchList watchList)
+        public async Task<IWatchList> AddCustomWatchListAsync(string clientId, WatchList watchList)
         {
-            return _assetsService.WatchListAddCustomAsync(watchList, clientId);
+            var data = await _assetsServiceUserDataClient.WatchLists.AddCustomAsync(FromWatchListResponse(watchList), clientId);
+            return data;
         }
 
-        public Task UpdateCustomWatchListAsync(string clientId, WatchList watchList)
+        public async Task UpdateCustomWatchListAsync(string clientId, WatchListDto watchList)
         {
-            return _assetsService.WatchListUpdateCustomAsync(watchList, clientId);
+            await _assetsServiceUserDataClient.WatchLists.UpdateCustomWatchListAsync(clientId, watchList);
         }
 
-        public Task RemoveCustomWatchListAsync(string clientId, string watchListId)
+        public async Task RemoveCustomWatchListAsync(string clientId, string watchListId)
         {
-            return _assetsService.WatchListCustomRemoveAsync(watchListId, clientId);
+            await _assetsServiceUserDataClient.WatchLists.RemoveCustomAsync(watchListId, clientId);
         }
 
-        public Task<IList<WatchList>> GetAllCustomWatchListsForClient(string clientId)
+        public async Task<IList<IWatchList>> GetAllCustomWatchListsForClient(string clientId)
         {
-            return _assetsService.WatchListGetAllAsync(clientId);
+            var data = await _assetsServiceUserDataClient.WatchLists.GetAllCustom(clientId);
+            return data.ToList();
         }
 
-        public Task<WatchList> GetCustomWatchListAsync(string clientId, string watchListId)
+        public async Task<IWatchList> GetCustomWatchListAsync(string clientId, string watchListId)
         {
-            return _assetsService.WatchListGetCustomAsync(watchListId, clientId);
+            var data = await _assetsServiceUserDataClient.WatchLists.GetCustomWatchListAsync(clientId, watchListId);
+
+            return data;
         }
 
-        public Task<WatchList> GetPredefinedWatchListAsync(string watchListId)
+        public async Task<IWatchList> GetPredefinedWatchListAsync(string watchListId)
         {
-            return _assetsService.WatchListGetPredefinedAsync(watchListId);
+            var data = await _assetsServiceUserDataClient.WatchLists.GetPredefinedWatchListAsync(watchListId);
+            return data;
+        }
+
+        private WatchListDto FromWatchListResponse(WatchList watchList)
+        {
+            return new WatchListDto()
+            {
+                Id = watchList.Id,
+                Name = watchList.Name,
+                Order = watchList.Order,
+                ReadOnly = watchList.ReadOnlyProperty,
+                AssetIds = watchList.AssetIds.ToList()
+            };
         }
     }
 }

@@ -63,8 +63,6 @@ namespace LykkeApi2.Modules
 
             builder.RegisterInstance(new DeploymentSettings());
             builder.RegisterInstance(_settings.DeploymentSettings);
-            builder.RegisterInstance<IAssetsService>(
-                new AssetsService(new Uri(_settings.Services.AssetsServiceUrl)));
 
             _services.AddSingleton<ClientAccountLogic>();
 

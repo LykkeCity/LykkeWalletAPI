@@ -24,6 +24,7 @@ using Lykke.Service.History.Contracts.Enums;
 using LykkeApi2.Models.Blockchain;
 using Swashbuckle.AspNetCore.Annotations;
 using LykkeApi2.Models.History;
+using AssetType = Lykke.Service.Assets.Core.Domain.AssetType;
 using ErrorResponse = LykkeApi2.Models.ErrorResponse;
 
 namespace LykkeApi2.Controllers

@@ -135,6 +135,7 @@ namespace LykkeApi2
     public class ServiceSettings
     {
         public string AssetsServiceUrl { get; set; }
+        public string AssetsServiceMyNoSqlReaderHostPort { get; set; }
         public string ClientAccountServiceUrl { get; set; }
         public string RegistrationUrl { get; set; }
         public string RateCalculatorServiceApiUrl { get; set; }

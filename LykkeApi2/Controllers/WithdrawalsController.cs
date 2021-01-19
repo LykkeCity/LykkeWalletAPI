@@ -9,6 +9,7 @@ using Core.Constants;
 using Core.Services;
 using Lykke.Common.ApiLibrary.Exceptions;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Core.Domain;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Contract.Requests;
 using Lykke.Service.BlockchainWallets.Client;
@@ -262,7 +263,7 @@ namespace LykkeApi2.Controllers
             return Ok(new SwiftLastResponse());
         }
 
-        private async Task<Asset> GetCryptoWithdrawalAssetAsync(string assetId)
+        private async Task<IAsset> GetCryptoWithdrawalAssetAsync(string assetId)
         {
             var asset = await _assetsHelper.GetAssetAsync(assetId);
 

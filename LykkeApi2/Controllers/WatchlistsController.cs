@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Antares.Service.Assets.Client.Models;
 using Core.Services;
 using LkeServices;
 using Lykke.Service.Assets.Client;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Core.Domain;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models.Watchlists;
 using Microsoft.AspNetCore.Authorization;
@@ -94,7 +96,7 @@ namespace LykkeApi2.Controllers
             if (watchList == null)
                 return NotFound();
 
-            if (watchList.ReadOnlyProperty ||
+            if (watchList.ReadOnly ||
                 !await IsValidAsync(model.AssetPairIds) ||
                 string.IsNullOrEmpty(model.Name))
                 return BadRequest();
@@ -104,7 +106,7 @@ namespace LykkeApi2.Controllers
             if (watchlists.Any(item => item.Name == model.Name && item.Id != watchList.Id))
                 return BadRequest();
 
-            var newWatchList = new WatchList
+            var newWatchList = new WatchListDto()
             {
                 Id = id,
                 Name = model.Name,
@@ -128,14 +130,14 @@ namespace LykkeApi2.Controllers
             if (watchList == null)
                 return NotFound();
 
-            if (watchList.ReadOnlyProperty)
+            if (watchList.ReadOnly)
                 return BadRequest();
 
             await _assetsHelper.RemoveCustomWatchListAsync(_requestContext.ClientId, id);
             return Ok();
         }
 
-        private async Task<WatchList> GetWatchList(string id)
+        private async Task<IWatchList> GetWatchList(string id)
         {
             var result = await _assetsHelper.GetCustomWatchListAsync(_requestContext.ClientId, id) ??
                          await _assetsHelper.GetPredefinedWatchListAsync(id);
@@ -155,7 +157,7 @@ namespace LykkeApi2.Controllers
             return watchList;
         }
 
-        private async Task<IEnumerable<WatchList>> GetAllWatchlists()
+        private async Task<IEnumerable<IWatchList>> GetAllWatchlists()
         {
             var availableAssetPairIds = await GetAvailableAssetPairIdsAsync();
 
@@ -177,12 +179,12 @@ namespace LykkeApi2.Controllers
                 .All(id => availableAssetPairIds.Contains(id));
         }
 
-        private WatchList FilterAssetsPairs(WatchList watchList, List<string> availableAssetPairIds = null)
+        private IWatchList FilterAssetsPairs(IWatchList watchList, List<string> availableAssetPairIds = null)
         {
             return FilterAssetPairsAsync(watchList, availableAssetPairIds).GetAwaiter().GetResult();
         }
 
-        private async Task<WatchList> FilterAssetPairsAsync(WatchList watchList, List<string> availableAssetPairIds = null)
+        private async Task<IWatchList> FilterAssetPairsAsync(IWatchList watchList, List<string> availableAssetPairIds = null)
         {
             availableAssetPairIds = availableAssetPairIds ?? await GetAvailableAssetPairIdsAsync();
 
@@ -195,13 +197,13 @@ namespace LykkeApi2.Controllers
                 return null;
             }
 
-            var result = new WatchList
+            var result = new WatchListDto()
             {
                 AssetIds = filteredAssetPairIds,
                 Id = watchList.Id,
                 Name = watchList.Name,
                 Order = watchList.Order,
-                ReadOnlyProperty = watchList.ReadOnlyProperty
+                ReadOnly = watchList.ReadOnly
             };
 
             return result;
@@ -210,8 +212,7 @@ namespace LykkeApi2.Controllers
         private async Task<List<string>> GetAvailableAssetPairIdsAsync()
         {
             var assetPairIds =
-                await _assetsHelper.GetSetOfAssetPairsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId,
-                    true);
+                await _assetsHelper.GetSetOfAssetPairsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
             return assetPairIds.ToList();
         }

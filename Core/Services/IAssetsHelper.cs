@@ -1,38 +1,40 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Antares.Service.Assets.Client.Models;
 using Lykke.Service.Assets.Client.Models;
+using Lykke.Service.Assets.Core.Domain;
 
 namespace Core.Services
 {
     public interface IAssetsHelper
     {
-        Task<Asset> GetAssetAsync(string assetId);
-        Task<IReadOnlyCollection<Asset>> GetAllAssetsAsync();
-        Task<AssetPair> GetAssetPairAsync(string assetPairId);
-        Task<IReadOnlyCollection<AssetPair>> GetAllAssetPairsAsync();
-        Task<AssetAttributes> GetAssetsAttributesAsync(string assetId);
-        Task<AssetAttribute> GetAssetAttributesAsync(string assetId, string key);
-        Task<IList<AssetExtendedInfo>> GetAssetsExtendedInfosAsync();
-        Task<AssetExtendedInfo> GetAssetExtendedInfoAsync(string assetId);
-        Task<AssetExtendedInfo> GetDefaultAssetExtendedInfoAsync();
-        Task<IList<AssetCategory>> GetAssetCategoriesAsync();
-        Task<AssetCategory> GetAssetCategoryAsync(string categoryId);
+        Task<IAsset> GetAssetAsync(string assetId);
+        Task<IReadOnlyCollection<IAsset>> GetAllAssetsAsync();
+        Task<IAssetPair> GetAssetPairAsync(string assetPairId);
+        Task<IReadOnlyCollection<IAssetPair>> GetAllAssetPairsAsync();
+        Task<IAssetAttributes> GetAssetsAttributesAsync(string assetId);
+        Task<IAssetAttribute> GetAssetAttributesAsync(string assetId, string key);
+        Task<IList<IAssetExtendedInfo>> GetAssetsExtendedInfosAsync();
+        Task<IAssetExtendedInfo> GetAssetExtendedInfoAsync(string assetId);
+        Task<IAssetExtendedInfo> GetDefaultAssetExtendedInfoAsync();
+        Task<IList<IAssetCategory>> GetAssetCategoriesAsync();
+        Task<IAssetCategory> GetAssetCategoryAsync(string categoryId);
 
-        Task<IEnumerable<Asset>> GetAssetsAvailableToClientAsync(string clientId, string partnerId,
+        Task<IEnumerable<IAsset>> GetAssetsAvailableToClientAsync(string clientId, string partnerId,
             bool? tradable = default(bool?));
         Task<HashSet<string>> GetSetOfAssetsAvailableToClientAsync(string clientId, string partnerId,
             bool? tradable = default(bool?));
 
-        Task<IEnumerable<AssetPair>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId,
+        Task<IEnumerable<IAssetPair>> GetAssetPairsAvailableToClientAsync(string clientId, string partnerId,
             bool? tradable = default(bool?));
         Task<HashSet<string>> GetSetOfAssetPairsAvailableToClientAsync(string clientId, string partnerId,
             bool? tradable = default(bool?));
 
-        Task<WatchList> AddCustomWatchListAsync(string clientId, WatchList watchList);
-        Task UpdateCustomWatchListAsync(string clientId, WatchList watchList);
+        Task<IWatchList> AddCustomWatchListAsync(string clientId, WatchList watchList);
+        Task UpdateCustomWatchListAsync(string clientId, WatchListDto watchList);
         Task RemoveCustomWatchListAsync(string clientId, string watchListId);
-        Task<IList<WatchList>> GetAllCustomWatchListsForClient(string clientId);
-        Task<WatchList> GetCustomWatchListAsync(string clientId, string watchListId);
-        Task<WatchList> GetPredefinedWatchListAsync(string watchListId);
+        Task<IList<IWatchList>> GetAllCustomWatchListsForClient(string clientId);
+        Task<IWatchList> GetCustomWatchListAsync(string clientId, string watchListId);
+        Task<IWatchList> GetPredefinedWatchListAsync(string watchListId);
     }
 }
