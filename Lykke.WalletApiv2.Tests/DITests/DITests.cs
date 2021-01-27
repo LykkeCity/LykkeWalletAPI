@@ -46,7 +46,11 @@ namespace Lykke.WalletApiv2.Tests.DITests
                     Db = new DbSettings(),
                     Services = new ServiceSettings
                     {
-                        AffiliateServiceClient = new AffiliateServiceClientSettings { ServiceUrl = MockUrl }
+                        AffiliateServiceClient = new AffiliateServiceClientSettings { ServiceUrl = MockUrl },
+                        MyNoSqlServer = new MyNoSqlSettings()
+                        {
+                            ReaderServiceUrl = MockUrl
+                        }
                     },
                     DeploymentSettings = new DeploymentSettings(),
                     CacheSettings = new CacheSettings(),
