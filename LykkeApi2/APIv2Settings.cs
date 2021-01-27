@@ -152,6 +152,7 @@ namespace LykkeApi2
         public string HistoryServiceUrl { get; set; }
         public AffiliateServiceClientSettings AffiliateServiceClient { get; set; }
         public string IndicesFacadeServiceUrl { get; set; }
+        public MyNoSqlSettings MyNoSqlServer { get; set; }
     }
 
     public class MatchingEngineSettings
@@ -242,6 +243,11 @@ namespace LykkeApi2
     public class BlockedWithdawalSettings
     {
         public Dictionary<string, string[]> AssetByCountry { get; set; } = new Dictionary<string, string[]>();
+    }
+
+    public class MyNoSqlSettings
+    {
+        public string ReaderServiceUrl { get; set; }
     }
 }
 

@@ -2,18 +2,12 @@
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Common;
-using Common.Log;
+using Antares.Service.MarketProfile.Client;
 using Core.Services;
-using LkeServices;
-using Lykke.MarketProfileService.Client;
-using Lykke.Service.Assets.Client;
-using Lykke.Service.Assets.Client.Models;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models;
 using LykkeApi2.Models.AssetPairRates;
 using LykkeApi2.Models.AssetPairsModels;
-using LykkeApi2.Models.ValidationModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,12 +17,12 @@ namespace LykkeApi2.Controllers
     [ApiController]
     public class AssetPairsController : Controller
     {
-        private readonly ILykkeMarketProfileServiceAPI _marketProfileService;
+        private readonly IMarketProfileServiceClient _marketProfileService;
         private readonly IAssetsHelper _assetsHelper;
         private readonly IRequestContext _requestContext;
 
         public AssetPairsController(
-            ILykkeMarketProfileServiceAPI marketProfile,
+            IMarketProfileServiceClient marketProfile,
             IAssetsHelper assetsHelper,
             IRequestContext requestContext)
         {
@@ -131,7 +125,7 @@ namespace LykkeApi2.Controllers
                 allTradableNondisabledAssets.Contains(x.QuotingAssetId))
                 .ToDictionary(x => x.Id);
             
-            var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
+            var marketProfile = _marketProfileService.GetAll();
             var relevantMarketProfile = marketProfile.Where(itm => assetPairsDict.ContainsKey(itm.AssetPair));
             
             return Ok(AssetPairRatesResponseModel.Create(
@@ -168,7 +162,7 @@ namespace LykkeApi2.Controllers
                !allTradableNondisabledAssets.Contains(assetPair.QuotingAssetId))
                 return NotFound();
 
-            var marketProfile = await _marketProfileService.ApiMarketProfileGetAsync();
+            var marketProfile = _marketProfileService.GetAll();
             var feedData = marketProfile.FirstOrDefault(itm => itm.AssetPair == request.AssetPairId);
 
             if (feedData == null)
