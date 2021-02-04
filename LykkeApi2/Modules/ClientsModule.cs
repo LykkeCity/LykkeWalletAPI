@@ -5,6 +5,7 @@ using Autofac.Extensions.DependencyInjection;
 using Common.Log;
 using Core.Blockchain;
 using LkeServices.Blockchain;
+using Lykke.Common.Log;
 using Lykke.Exchange.Api.MarketData.Contract;
 using Lykke.HttpClientGenerator.Caching;
 using Lykke.MatchingEngine.Connector.Services;
@@ -66,7 +67,10 @@ namespace LykkeApi2.Modules
 
             builder.Register((x) =>
                 {
-                    var marketProfile = new MarketProfileServiceClient(_settings.MyNoSqlServer.ReaderServiceUrl, _settings.MarketProfileUrl);
+                    var marketProfile = new MarketProfileServiceClient(
+                        _settings.MyNoSqlServer.ReaderServiceUrl, 
+                        _settings.MarketProfileUrl,
+                        x.Resolve<ILogFactory>());
                     marketProfile.Start();
 
                     return marketProfile;
