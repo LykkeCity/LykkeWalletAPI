@@ -2,6 +2,7 @@
 using System.Buffers;
 using System.Linq;
 using System.Threading.Tasks;
+using Antares.Service.MarketProfile.Client;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using AzureStorage.Tables;
@@ -227,6 +228,8 @@ namespace LykkeApi2
             try
             {
                 // NOTE: Service not yet receive and process requests here
+                var marketProfile = ApplicationContainer.Resolve<IMarketProfileServiceClient>();
+                marketProfile.Start();
                 ApplicationContainer.Resolve<ICqrsEngine>().StartSubscribers();
 
                 Log.WriteMonitor("", AppEnvironment.EnvInfo, "Started");

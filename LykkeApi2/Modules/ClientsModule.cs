@@ -1,43 +1,44 @@
 ﻿using System;
+using Antares.Service.MarketProfile.Client;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using Lykke.MarketProfileService.Client;
-using Lykke.Service.Operations.Client;
-using Lykke.Service.Registration;
-using Lykke.SettingsReader;
-using Lykke.Service.ClientAccount.Client;
-using Lykke.Service.PersonalData.Client;
-using Lykke.Service.PersonalData.Contract;
 using Common.Log;
 using Core.Blockchain;
 using LkeServices.Blockchain;
+using Lykke.Common.Log;
 using Lykke.Exchange.Api.MarketData.Contract;
 using Lykke.HttpClientGenerator.Caching;
 using Lykke.MatchingEngine.Connector.Services;
 using Lykke.Payments.Link4Pay.Contract;
-using Lykke.Service.Assets.Client;
-using Lykke.Service.FeeCalculator.Client;
-using Microsoft.Extensions.DependencyInjection;
 using Lykke.Service.Affiliate.Client;
-using Lykke.Service.ClientDictionaries.Client;
-using Lykke.Service.Kyc.Abstractions.Services;
-using Lykke.Service.Kyc.Client;
-using Lykke.Service.PaymentSystem.Client;
-using Lykke.Service.Session.Client;
 using Lykke.Service.AssetDisclaimers.Client;
+using Lykke.Service.Assets.Client;
 using Lykke.Service.BlockchainCashoutPreconditionsCheck.Client;
 using Lykke.Service.BlockchainSettings.Client;
-using Lykke.Service.ClientDialogs.Client;
 using Lykke.Service.BlockchainWallets.Client;
 using Lykke.Service.BlockchainWallets.Client.ClientGenerator;
-using Lykke.Service.History.Client;
+using Lykke.Service.ClientAccount.Client;
+using Lykke.Service.ClientDialogs.Client;
+using Lykke.Service.ClientDictionaries.Client;
 using Lykke.Service.ConfirmationCodes.Client;
+using Lykke.Service.FeeCalculator.Client;
 using Lykke.Service.HftInternalService.Client;
+using Lykke.Service.History.Client;
 using Lykke.Service.IndicesFacade.Client;
+using Lykke.Service.Kyc.Abstractions.Services;
+using Lykke.Service.Kyc.Client;
 using Lykke.Service.Limitations.Client;
+using Lykke.Service.Operations.Client;
+using Lykke.Service.PaymentSystem.Client;
+using Lykke.Service.PersonalData.Client;
+using Lykke.Service.PersonalData.Contract;
 using Lykke.Service.PushNotifications.Client;
+using Lykke.Service.Registration;
+using Lykke.Service.Session.Client;
 using Lykke.Service.SwiftCredentials.Client;
 using Lykke.Service.Tier.Client;
+using Lykke.SettingsReader;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LykkeApi2.Modules
 {
@@ -64,9 +65,19 @@ namespace LykkeApi2.Modules
 
             builder.RegisterHftInternalClient(_settings.HftInternalServiceUrl);
 
-            builder.RegisterType<LykkeMarketProfileServiceAPI>()
-                .As<ILykkeMarketProfileServiceAPI>()
-                .WithParameter("baseUri", new Uri(_settings.MarketProfileUrl));
+            builder.Register((x) =>
+                {
+                    var marketProfile = new MarketProfileServiceClient(
+                        _settings.MyNoSqlServer.ReaderServiceUrl, 
+                        _settings.MarketProfileUrl,
+                        x.Resolve<ILogFactory>());
+                    marketProfile.Start();
+
+                    return marketProfile;
+                })
+                .As<IMarketProfileServiceClient>()
+                .SingleInstance()
+                .AutoActivate();
 
             builder.RegisterOperationsClient(_settings.OperationsUrl);
 

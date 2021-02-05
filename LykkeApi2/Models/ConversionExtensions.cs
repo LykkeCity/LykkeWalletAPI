@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Lykke.Job.MarketProfile.Contract;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.Kyc.Abstractions.Domain.Verification;
 using LykkeApi2.Models.AssetPairRates;
@@ -78,7 +79,7 @@ namespace LykkeApi2.Models
         }
 
         public static AssetPairRateModel ToApiModel(
-            this Lykke.MarketProfileService.Client.Models.AssetPairModel src)
+            this IAssetPair src)
         {
             return new AssetPairRateModel
             {
