@@ -8,6 +8,7 @@ using Swisschain.Sirius.Api.ApiClient;
 using Swisschain.Sirius.Api.ApiContract.Account;
 using Swisschain.Sirius.Api.ApiContract.Address;
 using Swisschain.Sirius.Api.ApiContract.Common;
+using Swisschain.Sirius.Api.ApiContract.User;
 
 namespace LkeServices.Blockchain
 {
@@ -55,12 +56,26 @@ namespace LkeServices.Blockchain
                 {
                     _log.WriteInfo(nameof(CreateWalletsAsync), info: "Creating wallets in sirius", context: new { clientId });
 
-                    string requestId = $"{_brokerAccountId}_{clientId}";
+                    string accountRequestId = $"{_brokerAccountId}_{clientId}_account";
+                    string userRequestId = $"{_brokerAccountId}_{clientId}_user";
+
+                    var user = await _siriusApiClient.Users.CreateAsync(new CreateUserRequest
+                    {
+                        RequestId = userRequestId,
+                        NativeId = clientId
+                    });
+
+                    if (user.BodyCase == CreateUserResponse.BodyOneofCase.Error)
+                    {
+                        _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error creating user in sirius", context: new { error = user.Error, clientId });
+                        return;
+                    }
+
                     var createResponse = await _siriusApiClient.Accounts.CreateAsync(new AccountCreateRequest
                     {
-                        RequestId = requestId,
+                        RequestId = accountRequestId,
                         BrokerAccountId = _brokerAccountId,
-                        ReferenceId = clientId
+                        UserId = user.User.Id
                     });
 
                     if (createResponse.ResultCase == AccountCreateResponse.ResultOneofCase.Error)
@@ -69,7 +84,7 @@ namespace LkeServices.Blockchain
                         return;
                     }
 
-                    _log.WriteInfo(nameof(CreateWalletsAsync), info: "Wallets created in siruis", context: new { account = createResponse.Body.Account, clientId, requestId });
+                    _log.WriteInfo(nameof(CreateWalletsAsync), info: "Wallets created in siruis", context: new { account = createResponse.Body.Account, clientId, requestId = accountRequestId });
 
                     accountId = createResponse.Body.Account.Id;
                 } else if (accountResponse.Body.Items.Any(x => x.State == AccountStateModel.Creating))
