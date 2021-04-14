@@ -67,7 +67,7 @@ namespace LkeServices.Blockchain
 
                     if (user.BodyCase == CreateUserResponse.BodyOneofCase.Error)
                     {
-                        _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error creating user in sirius", context: new { error = user.Error, clientId });
+                        _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error creating user in sirius", context: new { error = user.Error, clientId, requestId = userRequestId });
                         return;
                     }
 
