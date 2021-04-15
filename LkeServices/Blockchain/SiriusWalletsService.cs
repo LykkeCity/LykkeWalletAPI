@@ -38,13 +38,13 @@ namespace LkeServices.Blockchain
         {
             var accountResponse = await _siriusApiClient.Accounts.SearchAsync(new AccountSearchRequest
             {
-                ReferenceId = clientId,
+                UserNativeId = clientId,
                 Pagination = new PaginationInt64{Limit = 100}
             });
 
             if (accountResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
             {
-                _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error getting wallets from sirius", context: new { error = accountResponse.Error, clientId });
+                _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error getting user from sirius", context: new { error = accountResponse.Error, clientId });
                 return;
             }
 
@@ -54,10 +54,10 @@ namespace LkeServices.Blockchain
             {
                 if (accountResponse.Body.Items.Count == 0)
                 {
-                    _log.WriteInfo(nameof(CreateWalletsAsync), info: "Creating wallets in sirius", context: new { clientId });
-
                     string accountRequestId = $"{_brokerAccountId}_{clientId}_account";
                     string userRequestId = $"{_brokerAccountId}_{clientId}_user";
+
+                    _log.WriteInfo(nameof(CreateWalletsAsync), info: "Creating user in sirius", context: new { clientId, requestId = userRequestId });
 
                     var user = await _siriusApiClient.Users.CreateAsync(new CreateUserRequest
                     {
@@ -71,6 +71,8 @@ namespace LkeServices.Blockchain
                         return;
                     }
 
+                    _log.WriteInfo(nameof(CreateWalletsAsync), info: "Creating wallets in sirius", context: new { clientId, requestId = accountRequestId });
+
                     var createResponse = await _siriusApiClient.Accounts.CreateAsync(new AccountCreateRequest
                     {
                         RequestId = accountRequestId,
@@ -80,7 +82,7 @@ namespace LkeServices.Blockchain
 
                     if (createResponse.ResultCase == AccountCreateResponse.ResultOneofCase.Error)
                     {
-                        _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error creating wallets in sirius", context: new { error = createResponse.Error, clientId });
+                        _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error creating wallets in sirius", context: new { error = createResponse.Error, clientId, requestId = accountRequestId });
                         return;
                     }
 
@@ -117,7 +119,7 @@ namespace LkeServices.Blockchain
                         var request = new AccountSearchRequest
                         {
                             BrokerAccountId = _brokerAccountId,
-                            ReferenceId = clientId,
+                            UserNativeId = clientId,
                             Pagination = new PaginationInt64 {Limit = 100}
                         };
 
@@ -135,16 +137,30 @@ namespace LkeServices.Blockchain
 
         public async Task<AccountDetailsResponse> GetWalletAdderssAsync(string clientId, long assetId)
         {
+            var userResponse = await _siriusApiClient.Accounts.SearchAsync(new AccountSearchRequest
+            {
+                BrokerAccountId = _brokerAccountId,
+                UserNativeId = clientId
+            });
+
+            if (userResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
+            {
+                _log.WriteWarning(nameof(GetWalletAdderssAsync), info: "Error getting user from sirius", context: new { error = userResponse.Error, clientId });
+                return null;
+            }
+
+            var accountId = userResponse.Body.Items.FirstOrDefault()?.Id;
+
             var searchResponse = await _siriusApiClient.Accounts.SearchDetailsAsync(new AccountDetailsSearchRequest
             {
                 BrokerAccountId = _brokerAccountId,
-                ReferenceId = clientId,
+                AccountId = accountId,
                 AssetId = assetId
             });
 
             if (searchResponse.ResultCase == AccountDetailsSearchResponse.ResultOneofCase.Error)
             {
-                _log.WriteWarning(nameof(GetWalletAdderssAsync), info: "Error getting wallet from sirius", context: new { error = searchResponse.Error, clientId, assetId });
+                _log.WriteWarning(nameof(GetWalletAdderssAsync), info: "Error getting wallet from sirius", context: new { error = searchResponse.Error, accountId, clientId, assetId });
             }
 
             return searchResponse.ResultCase == AccountDetailsSearchResponse.ResultOneofCase.Body
