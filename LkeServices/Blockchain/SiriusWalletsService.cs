@@ -44,7 +44,7 @@ namespace LkeServices.Blockchain
 
             if (accountResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
             {
-                _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error getting user from sirius", context: new { error = accountResponse.Error, clientId });
+                _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error getting wallets from sirius", context: new { error = accountResponse.Error, clientId });
                 return;
             }
 
@@ -54,8 +54,8 @@ namespace LkeServices.Blockchain
             {
                 if (accountResponse.Body.Items.Count == 0)
                 {
-                    string accountRequestId = $"{_brokerAccountId}_{clientId}_account";
-                    string userRequestId = $"{_brokerAccountId}_{clientId}_user";
+                    string accountRequestId = $"{clientId}_account";
+                    string userRequestId = $"{clientId}_user";
 
                     _log.WriteInfo(nameof(CreateWalletsAsync), info: "Creating user in sirius", context: new { clientId, requestId = userRequestId });
 
