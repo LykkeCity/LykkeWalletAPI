@@ -54,7 +54,7 @@ namespace LkeServices.Blockchain
             {
                 if (accountResponse.Body.Items.Count == 0)
                 {
-                    string accountRequestId = $"{clientId}_account";
+                    string accountRequestId = $"{_brokerAccountId}_{clientId}_account";
                     string userRequestId = $"{clientId}_user";
 
                     _log.WriteInfo(nameof(CreateWalletsAsync), info: "Creating user in sirius", context: new { clientId, requestId = userRequestId });
