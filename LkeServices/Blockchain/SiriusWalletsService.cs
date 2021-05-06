@@ -151,6 +151,9 @@ namespace LkeServices.Blockchain
 
             var accountId = userResponse.Body.Items.FirstOrDefault()?.Id;
 
+            if (accountId == null)
+                return null;
+
             var searchResponse = await _siriusApiClient.Accounts.SearchDetailsAsync(new AccountDetailsSearchRequest
             {
                 BrokerAccountId = _brokerAccountId,
