@@ -144,6 +144,7 @@ namespace LkeServices.Blockchain
             {
                 BrokerAccountId = _brokerAccountId,
                 UserNativeId = clientId,
+                ReferenceId = clientId
             });
 
             if (userResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
@@ -161,7 +162,8 @@ namespace LkeServices.Blockchain
             {
                 BrokerAccountId = _brokerAccountId,
                 AccountId = accountId,
-                AssetId = assetId
+                AssetId = assetId,
+                ReferenceId = clientId
             });
 
             if (searchResponse.ResultCase == AccountDetailsSearchResponse.ResultOneofCase.Error)
