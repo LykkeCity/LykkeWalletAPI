@@ -39,7 +39,8 @@ namespace LkeServices.Blockchain
             var accountResponse = await _siriusApiClient.Accounts.SearchAsync(new AccountSearchRequest
             {
                 UserNativeId = clientId,
-                Pagination = new PaginationInt64{Limit = 100}
+                Pagination = new PaginationInt64{Limit = 100},
+                ReferenceId = clientId
             });
 
             if (accountResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
@@ -77,7 +78,8 @@ namespace LkeServices.Blockchain
                     {
                         RequestId = accountRequestId,
                         BrokerAccountId = _brokerAccountId,
-                        UserId = user.User.Id
+                        UserId = user.User.Id,
+                        ReferenceId = clientId
                     });
 
                     if (createResponse.ResultCase == AccountCreateResponse.ResultOneofCase.Error)
@@ -120,6 +122,7 @@ namespace LkeServices.Blockchain
                         {
                             BrokerAccountId = _brokerAccountId,
                             UserNativeId = clientId,
+                            ReferenceId = clientId,
                             Pagination = new PaginationInt64 {Limit = 100}
                         };
 
@@ -140,7 +143,7 @@ namespace LkeServices.Blockchain
             var userResponse = await _siriusApiClient.Accounts.SearchAsync(new AccountSearchRequest
             {
                 BrokerAccountId = _brokerAccountId,
-                UserNativeId = clientId
+                UserNativeId = clientId,
             });
 
             if (userResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
