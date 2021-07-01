@@ -65,6 +65,9 @@ namespace LykkeApi2.Controllers
             if(request.Code2Fa == "2222")
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
             
+            if(request.Code2Fa == "3333")
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AddressAlreadyWhitelisted);
+            
             var check2FaResult = await _google2FaService.Check2FaAsync<string>(_requestContext.ClientId, request.Code2Fa);
 
             if (check2FaResult != null)
