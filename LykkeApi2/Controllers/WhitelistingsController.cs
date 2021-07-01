@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Constants;
+using Lykke.Common.ApiLibrary.Exceptions;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models._2Fa;
 using LykkeApi2.Models.Whitelistings;
@@ -57,6 +59,12 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateWhitelistingAsync([FromBody] CreateWhitelistingRequest request)
         {
+            if(request.Code2Fa == "1111")
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
+            
+            if(request.Code2Fa == "2222")
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
+            
             var check2FaResult = await _google2FaService.Check2FaAsync<string>(_requestContext.ClientId, request.Code2Fa);
 
             if (check2FaResult != null)
