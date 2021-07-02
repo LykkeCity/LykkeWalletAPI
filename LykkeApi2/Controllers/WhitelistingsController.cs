@@ -64,8 +64,9 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> CreateWhitelistingAsync([FromBody] CreateWhitelistingRequest request)
         {
             var asset = await _assetsHelper.GetAssetAsync(request.AssetId);
+            var assetsAvailableToUser = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
             
-            if(asset==null || asset.BlockchainIntegrationType != BlockchainIntegrationType.Sirius)
+            if(asset==null || asset.BlockchainIntegrationType != BlockchainIntegrationType.Sirius && assetsAvailableToUser.Contains(asset.Id))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
             
             if(request.Code2Fa == "2222")
