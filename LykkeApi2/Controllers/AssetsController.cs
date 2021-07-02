@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
 using Core.Services;
+using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.ClientAccount.Client;
 using Lykke.Service.ClientAccount.Client.Models.Request.Settings;
 using LykkeApi2.Infrastructure;
@@ -305,6 +306,28 @@ namespace LykkeApi2.Controllers
                 AssetIdsModel.Create(
                     assetsAvailableToUser
                         .OrderBy(x => x)
+                        .ToArray()));
+        }
+        
+        /// <summary>
+        /// Get assets available for the user based on regulations.
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("available/crypto-operations")]
+        [ProducesResponseType(typeof(IEnumerable<AssetsModel>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> GetAvailableAssetsForCryptoOperationsAsync()
+        {
+            var assetsAvailableToUser =
+                await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+
+            var allAssets = await _assetsHelper.GetAllAssetsAsync();
+
+            return Ok(
+                AssetsModel.Create(
+                        allAssets
+                        .Where(x => x.BlockchainIntegrationType == BlockchainIntegrationType.Sirius && assetsAvailableToUser.Contains(x.Id))
+                        .Select(x => x.ToApiModel())
                         .ToArray()));
         }
     }

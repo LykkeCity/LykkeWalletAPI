@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Core.Constants;
+using Core.Services;
 using Lykke.Common.ApiLibrary.Exceptions;
+using Lykke.Service.Assets.Client.Models;
 using LykkeApi2.Infrastructure;
 using LykkeApi2.Models._2Fa;
 using LykkeApi2.Models.Whitelistings;
@@ -20,11 +22,13 @@ namespace LykkeApi2.Controllers
     {
         private readonly Google2FaService _google2FaService;
         private readonly IRequestContext _requestContext;
+        private readonly IAssetsHelper _assetsHelper;
 
-        public WhitelistingsController(Google2FaService google2FaService, IRequestContext requestContext)
+        public WhitelistingsController(Google2FaService google2FaService, IRequestContext requestContext, IAssetsHelper assetsHelper)
         {
             _google2FaService = google2FaService;
             _requestContext = requestContext;
+            _assetsHelper = assetsHelper;
         }
 
         [HttpGet]
@@ -59,7 +63,10 @@ namespace LykkeApi2.Controllers
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> CreateWhitelistingAsync([FromBody] CreateWhitelistingRequest request)
         {
-            if(request.Code2Fa == "1111")
+            var asset = await _assetsHelper.GetAssetAsync(request.AssetId);
+            var assetsAvailableToUser = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+            
+            if(asset==null || asset.BlockchainIntegrationType != BlockchainIntegrationType.Sirius && assetsAvailableToUser.Contains(asset.Id))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
             
             if(request.Code2Fa == "2222")
