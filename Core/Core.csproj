@@ -20,6 +20,6 @@
     <PackageReference Include="Lykke.Service.PaymentSystem.Client" Version="1.0.22" />
     <PackageReference Include="Lykke.Service.SwiftCredentials.Client" Version="1.0.0.8" />
     <PackageReference Include="Lykke.Service.ConfirmationCodes.Client" Version="1.7.0" />
-    <PackageReference Include="Swisschain.Sirius.Api.ApiClient" Version="1.0.0-beta.16" />
+    <PackageReference Include="Swisschain.Sirius.Api.ApiClient" Version="1.0.0-beta.24" />
   </ItemGroup>
 </Project>

@@ -131,6 +131,8 @@ namespace LykkeApi2.Modules
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.SiriusApiServiceClient.WalletsActiveRetryCount))
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.SiriusApiServiceClient.WaitForActiveWalletsTimeout))
                 .SingleInstance();
+            
+            builder.RegisterInstance(_apiSettings.CurrentValue.SiriusApiServiceClient);
         }
     }
 }
