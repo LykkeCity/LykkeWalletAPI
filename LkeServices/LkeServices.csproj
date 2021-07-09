@@ -19,7 +19,7 @@
     <PackageReference Include="Lykke.Service.Kyc.Client" Version="1.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="NBitcoin" Version="4.1.1.66" />
-    <PackageReference Include="Swisschain.Sirius.Api.ApiClient" Version="1.0.0-beta.24" />
+    <PackageReference Include="Swisschain.Sirius.Api.ApiClient" Version="1.0.0-beta.25" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />

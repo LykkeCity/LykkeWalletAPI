@@ -74,14 +74,18 @@ namespace LykkeApi2.Controllers
             if(noGeneratedAddresses)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
 
+            var assets = await _assetsHelper.GetAllAssetsAsync();
+            
             return Ok(result.Select(x => new WhitelistingResponseModel
             {
                 Id = x.Id.ToString(),
                 Name = x.Name,
                 WalletName = wallets.Single(y => y.Id == x.Scope.AccountReferenceId).Name,
+                AssetName = assets.SingleOrDefault(y => y.SiriusAssetId == x.Details.AssetId)?.DisplayId,
                 AddressBase = x.Details.Address,
                 AddressExtension = x.Details.Tag,
                 CreatedAt = x.CreatedAt.ToDateTime(),
+                StartsAt = x.Lifespan.StartsAt.ToDateTime(),
                 Status = x.Lifespan.StartsAt < Timestamp.FromDateTime(DateTime.UtcNow)
                     ? WhitelistingStatus.Active
                     : WhitelistingStatus.Pending
@@ -138,6 +142,7 @@ namespace LykkeApi2.Controllers
                 },
                 Details = new WhitelistItemDetailsModel
                 {
+                    AssetId = siriusAsset.Id,
                     BlockchainId = siriusAsset.BlockchainId,
                     Address = request.AddressBase,
                     Tag = request.AddressExtension,
