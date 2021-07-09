@@ -120,7 +120,7 @@ namespace LykkeApi2
         public int MaxTwoFactorConfirmationAttempts { get; set; }
         [Optional]
         public bool? IsMtDisabled { get; set; }
-
+        public WhitelistingSettings WhitelistingSettings { set; get; }
         public SessionCheckSettings SessionCheck { get; set; }
     }
 
@@ -248,6 +248,11 @@ namespace LykkeApi2
     public class MyNoSqlSettings
     {
         public string ReaderServiceUrl { get; set; }
+    }
+
+    public class WhitelistingSettings
+    {
+        public TimeSpan WaitingPeriod { set; get; } = TimeSpan.FromDays(2);
     }
 }
 

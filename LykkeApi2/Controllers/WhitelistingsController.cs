@@ -34,6 +34,7 @@ namespace LykkeApi2.Controllers
         private readonly IAssetsHelper _assetsHelper;
         private readonly IClientAccountClient _clientAccountService;
         private readonly SiriusApiServiceClientSettings _siriusApiServiceClientSettings;
+        private readonly WhitelistingSettings _whitelistingSettings;
 
         public WhitelistingsController(
             Google2FaService google2FaService,
@@ -41,7 +42,8 @@ namespace LykkeApi2.Controllers
             IAssetsHelper assetsHelper,
             IApiClient siriusApiClient,
             IClientAccountClient clientAccountService,
-            SiriusApiServiceClientSettings siriusApiServiceClientSettings)
+            SiriusApiServiceClientSettings siriusApiServiceClientSettings,
+            WhitelistingSettings whitelistingSettings)
         {
             _google2FaService = google2FaService;
             _requestContext = requestContext;
@@ -49,6 +51,7 @@ namespace LykkeApi2.Controllers
             _siriusApiClient = siriusApiClient;
             _clientAccountService = clientAccountService;
             _siriusApiServiceClientSettings = siriusApiServiceClientSettings;
+            _whitelistingSettings = whitelistingSettings;
         }
 
         [HttpGet]
@@ -160,7 +163,7 @@ namespace LykkeApi2.Controllers
                 },
                 Lifespan = new WhitelistItemLifespanModel
                 {
-                    StartsAt = Timestamp.FromDateTime(DateTime.UtcNow.AddDays(2))
+                    StartsAt = Timestamp.FromDateTime(DateTime.UtcNow.Add(_whitelistingSettings.WaitingPeriod))
                 },
                 RequestId = requestId
             });
@@ -169,10 +172,12 @@ namespace LykkeApi2.Controllers
             {
                 Id = Guid.NewGuid().ToString(),
                 WalletName = wallets.Single(y => y.Id == request.WalletId).Name,
+                AssetName = asset.DisplayId,
                 Status = WhitelistingStatus.Pending,
                 AddressBase = request.AddressBase,
                 AddressExtension = request.AddressExtension,
-                CreatedAt = DateTime.UtcNow,
+                StartsAt = result.WhitelistItem.Lifespan.StartsAt.ToDateTime(),
+                CreatedAt = result.WhitelistItem.CreatedAt.ToDateTime(),
                 Name = request.Name
             }));
         }
