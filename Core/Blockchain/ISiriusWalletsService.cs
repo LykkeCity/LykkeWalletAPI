@@ -5,7 +5,7 @@ namespace Core.Blockchain
 {
     public interface ISiriusWalletsService
     {
-        Task CreateWalletsAsync(string clientId, bool waitForCreation);
+        Task CreateWalletsAsync(string clientId);
         Task<AccountDetailsResponse> GetWalletAdderssAsync(string clientId, long assetId);
         Task<bool> IsAddressValidAsync(string blockchainId, string address);
     }
