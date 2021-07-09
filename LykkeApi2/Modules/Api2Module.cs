@@ -133,6 +133,9 @@ namespace LykkeApi2.Modules
                 .SingleInstance();
             
             builder.RegisterInstance(_apiSettings.CurrentValue.SiriusApiServiceClient);
+
+            builder.RegisterInstance(_settings.WhitelistingSettings)
+                .AsSelf();
         }
     }
 }
