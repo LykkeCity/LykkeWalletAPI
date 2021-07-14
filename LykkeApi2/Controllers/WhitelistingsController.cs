@@ -152,7 +152,7 @@ namespace LykkeApi2.Controllers
                     TagType =
                         new NullableWhitelistItemTagModel
                         {
-                            TagType = WhitelistItemTagModel.Number
+                            TagType = WhitelistItemTagModel.Number //TODO: specify tag type depending on the blockchain
                         },
                     TransactionType = WhitelistTransactionTypeModel.Any
                 },
