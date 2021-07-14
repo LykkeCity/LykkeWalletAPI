@@ -149,15 +149,10 @@ namespace LykkeApi2.Controllers
                     BlockchainId = siriusAsset.BlockchainId,
                     Address = request.AddressBase,
                     Tag = request.AddressExtension,
-                    TagType = string.IsNullOrWhiteSpace(request.AddressExtension)
-                        ? new NullableWhitelistItemTagModel
+                    TagType =
+                        new NullableWhitelistItemTagModel
                         {
-                            Null = NullValue.NullValue
-                        }
-                        : new NullableWhitelistItemTagModel
-                        {
-                            TagType = int.TryParse(request.AddressExtension, out _) ? WhitelistItemTagModel.Number : WhitelistItemTagModel.Text
-                            
+                            TagType = WhitelistItemTagModel.Number
                         },
                     TransactionType = WhitelistTransactionTypeModel.Any
                 },
