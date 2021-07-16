@@ -57,6 +57,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
                     DeploymentSettings = new DeploymentSettings(),
                     CacheSettings = new CacheSettings(),
                     SessionCheck = new SessionCheckSettings(),
+                    WhitelistingSettings = new WhitelistingSettings()
                 },
                 ClientDictionariesServiceClient = new ClientDictionariesServiceClientSettings() { ServiceUrl = MockUrl },
                 FeeCalculatorServiceClient = new FeeCalculatorSettings{ServiceUrl = MockUrl},
@@ -74,7 +75,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 TierServiceClient = new TierServiceClientSettings {ServiceUrl = MockUrl},
                 MarketDataServiceClient = new MarketDataServiceClientSettings{ServiceUrl = MockUrl, GrpcServiceUrl = MockUrl},
                 SiriusApiServiceClient = new SiriusApiServiceClientSettings{GrpcServiceUrl = MockUrl, ApiKey = "123", BrokerAccountId = 123},
-                BlockedWithdrawalSettings = new BlockedWithdawalSettings()
+                BlockedWithdrawalSettings = new BlockedWithdawalSettings(),
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
 
