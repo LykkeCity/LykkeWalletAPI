@@ -62,23 +62,23 @@ namespace LykkeApi2.Controllers
 
             var result = new List<WhitelistItemResponse>();
             var noGeneratedAddresses = true;
-            
+
             foreach (var wallet in wallets)
             {
                 var siriusAccount = await TryGetSiriusAccountAsync(_requestContext.ClientId, wallet.Id);
 
                 if (siriusAccount == null)
                     continue;
-                
+
                 noGeneratedAddresses = false;
                 result.AddRange(await GetWhitelistItemsAsync(siriusAccount.Id));
             }
-            
+
             if(noGeneratedAddresses)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
 
             var assets = await _assetsHelper.GetAllAssetsAsync();
-            
+
             return Ok(result.Select(x => new WhitelistingResponseModel
             {
                 Id = x.Id.ToString(),
@@ -94,7 +94,7 @@ namespace LykkeApi2.Controllers
                     : WhitelistingStatus.Pending
             }));
         }
-        
+
         [HttpPost]
         [ProducesResponseType(typeof(Google2FaResultModel<WhitelistingModel>), (int) HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -102,7 +102,7 @@ namespace LykkeApi2.Controllers
         {
             if(string.IsNullOrWhiteSpace(request.AddressBase))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
-            
+
             var check2FaResult = await _google2FaService.Check2FaAsync<string>(_requestContext.ClientId, request.Code2Fa);
 
             if (check2FaResult != null)
@@ -110,7 +110,7 @@ namespace LykkeApi2.Controllers
 
             var asset = await _assetsHelper.GetAssetAsync(request.AssetId);
             var assetsAvailableToUser = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
-            
+
             if(asset==null || asset.BlockchainIntegrationType != BlockchainIntegrationType.Sirius && assetsAvailableToUser.Contains(asset.Id))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
 
@@ -118,51 +118,51 @@ namespace LykkeApi2.Controllers
 
             if(wallets.All(x => x.Id != request.WalletId))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
-            
+
             var siriusAssetResponse = await _siriusApiClient.Assets.SearchAsync(new AssetSearchRequest {Id = asset.SiriusAssetId});
             var siriusAsset = siriusAssetResponse.Body.Items.Single();
-            
+
             var siriusAccount = await TryGetSiriusAccountAsync(_requestContext.ClientId, request.WalletId);
-            
+
             if(siriusAccount == null)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
 
             var whitelistedItems = await GetWhitelistItemsAsync(siriusAccount.Id);
-            
+
             if(whitelistedItems.Any(x => x.Details.Address == request.AddressBase && x.Details.Tag == request.AddressExtension))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AddressAlreadyWhitelisted);
-            
+
             var requestId = $"{request.WalletId}:{request.Name}:{request.AssetId}:{request.AddressBase}:{request.AddressExtension ?? string.Empty}";
 
             var result = await _siriusApiClient.WhitelistItems.CreateAsync(new WhitelistItemCreateRequest
             {
                 Name = request.Name,
-                Scope = new WhitelistItemScopeModel
+                Scope = new WhitelistItemScope
                 {
                     BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId,
                     AccountId = siriusAccount.Id,
                     AccountReferenceId = request.WalletId
                 },
-                Details = new WhitelistItemDetailsModel
+                Details = new WhitelistItemDetails
                 {
                     AssetId = siriusAsset.Id,
                     BlockchainId = siriusAsset.BlockchainId,
                     Address = request.AddressBase,
                     Tag = request.AddressExtension,
                     TagType =
-                        new NullableWhitelistItemTagModel
+                        new NullableWhitelistItemTagType
                         {
-                            TagType = WhitelistItemTagModel.Number //TODO: specify tag type depending on the blockchain
+                            TagType = WhitelistItemTagType.Number //TODO: specify tag type depending on the blockchain
                         },
-                    TransactionType = WhitelistTransactionTypeModel.Any
+                    TransactionType = WhitelistTransactionType.Any
                 },
-                Lifespan = new WhitelistItemLifespanModel
+                Lifespan = new WhitelistItemLifespan
                 {
                     StartsAt = Timestamp.FromDateTime(DateTime.UtcNow.Add(_whitelistingSettings.WaitingPeriod))
                 },
                 RequestId = requestId
             });
-            
+
             return Ok(Google2FaResultModel<WhitelistingResponseModel>.Success(new WhitelistingResponseModel
             {
                 Id = Guid.NewGuid().ToString(),
@@ -176,7 +176,7 @@ namespace LykkeApi2.Controllers
                 Name = request.Name
             }));
         }
-        
+
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(Google2FaResultModel<string>), (int) HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
@@ -188,13 +188,13 @@ namespace LykkeApi2.Controllers
                 return Ok(check2FaResult);
 
             var requestId = $"{id}";
-            
+
             await _siriusApiClient.WhitelistItems.DeleteAsync(new WhitelistItemDeleteRequest
             {
                 Id = id,
                 RequestId = requestId
             });
-            
+
             return Ok(Google2FaResultModel<string>.Success(id.ToString()));
         }
 
@@ -222,7 +222,7 @@ namespace LykkeApi2.Controllers
                 BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId,
                 AccountId = accountId
             });
-            
+
             if (whitelistedItems.BodyCase == WhitelistItemsSearchResponse.BodyOneofCase.Error)
             {
                 throw new Exception(whitelistedItems.Error.ErrorMessage);

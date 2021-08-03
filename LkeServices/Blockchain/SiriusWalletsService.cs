@@ -39,7 +39,7 @@ namespace LkeServices.Blockchain
         public async Task CreateWalletsAsync(string clientId)
         {
             long? accountId = null;
-            
+
             var accountResponse = await _siriusApiClient.Accounts.SearchAsync(new AccountSearchRequest
             {
                 UserNativeId = clientId,
@@ -87,7 +87,7 @@ namespace LkeServices.Blockchain
                     _log.WriteInfo(nameof(CreateWalletsAsync), info: "Wallets created in siruis", context: new { account = createResponse.Body.Account, clientId, requestId = accountRequestId });
 
                     accountId = createResponse.Body.Account.Id;
-                    
+
                     _log.WriteInfo(nameof(CreateWalletsAsync), info: $"Waiting for all wallets to be active ({_retryCount} retries with {_retryTimeout.TotalSeconds} sec. delay)", context: new { clientId });
 
                     var waitAccountCreationPolicy = Policy
@@ -127,25 +127,25 @@ namespace LkeServices.Blockchain
                 }
 
                 var whitelistingRequestId = $"lykke:trading_wallet:{clientId}";
-                
+
                 var whitelistItemCreateResponse = await _siriusApiClient.WhitelistItems.CreateAsync(new WhitelistItemCreateRequest
                 {
                     Name = "Trading Wallet Whitelist",
-                    Scope = new WhitelistItemScopeModel
+                    Scope = new WhitelistItemScope
                     {
                         BrokerAccountId = _brokerAccountId,
                         AccountId = accountId,
                         UserNativeId = clientId
                     },
-                    Details = new WhitelistItemDetailsModel
+                    Details = new WhitelistItemDetails
                     {
-                        TransactionType = WhitelistTransactionTypeModel.Any,
-                        TagType = new NullableWhitelistItemTagModel
+                        TransactionType = WhitelistTransactionType.Any,
+                        TagType = new  NullableWhitelistItemTagType
                         {
                             Null = NullValue.NullValue
                         }
                     },
-                    Lifespan = new WhitelistItemLifespanModel
+                    Lifespan = new WhitelistItemLifespan
                     {
                         StartsAt = Timestamp.FromDateTime(DateTime.UtcNow)
                     },
@@ -162,7 +162,7 @@ namespace LkeServices.Blockchain
                 _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error getting wallets from sirius", context: new { error = accountResponse.Error, clientId });
             }
 
-            
+
         }
 
         public async Task<AccountDetailsResponse> GetWalletAdderssAsync(string clientId, long assetId)
@@ -211,7 +211,7 @@ namespace LkeServices.Blockchain
                 BlockchainId = blockchainId
             });
 
-            return response.ResultCase == AddressIsValidResponse.ResultOneofCase.Body && response.Body.IsValid;
+            return response.ResultCase == AddressIsValidResponse.ResultOneofCase.Body && response.Body.IsFormatValid;
         }
     }
 }
