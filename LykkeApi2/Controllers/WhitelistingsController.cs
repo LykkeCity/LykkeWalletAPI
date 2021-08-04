@@ -140,8 +140,7 @@ namespace LykkeApi2.Controllers
                 Scope = new WhitelistItemScope
                 {
                     BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId,
-                    AccountId = siriusAccount.Id,
-                    AccountReferenceId = request.WalletId
+                    AccountId = siriusAccount.Id
                 },
                 Details = new WhitelistItemDetails
                 {
