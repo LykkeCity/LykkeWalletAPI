@@ -129,7 +129,7 @@ namespace Core.Constants
             ///     Error whitelisting address
             /// </summary>
             public static readonly ILykkeApiErrorCode WhitelistingError =
-                new LykkeApiErrorCode(nameof(AddressAlreadyWhitelisted), "Address wasn't whitelisted.");
+                new LykkeApiErrorCode(nameof(WhitelistingError), "Address wasn't whitelisted.");
         }
 
         /// <summary>
