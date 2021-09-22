@@ -135,7 +135,10 @@ namespace LykkeApi2.Controllers
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
 
             var siriusAssetResponse = await _siriusApiClient.Assets.SearchAsync(new AssetSearchRequest { Id = asset.SiriusAssetId });
-            var siriusAsset = siriusAssetResponse.Body.Items.Single();
+            var siriusAsset = siriusAssetResponse.Body.Items.FirstOrDefault();
+
+            if (siriusAsset == null)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
 
             var siriusAccount = await TryGetSiriusAccountAsync(_requestContext.ClientId, request.WalletId);
 
