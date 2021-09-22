@@ -118,12 +118,18 @@ namespace Core.Constants
             /// </summary>
             public static readonly ILykkeApiErrorCode MaxAttemptsReached =
                 new LykkeApiErrorCode(nameof(MaxAttemptsReached), "Maximum attempts reached for this call.");
-            
+
             /// <summary>
-            ///     Max number of attempts reached
+            ///     Address has already been whitelisted
             /// </summary>
             public static readonly ILykkeApiErrorCode AddressAlreadyWhitelisted =
-                new LykkeApiErrorCode(nameof(AddressAlreadyWhitelisted), "Suggested address has already been whitelisted.");
+                new LykkeApiErrorCode(nameof(AddressAlreadyWhitelisted), "Address has already been whitelisted.");
+
+            /// <summary>
+            ///     Error whitelisting address
+            /// </summary>
+            public static readonly ILykkeApiErrorCode WhitelistingError =
+                new LykkeApiErrorCode(nameof(AddressAlreadyWhitelisted), "Address wasn't whitelisted.");
         }
 
         /// <summary>
