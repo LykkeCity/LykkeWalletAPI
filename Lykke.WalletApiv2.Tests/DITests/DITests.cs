@@ -19,6 +19,7 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.Service.PushNotifications.Client;
 using Lykke.Service.SwiftCredentials.Client;
+using Lykke.Service.TemplateFormatter.Client;
 using Lykke.Service.Tier.Client;
 using Lykke.SettingsReader.ReloadingManager;
 using LykkeApi2;
@@ -45,7 +46,10 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 KycServiceClient = new KycServiceClientSettings(),
                 WalletApiv2 = new BaseSettings
                 {
-                    Db = new DbSettings(),
+                    Db = new DbSettings
+                    {
+                        ClientPersonalInfoConnString = "UseDevelopmentStorage=true"
+                    },
                     Services = new ServiceSettings
                     {
                         AffiliateServiceClient = new AffiliateServiceClientSettings { ServiceUrl = MockUrl },
@@ -76,6 +80,7 @@ namespace Lykke.WalletApiv2.Tests.DITests
                 MarketDataServiceClient = new MarketDataServiceClientSettings{ServiceUrl = MockUrl, GrpcServiceUrl = MockUrl},
                 SiriusApiServiceClient = new SiriusApiServiceClientSettings{GrpcServiceUrl = MockUrl, ApiKey = "123", BrokerAccountId = 123},
                 BlockedWithdrawalSettings = new BlockedWithdawalSettings(),
+                TemplateFormatterServiceClient = new TemplateFormatterServiceClientSettings{ServiceUrl = MockUrl}
             };
             settings.WalletApiv2.Services.GetType().GetProperties().Where(p => p.PropertyType == typeof(string)).ToList().ForEach(p => p.SetValue(settings.WalletApiv2.Services, MockUrl));
 
