@@ -14,6 +14,7 @@ using Lykke.Service.PaymentSystem.Client;
 using Lykke.Service.PersonalData.Settings;
 using Lykke.Service.PushNotifications.Client;
 using Lykke.Service.SwiftCredentials.Client;
+using Lykke.Service.TemplateFormatter.Client;
 using Lykke.Service.Tier.Client;
 using Lykke.SettingsReader.Attributes;
 
@@ -49,7 +50,7 @@ namespace LykkeApi2
         public SiriusApiServiceClientSettings SiriusApiServiceClient { get; set; }
         [Optional]
         public BlockedWithdawalSettings BlockedWithdrawalSettings { get; set; } = new BlockedWithdawalSettings();
-
+        public TemplateFormatterServiceClientSettings TemplateFormatterServiceClient { get; set; }
     }
 
     public class SwaggerSettings
@@ -134,6 +135,7 @@ namespace LykkeApi2
     {
         public string LogsConnString { get; set; }
         public string DataConnString { get; set; }
+        public string ClientPersonalInfoConnString { get; set; }
     }
 
     public class ServiceSettings
