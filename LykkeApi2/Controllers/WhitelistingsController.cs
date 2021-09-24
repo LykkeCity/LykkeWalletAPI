@@ -244,7 +244,9 @@ namespace LykkeApi2.Controllers
         {
             var whitelistedItems = await _siriusApiClient.WhitelistItems.SearchAsync(new WhitelistItemSearchRequest
             {
-                BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId, AccountId = accountId
+                BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId,
+                AccountId = accountId,
+                IsRemoved = false
             });
 
             if (whitelistedItems.BodyCase == WhitelistItemsSearchResponse.BodyOneofCase.Error)
