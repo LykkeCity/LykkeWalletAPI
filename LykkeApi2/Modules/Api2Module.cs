@@ -1,4 +1,5 @@
 ﻿using System;
+using Antares.Sdk.Health;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common.Cache;
@@ -47,6 +48,7 @@ namespace LykkeApi2.Modules
             builder.RegisterType<HealthService>()
                 .As<IHealthService>()
                 .SingleInstance();
+
             builder.RegisterType<ClientAccountLogic>()
                 .AsSelf()
                 .SingleInstance();
@@ -131,7 +133,7 @@ namespace LykkeApi2.Modules
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.SiriusApiServiceClient.WalletsActiveRetryCount))
                 .WithParameter(TypedParameter.From(_apiSettings.CurrentValue.SiriusApiServiceClient.WaitForActiveWalletsTimeout))
                 .SingleInstance();
-            
+
             builder.RegisterInstance(_apiSettings.CurrentValue.SiriusApiServiceClient);
 
             builder.RegisterInstance(_settings.WhitelistingSettings)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Autofac;
 using Common.Log;
 using Lykke.Cqrs;
@@ -31,7 +32,7 @@ namespace LykkeApi2.Modules
             MessagePackSerializerFactory.Defaults.FormatterResolver = MessagePack.Resolvers.ContractlessStandardResolver.Instance;
             var rabbitMqSettings = new RabbitMQ.Client.ConnectionFactory
             {
-                Uri = _settings.SagasRabbitMq.RabbitConnectionString
+                Uri = new Uri(_settings.SagasRabbitMq.RabbitConnectionString)
             };
 
             builder.Register(context => new AutofacDependencyResolver(context)).As<IDependencyResolver>().SingleInstance();

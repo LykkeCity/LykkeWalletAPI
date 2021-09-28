@@ -37,7 +37,7 @@ namespace LykkeApi2.Infrastructure.Extensions
 
         public static T GetHeaderValueAs<T>(this HttpContext httpContext, string headerName)
         {
-            StringValues values;
+            StringValues values = new StringValues();
 
             if (httpContext?.Request?.Headers?.TryGetValue(headerName, out values) ?? false)
             {

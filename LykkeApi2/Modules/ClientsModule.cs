@@ -41,6 +41,7 @@ using Lykke.Service.TemplateFormatter;
 using Lykke.Service.Tier.Client;
 using Lykke.SettingsReader;
 using Microsoft.Extensions.DependencyInjection;
+using Swisschain.Sirius.Api.ApiClient;
 
 namespace LykkeApi2.Modules
 {
@@ -173,9 +174,11 @@ namespace LykkeApi2.Modules
             builder.RegisterMarketDataClient(_apiSettings.CurrentValue.MarketDataServiceClient);
             builder.RegisterLink4PayClient(_apiSettings.CurrentValue.Link4PayServiceClient);
 
-            builder.RegisterInstance(
-                new Swisschain.Sirius.Api.ApiClient.ApiClient(_apiSettings.CurrentValue.SiriusApiServiceClient.GrpcServiceUrl, _apiSettings.CurrentValue.SiriusApiServiceClient.ApiKey)
-            ).As<Swisschain.Sirius.Api.ApiClient.IApiClient>();
+            _services.AddSiriusApiClient(new SiriusApiOptions
+            {
+                ApiKey = _apiSettings.CurrentValue.SiriusApiServiceClient.ApiKey,
+                ServerGrpcUrl = new Uri(_apiSettings.CurrentValue.SiriusApiServiceClient.GrpcServiceUrl)
+            });
 
             builder.RegisterEmailSenderViaAzureQueueMessageProducer(_apiSettings.ConnectionString(x => x.WalletApiv2.Db.ClientPersonalInfoConnString));
             builder.RegisterTemplateFormatter(_apiSettings.CurrentValue.TemplateFormatterServiceClient.ServiceUrl, _log);
