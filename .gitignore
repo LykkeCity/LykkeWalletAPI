@@ -75,3 +75,4 @@ app/
 /src/BackOffice/appsettings.Development.json
 /LykkeApi2/appsettings.Development.json
 /_NCrunch_LykkeApi2/*.cache
+global.json
