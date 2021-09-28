@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Linq;
-using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace LykkeApi2.Infrastructure
 {
     public class ObsoleteOperationFilter : IOperationFilter
     {
-        public void Apply(Operation operation, OperationFilterContext context)
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
         {
-            var attr = context.ApiDescription.ActionAttributes().FirstOrDefault(x => x is ObsoleteAttribute);
+            var attr = context.ApiDescription.CustomAttributes().FirstOrDefault(x => x is ObsoleteAttribute);
             if (attr != null)
             {
-                operation.Description += (attr as ObsoleteAttribute).Message;
+                operation.Description += (attr as ObsoleteAttribute)?.Message;
             }
         }
     }
