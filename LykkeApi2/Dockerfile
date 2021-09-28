@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.2-aspnetcore-runtime
+FROM mcr.microsoft.com/dotnet/aspnet:5.0.3
 # ARG source
 WORKDIR /app
 EXPOSE 80
