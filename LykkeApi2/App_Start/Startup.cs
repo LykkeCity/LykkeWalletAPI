@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Buffers;
-using System.Linq;
-using System.Threading.Tasks;
 using Antares.Service.MarketProfile.Client;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
@@ -26,31 +24,31 @@ using LykkeApi2.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
 using Prometheus;
-using Swashbuckle.AspNetCore.Swagger;
 using Swisschain.Sdk.Metrics.Rest;
 
 namespace LykkeApi2
 {
     public class Startup
     {
-        private IReloadingManagerWithConfiguration<APIv2Settings> _appSettings;
-        public const string ApiVersion = "v2";
-        public const string ApiTitle = "Lykke Wallet API v2";
+        private readonly IReloadingManagerWithConfiguration<APIv2Settings> _appSettings;
+        private const string ApiVersion = "v2";
+        private const string ApiTitle = "Lykke Wallet API v2";
         public const string ComponentName = "WalletApiV2";
 
-        public IHostingEnvironment Environment { get; }
-        public IContainer ApplicationContainer { get; private set; }
-        public IConfigurationRoot Configuration { get; set; }
-        public ILog Log { get; private set; }
+        private IContainer ApplicationContainer { get; set; }
+        private IConfigurationRoot Configuration { get; set; }
+        private ILog Log { get; set; }
 
-        public Startup(IHostingEnvironment env)
+        public Startup(IWebHostEnvironment env)
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -64,8 +62,6 @@ namespace LykkeApi2
                 options.SetQueueName(x => x.SlackNotifications.AzureQueue.QueueName);
                 options.SenderName = $"{AppEnvironment.Name} {AppEnvironment.Version}";
             });
-
-            Environment = env;
         }
 
         public IServiceProvider ConfigureServices(IServiceCollection services)
@@ -74,22 +70,22 @@ namespace LykkeApi2
             {
                 services.AddMvc()
                     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Startup>())
-                    .AddJsonOptions(options =>
+                    .AddNewtonsoftJson(options =>
                     {
-                        options.SerializerSettings.ContractResolver =
-                            new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                        options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                     });
+
+                services.Configure<MvcOptions>(options =>
+                {
+                    options.EnableEndpointRouting = false;
+                });
+
                 services.Configure<MvcOptions>(opts =>
                 {
-                    var formatter = opts.OutputFormatters.FirstOrDefault(i => i.GetType() == typeof(JsonOutputFormatter));
-                    var jsonFormatter = formatter as JsonOutputFormatter;
-                    var formatterSettings = jsonFormatter == null
-                        ? JsonSerializerSettingsProvider.CreateSerializerSettings()
-                        : jsonFormatter.PublicSerializerSettings;
-                    if (formatter != null)
-                        opts.OutputFormatters.RemoveType<JsonOutputFormatter>();
-                    formatterSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ";
-                    JsonOutputFormatter jsonOutputFormatter = new JsonOutputFormatter(formatterSettings, ArrayPool<char>.Create());
+                    var serializerSettings = JsonSerializerSettingsProvider.CreateSerializerSettings();
+                    serializerSettings.ContractResolver = new DefaultContractResolver();
+                    serializerSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ";
+                    var jsonOutputFormatter = new NewtonsoftJsonOutputFormatter(serializerSettings, ArrayPool<char>.Create(), opts);
                     opts.OutputFormatters.Insert(0, jsonOutputFormatter);
                 });
 
@@ -99,16 +95,24 @@ namespace LykkeApi2
 
                     options.OperationFilter<ApiKeyHeaderOperationFilter>();
                     options.OperationFilter<ObsoleteOperationFilter>();
+                    options.OperationFilter<SecurityRequirementsOperationFilter>();
 
-                    options.DocumentFilter<SecurityRequirementsDocumentFilter>();
+                    options.CustomSchemaIds(type => type.ToString());
 
-                    options.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                     {
-                        Type = "oauth2",
-                        Flow = "implicit",
-                        AuthorizationUrl = _appSettings.CurrentValue.SwaggerSettings.Security.AuthorizeEndpoint
+                        Type = SecuritySchemeType.OAuth2,
+                        Flows = new OpenApiOAuthFlows
+                        {
+                            Implicit = new OpenApiOAuthFlow
+                            {
+                                AuthorizationUrl = new Uri(_appSettings.CurrentValue.SwaggerSettings.Security.AuthorizeEndpoint)
+                            }
+                        }
                     });
                 });
+
+                services.AddSwaggerGenNewtonsoftSupport();
 
                 services.AddAuthentication(OAuth2IntrospectionDefaults.AuthenticationScheme)
                     .AddOAuth2Introspection(options =>
@@ -177,7 +181,7 @@ namespace LykkeApi2
 
                 app.Use(next => context =>
                 {
-                    context.Request.EnableRewind();
+                    context.Request.EnableBuffering();
 
                     return next(context);
                 });
@@ -213,7 +217,7 @@ namespace LykkeApi2
                     o.OAuthClientId(_appSettings.CurrentValue.SwaggerSettings.Security.OAuthClientId);
                 });
 
-                appLifetime.ApplicationStarted.Register(() => StartApplication().GetAwaiter().GetResult());
+                appLifetime.ApplicationStarted.Register(StartApplication);
                 appLifetime.ApplicationStopped.Register(CleanUp);
             }
             catch (Exception ex)
@@ -223,7 +227,7 @@ namespace LykkeApi2
             }
         }
 
-        private async Task StartApplication()
+        private void StartApplication()
         {
             try
             {
