@@ -112,7 +112,10 @@ namespace LykkeApi2.Modules
 
             builder.RegisterClientDictionariesClient(_apiSettings.CurrentValue.ClientDictionariesServiceClient, _log);
 
-            builder.RegisterMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint());
+            var socketLog = new SocketLogDynamic(
+                i => { },
+                s => _log.WriteInfo("MeClient", null, s));
+            builder.BindMeClient(_apiSettings.CurrentValue.MatchingEngineClient.IpEndpoint.GetClientIpEndPoint(), socketLog, ignoreErrors: true);
 
             builder.RegisterFeeCalculatorClient(_apiSettings.CurrentValue.FeeCalculatorServiceClient.ServiceUrl, _log);
 
