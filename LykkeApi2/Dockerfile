@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:5.0.3
+FROM swisschains/dotnet:2.2-aspnetcore-runtime
 # ARG source
 WORKDIR /app
 EXPOSE 80
