@@ -10,6 +10,7 @@
         public bool BankCardsDepositEnabled { get; set; }
         public bool SwiftDepositEnabled { get; set; }
         public bool BlockchainDepositEnabled { get; set; }
+        public string SiriusBlockchainId { get; set; }
         public string CategoryId { get; set; }
         public bool IsBase { get; set; }
         public bool CanBeBase { get; set; }
