@@ -21,6 +21,7 @@ namespace LykkeApi2.Models
                 BankCardsDepositEnabled = src.BankCardsDepositEnabled,
                 SwiftDepositEnabled = src.SwiftDepositEnabled,
                 BlockchainDepositEnabled = src.BlockchainDepositEnabled,
+                SiriusBlockchainId = src.SiriusBlockchainId,
                 CategoryId = src.CategoryId,
                 CanBeBase = src.IsBase,
                 IsBase = src.IsBase,
@@ -50,7 +51,7 @@ namespace LykkeApi2.Models
         {
             return new KeyValue {Key = src.Key, Value = src.Value};
         }
-        
+
         public static AssetDescriptionModel ToApiModel(this AssetExtendedInfo extendedInfo)
         {
             return new AssetDescriptionModel
