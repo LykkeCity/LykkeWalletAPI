@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.2-aspnetcore-runtime
+FROM swisschains/dotnet:2.2-aspnetcore-runtime
 # ARG source
 WORKDIR /app
 EXPOSE 80
