@@ -4,6 +4,7 @@ using LykkeApi2.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Blockchain;
 using Core.Services;
 using Lykke.Service.Assets.Client.Models;
 using Lykke.Service.ClientAccount.Client;
@@ -18,15 +19,18 @@ namespace LykkeApi2.Controllers
     public class AssetsController : Controller
     {
         private readonly IClientAccountClient _clientAccountClient;
+        private readonly ISiriusWalletsService _siriusWalletsService;
         private readonly IAssetsHelper _assetsHelper;
         private readonly IRequestContext _requestContext;
 
         public AssetsController(
             IClientAccountClient clientAccountClient,
+            ISiriusWalletsService siriusWalletsService,
             IAssetsHelper assetsHelper,
             IRequestContext requestContext)
         {
             _clientAccountClient = clientAccountClient;
+            _siriusWalletsService = siriusWalletsService;
             _assetsHelper = assetsHelper;
             _requestContext = requestContext;
         }
@@ -308,27 +312,49 @@ namespace LykkeApi2.Controllers
                         .OrderBy(x => x)
                         .ToArray()));
         }
-        
+
         /// <summary>
         /// Get assets available for the user based on regulations.
         /// </summary>
         /// <returns></returns>
         [Authorize]
         [HttpGet("available/crypto-operations")]
-        [ProducesResponseType(typeof(IEnumerable<AssetsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<AssetWhitelistModel>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> GetAvailableAssetsForCryptoOperationsAsync()
         {
-            var assetsAvailableToUser =
-                await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+            var assetsAvailableToUserTask = _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
+            var allAssetsTask = _assetsHelper.GetAllAssetsAsync();
+            var blockchainsTask = _siriusWalletsService.GetBlockchainsAsync();
 
-            var allAssets = await _assetsHelper.GetAllAssetsAsync();
+            await Task.WhenAll(assetsAvailableToUserTask, allAssetsTask, blockchainsTask);
 
-            return Ok(
-                AssetsModel.Create(
-                        allAssets
-                        .Where(x => x.BlockchainIntegrationType == BlockchainIntegrationType.Sirius && assetsAvailableToUser.Contains(x.Id))
-                        .Select(x => x.ToApiModel())
-                        .ToArray()));
+            var assetsModel = allAssetsTask.Result
+                        .Where(x => x.BlockchainIntegrationType == BlockchainIntegrationType.Sirius && assetsAvailableToUserTask.Result.Contains(x.Id))
+                        .Select(x => x.ToModel())
+                        .ToArray();
+
+            var blockchains = blockchainsTask.Result;
+
+            foreach (var asset in assetsModel)
+            {
+                var blockchain = blockchains.FirstOrDefault(x => x.Id == asset.SiriusBlockchainId);
+
+                if (blockchain == null)
+                    continue;
+
+                var number = blockchain.Protocol.Capabilities.DestinationTag.Number;
+                var text = blockchain.Protocol.Capabilities.DestinationTag.Text;
+
+                asset.DestinationTagLabel = (number != null, text != null) switch
+                {
+                    (true, true) => $"{number?.Name} / {text?.Name}",
+                    (true, false) => $"{number?.Name}",
+                    (false, true) => $"{text?.Name}",
+                    _ => null
+                };
+            }
+
+            return Ok(assetsModel);
         }
     }
 }
