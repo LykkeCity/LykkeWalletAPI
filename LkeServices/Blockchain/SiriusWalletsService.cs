@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Common.Log;
@@ -8,6 +9,7 @@ using Polly;
 using Swisschain.Sirius.Api.ApiClient;
 using Swisschain.Sirius.Api.ApiContract.Account;
 using Swisschain.Sirius.Api.ApiContract.Address;
+using Swisschain.Sirius.Api.ApiContract.Blockchain;
 using Swisschain.Sirius.Api.ApiContract.Common;
 using Swisschain.Sirius.Api.ApiContract.User;
 using Swisschain.Sirius.Api.ApiContract.WhitelistItems;
@@ -212,6 +214,13 @@ namespace LkeServices.Blockchain
             });
 
             return response.ResultCase == AddressIsValidResponse.ResultOneofCase.Body && response.Body.IsFormatValid;
+        }
+
+        public async Task<List<BlockchainResponse>> GetBlockchainsAsync()
+        {
+            var response = await _siriusApiClient.Blockchains.SearchAsync(new BlockchainSearchRequest());
+
+            return response.ResultCase == BlockchainSearchResponse.ResultOneofCase.Body ? response.Body.Items.ToList() : new List<BlockchainResponse>();
         }
     }
 }
