@@ -21,6 +21,7 @@ namespace LykkeApi2.Models
                 BankCardsDepositEnabled = src.BankCardsDepositEnabled,
                 SwiftDepositEnabled = src.SwiftDepositEnabled,
                 BlockchainDepositEnabled = src.BlockchainDepositEnabled,
+                SiriusBlockchainId = src.SiriusBlockchainId,
                 CategoryId = src.CategoryId,
                 CanBeBase = src.IsBase,
                 IsBase = src.IsBase,
@@ -50,7 +51,7 @@ namespace LykkeApi2.Models
         {
             return new KeyValue {Key = src.Key, Value = src.Value};
         }
-        
+
         public static AssetDescriptionModel ToApiModel(this AssetExtendedInfo extendedInfo)
         {
             return new AssetDescriptionModel
@@ -105,6 +106,26 @@ namespace LykkeApi2.Models
                 default:
                     return KycStatus.Pending;
             }
+        }
+
+        public static AssetWhitelistModel ToModel(this Asset src)
+        {
+            return new AssetWhitelistModel
+            {
+                Id = src.Id,
+                Name = src.Name,
+                DisplayId = src.DisplayId,
+                Accuracy = src.DisplayAccuracy ?? src.Accuracy,
+                KycNeeded = src.KycNeeded,
+                BankCardsDepositEnabled = src.BankCardsDepositEnabled,
+                SwiftDepositEnabled = src.SwiftDepositEnabled,
+                BlockchainDepositEnabled = src.BlockchainDepositEnabled,
+                SiriusBlockchainId = src.SiriusBlockchainId,
+                CategoryId = src.CategoryId,
+                CanBeBase = src.IsBase,
+                IsBase = src.IsBase,
+                IconUrl = src.IconUrl
+            };
         }
 
     }
