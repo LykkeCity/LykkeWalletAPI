@@ -157,7 +157,10 @@ namespace LykkeApi2.Controllers
                 Name = request.Name,
                 Scope = new WhitelistItemScope
                 {
-                    BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId, AccountId = siriusAccount.Id
+                    BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId,
+                    AccountId = siriusAccount.Id,
+                    UserNativeId = _requestContext.ClientId,
+                    AccountReferenceId = request.WalletId
                 },
                 Details = new WhitelistItemDetails
                 {
@@ -170,7 +173,7 @@ namespace LykkeApi2.Controllers
                         {
                             TagType = WhitelistItemTagType.Number //TODO: specify tag type depending on the blockchain
                         },
-                    TransactionType = WhitelistTransactionType.Any
+                    TransactionType = WhitelistTransactionType.Withdrawal
                 },
                 Lifespan = new WhitelistItemLifespan
                 {
