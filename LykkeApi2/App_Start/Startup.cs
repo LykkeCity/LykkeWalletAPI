@@ -93,22 +93,17 @@ namespace LykkeApi2
                 {
                     options.DefaultLykkeConfiguration(ApiVersion, ApiTitle);
 
-                    options.OperationFilter<ApiKeyHeaderOperationFilter>();
                     options.OperationFilter<ObsoleteOperationFilter>();
                     options.OperationFilter<SecurityRequirementsOperationFilter>();
 
                     options.CustomSchemaIds(type => type.ToString());
 
-                    options.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
+                    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                     {
-                        Type = SecuritySchemeType.OAuth2,
-                        Flows = new OpenApiOAuthFlows
-                        {
-                            Implicit = new OpenApiOAuthFlow
-                            {
-                                AuthorizationUrl = new Uri(_appSettings.CurrentValue.SwaggerSettings.Security.AuthorizeEndpoint)
-                            }
-                        }
+                        Type = SecuritySchemeType.Http,
+                        In = ParameterLocation.Header,
+                        Scheme = "bearer",
+                        Description = "Bearer token"
                     });
                 });
 
