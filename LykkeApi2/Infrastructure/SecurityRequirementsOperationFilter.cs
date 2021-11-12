@@ -14,7 +14,7 @@ namespace LykkeApi2.Infrastructure
             {
                 var oauthScheme = new OpenApiSecurityScheme
                 {
-                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "oauth2" }
+                    Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "bearer" }
                 };
 
                 operation.Security = new List<OpenApiSecurityRequirement>

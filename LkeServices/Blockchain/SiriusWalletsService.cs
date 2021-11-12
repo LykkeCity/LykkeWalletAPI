@@ -163,8 +163,6 @@ namespace LkeServices.Blockchain
             {
                 _log.WriteWarning(nameof(CreateWalletsAsync), info: "Error getting wallets from sirius", context: new { error = accountResponse.Error, clientId });
             }
-
-
         }
 
         public async Task<AccountDetailsResponse> GetWalletAdderssAsync(string clientId, long assetId)
