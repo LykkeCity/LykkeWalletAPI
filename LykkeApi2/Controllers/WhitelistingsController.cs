@@ -159,8 +159,7 @@ namespace LykkeApi2.Controllers
                 {
                     BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId,
                     AccountId = siriusAccount.Id,
-                    UserNativeId = _requestContext.ClientId,
-                    AccountReferenceId = request.WalletId
+                    UserNativeId = _requestContext.ClientId
                 },
                 Details = new WhitelistItemDetails
                 {
