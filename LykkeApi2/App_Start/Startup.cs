@@ -100,10 +100,12 @@ namespace LykkeApi2
 
                     options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
                     {
-                        Type = SecuritySchemeType.Http,
+                        Name = "Authorization",
+                        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345abcdef\"",
                         In = ParameterLocation.Header,
-                        Scheme = "bearer",
-                        Description = "Bearer token"
+                        Type = SecuritySchemeType.ApiKey,
+                        Scheme = "Bearer",
+                        BearerFormat = "JWT"
                     });
                 });
 
