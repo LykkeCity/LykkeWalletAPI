@@ -130,6 +130,12 @@ namespace Core.Constants
             /// </summary>
             public static readonly ILykkeApiErrorCode WhitelistingError =
                 new LykkeApiErrorCode(nameof(WhitelistingError), "Address wasn't whitelisted.");
+
+            /// <summary>
+            ///     Error delete whitelisting item
+            /// </summary>
+            public static readonly ILykkeApiErrorCode WhitelistingDeleteError =
+                new LykkeApiErrorCode(nameof(WhitelistingDeleteError), "Whitelisting item wasn't deleted..");
         }
 
         /// <summary>
