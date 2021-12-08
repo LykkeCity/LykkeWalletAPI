@@ -11,6 +11,7 @@ using Polly.Contrib.WaitAndRetry;
 using Swisschain.Sirius.Api.ApiClient;
 using Swisschain.Sirius.Api.ApiContract.Account;
 using Swisschain.Sirius.Api.ApiContract.Address;
+using Swisschain.Sirius.Api.ApiContract.Asset;
 using Swisschain.Sirius.Api.ApiContract.Blockchain;
 using Swisschain.Sirius.Api.ApiContract.Common;
 using Swisschain.Sirius.Api.ApiContract.User;
@@ -82,8 +83,24 @@ namespace LkeServices.Blockchain
 
                 await WaitForActiveWalletsAsync(clientId, accountId);
             }
+            else
+            {
+                accountId = accountResponse.Body.Items.FirstOrDefault()?.Id;
+            }
 
-            var whitelistItemCreateResponse = await CreateTradingWalletWhitelistAsync(clientId, accountId);
+            var whitelistItemRequest = new WhitelistItemCreateRequest
+            {
+                Name = "Trading Wallet Whitelist",
+                Scope = new WhitelistItemScope { BrokerAccountId = _brokerAccountId, AccountId = accountId, UserNativeId = clientId },
+                Details = new WhitelistItemDetails
+                {
+                    TransactionType = WhitelistTransactionType.Any, TagType = new NullableWhitelistItemTagType { Null = NullValue.NullValue }
+                },
+                Lifespan = new WhitelistItemLifespan { StartsAt = Timestamp.FromDateTime(DateTime.UtcNow) },
+                RequestId = $"lykke:trading_wallet:{clientId}"
+            };
+
+            var whitelistItemCreateResponse = await CreateWhitelistItemAsync(whitelistItemRequest);
 
             if (whitelistItemCreateResponse == null)
             {
@@ -120,24 +137,86 @@ namespace LkeServices.Blockchain
 
         public async Task<bool> IsAddressValidAsync(string blockchainId, string address)
         {
-            var response = await _siriusApiClient.Addresses.IsValidAsync(new AddressIsValidRequest
-            {
-                Address = address, BlockchainId = blockchainId
-            });
+            var retryPolicy = Policy
+                .Handle<Exception>(ex =>
+                {
+                    _log.WriteWarning(nameof(IsAddressValidAsync), new { blockchainId, address }, $"Retry on Exception: {ex.Message}.", ex);
+                    return true;
+                })
+                .OrResult<AddressIsValidResponse>(response =>
+                    {
+                        if (response.ResultCase == AddressIsValidResponse.ResultOneofCase.Error)
+                        {
+                            _log.WriteWarning(nameof(IsAddressValidAsync), response.ToJson(), "Response from sirius.");
+                        }
 
-            return response.ResultCase == AddressIsValidResponse.ResultOneofCase.Body && response.Body.IsFormatValid;
+                        return response.ResultCase == AddressIsValidResponse.ResultOneofCase.Error;
+                    }
+                )
+                .WaitAndRetryAsync(_delay);
+
+            try
+            {
+                var result = await retryPolicy.ExecuteAsync(async () =>
+                    await _siriusApiClient.Addresses.IsValidAsync(new AddressIsValidRequest
+                        {
+                            Address = address, BlockchainId = blockchainId
+                        }
+                    ));
+
+                if (result.ResultCase != AddressIsValidResponse.ResultOneofCase.Error)
+                    return result.Body.IsFormatValid;
+
+                _log.WriteError(nameof(IsAddressValidAsync), new { blockchainId, address });
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _log.WriteError(nameof(IsAddressValidAsync), new { blockchainId, address }, ex);
+                return false;
+            }
         }
 
         public async Task<List<BlockchainResponse>> GetBlockchainsAsync()
         {
-            var response = await _siriusApiClient.Blockchains.SearchAsync(new BlockchainSearchRequest());
+            var emptyResult = new List<BlockchainResponse>();
 
-            return response.ResultCase == BlockchainSearchResponse.ResultOneofCase.Body
-                ? response.Body.Items.ToList()
-                : new List<BlockchainResponse>();
+            var retryPolicy = Policy
+                .Handle<Exception>(ex =>
+                {
+                    _log.WriteWarning(nameof(GetBlockchainsAsync), null, $"Retry on Exception: {ex.Message}.", ex);
+                    return true;
+                })
+                .OrResult<BlockchainSearchResponse>(response =>
+                    {
+                        if (response.ResultCase == BlockchainSearchResponse.ResultOneofCase.Error)
+                        {
+                            _log.WriteWarning(nameof(GetBlockchainsAsync), response.ToJson(), "Response from sirius.");
+                        }
+
+                        return response.ResultCase == BlockchainSearchResponse.ResultOneofCase.Error;
+                    }
+                )
+                .WaitAndRetryAsync(_delay);
+
+            try
+            {
+                var result = await retryPolicy.ExecuteAsync(async () => await _siriusApiClient.Blockchains.SearchAsync(new BlockchainSearchRequest()));
+
+                if (result.ResultCase != BlockchainSearchResponse.ResultOneofCase.Error)
+                    return result.Body.Items.ToList();
+
+                _log.WriteError(nameof(GetBlockchainsAsync), null);
+                return emptyResult;
+            }
+            catch (Exception ex)
+            {
+                _log.WriteError(nameof(GetBlockchainsAsync), null, ex);
+                return emptyResult;
+            }
         }
 
-        private async Task<AccountSearchResponse> SearchAccountAsync(string clientId)
+        public async Task<AccountSearchResponse> SearchAccountAsync(string clientId, string walletId = null)
         {
             var retryPolicy = Policy
                 .Handle<Exception>(ex =>
@@ -161,7 +240,7 @@ namespace LkeServices.Blockchain
             {
                 var result = await retryPolicy.ExecuteAsync(async () => await _siriusApiClient.Accounts.SearchAsync(new AccountSearchRequest
                 {
-                    BrokerAccountId = _brokerAccountId, UserNativeId = clientId, ReferenceId = clientId
+                    BrokerAccountId = _brokerAccountId, UserNativeId = clientId, ReferenceId = walletId ?? clientId
                 }));
 
                 if (result.ResultCase != AccountSearchResponse.ResultOneofCase.Error)
@@ -173,6 +252,173 @@ namespace LkeServices.Blockchain
             catch (Exception ex)
             {
                 _log.WriteError(nameof(SearchAccountAsync), new { clientId }, ex);
+                return null;
+            }
+        }
+
+        public async Task<AssetResponse> GetAssetByIdAsync(long assetId)
+        {
+            var retryPolicy = Policy
+                .Handle<Exception>(ex =>
+                {
+                    _log.WriteWarning(nameof(GetAssetByIdAsync), new { assetId }, $"Retry on Exception: {ex.Message}.", ex);
+                    return true;
+                })
+                .OrResult<AssetSearchResponse>(response =>
+                    {
+                        if (response.ResultCase == AssetSearchResponse.ResultOneofCase.Error)
+                        {
+                            _log.WriteWarning(nameof(GetAssetByIdAsync), response.ToJson(), "Response from sirius.");
+                        }
+
+                        return response.ResultCase == AssetSearchResponse.ResultOneofCase.Error;
+                    }
+                )
+                .WaitAndRetryAsync(_delay);
+
+            try
+            {
+                var result = await retryPolicy.ExecuteAsync(async () => await _siriusApiClient.Assets.SearchAsync(new AssetSearchRequest { Id = assetId }));
+
+                if (result.ResultCase != AssetSearchResponse.ResultOneofCase.Error)
+                    return result.Body.Items.FirstOrDefault();
+
+                _log.WriteError(nameof(GetAssetByIdAsync), new { assetId });
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _log.WriteError(nameof(GetAssetByIdAsync), new { assetId }, ex);
+                return null;
+            }
+        }
+
+        public async Task<WhitelistItemCreateResponse> CreateWhitelistItemAsync(WhitelistItemCreateRequest request)
+        {
+            var retryPolicy = Policy
+                .Handle<Exception>(ex =>
+                {
+                    _log.WriteWarning(nameof(CreateWhitelistItemAsync), new { requestId = request.RequestId, clientId = request.Scope.UserNativeId, accountId = request.Scope.AccountId }, $"Retry on Exception: {ex.Message}.", ex);
+                    return true;
+                })
+                .OrResult<WhitelistItemCreateResponse>(response =>
+                    {
+                        if (response.BodyCase == WhitelistItemCreateResponse.BodyOneofCase.Error)
+                        {
+                            _log.WriteWarning(nameof(CreateWhitelistItemAsync), response.ToJson(), "Response from sirius.");
+                        }
+
+                        return response.BodyCase == WhitelistItemCreateResponse.BodyOneofCase.Error;
+                    }
+                )
+                .WaitAndRetryAsync(_delay);
+
+            try
+            {
+                _log.WriteInfo(nameof(CreateWhitelistItemAsync), info: "Creating whitelist item in sirius",
+                    context: new { requestId = request.RequestId, clientId = request.Scope.UserNativeId, accountId = request.Scope.AccountId });
+
+                var result = await retryPolicy.ExecuteAsync(async () => await _siriusApiClient.WhitelistItems.CreateAsync(request));
+
+                if (result.BodyCase == WhitelistItemCreateResponse.BodyOneofCase.Error)
+                {
+                    _log.WriteError(nameof(CreateWhitelistItemAsync), new { requestId = request.RequestId, clientId = request.Scope.UserNativeId, accountId = request.Scope.AccountId });
+                    return null;
+                }
+
+                _log.WriteInfo(nameof(CreateWhitelistItemAsync), info: "Whitelist item created in siruis",
+                    context: new { whitelistItemId = result.WhitelistItem.Id, requestId = request.RequestId, clientId = request.Scope.UserNativeId, accountId = request.Scope.AccountId });
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _log.WriteError(nameof(CreateWhitelistItemAsync), new { requestId = request.RequestId, clientId = request.Scope.UserNativeId, accountId = request.Scope.AccountId }, ex);
+                return null;
+            }
+        }
+
+        public async Task<List<WhitelistItemResponse>> GetWhitelistItemsAsync(long accountId)
+        {
+            var retryPolicy = Policy
+                .Handle<Exception>(ex =>
+                {
+                    _log.WriteWarning(nameof(GetWhitelistItemsAsync), null, $"Retry on Exception: {ex.Message}.", ex);
+                    return true;
+                })
+                .OrResult<WhitelistItemsSearchResponse>(response =>
+                    {
+                        if (response.BodyCase == WhitelistItemsSearchResponse.BodyOneofCase.Error)
+                        {
+                            _log.WriteWarning(nameof(GetWhitelistItemsAsync), response.ToJson(), "Response from sirius.");
+                        }
+
+                        return response.BodyCase == WhitelistItemsSearchResponse.BodyOneofCase.Error;
+                    }
+                )
+                .WaitAndRetryAsync(_delay);
+
+            try
+            {
+                var result = await retryPolicy.ExecuteAsync(async () =>
+                    await _siriusApiClient.WhitelistItems.SearchAsync(new WhitelistItemSearchRequest
+                    {
+                        BrokerAccountId = _brokerAccountId,
+                        AccountId = accountId,
+                        IsRemoved = false
+                    }));
+
+                if (result.BodyCase != WhitelistItemsSearchResponse.BodyOneofCase.Error)
+                    return result.WhitelistItems.Items.ToList();
+
+                _log.WriteError(nameof(GetWhitelistItemsAsync), null);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _log.WriteError(nameof(GetWhitelistItemsAsync), null, ex);
+                return null;
+            }
+        }
+
+        public async Task<WhitelistItemDeleteResponse> DeleteWhitelistItemsAsync(long id)
+        {
+            var retryPolicy = Policy
+                .Handle<Exception>(ex =>
+                {
+                    _log.WriteWarning(nameof(DeleteWhitelistItemsAsync), new { requestId = id }, $"Retry on Exception: {ex.Message}.", ex);
+                    return true;
+                })
+                .OrResult<WhitelistItemDeleteResponse>(response =>
+                    {
+                        if (response.BodyCase == WhitelistItemDeleteResponse.BodyOneofCase.Error)
+                        {
+                            _log.WriteWarning(nameof(DeleteWhitelistItemsAsync), response.ToJson(), "Response from sirius.");
+                        }
+
+                        return response.BodyCase == WhitelistItemDeleteResponse.BodyOneofCase.Error;
+                    }
+                )
+                .WaitAndRetryAsync(_delay);
+
+            try
+            {
+                var result = await retryPolicy.ExecuteAsync(async () => await _siriusApiClient.WhitelistItems.DeleteAsync(new WhitelistItemDeleteRequest
+                    {
+                        Id = id,
+                        RequestId = id.ToString()
+                    }
+                ));
+
+                if (result.BodyCase != WhitelistItemDeleteResponse.BodyOneofCase.Error)
+                    return result;
+
+                _log.WriteError(nameof(DeleteWhitelistItemsAsync), new { requestId = id });
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _log.WriteError(nameof(DeleteWhitelistItemsAsync), new { requestId = id }, ex);
                 return null;
             }
         }
@@ -306,64 +552,6 @@ namespace LkeServices.Blockchain
             catch (Exception ex)
             {
                 _log.WriteError(nameof(CreateAccountAsync), new { clientId, userId, requestId = accountRequestId }, ex);
-                return null;
-            }
-        }
-
-        private async Task<WhitelistItemCreateResponse> CreateTradingWalletWhitelistAsync(string clientId, long? accountId)
-        {
-            var whitelistingRequestId = $"lykke:trading_wallet:{clientId}";
-
-            var retryPolicy = Policy
-                .Handle<Exception>(ex =>
-                {
-                    _log.WriteWarning(nameof(CreateTradingWalletWhitelistAsync), new { clientId, accountId, requestId = whitelistingRequestId }, $"Retry on Exception: {ex.Message}.", ex);
-                    return true;
-                })
-                .OrResult<WhitelistItemCreateResponse>(response =>
-                    {
-                        if (response.BodyCase == WhitelistItemCreateResponse.BodyOneofCase.Error)
-                        {
-                            _log.WriteWarning(nameof(CreateTradingWalletWhitelistAsync), response.ToJson(), "Response from sirius.");
-                        }
-
-                        return response.BodyCase == WhitelistItemCreateResponse.BodyOneofCase.Error;
-                    }
-                )
-                .WaitAndRetryAsync(_delay);
-
-            try
-            {
-                _log.WriteInfo(nameof(CreateTradingWalletWhitelistAsync), info: "Creating trading wallet whitelist item in sirius",
-                    context: new { clientId, requestId = whitelistingRequestId });
-
-                var result = await retryPolicy.ExecuteAsync(async () => await _siriusApiClient.WhitelistItems.CreateAsync(new WhitelistItemCreateRequest
-                    {
-                        Name = "Trading Wallet Whitelist",
-                        Scope = new WhitelistItemScope { BrokerAccountId = _brokerAccountId, AccountId = accountId, UserNativeId = clientId },
-                        Details = new WhitelistItemDetails
-                        {
-                            TransactionType = WhitelistTransactionType.Any, TagType = new NullableWhitelistItemTagType { Null = NullValue.NullValue }
-                        },
-                        Lifespan = new WhitelistItemLifespan { StartsAt = Timestamp.FromDateTime(DateTime.UtcNow) },
-                        RequestId = whitelistingRequestId
-                    }
-                ));
-
-                if (result.BodyCase == WhitelistItemCreateResponse.BodyOneofCase.Error)
-                {
-                    _log.WriteError(nameof(CreateTradingWalletWhitelistAsync), new { clientId, accountId, requestId = whitelistingRequestId });
-                    return null;
-                }
-
-                _log.WriteInfo(nameof(CreateTradingWalletWhitelistAsync), info: "Whitelist item created in siruis",
-                    context: new { whitelistItemId = result.WhitelistItem.Id, clientId, accountId, requestId = whitelistingRequestId });
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _log.WriteError(nameof(CreateTradingWalletWhitelistAsync), new { clientId, accountId, requestId = whitelistingRequestId }, ex);
                 return null;
             }
         }

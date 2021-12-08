@@ -32,7 +32,8 @@ namespace Lykke.WalletApiv2.Tests.Constants
             "SecondFactorAlreadySetup",
             "MaxAttemptsReached",
             "AddressAlreadyWhitelisted",
-            "WhitelistingError"
+            "WhitelistingError",
+            "WhitelistingDeleteError"
         };
 
         /// <summary>
