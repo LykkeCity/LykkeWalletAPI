@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Core.Blockchain;
 using Core.Constants;
 using Core.Services;
 using Google.Protobuf.WellKnownTypes;
@@ -20,9 +21,6 @@ using LykkeApi2.Models.Whitelistings;
 using LykkeApi2.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Swisschain.Sirius.Api.ApiClient;
-using Swisschain.Sirius.Api.ApiContract.Account;
-using Swisschain.Sirius.Api.ApiContract.Asset;
 using Swisschain.Sirius.Api.ApiContract.WhitelistItems;
 
 namespace LykkeApi2.Controllers
@@ -33,7 +31,7 @@ namespace LykkeApi2.Controllers
     public class WhitelistingsController : Controller
     {
         private readonly Google2FaService _google2FaService;
-        private readonly IApiClient _siriusApiClient;
+        private readonly ISiriusWalletsService _siriusWalletsService;
         private readonly IRequestContext _requestContext;
         private readonly IAssetsHelper _assetsHelper;
         private readonly IClientAccountClient _clientAccountService;
@@ -47,7 +45,7 @@ namespace LykkeApi2.Controllers
             Google2FaService google2FaService,
             IRequestContext requestContext,
             IAssetsHelper assetsHelper,
-            IApiClient siriusApiClient,
+            ISiriusWalletsService siriusWalletsService,
             IClientAccountClient clientAccountService,
             IPersonalDataService personalDataService,
             IEmailSender emailSender,
@@ -58,7 +56,7 @@ namespace LykkeApi2.Controllers
             _google2FaService = google2FaService;
             _requestContext = requestContext;
             _assetsHelper = assetsHelper;
-            _siriusApiClient = siriusApiClient;
+            _siriusWalletsService = siriusWalletsService;
             _clientAccountService = clientAccountService;
             _personalDataService = personalDataService;
             _emailSender = emailSender;
@@ -78,13 +76,16 @@ namespace LykkeApi2.Controllers
 
             foreach (var wallet in wallets)
             {
-                var siriusAccount = await TryGetSiriusAccountAsync(_requestContext.ClientId, wallet.Id);
+                var siriusAccount = await _siriusWalletsService.SearchAccountAsync(_requestContext.ClientId, wallet.Id);
 
-                if (siriusAccount == null)
+                if (siriusAccount == null || siriusAccount.Body.Items.Count == 0)
                     continue;
 
                 noGeneratedAddresses = false;
-                result.AddRange(await GetWhitelistItemsAsync(siriusAccount.Id));
+                var whitelistItems = await _siriusWalletsService.GetWhitelistItemsAsync(siriusAccount.Body.Items.First().Id);
+
+                if (whitelistItems != null)
+                    result.AddRange(whitelistItems);
             }
 
             if (noGeneratedAddresses)
@@ -124,8 +125,7 @@ namespace LykkeApi2.Controllers
             var asset = await _assetsHelper.GetAssetAsync(request.AssetId);
             var assetsAvailableToUser = await _assetsHelper.GetSetOfAssetsAvailableToClientAsync(_requestContext.ClientId, _requestContext.PartnerId, true);
 
-            if (asset == null || asset.BlockchainIntegrationType != BlockchainIntegrationType.Sirius &&
-                assetsAvailableToUser.Contains(asset.Id))
+            if (asset == null || asset.BlockchainIntegrationType != BlockchainIntegrationType.Sirius && assetsAvailableToUser.Contains(asset.Id))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
 
             var wallets = (await _clientAccountService.Wallets.GetClientWalletsFilteredAsync(_requestContext.ClientId,
@@ -134,31 +134,29 @@ namespace LykkeApi2.Controllers
             if (wallets.All(x => x.Id != request.WalletId))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InvalidInput);
 
-            var siriusAssetResponse = await _siriusApiClient.Assets.SearchAsync(new AssetSearchRequest { Id = asset.SiriusAssetId });
-            var siriusAsset = siriusAssetResponse.Body.Items.FirstOrDefault();
+            var siriusAsset = await _siriusWalletsService.GetAssetByIdAsync(asset.SiriusAssetId);
 
             if (siriusAsset == null)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AssetUnavailable);
 
-            var siriusAccount = await TryGetSiriusAccountAsync(_requestContext.ClientId, request.WalletId);
+            var siriusAccount = await _siriusWalletsService.SearchAccountAsync(_requestContext.ClientId, request.WalletId);
 
             if (siriusAccount == null)
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.BlockchainWalletDepositAddressNotGenerated);
 
-            var whitelistedItems = await GetWhitelistItemsAsync(siriusAccount.Id);
+            var whitelistedItems = await _siriusWalletsService.GetWhitelistItemsAsync(siriusAccount.Body.Items.First().Id);
 
             if (whitelistedItems.Any(x => x.Details.Address == request.AddressBase && x.Details.Tag == request.AddressExtension))
                 throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.AddressAlreadyWhitelisted);
 
-            var requestId = $"{request.WalletId}:{request.Name}:{request.AssetId}:{request.AddressBase}:{request.AddressExtension ?? string.Empty}";
+            var requestId = $"lykke:hft:withdrawals:{request.WalletId}:{request.Name}:{request.AssetId}:{request.AddressBase}:{request.AddressExtension ?? string.Empty}";
 
-            var result = await _siriusApiClient.WhitelistItems.CreateAsync(new WhitelistItemCreateRequest
+            var whitelistItemRequest = new WhitelistItemCreateRequest
             {
                 Name = request.Name,
-                Scope = new WhitelistItemScope
-                {
+                Scope = new WhitelistItemScope {
                     BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId,
-                    AccountId = siriusAccount.Id,
+                    AccountId = siriusAccount.Body.Items.First().Id,
                     UserNativeId = _requestContext.ClientId
                 },
                 Details = new WhitelistItemDetails
@@ -174,33 +172,30 @@ namespace LykkeApi2.Controllers
                         },
                     TransactionType = WhitelistTransactionType.Withdrawal
                 },
-                Lifespan = new WhitelistItemLifespan
-                {
-                    StartsAt = Timestamp.FromDateTime(DateTime.UtcNow.Add(_whitelistingSettings.WaitingPeriod))
-                },
+                Lifespan = new WhitelistItemLifespan { StartsAt = Timestamp.FromDateTime(DateTime.UtcNow.Add(_whitelistingSettings.WaitingPeriod)) },
                 RequestId = requestId
-            });
+            };
 
-            if (result.BodyCase == WhitelistItemCreateResponse.BodyOneofCase.WhitelistItem)
+            var result = await _siriusWalletsService.CreateWhitelistItemAsync(whitelistItemRequest);
+
+            if (result == null)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.WhitelistingError);
+
+            await SendWhitelistEmail(_requestContext.ClientId, asset.DisplayId, request.AddressBase,
+                request.AddressExtension);
+
+            return Ok(Google2FaResultModel<WhitelistingResponseModel>.Success(new WhitelistingResponseModel
             {
-                await SendWhitelistEmail(_requestContext.ClientId, asset.DisplayId, request.AddressBase,
-                    request.AddressExtension);
-
-                return Ok(Google2FaResultModel<WhitelistingResponseModel>.Success(new WhitelistingResponseModel
-                {
-                    Id = result.WhitelistItem.Id.ToString(),
-                    WalletName = wallets.Single(y => y.Id == request.WalletId).Name,
-                    AssetName = asset.DisplayId,
-                    Status = WhitelistingStatus.Pending,
-                    AddressBase = request.AddressBase,
-                    AddressExtension = request.AddressExtension,
-                    StartsAt = result.WhitelistItem.Lifespan.StartsAt.ToDateTime(),
-                    CreatedAt = result.WhitelistItem.CreatedAt.ToDateTime(),
-                    Name = request.Name
-                }));
-            }
-
-            throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.WhitelistingError);
+                Id = result.WhitelistItem.Id.ToString(),
+                WalletName = wallets.Single(y => y.Id == request.WalletId).Name,
+                AssetName = asset.DisplayId,
+                Status = WhitelistingStatus.Pending,
+                AddressBase = request.AddressBase,
+                AddressExtension = request.AddressExtension,
+                StartsAt = result.WhitelistItem.Lifespan.StartsAt.ToDateTime(),
+                CreatedAt = result.WhitelistItem.CreatedAt.ToDateTime(),
+                Name = request.Name
+            }));
         }
 
         [HttpDelete("{id}")]
@@ -214,49 +209,12 @@ namespace LykkeApi2.Controllers
             if (check2FaResult != null)
                 return Ok(check2FaResult);
 
-            var requestId = $"{id}";
+            var deleteResponse = await _siriusWalletsService.DeleteWhitelistItemsAsync(id);
 
-            await _siriusApiClient.WhitelistItems.DeleteAsync(new WhitelistItemDeleteRequest
-            {
-                Id = id,
-                RequestId = requestId
-            });
+            if (deleteResponse == null || !deleteResponse.IsRemoved)
+                throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.WhitelistingDeleteError);
 
             return Ok(Google2FaResultModel<string>.Success(id.ToString()));
-        }
-
-        private async Task<AccountResponse> TryGetSiriusAccountAsync(string clientId, string walletId)
-        {
-            var accountSearchResponse = await _siriusApiClient.Accounts.SearchAsync(new AccountSearchRequest
-            {
-                BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId,
-                UserNativeId = clientId,
-                ReferenceId = walletId
-            });
-
-            if (accountSearchResponse.ResultCase == AccountSearchResponse.ResultOneofCase.Error)
-            {
-                throw new Exception("Error fetching Sirius Account");
-            }
-
-            return accountSearchResponse.Body.Items.SingleOrDefault();
-        }
-
-        private async Task<IEnumerable<WhitelistItemResponse>> GetWhitelistItemsAsync(long accountId)
-        {
-            var whitelistedItems = await _siriusApiClient.WhitelistItems.SearchAsync(new WhitelistItemSearchRequest
-            {
-                BrokerAccountId = _siriusApiServiceClientSettings.BrokerAccountId,
-                AccountId = accountId,
-                IsRemoved = false
-            });
-
-            if (whitelistedItems.BodyCase == WhitelistItemsSearchResponse.BodyOneofCase.Error)
-            {
-                throw new Exception(whitelistedItems.Error.ErrorMessage);
-            }
-
-            return whitelistedItems.WhitelistItems.Items;
         }
 
         private async Task SendWhitelistEmail(string clientId, string asset, string address, string tag)
