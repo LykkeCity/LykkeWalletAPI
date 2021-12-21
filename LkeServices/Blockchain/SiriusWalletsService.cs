@@ -365,7 +365,8 @@ namespace LkeServices.Blockchain
                     {
                         BrokerAccountId = _brokerAccountId,
                         AccountId = accountId,
-                        IsRemoved = false
+                        IsRemoved = false,
+                        TransactionType = { WhitelistTransactionType.Withdrawal }
                     }));
 
                 if (result.BodyCase != WhitelistItemsSearchResponse.BodyOneofCase.Error)
