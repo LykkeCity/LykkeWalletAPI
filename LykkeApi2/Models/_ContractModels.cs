@@ -15,6 +15,8 @@
         public bool IsBase { get; set; }
         public bool CanBeBase { get; set; }
         public string IconUrl { get; set; }
+        
+        public string BlockchainNetworkName { get; set; }
     }
 
     public class AssetDescriptionModel
