@@ -22,6 +22,7 @@ namespace LykkeApi2.Models
                 SwiftDepositEnabled = src.SwiftDepositEnabled,
                 BlockchainDepositEnabled = src.BlockchainDepositEnabled,
                 SiriusBlockchainId = src.SiriusBlockchainId,
+                BlockchainNetworkName = src.BlockchainNetworkName,
                 CategoryId = src.CategoryId,
                 CanBeBase = src.IsBase,
                 IsBase = src.IsBase,
