@@ -177,9 +177,9 @@ namespace LkeServices.Blockchain
             }
         }
 
-        public async Task<List<BlockchainResponse>> GetBlockchainsAsync()
+        public async Task<List<Swisschain.Sirius.Api.ApiContract.Blockchain.Blockchain>> GetBlockchainsAsync()
         {
-            var emptyResult = new List<BlockchainResponse>();
+            var emptyResult = new List<Swisschain.Sirius.Api.ApiContract.Blockchain.Blockchain>();
 
             var retryPolicy = Policy
                 .Handle<Exception>(ex =>
