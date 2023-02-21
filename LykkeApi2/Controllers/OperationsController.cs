@@ -254,6 +254,8 @@ namespace LykkeApi2.Controllers
             var kycStatus = await _kycStatusService.GetKycStatusAsync(_requestContext.ClientId);
 
             var operationId = id ?? Guid.NewGuid();
+            
+            SwiftDataValidator.ValidateSwiftFields(cmd);
 
             var command = new CreateSwiftCashoutCommand
             {
