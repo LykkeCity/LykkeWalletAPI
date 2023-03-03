@@ -10,7 +10,7 @@ namespace LykkeApi2.Services
         /// <summary>
         /// Valid SWIFT characters: http://connect-content.us.hsbc.com/hsbc_pcm/onetime/2016/June/16_swift_supported_characters.html
         /// </summary>
-        private static readonly Regex SwiftAllowedCharactersOnly = new("^[a-zA-Z0-9/-?:().,'+ ]*$", RegexOptions.Compiled);
+        private static readonly Regex SwiftAllowedCharactersOnly = new("^[-a-zA-Z0-9/?:().,'+ ]*$", RegexOptions.Compiled);
 
         public static void ValidateSwiftFields(CreateSwiftCashoutRequest request)
         {
