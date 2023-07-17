@@ -166,6 +166,32 @@ namespace LykkeApi2.Controllers
             }
         }
 
+        [HttpDelete("setup/google")]
+        public async Task<IActionResult> ResetGoogle2FaVerify()
+        {
+            try
+            {
+                if (!await _confirmationCodesClient.Google2FaClientHasSetupAsync(_requestContext.ClientId))
+                    throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorIsNotSetup);
+
+                await _confirmationCodesClient.Google2FaResetAsync(_requestContext.ClientId);
+
+                return Ok();
+            }
+            catch (ApiException e)
+            {
+                switch (e.StatusCode)
+                {
+                    case HttpStatusCode.BadRequest:
+                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.InconsistentState);
+                    case HttpStatusCode.Forbidden:
+                        throw LykkeApiErrorException.BadRequest(LykkeApiErrorCodes.Service.SecondFactorSetupInProgress);
+                }
+
+                throw;
+            }
+        }
+
         [HttpPost("setup/google/confirmRequest")]
         [ProducesResponseType(typeof(SmsConfirmationResponse), (int) HttpStatusCode.OK)]
         public async Task<IActionResult> ConfirmGoogle2FaSetup()
