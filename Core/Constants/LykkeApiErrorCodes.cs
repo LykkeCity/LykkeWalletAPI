@@ -108,6 +108,12 @@ namespace Core.Constants
                 new LykkeApiErrorCode(nameof(SecondFactorSetupInProgress), "2FA setup is in progress.");
 
             /// <summary>
+            ///     Two factor verification is not setup yet.
+            /// </summary>
+            public static readonly ILykkeApiErrorCode SecondFactorIsNotSetup =
+                new LykkeApiErrorCode(nameof(SecondFactorIsNotSetup), "2FA setup is not setup.");
+
+            /// <summary>
             ///     Two factor authentication already setup.
             /// </summary>
             public static readonly ILykkeApiErrorCode SecondFactorAlreadySetup =
