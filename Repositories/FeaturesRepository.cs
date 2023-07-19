@@ -24,23 +24,12 @@ namespace Repositories
             _tableStorage = tableStorage;
         }
 
-        public async Task AddOrUpdate(string featureName, bool value, string clientId = null)
-        {
-            await _tableStorage.InsertOrMergeAsync(new FeatureEntry
-            {
-                PartitionKey = clientId ?? GlobalSettingsPartitionKey,
-                RowKey = featureName,
-                IsEnabled = value,
-                Timestamp = DateTimeOffset.UtcNow,
-            });
-        }
-
         public async Task<IDictionary<string, bool>> GetAll(string clientId = null)
         {
             var globals = await _tableStorage.GetDataAsync(partition: GlobalSettingsPartitionKey);
 
             var result = globals.ToDictionary(
-                key => key.RowKey, // feature name
+                key => key.FeatureName,
                 value => value.IsEnabled);
             
             if (!string.IsNullOrWhiteSpace(clientId))
@@ -48,7 +37,7 @@ namespace Repositories
                 var overrides = await _tableStorage.GetDataAsync(partition: clientId);
                 foreach (var overrideEntry in overrides)
                 {
-                    result[overrideEntry.RowKey] = overrideEntry.IsEnabled;
+                    result[overrideEntry.FeatureName] = overrideEntry.IsEnabled;
                 }
             }
 
