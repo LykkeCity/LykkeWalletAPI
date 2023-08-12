@@ -123,6 +123,8 @@ namespace LykkeApi2
         public bool? IsMtDisabled { get; set; }
         public WhitelistingSettings WhitelistingSettings { set; get; }
         public SessionCheckSettings SessionCheck { get; set; }
+        [Optional]
+        public PrivateWalletSettings PrivateWallet { get; set; }
     }
 
     public class IcoSettings
@@ -255,6 +257,12 @@ namespace LykkeApi2
     public class WhitelistingSettings
     {
         public TimeSpan WaitingPeriod { set; get; } = TimeSpan.FromDays(2);
+    }
+
+
+    public class PrivateWalletSettings
+    {
+        public DateTime DisableForRegisteredAfter { get; set; } = new DateTime(1989, 09, 02);
     }
 }
 
