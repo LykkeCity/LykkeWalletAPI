@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Core.Repositories;
+using Lykke.Service.ClientAccount.Client;
 using LykkeApi2.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,11 +16,15 @@ namespace LykkeApi2.Controllers
     {
         private readonly IFeaturesRepository _featuresRepository;
         private readonly IRequestContext _requestContext;
+        private readonly IClientAccountClient _clientAccountClient; 
+        private readonly PrivateWalletSettings privateWalletSettings;
 
-        public FeaturesController(IFeaturesRepository featuresRepository, IRequestContext requestContext)
+        public FeaturesController(IFeaturesRepository featuresRepository, IRequestContext requestContext, IClientAccountClient clientAccountClient, PrivateWalletSettings privateWalletSettings)
         {
             _featuresRepository = featuresRepository;
             _requestContext = requestContext;
+            _clientAccountClient = clientAccountClient;
+            this.privateWalletSettings = privateWalletSettings;
         }
 
         /// <summary>
@@ -32,6 +37,17 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> Get()
         {
             var clientId = _requestContext.ClientId;
+            var featureFlags = await _featuresRepository.GetAll(clientId);
+            
+            if(featureFlags.TryGetValue(WellKnownFeatureFlags.PrivateWallets, out var isPrivateWalletsEnabledGlobally) && isPrivateWalletsEnabledGlobally)
+            {
+                var client = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(clientId);
+                //disable private wallets for new clients
+                if(client == null || client.Registered > privateWalletSettings.DisableForRegisteredAfter)
+                {
+                    featureFlags[WellKnownFeatureFlags.PrivateWallets] = false;
+                }
+            }
             return Ok(await _featuresRepository.GetAll(clientId));
         }
     }
