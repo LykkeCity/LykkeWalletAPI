@@ -124,7 +124,7 @@ namespace LykkeApi2
         public WhitelistingSettings WhitelistingSettings { set; get; }
         public SessionCheckSettings SessionCheck { get; set; }
         [Optional]
-        public PrivateWalletSettings PrivateWallet { get; set; }
+        public PrivateWalletsSettings PrivateWallets { get; set; }
     }
 
     public class IcoSettings
@@ -260,7 +260,7 @@ namespace LykkeApi2
     }
 
 
-    public class PrivateWalletSettings
+    public class PrivateWalletsSettings
     {
         public DateTime DisableForRegisteredAfter { get; set; } = new DateTime(1989, 09, 02);
     }

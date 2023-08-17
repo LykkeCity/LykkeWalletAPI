@@ -17,14 +17,14 @@ namespace LykkeApi2.Controllers
         private readonly IFeaturesRepository _featuresRepository;
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountClient; 
-        private readonly PrivateWalletSettings privateWalletSettings;
+        private readonly PrivateWalletsSettings _privateWalletsSettings;
 
-        public FeaturesController(IFeaturesRepository featuresRepository, IRequestContext requestContext, IClientAccountClient clientAccountClient, PrivateWalletSettings privateWalletSettings)
+        public FeaturesController(IFeaturesRepository featuresRepository, IRequestContext requestContext, IClientAccountClient clientAccountClient, PrivateWalletsSettings privateWalletsSettings)
         {
             _featuresRepository = featuresRepository;
             _requestContext = requestContext;
             _clientAccountClient = clientAccountClient;
-            this.privateWalletSettings = privateWalletSettings;
+            this._privateWalletsSettings = privateWalletsSettings;
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace LykkeApi2.Controllers
             {
                 var client = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(clientId);
                 //disable private wallets for new clients
-                if(client == null || client.Registered > privateWalletSettings.DisableForRegisteredAfter)
+                if(client == null || client.Registered > _privateWalletsSettings.DisableForRegisteredAfter)
                 {
                     featureFlags[WellKnownFeatureFlags.PrivateWallets] = false;
                 }
