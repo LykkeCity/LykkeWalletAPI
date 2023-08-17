@@ -126,7 +126,7 @@ namespace LykkeApi2.Modules
                 .SingleInstance();
 
             builder.RegisterInstance(settings.SessionCheck);
-            builder.RegisterInstance(settings.PrivateWalletses ?? new PrivateWalletsSettings());
+            builder.RegisterInstance(settings.PrivateWallets ?? new PrivateWalletsSettings());
             builder.RegisterInstance(_apiSettings.CurrentValue.BlockedWithdrawalSettings);
             builder.RegisterType<SiriusWalletsService>()
                 .As<ISiriusWalletsService>()

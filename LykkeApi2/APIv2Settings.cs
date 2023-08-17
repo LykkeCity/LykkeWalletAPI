@@ -124,7 +124,7 @@ namespace LykkeApi2
         public WhitelistingSettings WhitelistingSettings { set; get; }
         public SessionCheckSettings SessionCheck { get; set; }
         [Optional]
-        public PrivateWalletsSettings PrivateWalletses { get; set; }
+        public PrivateWalletsSettings PrivateWallets { get; set; }
     }
 
     public class IcoSettings
