@@ -38,17 +38,10 @@ namespace LykkeApi2.Controllers
         {
             var clientId = _requestContext.ClientId;
             var featureFlags = await _featuresRepository.GetAll(clientId);
-            
-            if(featureFlags.TryGetValue(WellKnownFeatureFlags.PrivateWallets, out var isPrivateWalletsEnabledGlobally) && isPrivateWalletsEnabledGlobally)
-            {
-                var client = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(clientId);
-                //disable private wallets for new clients
-                if(client == null || client.Registered > _privateWalletsSettings.DisableForRegisteredAfter)
-                {
-                    featureFlags[WellKnownFeatureFlags.PrivateWallets] = false;
-                }
-            }
-            return Ok(await _featuresRepository.GetAll(clientId));
+            var client = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(clientId);
+            var isPrivateWalletsEnabled = client?.Registered < _privateWalletsSettings.DisableForRegisteredAfter;
+            featureFlags[WellKnownFeatureFlags.PrivateWallets] = isPrivateWalletsEnabled;
+            return Ok(featureFlags);
         }
     }
 }
