@@ -24,7 +24,7 @@ namespace LykkeApi2.Controllers
             _featuresRepository = featuresRepository;
             _requestContext = requestContext;
             _clientAccountClient = clientAccountClient;
-            this._privateWalletsSettings = privateWalletsSettings;
+            _privateWalletsSettings = privateWalletsSettings;
         }
 
         /// <summary>
@@ -38,9 +38,25 @@ namespace LykkeApi2.Controllers
         {
             var clientId = _requestContext.ClientId;
             var featureFlags = await _featuresRepository.GetAll(clientId);
-            var client = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(clientId);
-            var isPrivateWalletsEnabled = client?.Registered < _privateWalletsSettings.DisableForRegisteredAfter;
-            featureFlags[WellKnownFeatureFlags.PrivateWallets] = isPrivateWalletsEnabled;
+            if(featureFlags.TryGetValue(WellKnownFeatureFlags.PrivateWallets, out var isPrivateWalletsEnabledGlobally))
+            {
+                // is feature flag is enabled globally
+                // additionally ensure that only old users can use this feature
+                if(isPrivateWalletsEnabledGlobally)
+                {
+                    var client = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(clientId);
+                    //disable private wallets for new clients
+                    if(client == null || client.Registered > _privateWalletsSettings.DisableForRegisteredAfter)
+                    {
+                        featureFlags[WellKnownFeatureFlags.PrivateWallets] = false;
+                    }
+                }
+            }
+            // if feature flag is configured at all - set it to true
+            else
+            {
+                featureFlags[WellKnownFeatureFlags.PrivateWallets] = true;
+            }
             return Ok(featureFlags);
         }
     }
