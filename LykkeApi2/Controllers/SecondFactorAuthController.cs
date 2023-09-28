@@ -208,7 +208,9 @@ namespace LykkeApi2.Controllers
                     {
                         ClientId = _requestContext.ClientId,
                         Phone = client.ContactPhone,
-                        Operation = ConfirmOperations.Google2FaSendSms
+                        Operation = ConfirmOperations.Google2FaSendSms,
+                        Reason = "LykkeApi2:setup/google/confirmRequest",
+                        OuterRequestId = HttpContext.TraceIdentifier
                     });
 
                 return Ok(smsRequestResult);
