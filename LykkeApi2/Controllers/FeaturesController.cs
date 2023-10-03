@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
+using Common.Log;
 using Core.Repositories;
+using Lykke.Common.Log;
 using Lykke.Service.ClientAccount.Client;
 using LykkeApi2.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
@@ -14,13 +16,19 @@ namespace LykkeApi2.Controllers
     [ApiController]
     public class FeaturesController : Controller
     {
+        private readonly ILog _log;
         private readonly IFeaturesRepository _featuresRepository;
         private readonly IRequestContext _requestContext;
         private readonly IClientAccountClient _clientAccountClient; 
         private readonly PrivateWalletsSettings _privateWalletsSettings;
 
-        public FeaturesController(IFeaturesRepository featuresRepository, IRequestContext requestContext, IClientAccountClient clientAccountClient, PrivateWalletsSettings privateWalletsSettings)
+        public FeaturesController(ILogFactory logFacotry,
+            IFeaturesRepository featuresRepository, 
+            IRequestContext requestContext, 
+            IClientAccountClient clientAccountClient, 
+            PrivateWalletsSettings privateWalletsSettings)
         {
+            _log = logFacotry.CreateLog(this);
             _featuresRepository = featuresRepository;
             _requestContext = requestContext;
             _clientAccountClient = clientAccountClient;
@@ -37,6 +45,12 @@ namespace LykkeApi2.Controllers
         public async Task<IActionResult> Get()
         {
             var clientId = _requestContext.ClientId;
+
+            if(clientId == null)
+            {
+                _log.Warning(nameof(Get), "Client ID is null in the request context");
+            }
+
             var featureFlags = await _featuresRepository.GetAll(clientId);
             if(featureFlags.TryGetValue(WellKnownFeatureFlags.PrivateWallets, out var isPrivateWalletsEnabledGlobally))
             {
@@ -45,8 +59,17 @@ namespace LykkeApi2.Controllers
                 if(isPrivateWalletsEnabledGlobally)
                 {
                     var client = await _clientAccountClient.ClientAccountInformation.GetByIdAsync(clientId);
+
+                    if (clientId == null)
+                    {
+                        _log.Warning(nameof(Get), "Client Account information is not found", context: new
+                        {
+                            ClientId = clientId,
+                        });
+                    }
+
                     //disable private wallets for new clients
-                    if(client == null || client.Registered > _privateWalletsSettings.DisableForRegisteredAfter)
+                    if (client == null || client.Registered > _privateWalletsSettings.DisableForRegisteredAfter)
                     {
                         featureFlags[WellKnownFeatureFlags.PrivateWallets] = false;
                     }
