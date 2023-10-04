@@ -73,10 +73,16 @@ namespace LykkeApi2.Controllers
                     if (client == null || client.Registered > _privateWalletsSettings.DisableForRegisteredAfter)
                     {
                         featureFlags[WellKnownFeatureFlags.PrivateWallets] = false;
+
+                        _log.WriteInfo(nameof(Get), context: new
+                        {
+                            ClientId = clientId
+                        },
+                        info: $"Private wallets are disabled for the client. Client is registered at {client.Registered}. Private wallets are disabled since {_privateWalletsSettings.DisableForRegisteredAfter}");
                     }
                 }
             }
-            // if feature flag is configured at all - set it to true
+            // if feature flag is not configured at all - set it to true
             else
             {
                 featureFlags[WellKnownFeatureFlags.PrivateWallets] = true;
