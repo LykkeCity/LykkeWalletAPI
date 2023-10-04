@@ -22,13 +22,13 @@ namespace LykkeApi2.Controllers
         private readonly IClientAccountClient _clientAccountClient; 
         private readonly PrivateWalletsSettings _privateWalletsSettings;
 
-        public FeaturesController(ILogFactory logFacotry,
+        public FeaturesController(ILog log,
             IFeaturesRepository featuresRepository, 
             IRequestContext requestContext, 
             IClientAccountClient clientAccountClient, 
             PrivateWalletsSettings privateWalletsSettings)
         {
-            _log = logFacotry.CreateLog(this);
+            _log = log;
             _featuresRepository = featuresRepository;
             _requestContext = requestContext;
             _clientAccountClient = clientAccountClient;
@@ -48,7 +48,7 @@ namespace LykkeApi2.Controllers
 
             if(clientId == null)
             {
-                _log.Warning(nameof(Get), "Client ID is null in the request context");
+                _log.WriteWarning(nameof(Get), context: null, info: "Client ID is null in the request context");
             }
 
             var featureFlags = await _featuresRepository.GetAll(clientId);
@@ -62,10 +62,11 @@ namespace LykkeApi2.Controllers
 
                     if (clientId == null)
                     {
-                        _log.Warning(nameof(Get), "Client Account information is not found", context: new
+                        _log.WriteWarning(nameof(Get), context: new
                         {
                             ClientId = clientId,
-                        });
+                        },
+                        info: "Client Account information is not found");
                     }
 
                     //disable private wallets for new clients
